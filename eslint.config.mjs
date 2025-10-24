@@ -1,5 +1,3 @@
-// eslint.config.js
-/* eslint import/no-unresolved: off */
 import js from "@eslint/js";
 import globals from "globals";
 import noSecrets from "eslint-plugin-no-secrets";
@@ -51,7 +49,7 @@ export default [
       "import/no-unresolved": "error",
       "import/named": "error",
        "@typescript-eslint/triple-slash-reference": "off",
-      "no-undef": "off",
+       "no-undef": "off",
     },
     settings: {
       react: { version: "detect" },
