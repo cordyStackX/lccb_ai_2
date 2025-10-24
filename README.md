@@ -60,8 +60,8 @@ flowchart TD
     end
 
     subgraph Backend_Python
-        E["Python Server (api_server.py, checkGPU.py)"]
-        F["Storage (tmp/lccb_ai_uploads)"]
+        E["Gemini Server (---)"]
+        F["Storage (---)"]
     end
 
     %% Connections
