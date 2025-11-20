@@ -4,47 +4,45 @@
     background-color: var(--primary);
     position: fixed;
 }
-
 .wrapper {
     width: var(--max-width);
     margin: 10px auto;
 }
-
 .logo {
     width: 50%;
     height: 100%;
 }
-
 .image1 {
     margin: 0 0 0 30px;
 }
 .image2{
     margin: 0 0 0 20px;
 }
-
 .image1,
 .image2 {
     border-radius: 50%;
 }
-
+.title {
+    width: 30%;
+}
 .buttons {
     width: 50%;
     height: 100%;
 }
-
 .buttons button {
     margin: 0 30px;
-    width: 80px;
-    height: 35px;
+    width: 120px;
+    height: 40px;
     background: transparent;
-    border: 2px solid var(--foreground);
+    border: 2px solid var(--background);
     border-radius: 5px;
     font-weight: bold;
     cursor: pointer;
     transition: all 500ms ease-in-out;
+    font-size: 1rem;
 }
 
 .buttons button:hover {
-    background-color: var(--foreground);
-    color: var(--background);
+    background-color: var(--background);
+    color: var(--foreground);
 }

@@ -6,7 +6,7 @@ export default function Header() {
     return(
         <header className={styles.container}>
             <div className={`${styles.wrapper} display_flex_center`}>
-                <section className={`${styles.logo} display_flex_left`}>
+                <figure className={`${styles.logo} display_flex_left`}>
                     <Image 
                     src={image_src.logo1}
                     alt="LCCB Logo"
@@ -15,14 +15,9 @@ export default function Header() {
                     className={styles.image1}
                     unoptimized
                     />
-                    <Image 
-                    src={image_src.logo2}
-                    alt="LCCB Logo"
-                    width={50}
-                    height={50}
-                    className={styles.image2}
-                    unoptimized
-                    />
+                </figure>
+                <section className={`${styles.title} display_flex_center`}>
+                    <h2>LACO AI</h2>
                 </section>
                 <section className={`${styles.buttons} display_flex_right`}>
                     <button>Ask AI</button>
