@@ -10,8 +10,8 @@ export default function Header() {
                     <Image 
                     src={image_src.logo1}
                     alt="LCCB Logo"
-                    width={50}
-                    height={50}
+                    width={70}
+                    height={70}
                     className={styles.image1}
                     unoptimized
                     />

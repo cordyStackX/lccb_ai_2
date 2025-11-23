@@ -1,9 +1,13 @@
-import { Header } from "@/app/components";
+import { 
+	Header,
+	Banner 
+} from "@/app/components";
 
 export default function Home() {
 	return (
 		<main>
 			<Header />
+			<Banner />
 		</main>
 	);
 }
