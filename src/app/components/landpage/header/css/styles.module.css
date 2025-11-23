@@ -18,10 +18,7 @@
 .image2{
     margin: 0 0 0 20px;
 }
-.image1,
-.image2 {
-    border-radius: 50%;
-}
+
 .title {
     width: 30%;
 }
@@ -33,16 +30,19 @@
     margin: 0 30px;
     width: 120px;
     height: 40px;
-    background: transparent;
+    background-color: var(--background);
     border: 2px solid var(--background);
     border-radius: 5px;
     font-weight: bold;
     cursor: pointer;
-    transition: all 500ms ease-in-out;
+    transform: scale(1.0);
+    transition: transform 500ms ease-out;
     font-size: 1rem;
+    color: var(--default-color-white);
 }
-
 .buttons button:hover {
-    background-color: var(--background);
-    color: var(--foreground);
+    transform: scale(1.1);
+}
+.buttons button:active {
+    transform: scale(1.0);
 }
