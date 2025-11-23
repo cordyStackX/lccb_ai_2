@@ -1,5 +1,5 @@
 
-@import url("./config/conf/config.css");
+@import url("../config/conf/config.css");
 
 .display_flex_center {
 	display: flex;

@@ -1,5 +1,5 @@
 import styles from "./css/styles.module.css";
-import image_src from "@/app/config/images_links/assets.json";
+import image_src from "@/config/images_links/assets.json";
 import Image from "next/image";
 
 export default function Header() {
