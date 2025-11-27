@@ -1,8 +1,10 @@
 import styles from "./css/styles.module.css";
 import image_src from "@/config/images_links/assets.json";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
+    const router = useRouter();
     return(
         <header className={styles.container}>
             <div className={`${styles.wrapper} display_flex_center`}>
@@ -20,7 +22,7 @@ export default function Header() {
                     <h2>LACO AI</h2>
                 </section>
                 <section className={`${styles.buttons} display_flex_right`}>
-                    <button>Ask LACO</button>
+                    <button onClick={() => {router.push("/auth/signup");}}>Ask LACO</button>
                 </section>
             </div>
         </header>
