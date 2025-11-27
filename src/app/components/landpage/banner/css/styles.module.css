@@ -2,3 +2,16 @@
     width: 100%;
     height: 100vh;
 }
+
+.left_side {
+    width: 50%;
+    height: 100%;
+
+}
+.left_side h1 {
+    font-size: 3rem;
+}
+.right_side {
+    width: 50%;
+    height: 100%;
+}

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { MetadataUtils } from "@/utilities";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -12,10 +12,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "LACO AI",
-  description: "AI PDF reader for LCC Bacolod: Summarize, ask questions, and interact with your documents smarter and faster.",
-};
+export const metadata = MetadataUtils();
+
 
 export default function RootLayout({
   children,
