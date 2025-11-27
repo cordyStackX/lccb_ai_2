@@ -1,3 +1,4 @@
+"use client";
 import styles from "./css/styles.module.css";
 import { useRouter } from "next/navigation";
 

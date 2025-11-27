@@ -1,3 +1,4 @@
+"use client";
 import styles from "./css/styles.module.css";
 import image_src from "@/config/images_links/assets.json";
 import Image from "next/image";
