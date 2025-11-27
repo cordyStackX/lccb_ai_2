@@ -14,7 +14,6 @@ const geistMono = Geist_Mono({
 
 export const metadata = MetadataUtils();
 
-
 export default function RootLayout({
   children,
 }: Readonly<{

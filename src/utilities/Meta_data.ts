@@ -20,13 +20,13 @@ export default function MetadataUtils() {
             },
         },
          verification: {
-            google: "google9249e550c23b54d0.html",
+            google: config.google_verify,
         },
         openGraph: {
             title: config.title,
             description: config.description,
             url: config.domain__links,
-            siteName: "CordyStackX",
+            siteName: config.siteName_config,
             images: [
             {
                 url: config.openGraph,
@@ -37,7 +37,7 @@ export default function MetadataUtils() {
                 url: config.openGraph,
                 width: 1800,
                 height: 1600,
-                alt: "Cordy Portfolio",
+                alt: "Logo",
             },
             ],
             locale: "en-US",
@@ -45,7 +45,7 @@ export default function MetadataUtils() {
         },
          other: {
             "article:publisher": config.links__src,
-            "twitter:creator": "@CordyStackX",
+            "twitter:creator": config.creator,
         },                                  
     };
 
