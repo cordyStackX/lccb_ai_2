@@ -22,7 +22,9 @@
 }
 
 .title {
-    width: 30%;
+    width: 40%;
+    height: 100%;
+    font-size: clamp(0.8rem, 0.5rem + 1vw, 1rem);
 }
 .buttons {
     width: 50%;

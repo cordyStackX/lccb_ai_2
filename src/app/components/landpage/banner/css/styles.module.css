@@ -6,17 +6,19 @@
     width: var(--max-width);
     margin: 10px auto;
 }
-.left_side {
-    width: 50%;
+.center {
+    width: 80%;
     height: 100%;
+    flex-flow: column;
+    text-align: center;
 }
-.left_side h1 {
+.center h1 {
     font-size: clamp(2rem, 1rem + 3vw, 4rem);
-    margin: 0 2rem;
+    margin: 0 1rem;
 }
-.left_side p {
+.center p {
     font-size: clamp(1rem, 0.5rem + 1vw, 1.2rem);
-    margin: 1rem 2rem;
+    margin: 1rem 0;
 }
 .buttons {
     width: 100%;
@@ -25,7 +27,7 @@
 .buttons button {
     margin: 1rem 2rem;
     width: 150px;
-    height: 50px;
+    height: 45px;
     background-color: var(--primary);
     border: 2px solid var(--background);
     border-radius: 5px;
@@ -41,8 +43,4 @@
 }
 .buttons button:active {
     transform: scale(1.0);
-}
-.right_side {
-    width: 50%;
-    height: 100%;
 }
