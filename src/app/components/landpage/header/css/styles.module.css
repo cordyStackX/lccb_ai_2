@@ -30,7 +30,7 @@
 }
 .buttons button {
     margin: 0 30px;
-    width: 120px;
+    width: 130px;
     height: 40px;
     background-color: var(--primary);
     border: 2px solid var(--background);

@@ -20,7 +20,7 @@ export default function Header() {
                     <h2>LACO AI</h2>
                 </section>
                 <section className={`${styles.buttons} display_flex_right`}>
-                    <button>Ask AI</button>
+                    <button>Ask LACO</button>
                 </section>
             </div>
         </header>

@@ -9,6 +9,10 @@ export default function Banner() {
                     <h1>LACO Artificial Intelligence</h1>
                     <p>LACO AI is an intelligent PDF summarization and analysis system enhanced by Gemeni AI technologies.</p>
                     <p>It is designed to support academic workflows by automatically extracting and condensing essential information from lengthy documents, enabling faster comprehension and improving research efficiency.</p>
+                    
+                    <section className={`${styles.buttons} display_flex_right`}>
+                    <button>Ask LACO</button>
+                    </section>
                 </section>
                 <section className={styles.right_side}>
                     
