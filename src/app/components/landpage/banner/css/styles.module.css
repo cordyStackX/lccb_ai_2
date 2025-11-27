@@ -2,14 +2,21 @@
     width: 100%;
     height: 100vh;
 }
-
+.wrapper {
+    width: var(--max-width);
+    margin: 10px auto;
+}
 .left_side {
     width: 50%;
     height: 100%;
-
 }
 .left_side h1 {
-    font-size: 3rem;
+    font-size: clamp(2rem, 1rem + 3vw, 4rem);
+    margin: 0 2rem;
+}
+.left_side p {
+    font-size: clamp(1rem, 0.5rem + 1vw, 1.2rem);
+    margin: 1rem 2rem;
 }
 .right_side {
     width: 50%;
