@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import config from "@/config/conf/Metadata.json"; 
+import config from "@/config/conf/json_config/Metadata.json"; 
 
 export default function MetadataUtils() {
     const metadata: Metadata = {

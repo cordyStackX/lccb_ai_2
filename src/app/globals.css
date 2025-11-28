@@ -1,23 +1,9 @@
 
-@import url("../config/conf/config.css");
+@import url("../config/conf/css_config/config.css");
 
-.display_flex_center {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-}
+@import url("../config/conf/css_config/background_colors.css");
 
-.display_flex_right {
-	display: flex;
-	justify-content: right;
-	align-items: center;
-}
-
-.display_flex_left {
-	display: flex;
-	justify-content: left;
-	align-items: center;
-}
+@import url("../config/conf/css_config/display_flex.css");
 
 html,
 body {
@@ -27,7 +13,7 @@ body {
 
 body {
 	color: var(--default-color-white);
-	background: var(--background);
+	background: transparent;
 	font-family: Arial, Helvetica, sans-serif;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;

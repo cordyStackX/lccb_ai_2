@@ -1,0 +1,8 @@
+
+.landpage {
+	background: linear-gradient(0deg, var(--background_linear_2), var(--background_linear_1));
+}
+
+.signup_page {
+    background: linear-gradient(0deg, var(--background_linear_2), var(--default-color-black));
+}

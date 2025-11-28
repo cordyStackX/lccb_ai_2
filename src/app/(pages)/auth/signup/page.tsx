@@ -3,7 +3,7 @@ import { SignUp } from "@/app/components";
 export default function SignupPage() {
 
     return(
-        <main>
+        <main className="signup_page">
             <SignUp />
         </main>
     );

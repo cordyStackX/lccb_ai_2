@@ -5,7 +5,7 @@ import {
 
 export default function Home() {
 	return (
-		<main>
+		<main className="landpage">
 			<Header />
 			<Banner />
 		</main>
