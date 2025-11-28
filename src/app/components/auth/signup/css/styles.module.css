@@ -1,6 +1,61 @@
-
 .container {
     width: 100%;
     height: 100vh;
 }
-
+.form_styles {
+    width: min(600px, 90dvw);
+    height: clamp(200px, 80vh, 400px);
+    border-radius: 10px;
+    background: var(--adaptive-color);
+    padding: clamp(1rem, 10dvw, 3rem);
+    position: relative;
+    overflow: hidden;
+}
+.form_styles input {
+    width: 100%;
+    height: auto;
+    margin: 1rem 0 0 0;
+    font-size: clamp(1rem, 0.5rem + 1vw, 1.3rem);
+    padding: 5px 0;
+    background: transparent;
+    border: transparent;
+    border-bottom: 1px solid var(--adaptive-color-text);
+    outline: none;
+}
+.form_styles p {
+    margin: 1rem 0 0 0;
+    font-size: clamp(0.8rem, 0.5rem + 1vw, 1rem);
+}
+.form_styles a {
+    color: var(--default-color-blue);
+}
+.info {
+    flex-flow: column;
+    align-items: flex-start;
+}
+.info h1 {
+    font-size: clamp(1.6rem, 0.5rem + 1vw, 2rem);
+    margin: 1rem 0 0 0;
+}
+.logo figcaption {
+    font-size: clamp(1.5rem, 0.5rem + 1vw, 3rem);
+    font-weight: 900;
+    opacity: 0.5;
+    margin: 0 0 0 0.5rem;
+}
+.buttons {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    padding: clamp(1rem, 10dvw, 3rem);
+    width: 100%;
+}
+.buttons button {
+    padding: 10px clamp(30px, 3vw, 50px);
+    margin: 0 0 0 10px;
+    background: var(--background_linear_1);
+    border-radius: 5px;
+    border: transparent;
+    font-size: 1rem;
+    cursor: pointer;
+}

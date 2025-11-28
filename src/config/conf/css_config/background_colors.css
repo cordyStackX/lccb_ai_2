@@ -4,5 +4,5 @@
 }
 
 .signup_page {
-    background: linear-gradient(0deg, var(--background_linear_2), var(--default-color-black));
+    background: linear-gradient(0deg, var(--adaptive-color-2), var(--default-color-black));
 }

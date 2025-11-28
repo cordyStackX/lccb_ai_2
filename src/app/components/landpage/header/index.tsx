@@ -16,7 +16,6 @@ export default function Header() {
                     width={70}
                     height={70}
                     className={styles.image1}
-                    unoptimized
                     />
                 </figure>
                 <section className={`${styles.title} display_flex_center`}>
