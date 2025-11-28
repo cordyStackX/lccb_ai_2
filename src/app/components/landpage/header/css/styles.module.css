@@ -6,10 +6,6 @@
     backdrop-filter: blur(10px);
     z-index: 999;
 }
-.wrapper {
-    width: var(--max-width);
-    margin: 10px auto;
-}
 .logo {
     width: 50%;
     height: 100%;

@@ -5,6 +5,8 @@
 
 @import url("../config/conf/css_config/display_flex.css");
 
+@import url("../config/conf/css_config/wrapper.css");
+
 html,
 body {
 	max-width: 100vw;

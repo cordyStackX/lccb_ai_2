@@ -2,10 +2,7 @@
     width: 100%;
     height: 100vh;
 }
-.wrapper {
-    width: var(--max-width);
-    margin: 10px auto;
-}
+
 .center {
     width: 80%;
     height: 100%;

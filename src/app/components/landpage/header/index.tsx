@@ -8,7 +8,7 @@ export default function Header() {
     const router = useRouter();
     return(
         <header className={styles.container}>
-            <div className={`${styles.wrapper} display_flex_center`}>
+            <div className="wrapper display_flex_center">
                 <figure className={`${styles.logo} display_flex_left`}>
                     <Image 
                     src={image_src.logo1}
