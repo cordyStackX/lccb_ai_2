@@ -1,0 +1,78 @@
+import { NextResponse, NextRequest } from "next/server";
+import nodemailer from "nodemailer";
+
+const cooldownMap = new Map<string, number>();
+const COOLDOWN_MS = 60 * 1000; // 1 minute
+
+export async function POST(req: NextRequest) {
+    const { email } = await req.json();
+
+    if (!email) {
+        console.error(" ==> User Email not exist");
+        return NextResponse.json({ success: false, error: "Email Not Exist" }, { status: 404 });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+
+    // === Cooldown check ===
+    const lastRequest = cooldownMap.get(cleanEmail);
+    const now = Date.now();
+
+    if (lastRequest && now - lastRequest < COOLDOWN_MS) {
+        const secondsLeft = Math.ceil((COOLDOWN_MS - (now - lastRequest)) / 1000);
+
+        return NextResponse.json(
+            {
+                success: true,
+                error: `Please wait ${secondsLeft}s before requesting another code.`
+            },
+            { status: 429 }
+        );
+    }
+
+    // Save new timestamp
+    cooldownMap.set(cleanEmail, now);
+
+    const confirmationCode = Math.floor(1000 + Math.random() * 9000).toString();
+
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: process.env.GMAIL_USERNAME,
+            pass: process.env.GMAIL_APP_PASSWORD
+        }
+    });
+
+    const mailOption = {
+        from: process.env.GMAIL_USERNAME,
+        to: cleanEmail,
+        subject: "Verification Code",
+        html: `
+            <p>Hello, ${cleanEmail}</p>
+            <h3>Your Code:</h3>
+            <h1 style="
+               color: #fff;
+               font-weight: bold;
+               background-color: #043988;
+               padding: 10px;
+               border-radius: 10px;
+            ">${confirmationCode}</h1>
+        `
+    };
+
+    try {
+        await transporter.sendMail(mailOption);
+
+        return NextResponse.json(
+            { success: true, message: confirmationCode },
+            { status: 200 }
+        );
+    } catch (err) {
+        console.error(" ==> Email Failed: ", err);
+
+        return NextResponse.json(
+            { success: false, error: "Failed to send code" },
+            { status: 500 }
+        );
+    }
+}

@@ -4,7 +4,7 @@
 }
 .form_styles {
     width: min(600px, 90dvw);
-    height: clamp(200px, 80vh, 400px);
+    height: clamp(200px, 80vh, 450px);
     border-radius: 10px;
     background: var(--adaptive-color);
     padding: clamp(1rem, 10dvw, 3rem);
@@ -15,12 +15,13 @@
     width: 100%;
     height: auto;
     margin: 1rem 0 0 0;
-    font-size: clamp(1rem, 0.5rem + 1vw, 1.1rem);
+    font-size: clamp(1rem, 0.5rem + 1vw, 1.3rem);
     padding: 5px 0;
     background: transparent;
     border: transparent;
     border-bottom: 2px solid var(--adaptive-color-text);
     outline: none;
+    text-align: center;
 }
 .form_styles p {
     margin: 1rem 0 0 0;
@@ -28,13 +29,14 @@
 }
 .form_styles a {
     color: var(--default-color-blue);
+    cursor: pointer;
 }
 .info {
     flex-flow: column;
     align-items: flex-start;
 }
-.info h1 {
-    font-size: clamp(1.6rem, 0.5rem + 1vw, 2rem);
+.info h2 {
+    font-size: clamp(0.9rem, 0.5rem + 1vw, 1.2rem);
     margin: 1rem 0 0 0;
 }
 .logo figcaption {
