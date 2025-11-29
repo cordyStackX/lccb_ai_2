@@ -1,7 +1,7 @@
 import { 
 	Header,
 	Banner 
-} from "@/app/components";
+} from "@/components";
 
 export default function Home() {
 	return (
