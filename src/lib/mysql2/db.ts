@@ -14,7 +14,7 @@ function getConnection(): mysql.Pool {
             queueLimit: 0
         });
         
-        console.log("Database pool created");
+        console.log(" ==> Database pool created");
     }
     
     return connection;

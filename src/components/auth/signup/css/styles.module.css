@@ -19,7 +19,7 @@
     padding: 5px 0;
     background: transparent;
     border: transparent;
-    border-bottom: 1px solid var(--adaptive-color-text);
+    border-bottom: 2px solid var(--adaptive-color-text);
     outline: none;
 }
 .form_styles p {

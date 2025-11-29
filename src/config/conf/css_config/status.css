@@ -1,0 +1,9 @@
+
+.success {
+    color: var(--default-color-green);
+}
+
+.error {
+    color: var(--default-color-red);
+    font-size: clamp(0.8rem, 0.5rem + 1vw, 1.1rem);
+}
