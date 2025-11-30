@@ -32,9 +32,10 @@ export default function SignUp() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        const responds = await Fetch_to("/services/mysql2/auth/signup/check_email", form);
+        const responds = await Fetch_to("/services/mysql2/auth/signup/check_email", { email: form.email });
         if (responds.success) {
             localStorage.setItem("signup_email", form.email);
+            await Fetch_to("/services/mysql2/auth/check_code", { email: form.email });
             router.push("/auth/confirm-email");
         } else {
             setStatus(true);

@@ -4,15 +4,51 @@ import nodemailer from "nodemailer";
 const cooldownMap = new Map<string, number>();
 const COOLDOWN_MS = 60 * 1000; // 1 minute
 
+// backend memory (not reset per request)
+const CodeStore = new Map<string, { code: string; expiresAt: number }>();
+
+
 export async function POST(req: NextRequest) {
-    const { email } = await req.json();
+    const { email, code } = await req.json();
 
     if (!email) {
         console.error(" ==> User Email not exist");
         return NextResponse.json({ success: false, error: "Email Not Exist" }, { status: 404 });
     }
-
+    
     const cleanEmail = email.trim().toLowerCase();
+
+    //Check if their is existing code
+    if (code) {
+        const stored = CodeStore.get(cleanEmail);
+
+        if (!stored) {
+            return NextResponse.json(
+                { success: false, error: "Code expired or not found" },
+                { status: 400 }
+            );
+        }
+
+        if (Date.now() > stored.expiresAt) {
+            CodeStore.delete(cleanEmail);
+            return NextResponse.json(
+                { success: false, error: "Code expired" },
+                { status: 409 }
+            );
+        }
+
+        if (stored.code !== code) {
+            return NextResponse.json(
+                { success: false, error: "Invalid code" },
+                { status: 409 }
+            );
+        }
+
+        // Code correct
+        CodeStore.delete(cleanEmail);
+        cooldownMap.delete(cleanEmail);
+        return NextResponse.json({ success: true }, { status: 200 });
+    }
 
     // === Cooldown check ===
     const lastRequest = cooldownMap.get(cleanEmail);
@@ -34,6 +70,12 @@ export async function POST(req: NextRequest) {
     cooldownMap.set(cleanEmail, now);
 
     const confirmationCode = Math.floor(1000 + Math.random() * 9000).toString();
+    const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes
+
+    CodeStore.set(cleanEmail, {
+        code: confirmationCode,
+        expiresAt
+    });
 
     const transporter = nodemailer.createTransport({
         service: "gmail",
@@ -61,12 +103,14 @@ export async function POST(req: NextRequest) {
     };
 
     try {
+
         await transporter.sendMail(mailOption);
 
         return NextResponse.json(
             { success: true, message: confirmationCode },
             { status: 200 }
         );
+
     } catch (err) {
         console.error(" ==> Email Failed: ", err);
 

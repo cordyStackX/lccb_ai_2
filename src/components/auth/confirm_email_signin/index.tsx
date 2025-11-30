@@ -6,10 +6,10 @@ import image_src from "@/config/images_links/assets.json";
 import { ThreeDots } from "react-loader-spinner";
 import { useState, useEffect } from "react";
 import {
-    Fetch_to
+    Fetch_to,
 } from "@/utilities";
 
-export default function Confirm_email() {
+export default function Confirm_email_signin() {
     const router = useRouter();
 
     const [form, setForm] = useState({
@@ -23,7 +23,7 @@ export default function Confirm_email() {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
 
-    useEffect(() => {
+   useEffect(() => {
         const saveEmail = localStorage.getItem("signup_email");
         setForm(prev => ({ ...prev, email: saveEmail || "" }));
     }, []);
@@ -46,7 +46,8 @@ export default function Confirm_email() {
         setLoading(true);
         const responds = await Fetch_to("/services/mysql2/auth/check_code", { email: form.email, code: form.code });
         if (responds.success) {
-            router.push("/auth/create-password");
+            localStorage.clear();
+            router.push("/");
         } else {
             setMessage(responds.message);
             setStatus(true);
@@ -54,7 +55,6 @@ export default function Confirm_email() {
         }
     };
     
-
     return(
         <section className={`${styles.container} display_flex_center`}>
             <div className="wrapper display_flex_center">

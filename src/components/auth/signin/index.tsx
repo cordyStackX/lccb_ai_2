@@ -3,57 +3,46 @@ import styles from "./css/styles.module.css";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import image_src from "@/config/images_links/assets.json";
+import Link from "next/link";
 import { ThreeDots } from "react-loader-spinner";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
-    Fetch_to
+    Fetch_to,
+    usePreventExit
 } from "@/utilities";
 
-export default function Confirm_email() {
+export default function SignIn() {
     const router = useRouter();
 
     const [form, setForm] = useState({
-        code: "", email: ""
+        email: "", password: ""
     });
     const [status, setStatus] = useState(false);
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
-    
+    const [isDirty, setIsDirty] = useState(false);
+
+    usePreventExit(isDirty);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
+        setIsDirty(true); 
     };
 
-    useEffect(() => {
-        const saveEmail = localStorage.getItem("signup_email");
-        setForm(prev => ({ ...prev, email: saveEmail || "" }));
-    }, []);
-
-    const SendCode = async (e: string | null) => {
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
         setLoading(true);
-        const responds = await Fetch_to("/services/mysql2/auth/check_code", { email: e });
+        const responds = await Fetch_to("/services/mysql2/auth/signin", form);
         if (responds.success) {
-            setStatus(false);
-            setMessage("Code Send Successfully");
-            setLoading(false);
+            localStorage.setItem("signup_email", form.email);
+            await Fetch_to("/services/mysql2/auth/check_code", { email: form.email });
+            router.push("/auth/confirm-email-signin");
         } else {
             setStatus(true);
-            setLoading(false);
-            setMessage(responds.message || "Something went wrong");
-        }
-    };
-
-    const ConfirmCode = async () => {
-        setLoading(true);
-        const responds = await Fetch_to("/services/mysql2/auth/check_code", { email: form.email, code: form.code });
-        if (responds.success) {
-            router.push("/auth/create-password");
-        } else {
-            setMessage(responds.message);
-            setStatus(true);
+            setMessage(responds.message || "Somethings Went Wrong");
             setLoading(false);
         }
     };
-    
 
     return(
         <section className={`${styles.container} display_flex_center`}>
@@ -70,7 +59,7 @@ export default function Confirm_email() {
                         />
                     </div>
                 ) : (
-                    <form className={styles.form_styles} onSubmit={ConfirmCode}>
+                    <form className={styles.form_styles} onSubmit={handleSubmit}>
                         <section className={`${styles.info} display_flex_left`}>
                             <figure className={`${styles.logo} display_flex_left`}>
                                 <Image 
@@ -82,25 +71,36 @@ export default function Confirm_email() {
                                 />
                                 <figcaption>LACO AI</figcaption>
                             </figure>
-                            <h2>Check your email</h2>
+                            <h1>Sign in</h1>
                         </section>
                         <input 
-                        type="number" 
-                        name="code" 
-                        id="code" 
-                        autoComplete="code"
+                        type="text" 
+                        name="email" 
+                        id="email" 
+                        autoComplete="email"
+                        value={form.email}
                         onChange={handleChange}
-                        placeholder="Enter Code"
+                        placeholder="Email"
+                        style={status ? {borderBottom: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
+                        required
+                        />
+                         <input 
+                        type="password" 
+                        name="password" 
+                        id="password" 
+                        autoComplete="password"
+                        value={form.password}
+                        onChange={handleChange}
+                        placeholder="Password"
                         style={status ? {borderBottom: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
                         required
                         />
                         {message && (
                             <p className={status ?  "error" : "success"}>{message}</p>
                         )}
-                        <p>Didn{"'"}t Recieve? <a onClick={() => {SendCode(form.email);}}>Resend Code</a></p>
+                        <p>Create an Account? <Link href={"/auth/signup"}>Sign Up</Link></p>
                         <section className={`${styles.buttons} display_flex_right`}>
-                            <button type="button" onClick={() => {router.back();}} style={{backgroundColor: "var(--secondary)"}}>Back</button>
-                            <button>Confirm</button>
+                            <button>Sign In</button>
                         </section>
                     </form>
                 )}

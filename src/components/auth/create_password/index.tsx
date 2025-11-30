@@ -11,7 +11,7 @@ import {
     usePreventExit
 } from "@/utilities";
 
-export default function SignUp() {
+export default function Create_Password() {
     const router = useRouter();
 
     const [form, setForm] = useState({
