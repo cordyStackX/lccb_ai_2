@@ -99,6 +99,7 @@ export default function SignIn() {
                             <p className={status ?  "error" : "success"}>{message}</p>
                         )}
                         <p>Create an Account? <Link href={"/auth/signup"}>Sign Up</Link></p>
+                        <p><Link href={"/auth/forgot-password"}>Forgot Password?</Link></p>
                         <section className={`${styles.buttons} display_flex_right`}>
                             <button>Sign In</button>
                         </section>

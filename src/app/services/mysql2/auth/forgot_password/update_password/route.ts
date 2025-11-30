@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
 
         const hashed = await bcrypt.hash(password, 10);
 
-        await db.query("INSERT INTO auth (email, password) VALUES (?, ?)", [cleanEmail, hashed]);
+        await db.query("UPDATE auth SET password = ? WHERE email = ?", [hashed, cleanEmail]);
 
         const transporter = nodemailer.createTransport({
             service: "gmail",
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
         const mailOption = {
             from: process.env.GMAIL_USERNAME,
             to: cleanEmail,
-            subject: `Welcome to LACO AI`,
+            subject: `Password Update`,
             html:  `<style>
                 
 
@@ -63,15 +63,15 @@ export async function POST(req: NextRequest) {
                 }
             </style>
             
-            <p class="welcome-message"> 🎉😊 Welcome ${cleanEmail} </p>
+            <p class="welcome-message"> 🎉😊 Password Change ${cleanEmail} </p>
             <h1 class="header">
-                Welcome to my web applications, you have been successfully create your account congrats. 👻🤫🧏‍♂️🤭🥳
+                You have been successfully change your account password congrats. 👻🤫🧏‍♂️🤭🥳
             </h1>`
         };
 
         await transporter.sendMail(mailOption);
 
-        console.log(" ==> User Successfully Created an Account");
+        console.log(" ==> User Successfully Update an Account");
 
         return NextResponse.json({ success: true }, { status: 200 });
 

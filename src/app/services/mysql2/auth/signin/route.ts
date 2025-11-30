@@ -21,65 +21,67 @@ export async function POST(req: NextRequest) {
         
         const [rows] = await db.query("SELECT * FROM auth WHERE email = ?", [email]) as [RowDataPacket[], unknown];
 
+        console.log(" ==> User Trying To Login");
         console.log("Data Info: ", rows);
 
-       if (rows.length > 0) {
-    const user = rows[0];
-    const email = user.email;
-    const now = Date.now();
+        if (rows.length > 0) {
 
-    // === GET LOGIN STATE FROM MEMORY ===
-    let state = LoginAttempts.get(email);
+            const user = rows[0];
+            const email = user.email;
+            const now = Date.now();
 
-    if (!state) {
-        state = { attempts: 0, cooldownUntil: 0 };
-        LoginAttempts.set(email, state);
-    }
+            // === GET LOGIN STATE FROM MEMORY ===
+            let state = LoginAttempts.get(email);
 
-    // === CHECK IF USER IS IN COOLDOWN ===
-    if (now < state.cooldownUntil) {
-        const left = Math.ceil((state.cooldownUntil - now) / 1000);
-        return NextResponse.json(
-            { success: false, error: `Too many attempts. Try again in ${left}s.` },
-            { status: 429 }
-        );
-    }
+            if (!state) {
+                state = { attempts: 0, cooldownUntil: 0 };
+                LoginAttempts.set(email, state);
+            }
 
-    // === CHECK PASSWORD ===
-    const verify = await verifyPassword(password, user.password);
+            // === CHECK IF USER IS IN COOLDOWN ===
+            if (now < state.cooldownUntil) {
+                const left = Math.ceil((state.cooldownUntil - now) / 1000);
+                return NextResponse.json(
+                    { success: false, error: `Too many attempts. Try again in ${left}s.` },
+                    { status: 429 }
+                );
+            }
 
-    if (!verify) {
+            // === CHECK PASSWORD ===
+            const verify = await verifyPassword(password, user.password);
 
-        state.attempts++;
+            if (!verify) {
 
-        console.log(`Wrong password: ${state.attempts} attempts`);
+                state.attempts++;
 
-        // If wrong attempts reached 5 → cooldown for 3 minutes
-        if (state.attempts >= 5) {
-            state.cooldownUntil = now + 3 * 60 * 1000; // 3 minutes
-            state.attempts = 0; // reset attempts
+                console.log(`Wrong password: ${state.attempts} attempts`);
+
+                // If wrong attempts reached 5 → cooldown for 3 minutes
+                if (state.attempts >= 5) {
+                    state.cooldownUntil = now + 3 * 60 * 1000; // 3 minutes
+                    state.attempts = 0; // reset attempts
+                    LoginAttempts.set(email, state);
+
+                    return NextResponse.json(
+                        { success: false, error: "Too many attempts. Locked for 3 minutes." },
+                        { status: 429 }
+                    );
+                }
+
+                LoginAttempts.set(email, state);
+                return NextResponse.json(
+                    { success: false, error: "Password does not match", attemptsLeft: 5 - state.attempts },
+                    { status: 409 }
+                );
+            }
+
+            // === CORRECT PASSWORD ===
+            state.attempts = 0;
+            state.cooldownUntil = 0;
             LoginAttempts.set(email, state);
 
-            return NextResponse.json(
-                { success: false, error: "Too many attempts. Locked for 3 minutes." },
-                { status: 429 }
-            );
+            return NextResponse.json({ success: true }, { status: 200 });
         }
-
-        LoginAttempts.set(email, state);
-        return NextResponse.json(
-            { success: false, error: "Password does not match", attemptsLeft: 5 - state.attempts },
-            { status: 409 }
-        );
-    }
-
-        // === CORRECT PASSWORD ===
-        state.attempts = 0;
-        state.cooldownUntil = 0;
-        LoginAttempts.set(email, state);
-
-        return NextResponse.json({ success: true }, { status: 200 });
-    }
         
     } catch (err: unknown) {
 

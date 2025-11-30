@@ -3,7 +3,6 @@ import styles from "./css/styles.module.css";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import image_src from "@/config/images_links/assets.json";
-import Link from "next/link";
 import { ThreeDots } from "react-loader-spinner";
 import { useState, useEffect } from "react";
 import {
@@ -11,7 +10,7 @@ import {
     usePreventExit
 } from "@/utilities";
 
-export default function Create_Password() {
+export default function Update_Password() {
     const router = useRouter();
 
     const [form, setForm] = useState({
@@ -37,7 +36,7 @@ export default function Create_Password() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        const responds = await Fetch_to("/services/mysql2/auth/signup/create_password", form);
+        const responds = await Fetch_to("/services/mysql2/auth/forgot_password/update_password", form);
         if (responds.success) {
             localStorage.clear();
             router.push("/auth/signin");
@@ -75,7 +74,7 @@ export default function Create_Password() {
                                 />
                                 <figcaption>LACO AI</figcaption>
                             </figure>
-                            <h1>Create your password</h1>
+                            <h1>Create your new password</h1>
                         </section>
                         <input 
                         type="password" 
@@ -84,7 +83,7 @@ export default function Create_Password() {
                         autoComplete="password"
                         value={form.password}
                         onChange={handleChange}
-                        placeholder="Create your password"
+                        placeholder="Create your New password"
                         style={status ? {borderBottom: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
                         required
                         />
@@ -95,17 +94,16 @@ export default function Create_Password() {
                         autoComplete="password"
                         value={form.c_password}
                         onChange={handleChange}
-                        placeholder="Confirm Your Password"
+                        placeholder="Confirm Your New Password"
                         style={status ? {borderBottom: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
                         required
                         />
                         {message && (
                             <p className={status ?  "error" : "success"}>{message}</p>
                         )}
-                        <p>Can{"'"}t create an account? <Link href={"/"}>Contact Us</Link></p>
                         <section className={`${styles.buttons} display_flex_right`}>
                             <button type="button" onClick={() => {router.back();}} style={{backgroundColor: "var(--secondary)"}}>Back</button>
-                            <button>Create</button>
+                            <button>Update</button>
                         </section>
                     </form>
                 )}

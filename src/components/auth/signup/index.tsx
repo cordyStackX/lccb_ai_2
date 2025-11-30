@@ -36,7 +36,7 @@ export default function SignUp() {
         if (responds.success) {
             localStorage.setItem("signup_email", form.email);
             await Fetch_to("/services/mysql2/auth/check_code", { email: form.email });
-            router.push("/auth/confirm-email");
+            router.push("/auth/confirm-email-signup");
         } else {
             setStatus(true);
             setMessage(responds.message || "Somethings Went Wrong");
