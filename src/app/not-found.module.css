@@ -1,0 +1,16 @@
+.container {
+    width: 100dvw;
+    height: 100dvh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-flow: column;
+    position: fixed;
+    top: 0;
+    z-index: 9999;
+    background: #0f4e82;
+}
+.container h2 {
+    margin: 10px 0;
+    font-size: clamp(1rem, 1vw + 1.3rem, 2rem);
+}
