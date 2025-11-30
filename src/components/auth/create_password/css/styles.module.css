@@ -4,7 +4,7 @@
 }
 .form_styles {
     width: min(600px, 90dvw);
-    height: clamp(200px, 80vh, 400px);
+    height: clamp(200px, 80vh, 480px);
     border-radius: 10px;
     background: var(--adaptive-color);
     padding: clamp(1rem, 10dvw, 3rem);
@@ -14,7 +14,7 @@
 .form_styles input {
     width: 100%;
     height: auto;
-    margin: 1rem 0 0 0;
+    margin: 2rem 0 0 0;
     font-size: clamp(1rem, 0.5rem + 1vw, 1.1rem);
     padding: 5px 0;
     background: transparent;
