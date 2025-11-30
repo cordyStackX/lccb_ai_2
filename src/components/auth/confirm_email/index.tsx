@@ -86,7 +86,7 @@ export default function SignUp() {
                                 <figcaption>LACO AI</figcaption>
                             </figure>
                             <h2>Check your email</h2>
-                        </section>false
+                        </section>
                         <input 
                         type="number" 
                         name="code" 

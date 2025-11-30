@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
         console.error("BackEnd Error: ", err);
 
-        return NextResponse.json({ success: false });
+        return NextResponse.json({ success: false, error: "Server is Down" }, {status: 500});
 
     }
 
