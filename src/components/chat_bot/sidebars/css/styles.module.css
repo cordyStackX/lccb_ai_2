@@ -1,0 +1,100 @@
+.container {
+    width: 250px;
+    height: 100vh;
+    background-color: var(--adaptive-color-4);
+    border-right: 1px solid var(--adaptive-color-2);
+    position: relative;
+}
+.wrapper {
+    width: var(--max-width);
+    height: 100%;
+    margin: 10px auto;
+    flex-flow: column;
+    justify-content: flex-start;
+}
+.logo {
+    width: 100%;
+    height: auto;
+    justify-content: space-between;
+    padding: 0.3rem 0.7rem;
+}
+.options {
+    width: 100%;
+    height: auto;
+    padding: 0.5rem 0.7rem;
+    margin: 1rem 0;
+}
+.options button {
+    width: 100%;
+    height: 35px;
+    padding: 0 1rem;
+    cursor: pointer;
+    background: transparent;
+    border: transparent;
+    border-radius: 10px;
+    text-align: left;
+    font-size: 0.9rem;
+}
+.options button:hover {
+    background-color: var(--adaptive-color-3);
+}
+.chat_history {
+    width: 100%;
+    height: 90%;
+    padding: 0.5rem 0.8rem;
+}
+.chat_history select {
+    background: transparent;
+    border: transparent;
+    outline: none;
+    cursor: pointer;
+    color: var(--adaptive-color-text);
+    font-weight: 900;
+}
+.user_info {
+    width: 100%;
+    height: 15%;
+    padding: 0.5rem;
+}
+.user_info figure {
+    cursor: pointer;
+    padding: 0.5rem 0;
+    border-radius: 10px;
+}
+.user_info figure:hover {
+    background: var(--adaptive-color-3);
+}
+.user_info_menu {
+    position: absolute;
+    bottom: 11%;
+    right: -13%;
+    width: 270px;
+    height: auto;
+    padding: 0.3rem 0.7rem;
+    background-color: var(--adaptive-color-3);
+    border-radius: 15px;
+    box-shadow: 0 0 1rem 0.1rem #000;
+    flex-flow: column;
+    overflow: hidden;
+}
+.user_info_menu figcaption, .user_info_menu p {
+    width: 180px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+.user_info_menu button {
+    width: 100%;
+    height: 45px;
+    text-align: start;
+    padding: 0 1rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-weight: bold;
+    border: transparent;
+    background: transparent;
+}
+.user_info_menu button:hover {
+    background: var(--adaptive-color-4);
+}

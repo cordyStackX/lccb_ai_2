@@ -7,7 +7,7 @@ export default function Banner() {
 
     return(
         <section className={`${styles.container} display_flex_center`}>
-            <div className="wrapper display_flex_center">
+            <div className={`${styles.wrapper} display_flex_center`}>
                 <section className={`${styles.center} display_flex_center`}>
                     <h1>LACO Artificial Intelligence</h1>
                     <p>LACO AI is an intelligent PDF summarization and analysis system enhanced by Gemeni AI technologies.</p>

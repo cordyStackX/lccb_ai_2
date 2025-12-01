@@ -23,6 +23,7 @@ export default async function Fetch_to(
       if (response.ok) {
         return { success: true, data }; // success
       } else {
+        console.log(data?.error);
         return { success: false, message: data?.error || `Request failed: ${response.status}` };
       }
     } catch (err: unknown) {

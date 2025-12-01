@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import db from "@/lib/mysql2/db";
+import db from "@/app/services/mysql2/connections/db";
 import bcrypt from "bcrypt";
 import nodemailer from "nodemailer";
 

@@ -16,3 +16,10 @@
 	justify-content: left;
 	align-items: center;
 }
+
+.display_flex_center_column {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-flow: column;
+}

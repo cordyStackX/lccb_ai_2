@@ -11,6 +11,10 @@
     position: relative;
     overflow: hidden;
 }
+.wrapper {
+    width: var(--max-width);
+    margin: 10px auto;
+}
 .form_styles input {
     width: 100%;
     height: auto;

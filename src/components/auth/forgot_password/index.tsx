@@ -45,7 +45,7 @@ export default function Forgot_password() {
 
     return(
         <section className={`${styles.container} display_flex_center`}>
-            <div className="wrapper display_flex_center">
+            <div className={`${styles.wrapper} display_flex_center`}>
                 {loading ? (
                     <div className={`${styles.form_styles} display_flex_center`}>
                         <ThreeDots 

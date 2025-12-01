@@ -6,3 +6,8 @@
 .auth_page {
     background: linear-gradient(0deg, var(--adaptive-color-2), var(--default-color-black));
 }
+
+.chat_page {
+    background: var(--adaptive-color-3);
+    overflow: hidden;
+}

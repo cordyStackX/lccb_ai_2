@@ -47,7 +47,8 @@ export default function Confirm_email_signin() {
         const responds = await Fetch_to("/services/mysql2/auth/check_code", { email: form.email, code: form.code });
         if (responds.success) {
             localStorage.clear();
-            router.push("/");
+            await Fetch_to("/services/jwt/auth", { email: form.email });
+            router.push("/chat");
         } else {
             setMessage(responds.message);
             setStatus(true);
