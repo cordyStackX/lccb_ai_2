@@ -37,7 +37,7 @@ python3 -m pip install --upgrade pip
 
 # Install Python packages
 echo -e "${YELLOW}==> Installing Python packages...${RESET}"
-pip install -r python3/requirements.txt
+pip install -r python/requirements.txt
 
 echo -e "${BLUE}<==> Building Next.js app... <==>${RESET}"
 echo -e "${YELLOW}==> Running lint...${RESET}"
@@ -47,7 +47,7 @@ npm run build
 
 # Start FastAPI in background
 echo -e "${GREEN}==> Starting FastAPI server...${RESET}"
-nohup python3 python3/main.py >> /tmp/fastapi.log 2>&1 & disown
+nohup python3 python/main.py >> /tmp/fastapi.log 2>&1 & disown
 
 # Start Next.js server (this will block)
 echo -e "${GREEN}==> Starting Next.js at http://localhost:3000...${RESET}"

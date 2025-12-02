@@ -1,3 +1,4 @@
 {
-    "python_links" : "http://localhost:5000/generate-md"
+    "python_links" : "http://localhost:5000/generate-md",
+    "render_links" : ""
 }

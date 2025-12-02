@@ -10,7 +10,7 @@ export async function POST(params: NextRequest) {
 
     if (!apikey) return NextResponse.json({ success: false, error: "API is not Valid" }, { status: 401 });
 
-    const apiUrl = api_links.python_links;
+    const apiUrl = api_links.python_links || api_links.render_links;
 
     if (!prompt) return NextResponse.json({ success: false, error: "Prompt is required" }, { status: 400 });
 
