@@ -7,8 +7,6 @@
     background: linear-gradient(0deg, var(--adaptive-color-2), var(--default-color-black));
 }
 
-.chat_page {
-    background: var(--adaptive-color-3);
-    height: 100dvh;
-    overflow: hidden;
+.chat_page { 
+    background: linear-gradient(90deg, var(--adaptive-color-1), var(--adaptive-color-3)); 
 }

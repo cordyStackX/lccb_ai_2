@@ -15,6 +15,7 @@
 	/* Color Modes */
 	--adaptive-color: rgba(233, 233, 233, 0.9);
 	--adaptive-color-2: var(--background_linear_1);
+	--adaptive-color-2-reverse: var(--background_linear_2);
 	--adaptive-color-3: var(--default-color-white);
 	--adaptive-color-4: var(--default-color-white-2);
 	--adaptive-color-text: var(--default-color-black);
@@ -27,6 +28,7 @@
 	:root {
 		--adaptive-color: rgba(23, 23, 23, 0.9);
 		--adaptive-color-2: var(--background_linear_2);
+		--adaptive-color-2-reverse: var(--background_linear_1);
 		--adaptive-color-3: var(--default-color-black);
 		--adaptive-color-4: var(--foreground);
 		--adaptive-color-text: var(--default-color-white);

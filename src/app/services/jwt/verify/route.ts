@@ -6,7 +6,7 @@ export async function POST() {
     const token = (await cookies()).get("token")?.value;
 
     if (!token) {
-        return NextResponse.json({ success: false, error: "UnAuth" }, { status: 500 });
+        return NextResponse.json({ success: false, error: "UnAuth" }, { status: 401 });
     }
 
     try {
@@ -15,6 +15,6 @@ export async function POST() {
         console.log(" ==> User Authenticated");
         return NextResponse.json({ success: true }, { status: 200 });
     } catch {
-        return NextResponse.json({ success: false, error: "UnAuth" }, { status: 500 });
+        return NextResponse.json({ success: false, error: "UnAuth" }, { status: 401 });
     }
 }

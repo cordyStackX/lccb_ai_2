@@ -26,7 +26,7 @@
 }
 .response {
     width: min(800px, 90dvw);
-    height: 50vh;
+    height: auto;
     margin: 2rem;
     margin: 0 auto; 
 }
@@ -37,24 +37,82 @@
     margin: 2rem 0;
 }
 .user_respones div {
+    width: 500px;
     padding: 1rem 1.5rem;
     background: var(--adaptive-color-4);
     border-radius: 10px;
 }
 .ai_response {
-    width: 100%;
-    height: auto;
+    display: block;
+    flex-direction: column; 
     justify-content: flex-start;
+    align-items: flex-start;
+    padding: 2rem 1rem;
+    line-height: 2.5rem;
+    backdrop-filter: blur(100px);
 }
+.ai_response pre {
+    width: 100%;
+    background: var(--adaptive-color-4);       
+    color: var(--adaptive-color-text);            
+    padding: 1rem;
+    border-radius: 10px;
+    overflow-x: auto;
+    font-family: monospace;
+}
+.ai_response code {
+    background: var(--adaptive-color-1);    
+    padding: 0.2rem 0.4rem;
+    border-radius: 5px;
+    font-family: monospace;
+    color: var(--adaptive-color-2);
+}
+.ai_response ol,
+.ai_response ul {
+    padding-left: 2rem;      
+    margin: 0 0 1rem 0;       
+    list-style-position: outside;
+}
+
+.ai_response li {
+    margin-bottom: 0.5rem;   
+    line-height: 1.6;        
+}
+
+.ai_response li {
+    margin-bottom: 0.5rem; 
+}
+.ai_response a {
+    color: var(--adaptive-color-2); 
+}
+.spinner_wrapper {
+    justify-content: left;
+    padding: 1rem 0;
+}
+
 .ask {
-    width: min(700px, 90dvw);
-    height: 60px;
+    width: min(800px, 90dvw);
+    height: auto;
     border-radius: 50px;
     overflow: hidden;
     padding: 0 1.2rem;
     margin: 1.3rem 3rem;
     background: var(--adaptive-color-4);
 }
+.expandableInput {
+    width: 100%;
+    min-height: 20px;
+    max-height: 150px;
+    padding: 1.2rem 0 0 1rem;
+    border: none;
+    outline: none;
+    resize: none;
+    background: var(--adaptive-color-4);
+    font-size: 16px;
+    overflow-y: hidden;
+    text-align: start;
+}
+
 .ask input {
     width: 90%;
     height: 100%;
@@ -83,4 +141,14 @@
 }
 .ask span:hover {
     background: var(--adaptive-color-3);
+}
+.fadeIn {
+    opacity: 0;
+    animation: fadeIn 1s forwards;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
 }
