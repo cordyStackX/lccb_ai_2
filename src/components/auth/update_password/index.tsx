@@ -63,8 +63,8 @@ export default function Update_Password() {
                     </div>
                 ) : (
                     <form className={styles.form_styles} onSubmit={handleSubmit}>
-                        <section className={`${styles.info} display_flex_left`}>
-                            <figure className={`${styles.logo} display_flex_left`}>
+                        <section className={`${styles.info} display_flex_center`}>
+                            <figure className={`${styles.logo} display_flex_center`}>
                                 <Image 
                                 src={image_src.logo1}
                                 alt="Logo"
@@ -101,7 +101,7 @@ export default function Update_Password() {
                         {message && (
                             <p className={status ?  "error" : "success"}>{message}</p>
                         )}
-                        <section className={`${styles.buttons} display_flex_right`}>
+                        <section className={`${styles.buttons} display_flex_center`}>
                             <button type="button" onClick={() => {router.back();}} style={{backgroundColor: "var(--secondary)"}}>Back</button>
                             <button>Update</button>
                         </section>

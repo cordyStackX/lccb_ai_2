@@ -60,8 +60,8 @@ export default function SignUp() {
                     </div>
                 ) : (
                     <form className={styles.form_styles} onSubmit={handleSubmit}>
-                        <section className={`${styles.info} display_flex_left`}>
-                            <figure className={`${styles.logo} display_flex_left`}>
+                        <section className={`${styles.info} display_flex_center`}>
+                            <figure className={`${styles.logo} display_flex_center`}>
                                 <Image 
                                 src={image_src.logo1}
                                 alt="Logo"
@@ -88,7 +88,7 @@ export default function SignUp() {
                             <p className={status ?  "error" : "success"}>{message}</p>
                         )}
                         <p>Already have an Account? <Link href={"/auth/signin"}>Sign In</Link></p>
-                        <section className={`${styles.buttons} display_flex_right`}>
+                        <section className={`${styles.buttons} display_flex_center`}>
                             <button>Next</button>
                         </section>
                     </form>

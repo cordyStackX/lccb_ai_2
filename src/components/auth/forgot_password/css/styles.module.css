@@ -46,6 +46,7 @@
     left: 0;
     padding: clamp(1rem, 10dvw, 2.5rem);
     width: 100%;
+    justify-content: right;
 }
 .buttons button {
     padding: 10px clamp(30px, 3vw, 50px);

@@ -60,8 +60,8 @@ export default function SignIn() {
                     </div>
                 ) : (
                     <form className={styles.form_styles} onSubmit={handleSubmit}>
-                        <section className={`${styles.info} display_flex_left`}>
-                            <figure className={`${styles.logo} display_flex_left`}>
+                        <section className={`${styles.info} display_flex_center`}>
+                            <figure className={`${styles.logo} display_flex_center`}>
                                 <Image 
                                 src={image_src.logo1}
                                 alt="Logo"
@@ -100,7 +100,7 @@ export default function SignIn() {
                         )}
                         <p>Create an Account? <Link href={"/auth/signup"}>Sign Up</Link></p>
                         <p><Link href={"/auth/forgot-password"}>Forgot Password?</Link></p>
-                        <section className={`${styles.buttons} display_flex_right`}>
+                        <section className={`${styles.buttons} display_flex_center`}>
                             <button>Sign In</button>
                         </section>
                     </form>
