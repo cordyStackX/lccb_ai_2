@@ -6,6 +6,7 @@
 	--secondary: #cd9b13;
 	/* Alternative Colors */
 	--default-color-white: #e9e9e9;
+	--default-color-white-2: #d7d7d7;
 	--default-color-black: #212121;
 	--default-color-blue: #0565B9;
 	--default-color-red: #E94B3C;
@@ -15,7 +16,7 @@
 	--adaptive-color: rgba(233, 233, 233, 0.9);
 	--adaptive-color-2: var(--background_linear_1);
 	--adaptive-color-3: var(--default-color-white);
-	--adaptive-color-4: var(--default-color-white);
+	--adaptive-color-4: var(--default-color-white-2);
 	--adaptive-color-text: var(--default-color-black);
 
 	/* Global Wrapper Width */

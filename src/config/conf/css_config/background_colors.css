@@ -9,5 +9,6 @@
 
 .chat_page {
     background: var(--adaptive-color-3);
+    height: 100dvh;
     overflow: hidden;
 }

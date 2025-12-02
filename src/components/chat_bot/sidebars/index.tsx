@@ -3,12 +3,15 @@ import styles from "./css/styles.module.css";
 import Image from "next/image";
 import image_src from "@/config/images_links/assets.json";
 import { useState } from "react";
-import { Spiral as Hamburger } from "hamburger-react";
 import { SweetAlert2, Fetch_to } from "@/utilities";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 
-export default function Sidebars() {
+interface SidebarsProps {
+    isOpen: boolean;
+}
+
+export default function Sidebars({ isOpen }: SidebarsProps) {
     const router = useRouter();
     const [profile, setProfile] = useState(false);
 
@@ -31,7 +34,7 @@ export default function Sidebars() {
     };
 
     return(
-        <section className={styles.container}>
+        <section className={`${styles.container} ${isOpen ? styles.open : ""}`}>
             <div className={`${styles.wrapper} display_flex_center`}>
                 <section className={`${styles.logo} display_flex_center`}>
                     <figure>
@@ -44,7 +47,6 @@ export default function Sidebars() {
                         priority
                         />
                     </figure>
-                    <Hamburger />
                 </section>
                 <section className={styles.options}>
                     <button>New Chat</button>

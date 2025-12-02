@@ -1,11 +1,13 @@
 "use client";
-import { Sidebars } from "@/components";
-import { useEffect } from "react";
+import { Sidebars, Main } from "@/components";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Fetch_to } from "@/utilities";
+import { Spin as Hamburger } from "hamburger-react";
 
-export default function Chat() {
+export default function ChatPage() {
     const router = useRouter();
+    const [isOpen, setOpen] = useState(false);
 
     useEffect(() => {
         async function check() {
@@ -17,7 +19,11 @@ export default function Chat() {
 
     return(
         <main className="chat_page display_flex_left">
-            <Sidebars />
+            <span style={{ position: "fixed", zIndex: "999" }}>
+                    <Hamburger toggled={isOpen} toggle={setOpen}  />
+            </span>
+            <Sidebars isOpen={isOpen} />
+            <Main />
         </main>
     );
 

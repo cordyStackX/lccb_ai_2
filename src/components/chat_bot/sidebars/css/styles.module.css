@@ -1,9 +1,17 @@
 .container {
-    width: 250px;
-    height: 100vh;
+    width: 290px;
+    height: 100%;
     background-color: var(--adaptive-color-4);
-    border-right: 1px solid var(--adaptive-color-2);
-    position: relative;
+    border: 1px solid var(--adaptive-color-2);
+    position: fixed;
+    z-index: 1;
+    transform: translateX(-100%);
+    opacity: 0;
+    transition: all 1s ease;
+}
+.open {
+    transform: translateX(0);
+    opacity: 1;
 }
 .wrapper {
     width: var(--max-width);
@@ -15,7 +23,6 @@
 .logo {
     width: 100%;
     height: auto;
-    justify-content: space-between;
     padding: 0.3rem 0.7rem;
 }
 .options {
@@ -54,12 +61,18 @@
 .user_info {
     width: 100%;
     height: 15%;
-    padding: 0.5rem;
+    padding: 0 0.5rem;
 }
 .user_info figure {
     cursor: pointer;
     padding: 0.5rem 0;
     border-radius: 10px;
+}
+.user_info figcaption {
+    width: 150px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }
 .user_info figure:hover {
     background: var(--adaptive-color-3);
@@ -97,4 +110,12 @@
 }
 .user_info_menu button:hover {
     background: var(--adaptive-color-4);
+}
+
+@media (max-width: 740px) {
+    .container {
+        width: 0;
+        border: transparent;
+        overflow: hidden;
+    }
 }
