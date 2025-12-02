@@ -9,7 +9,7 @@ export default function Header() {
     return(
         <header className={styles.container}>
             <div className="wrapper display_flex_center">
-                <figure className={`${styles.logo} display_flex_left`}>
+                <figure className={`${styles.logo} display_flex_center`}>
                     <Image 
                     src={image_src.logo1}
                     alt="LCCB Logo"
@@ -21,7 +21,7 @@ export default function Header() {
                 <section className={`${styles.title} display_flex_center`}>
                     <h2>LACO AI</h2>
                 </section>
-                <section className={`${styles.buttons} display_flex_right`}>
+                <section className={`${styles.buttons} display_flex_center`}>
                     <button onClick={() => {router.push("/auth/signup");}}>Ask LACO</button>
                 </section>
             </div>
