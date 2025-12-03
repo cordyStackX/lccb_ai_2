@@ -10,13 +10,13 @@ export async function POST(params: NextRequest) {
 
     if (!apikey) return NextResponse.json({ success: false, error: "API is not Valid" }, { status: 401 });
 
-    const apiUrl = api_links.python_links || api_links.render_links;
+    const apiUrl = process.env.RENDER_API || api_links.python_links;
 
     if (!prompt) return NextResponse.json({ success: false, error: "Prompt is required" }, { status: 400 });
 
     try {
 
-        const response = await Fetch_to(apiUrl, { prompt: prompt, token: apikey });
+        const response = await Fetch_to(`${apiUrl}generate-md`, { prompt: prompt, token: apikey });
 
         if (response.success) {
             return NextResponse.json({ success: true, message: response }, { status: 200 });
