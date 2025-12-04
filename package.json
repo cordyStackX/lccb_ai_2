@@ -13,10 +13,10 @@
 		"hamburger-react": "^2.5.2",
 		"jsonwebtoken": "^9.0.3",
 		"mysql2": "^3.15.3",
-		"next": "16.0.0",
+		"next": "16.0.7",
 		"nodemailer": "^7.0.11",
-		"react": "19.2.0",
-		"react-dom": "18.2.0",
+		"react": "19.2.1",
+		"react-dom": "19.2.1",
 		"react-loader-spinner": "^8.0.0",
 		"react-markdown": "^10.1.0",
 		"sweetalert2": "^11.26.3"
