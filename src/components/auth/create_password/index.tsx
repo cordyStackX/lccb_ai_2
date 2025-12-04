@@ -6,6 +6,7 @@ import image_src from "@/config/images_links/assets.json";
 import Link from "next/link";
 import { ThreeDots } from "react-loader-spinner";
 import { useState, useEffect } from "react";
+import api_link from "@/config/conf/json_config/fetch_url.json";
 import {
     Fetch_to,
     usePreventExit
@@ -37,7 +38,7 @@ export default function Create_Password() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        const responds = await Fetch_to("/services/mysql2/auth/signup/create_password", form);
+        const responds = await Fetch_to(api_link.signup.createAccount, form);
         if (responds.success) {
             localStorage.clear();
             router.push("/auth/signin");

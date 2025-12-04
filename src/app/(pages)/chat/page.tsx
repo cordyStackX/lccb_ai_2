@@ -3,6 +3,7 @@ import { Sidebars, Main } from "@/components";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Fetch_to } from "@/utilities";
+import api_link from "@/config/conf/json_config/fetch_url.json";
 import { Spin as Hamburger } from "hamburger-react";
 
 export default function ChatPage() {
@@ -11,7 +12,7 @@ export default function ChatPage() {
 
     useEffect(() => {
         async function check() {
-            const response = await Fetch_to("services/jwt/verify");
+            const response = await Fetch_to(api_link.jwt.verify);
             if (!response.success) return router.push("/");
         }
         check();

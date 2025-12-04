@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import image_src from "@/config/images_links/assets.json";
 import { ThreeDots } from "react-loader-spinner";
 import { useState, useEffect } from "react";
+import api_link from "@/config/conf/json_config/fetch_url.json";
 import {
     Fetch_to
 } from "@/utilities";
@@ -30,7 +31,7 @@ export default function Confirm_email_forgot_pwd() {
 
     const SendCode = async (e: string | null) => {
         setLoading(true);
-        const responds = await Fetch_to("/services/mysql2/auth/check_code", { email: e });
+        const responds = await Fetch_to(api_link.checkcode, { email: e });
         if (responds.success) {
             setStatus(false);
             setMessage("Code Send Successfully");
@@ -44,7 +45,7 @@ export default function Confirm_email_forgot_pwd() {
 
     const ConfirmCode = async () => {
         setLoading(true);
-        const responds = await Fetch_to("/services/mysql2/auth/check_code", { email: form.email, code: form.code });
+        const responds = await Fetch_to(api_link.checkcode, { email: form.email, code: form.code });
         if (responds.success) {
             router.push("/auth/update-password");
         } else {

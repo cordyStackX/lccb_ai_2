@@ -6,6 +6,7 @@ import { useState } from "react";
 import { SweetAlert2, Fetch_to } from "@/utilities";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
+import api_link from "@/config/conf/json_config/fetch_url.json";
 
 interface SidebarsProps {
     isOpen: boolean;
@@ -21,7 +22,7 @@ export default function Sidebars({ isOpen }: SidebarsProps) {
 
         if (alert2.isConfirmed) {
             SweetAlert2("Signning Out", "", "info", false, "", false, "", true);
-            const response = await Fetch_to("/services/jwt/deauth");
+            const response = await Fetch_to(api_link.jwt.deauth);
             Swal.close();
             if (response.success) {   
                 const alert2 = await SweetAlert2("Sign Out", "Complete", "success", true, "Go to Signin Page", false, "");

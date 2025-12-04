@@ -9,6 +9,7 @@
 		"lint": "eslint"
 	},
 	"dependencies": {
+		"@supabase/supabase-js": "^2.86.1",
 		"bcrypt": "^6.0.0",
 		"hamburger-react": "^2.5.2",
 		"jsonwebtoken": "^9.0.3",

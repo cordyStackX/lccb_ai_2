@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import image_src from "@/config/images_links/assets.json";
 import { ThreeDots } from "react-loader-spinner";
 import { useState, useEffect } from "react";
+import api_link from "@/config/conf/json_config/fetch_url.json";
 import {
     Fetch_to,
     usePreventExit
@@ -36,7 +37,7 @@ export default function Update_Password() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        const responds = await Fetch_to("/services/mysql2/auth/forgot_password/update_password", form);
+        const responds = await Fetch_to(api_link.fotgot_password.updateAccount, form);
         if (responds.success) {
             localStorage.clear();
             router.push("/auth/signin");

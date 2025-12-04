@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import image_src from "@/config/images_links/assets.json";
 import { ThreeDots } from "react-loader-spinner";
 import { useState } from "react";
+import api_link from "@/config/conf/json_config/fetch_url.json";
 import {
     Fetch_to,
     usePreventExit
@@ -31,10 +32,10 @@ export default function Forgot_password() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        const responds = await Fetch_to("/services/mysql2/auth/forgot_password/check_email", { email: form.email });
+        const responds = await Fetch_to(api_link.fotgot_password.checkEmail, { email: form.email });
         if (responds.success) {
             localStorage.setItem("signup_email", form.email);
-            await Fetch_to("/services/mysql2/auth/check_code", { email: form.email });
+            await Fetch_to(api_link.checkcode, { email: form.email });
             router.push("/auth/confirm-email-forgot-pwd");
         } else {
             setStatus(true);

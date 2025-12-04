@@ -1,0 +1,17 @@
+{
+	"signin" : "/services/supabase/auth/signin",
+	"checkcode" : "/services/supabase/auth/check_code",
+	"signup" : {
+	    "checkEmail" : "/services/supabase/auth/signup/check_email",
+		"createAccount" : "/services/supabase/auth/signup/create_account"
+	},
+	"fotgot_password" : {
+		"checkEmail" : "/services/supabase/auth/forgot_password/check_email",
+		"updateAccount" : "/services/supabase/auth/forgot_password/update_account"
+	},
+	"jwt" : {
+		"auth" : "/services/jwt/auth",
+		"deauth" : "/services/jwt/deauth",
+		"verify" : "/services/jwt/verify"
+	}
+}
