@@ -1,16 +1,14 @@
 .container {
-    width: 290px;
-    height: 100%;
-    background-color: var(--adaptive-color-4);
-    border: 1px solid var(--adaptive-color-2);
-    position: fixed;
+    width: 0;
+    height: 100vh;
+    background-color: var(--primary);
     z-index: 1;
-    transform: translateX(-120%);
-    opacity: 0;
     transition: all 800ms ease;
+    overflow: hidden;
+    opacity: 0;
 }
 .open {
-    transform: translateX(0);
+    width: 290px;
     opacity: 1;
 }
 .wrapper {
@@ -28,22 +26,23 @@
 .options {
     width: 100%;
     height: auto;
+    overflow: hidden;
     padding: 0.5rem 0.7rem;
     margin: 1rem 0;
 }
 .options button {
-    width: 100%;
-    height: 35px;
-    padding: 0 1rem;
+    padding: 0.5rem 9rem 0.5rem 1rem;
     cursor: pointer;
     background: transparent;
     border: transparent;
-    border-radius: 10px;
+    border-radius: 5px;
     text-align: left;
     font-size: 0.9rem;
+    transition: all 200ms ease;
 }
 .options button:hover {
-    background-color: var(--adaptive-color-3);
+    background: var(--default-color-white);
+    color: var(--foreground);
 }
 .chat_history {
     width: 100%;
@@ -67,6 +66,8 @@
     cursor: pointer;
     padding: 0.5rem 0;
     border-radius: 10px;
+    background: transparent;
+    transition: all 200ms ease;
 }
 .user_info figcaption {
     width: 150px;
@@ -75,20 +76,29 @@
     overflow: hidden;
 }
 .user_info figure:hover {
-    background: var(--adaptive-color-3);
+    background: var(--default-color-white);
+    color: var(--foreground);
 }
 .user_info_menu {
     position: absolute;
     bottom: 11%;
-    right: -13%;
+    left: 0;
     width: 270px;
     height: auto;
     padding: 0.3rem 0.7rem;
-    background-color: var(--adaptive-color-3);
-    border-radius: 15px;
+    background-color: var(--primary);
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
     box-shadow: 0 0 1rem 0.1rem #000;
     flex-flow: column;
     overflow: hidden;
+    transform: translateX(-120%);
+    opacity: 0;
+    transition: all 500ms ease;
+}
+.user_info_menu_open {
+    transform: translate(0);
+    opacity: 1;
 }
 .user_info_menu figcaption, .user_info_menu p {
     width: 180px;
@@ -107,15 +117,9 @@
     font-weight: bold;
     border: transparent;
     background: transparent;
+    transition: all 200ms ease;
 }
 .user_info_menu button:hover {
-    background: var(--adaptive-color-4);
-}
-
-@media (max-width: 740px) {
-    .container {
-        width: 0;
-        border: transparent;
-        overflow: hidden;
-    }
+    background: var(--default-color-white);
+    color: var(--foreground);
 }

@@ -59,10 +59,6 @@ export default function Main() {
 
     return(
         <section className={`${styles.container} display_flex_center_column`}>
-            <section className={`${styles.header} display_flex_center`}>
-                    <h2>Laco AI</h2>
-            </section>
-            
                {status ?(
                 <section className={styles.chat}>
                     <div className="display_flex_center_column">
@@ -80,7 +76,7 @@ export default function Main() {
                                         <div className={`${styles.spinner_wrapper} display_flex_center`}>
                                             <FallingLines 
                                                 width="100"
-                                                color="#4fa94d"
+                                                color="#1A54B8"
                                             />
                                         </div>
                                     ) : null}
@@ -95,7 +91,7 @@ export default function Main() {
                     
                )}
             
-            <form className={`${styles.ask} display_flex_center`} onSubmit={handleSubmit}>
+            <form className={`${styles.ask} display_flex_center`} onSubmit={handleSubmit} style={{ position: status ? "fixed" : "initial" }}>
                 <span>+</span>
                 <textarea
                 id="chat"
@@ -108,7 +104,7 @@ export default function Main() {
                     e.target.style.height = e.target.scrollHeight + "px";
                 }}
                 onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
+                    if (e.key === "Enter" && !e.shiftKey && !loading) {
                     e.preventDefault();
                     (e.target as HTMLTextAreaElement).style.height = "auto";
                     handleSubmit(e as unknown as React.FormEvent<HTMLFormElement>);
@@ -118,7 +114,7 @@ export default function Main() {
                 autoComplete="off"
                 spellCheck={false}
                 />
-                <button disabled={loading}>Ask</button>
+                <button disabled={loading} style={{ opacity: `${loading ? "0.5" : "1" }` }}>Ask</button>
             </form>
         </section>
     );

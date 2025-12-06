@@ -3,17 +3,11 @@
     height: 100vh;
     position: relative;
     overflow: hidden;
+    color: var(--foreground);
 }
 .container h1 {
     text-align: center;
     padding: 1rem;
-}
-.header {
-    width: 100%;
-    padding: 0.8rem;
-    position: absolute;
-    backdrop-filter: blur(10px);
-    top: 0;
 }
 .chat {
     width: 100%;
@@ -22,7 +16,7 @@
     align-items: flex-start;
     flex: 1;
     gap: 1rem;
-    margin-top: 70px;
+    margin: 70px;
 }
 .response {
     width: min(800px, 90dvw);
@@ -39,8 +33,9 @@
 .user_respones div {
     width: 500px;
     padding: 1rem 1.5rem;
-    background: var(--adaptive-color-4);
+    background: var(--default-color-blue);
     border-radius: 10px;
+    color: var(--default-color-white);
 }
 .ai_response {
     display: block;
@@ -53,20 +48,22 @@
 }
 .ai_response pre {
     width: 100%;
-    background: var(--adaptive-color-4);       
-    color: var(--adaptive-color-text);            
+    background: var(--default-color-black);       
+    color: var(--default-color-black);            
     padding: 1rem;
     border-radius: 10px;
     overflow-x: auto;
     font-family: monospace;
 }
 .ai_response code {
-    background: var(--adaptive-color-1);    
+    background: none;    
     padding: 0.2rem 0.4rem;
     border-radius: 5px;
-    font-family: monospace;
-    color: var(--adaptive-color-2);
+    font-weight: bolder;
+    font-size: 1rem;
+    color: var(--default-color-red);
 }
+
 .ai_response ol,
 .ai_response ul {
     padding-left: 2rem;      
@@ -97,7 +94,9 @@
     overflow: hidden;
     padding: 0 1.2rem;
     margin: 1.3rem 3rem;
-    background: var(--adaptive-color-4);
+    background: var(--default-color-white-2);
+    box-shadow: 0 0 10px 1px var(--foreground);
+    bottom: 0;
 }
 .expandableInput {
     width: 100%;
@@ -106,49 +105,41 @@
     padding: 1.2rem 0 0 1rem;
     border: none;
     outline: none;
+    background: transparent;
     resize: none;
-    background: var(--adaptive-color-4);
     font-size: 16px;
     overflow-y: hidden;
     text-align: start;
-}
-
-.ask input {
-    width: 90%;
-    height: 100%;
-    font-size: 18px;
-    background: transparent;
-    border: transparent;
-    outline: none;
-    padding: 0 0.5rem;
+    font-weight: bold;
+    color: var(--foreground);
 }
 .ask button {
     padding: 0.8rem 0.5rem;
     border-radius: 50%;
     font-weight: bold;
     border: transparent;
-    color: var(--adaptive-color-4);
-    background: var(--adaptive-color-text);
+    color: var(--default-color-white);
+    background: var(--primary);
     cursor: pointer;
+    transition: all 500ms ease;
+}
+.ask button:hover {
+    box-shadow: 0 0 5px 1px var(--foreground);   
 }
 .ask span {
     text-align: center;
-    padding: 0.5rem 1.1rem;
+    padding: 0.2rem 0.8rem;
     font-size: 1.5rem;
     overflow: hidden;
     border-radius: 50%;
     cursor: pointer;
+    background: var(--primary);
+    color: var(--default-color-white);
+    transition: all 500ms ease;
 }
 .ask span:hover {
-    background: var(--adaptive-color-3);
+    box-shadow: 0 0 5px 1px var(--foreground);   
 }
-.fadeIn {
-    opacity: 0;
-    animation: fadeIn 1s forwards;
-}
-
-@keyframes fadeIn {
-    to {
-        opacity: 1;
-    }
+.ask span:active {
+    transform: scale(0.5);
 }

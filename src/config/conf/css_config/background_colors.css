@@ -1,15 +1,15 @@
 
 .landpage {
-	background: linear-gradient(0deg, var(--background_linear_2), var(--background_linear_1));
+	background: linear-gradient(0deg, var(--primary), var(--secondary));
 }
 
 .auth_page {
-    background: linear-gradient(0deg, var(--background_linear_2), var(--background_linear_1));
+    background: linear-gradient(0deg, var(--primary), var(--secondary));
     color: var(--foreground);
 }
 
 .chat_page { 
-    background: linear-gradient(90deg, var(--adaptive-color-1), var(--adaptive-color-3)); 
+    background: linear-gradient(90deg, var(--adaptive-color-1), var(--adaptive-color-3));
 }
 
 .admin {

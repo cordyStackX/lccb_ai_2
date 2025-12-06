@@ -13,7 +13,7 @@ export default function SweetAlert2(
   const isProcess = icon === 'process';
 
   // Detect dark mode
-  const isDark = typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  // const isDark = typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
 
   return Swal.fire({
     title,
@@ -24,8 +24,8 @@ export default function SweetAlert2(
     confirmButtonText: ok,
     cancelButtonText: cancel,
     allowOutsideClick: false,
-    background: isDark ? '#1e1e1e' : '#fff',  // dark/light background
-    color: isDark ? '#fff' : '#000',          // text color
+    background: '#1A54B8',  
+    color: '#fff',         
     didOpen: () => {
       if (showLoading || isProcess) {
         Swal.showLoading();

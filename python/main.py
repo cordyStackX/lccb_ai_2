@@ -1,5 +1,4 @@
 import os
-import bcrypt
 from flask import Flask, request, jsonify
 from google import genai
 

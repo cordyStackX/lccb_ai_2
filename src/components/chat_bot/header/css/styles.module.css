@@ -1,0 +1,8 @@
+.container {
+    width: 100%;
+    height: 55px;
+    padding: 0.8rem;
+    position: fixed;
+    background: var(--primary);
+    top: 0;
+}
