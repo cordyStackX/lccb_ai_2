@@ -24,7 +24,7 @@
     background: transparent;
     border: transparent;
     border-bottom: 2px solid var(--primary);
-    color: var(--default-color-black);
+    color: var(--foreground);
     outline: none;
     text-align: center;
 }

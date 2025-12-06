@@ -25,7 +25,7 @@
     border: transparent;
     border-bottom: 2px solid var(--primary);
     outline: none;
-    color: var(--default-color-black);
+    color: var(--foreground);
 }
 .form_styles p {
     margin: 1rem 0 0 0;
