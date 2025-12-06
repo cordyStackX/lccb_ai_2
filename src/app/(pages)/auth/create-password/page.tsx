@@ -1,4 +1,4 @@
-import { Create_Password } from "@/components";
+import { Create_Password } from "@/components/auth";
 
 export default function CreatePasswordPage() {
     return(

@@ -1,5 +1,5 @@
 "use client";
-import { Sidebars, Main } from "@/components";
+import { Sidebars, Main } from "@/components/chat_bot";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Fetch_to } from "@/utilities";

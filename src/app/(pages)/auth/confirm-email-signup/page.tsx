@@ -1,4 +1,4 @@
-import { Confirm_email_signup } from "@/components";
+import { Confirm_email_signup } from "@/components/auth";
 
 export default function ConfirmEmailSignupPage() {
     return(

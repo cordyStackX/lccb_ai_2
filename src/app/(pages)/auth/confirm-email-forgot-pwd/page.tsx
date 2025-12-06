@@ -1,4 +1,4 @@
-import { Confirm_email_forgot_pwd } from "@/components";
+import { Confirm_email_forgot_pwd } from "@/components/auth";
 
 export default function ConfirmEmailForgotPwd() {
     return(

@@ -9,7 +9,7 @@
 		"lint": "eslint"
 	},
 	"dependencies": {
-		"@supabase/supabase-js": "^2.86.1",
+		"@supabase/supabase-js": "^2.86.2",
 		"bcrypt": "^6.0.0",
 		"hamburger-react": "^2.5.2",
 		"jsonwebtoken": "^9.0.3",
@@ -20,7 +20,7 @@
 		"react-dom": "19.2.1",
 		"react-loader-spinner": "^8.0.0",
 		"react-markdown": "^10.1.0",
-		"sweetalert2": "^11.26.3"
+		"sweetalert2": "^11.26.4"
 	},
 	"devDependencies": {
 		"@eslint/eslintrc": "^3.3.3",
@@ -34,7 +34,7 @@
 		"@types/react-dom": "^19.2.3",
 		"@typescript-eslint/eslint-plugin": "^8.48.1",
 		"@typescript-eslint/parser": "^8.48.1",
-		"baseline-browser-mapping": "^2.9.0",
+		"baseline-browser-mapping": "^2.9.3",
 		"eslint": "^9.39.1",
 		"eslint-config-next": "16.0.0",
 		"eslint-import-resolver-alias": "^1.1.2",
