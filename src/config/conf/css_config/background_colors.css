@@ -4,9 +4,14 @@
 }
 
 .auth_page {
-    background: linear-gradient(0deg, var(--adaptive-color-2), var(--default-color-black));
+    background: linear-gradient(0deg, var(--background_linear_2), var(--background_linear_1));
+    color: var(--foreground);
 }
 
 .chat_page { 
+    background: linear-gradient(90deg, var(--adaptive-color-1), var(--adaptive-color-3)); 
+}
+
+.admin {
     background: linear-gradient(90deg, var(--adaptive-color-1), var(--adaptive-color-3)); 
 }

@@ -75,7 +75,7 @@ export default function SignIn() {
                             <h1>Sign in</h1>
                         </section>
                         <input 
-                        type="text" 
+                        type="email" 
                         name="email" 
                         id="email" 
                         autoComplete="email"

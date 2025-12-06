@@ -49,7 +49,7 @@ export default function Confirm_email_signin() {
         if (responds.success) {
             localStorage.clear();
             await Fetch_to(api_link.jwt.auth, { email: form.email });
-            router.push("/chat");
+            router.push("/chat_bot");
         } else {
             setMessage(responds.message);
             setStatus(true);

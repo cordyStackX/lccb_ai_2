@@ -75,7 +75,7 @@ export default function SignUp() {
                             <h1>Sign up</h1>
                         </section>
                         <input 
-                        type="text" 
+                        type="email" 
                         name="email" 
                         id="email" 
                         autoComplete="email"

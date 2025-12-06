@@ -74,7 +74,7 @@ export default function Forgot_password() {
                             <h1>Forgot Password</h1>
                         </section>
                         <input 
-                        type="text" 
+                        type="email" 
                         name="email" 
                         id="email" 
                         autoComplete="email"

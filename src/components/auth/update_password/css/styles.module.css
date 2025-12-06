@@ -10,7 +10,7 @@
     width: min(600px, 90dvw);
     height: clamp(200px, 80vh, 480px);
     border-radius: 10px;
-    background: var(--adaptive-color);
+    background: var(--fx-color);
     padding: clamp(1rem, 10dvw, 3rem);
     position: relative;
     overflow: hidden;
@@ -23,7 +23,8 @@
     padding: 5px 0;
     background: transparent;
     border: transparent;
-    border-bottom: 2px solid var(--adaptive-color-text);
+    border-bottom: 2px solid var(--primary);
+    color: var(--adaptive-color-black);
     outline: none;
 }
 .form_styles p {
@@ -58,7 +59,7 @@
 .buttons button {
     padding: 10px clamp(30px, 3vw, 50px);
     margin: 0 0 0 10px;
-    background: var(--background_linear_1);
+    background: var(--primary);
     border-radius: 5px;
     border: transparent;
     font-size: 1rem;

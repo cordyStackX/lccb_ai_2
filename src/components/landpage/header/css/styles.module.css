@@ -36,12 +36,13 @@
     font-weight: bold;
     cursor: pointer;
     transform: scale(1.0);
-    transition: transform 500ms ease-out;
+    opacity: 1;
+    transition: all 500ms ease-out;
     font-size: 1rem;
     color: var(--default-color-white);
 }
 .buttons button:hover {
-    transform: scale(1.1);
+    opacity: 0.8;
 }
 .buttons button:active {
     transform: scale(1.0);

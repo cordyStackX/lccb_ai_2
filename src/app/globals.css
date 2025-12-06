@@ -15,7 +15,7 @@ body {
 
 body {
 	color: var(--adaptive-color-text);
-	background: transparent;
+	background: var(--default-color-white);
 	font-family: Arial, Helvetica, sans-serif;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
