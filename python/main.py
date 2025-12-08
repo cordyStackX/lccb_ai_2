@@ -1,4 +1,4 @@
-import os, requests
+import os
 import sys
 import threading
 import time
@@ -12,9 +12,9 @@ from PyPDF2 import PdfReader
 # -----------------------------------------
 # Load .env.local from project root
 # -----------------------------------------
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-ENV_PATH = os.path.join(ROOT_DIR, ".env.local")
-load_dotenv(ENV_PATH)
+# ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+# ENV_PATH = os.path.join(ROOT_DIR, ".env.local")
+# load_dotenv(ENV_PATH)
 
 # -----------------------------------------
 # Init Flask

@@ -1,2 +1,7 @@
 flask==3.1.2
+flask-cors==5.0.0
 google-genai==1.52.0
+python-dotenv==1.0.1
+supabase==2.10.0
+PyPDF2==3.0.1
+requests==2.32.3
