@@ -12,7 +12,7 @@ export async function POST(params: NextRequest) {
 
     if (!apikey) return NextResponse.json({ success: false, error: "API is not Valid" }, { status: 401 });
 
-    if (!pdf_id) return NextResponse.json({ success: false, error: "Please provide a PDF Documents before we procceed" }, { status: 401 });
+    if (!pdf_id) return NextResponse.json({ success: false, error: "Please provide Your Documents before we procceed" }, { status: 401 });
 
     const apiUrl = process.env.RENDER_API || api_links.python_links;
 

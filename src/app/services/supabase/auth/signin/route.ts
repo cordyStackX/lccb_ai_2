@@ -91,6 +91,8 @@ export async function POST(req: NextRequest) {
             LoginAttempts.set(email, state);
 
             return NextResponse.json({ success: true }, { status: 200 });
+        } else {
+            return NextResponse.json({ success: false, error: "User not found" }, { status: 409 });
         }
         
     } catch (err: unknown) {

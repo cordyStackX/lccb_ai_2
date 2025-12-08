@@ -19,6 +19,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
     }
 
+    if (data.length <= 0) return NextResponse.json({ success: true, error: [{ id: 0, file_name: "No PDF Found" }] }, { status: 400 });
+
     return NextResponse.json({ success: true, message: data }, { status: 200 });
 
 }

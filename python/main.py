@@ -12,9 +12,9 @@ from PyPDF2 import PdfReader
 # -----------------------------------------
 # Load .env.local from project root
 # -----------------------------------------
-# ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-# ENV_PATH = os.path.join(ROOT_DIR, ".env.local")
-# load_dotenv(ENV_PATH)
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+ENV_PATH = os.path.join(ROOT_DIR, ".env.local")
+load_dotenv(ENV_PATH)
 
 # -----------------------------------------
 # Init Flask
@@ -108,11 +108,11 @@ def generate_md():
             text += page.extract_text() or ""
 
         # --- Strict instruction: only answer based on PDF ---
-        final_prompt = f"Read the PDF content below carefully. Only answer based on this content. Do NOT add extra information, except what relates to the question. questions:\n\n{text}\n\nQuestion: {prompt}"
+        final_prompt = f"Read the PDF content below carefully. Base your answer primarily on this content. You may add a small amount of extra information ONLY if it directly supports or explains something from the PDF and stays on-topic. Do NOT go beyond the scope of the PDF. questions:\n\n{text}\n\nQuestion: {prompt}"
 
         # --- Call Gemini ---
         result = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-2.0-flash",
             contents=final_prompt
         )
 

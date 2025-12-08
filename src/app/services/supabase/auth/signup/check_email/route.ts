@@ -11,6 +11,9 @@ export async function POST(req: NextRequest) {
         
         const cleanEmail = email.trim().toLowerCase();
 
+        const allowedDomain = "@lccbonline.edu.ph"
+        if (!cleanEmail.endsWith(allowedDomain)) return NextResponse.json({ success: false, error: "@lccbonline.edu.ph is allowed" }, { status: 409 });
+
         const { data, error } = await supabaseServer
         .from("auth")
         .select("email")
