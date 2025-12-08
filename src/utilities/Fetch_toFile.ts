@@ -1,31 +1,49 @@
-export default async function Fetch_to(
+export default async function Fetch_toFile(
   dir: string,
-  payload: Record<string, unknown> = {},
+  file: File,
+  fields: Record<string, string | number> = {},
   headers: Record<string, string> = {},
-  retries: number = 3,      // number of attempts
-  delay: number = 1000      // wait time between attempts in ms
+  retries: number = 3,
+  delay: number = 1000
 ) {
   if (!dir || dir === "") {
     if (typeof window !== "undefined") alert("Invalid API Directory not found");
     return { success: false, message: "Invalid API Directory" };
   }
 
+  if (!file) {
+    return { success: false, message: "No file provided" };
+  }
+
+  // Build multipart form
+  const formData = new FormData();
+  formData.append("file", file);
+
+  for (const key in fields) {
+    formData.append(key, String(fields[key]));
+  }
+
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       const response = await fetch(dir, {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...headers },
-        body: JSON.stringify(payload),
+        headers: {
+          ...headers
+        },
+        body: formData,
       });
 
-      const data = await response.json().catch(() => null); // safe parse
+      const data = await response.json().catch(() => null);
 
       if (response.ok) {
-        console.log("Status for fetch: ", data);
-        return { success: true, data }; // success
+        console.log("Status for file upload:", data);
+        return { success: true, data };
       } else {
         console.log(data?.error);
-        return { success: false, message: data?.error || `Request failed: ${response.status}` };
+        return {
+          success: false,
+          message: data?.error || `Request failed: ${response.status}`,
+        };
       }
     } catch (err: unknown) {
       let message = "Unknown fetch error";

@@ -16,6 +16,7 @@ def generate_md():
     data = request.json
     received_token = data.get("token")
     prompt = data.get("prompt", "")
+    user_email = data.get("email")
 
     # Compare the received token with expected API key
     if not received_token or received_token != EXPECTED_API_KEY:

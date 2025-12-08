@@ -3,9 +3,14 @@ import styles from "./css/styles.module.css";
 import { useEffect, useState, useRef } from "react";
 import Markdown from "react-markdown";
 import { FallingLines } from "react-loader-spinner";
-import { Fetch_to } from "@/utilities";
+import { Fetch_to, Fetch_toFile, SweetAlert2 } from "@/utilities";
+import Swal from "sweetalert2";
 
-export default function Main() {
+type MainProps = {
+    emailRes: string
+}
+
+export default function Main({ emailRes }: MainProps) {
     const [messages, setMessages] = useState<
         { ask: string; respond: string }[]
     >([]);
@@ -14,6 +19,7 @@ export default function Main() {
     });
     const [status, setStatus] = useState(false);
     const [loading, setLoading] = useState(false);
+    const fileRef = useRef<HTMLInputElement>(null);
     const chatEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -55,7 +61,33 @@ export default function Main() {
         setLoading(false);
     };
 
+    const UploadPdf = () => {
+        fileRef.current?.click();
+    };
 
+    const HandleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        SweetAlert2("Uploading", "Please wait..", "info", false, "", false, "", true);
+
+        if (file.type !== "application/pdf") {
+            alert("Please select a PDF file.");
+            return;
+        }
+
+        console.log("PDF selected:", file);
+
+        const response = await Fetch_toFile("/services/supabase/uploadpdf", file, { email: emailRes });
+        Swal.close();
+
+        if (response.success) {
+            SweetAlert2("Success", "Successfully uploaded", "success", true, "Okay", false, "", false);
+        } else {
+            SweetAlert2("Error", `${response.message}`, "error", true, "Confirm", false, "", false);
+        }
+
+    };
 
     return(
         <section className={`${styles.container} display_flex_center_column`}>
@@ -90,9 +122,18 @@ export default function Main() {
                     <h1>Ask Anything or Upload your PDF file</h1>
                     
                )}
-            
+               {/* Hidden Input */}
+            <>
+                <input
+                ref={fileRef}
+                type="file"
+                accept="application/pdf"
+                style={{ display: "none" }}
+                onChange={HandleFile}
+                />
+            </>
             <form className={`${styles.ask} display_flex_center`} onSubmit={handleSubmit} style={{ position: status ? "fixed" : "initial" }}>
-                <span>+</span>
+                <span onClick={UploadPdf}>+</span>
                 <textarea
                 id="chat"
                 name="ask"

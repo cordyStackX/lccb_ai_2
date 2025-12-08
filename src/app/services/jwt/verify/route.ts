@@ -12,8 +12,8 @@ export async function POST() {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET || "");
         if (!decoded) return NextResponse.json({ success: false, error: "Secret Not Found" }, { status: 404 });
-        console.log(" ==> User Authenticated");
-        return NextResponse.json({ success: true }, { status: 200 });
+        console.log(" ==> User Authenticated", token);
+        return NextResponse.json({ success: true, message: decoded}, { status: 200 });
     } catch {
         return NextResponse.json({ success: false, error: "UnAuth" }, { status: 401 });
     }

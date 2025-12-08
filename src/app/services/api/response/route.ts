@@ -4,9 +4,13 @@ import { Fetch_to } from "@/utilities";
 
 export async function POST(params: NextRequest) {
     
-    const { prompt } = await params.json();
+    const { prompt, email } = await params.json();
+
+    const cleanEmail = email.trim().lowwerCase();
 
     const apikey = process.env.API_KEY;
+
+    if (!cleanEmail) return NextResponse.json({ success: false, error: "Email not exist invalid user" }, { status: 404 });
 
     if (!apikey) return NextResponse.json({ success: false, error: "API is not Valid" }, { status: 401 });
 
@@ -16,7 +20,7 @@ export async function POST(params: NextRequest) {
 
     try {
 
-        const response = await Fetch_to(`${apiUrl}generate-md`, { prompt: prompt, token: apikey });
+        const response = await Fetch_to(`${apiUrl}generate-md`, { prompt: prompt, token: apikey, email: cleanEmail });
 
         if (response.success) {
             return NextResponse.json({ success: true, message: response }, { status: 200 });

@@ -9,11 +9,13 @@ import { Spin as Hamburger } from "hamburger-react";
 export default function ChatPage() {
     const router = useRouter();
     const [isOpen, setOpen] = useState(true);
+    const [email, setEmail] = useState("");
 
     useEffect(() => {
         async function check() {
             const response = await Fetch_to(api_link.jwt.verify);
             if (!response.success) return router.push("/");
+            setEmail(response.data.message.email);
         }
         check();
     }, []);
@@ -26,7 +28,7 @@ export default function ChatPage() {
             <Header />
             <div className="display_flex_center">
                 <Sidebars isOpen={isOpen} />
-                <Main />
+                <Main emailRes={email}/>
             </div>
         </main>
     );
