@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
     // Save new timestamp
     cooldownMap.set(cleanEmail, now);
 
-    const confirmationCode = Math.floor(1000 + Math.random() * 9000).toString();
+    const confirmationCode = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes
 
     CodeStore.set(cleanEmail, {
