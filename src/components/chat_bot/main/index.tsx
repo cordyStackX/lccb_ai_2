@@ -91,7 +91,6 @@ export default function Main({ emailRes, refresh, setRefresh, currentPdf }: Main
 
         const response = await Fetch_toFile(api_link.storage.uploadPdf, file, { email: emailRes });
         Swal.close();
-        setChatres({ ask: "Give me the bullets of this pdf", respond2: "" });
 
         if (response.success) {
             SweetAlert2("Success", "Successfully uploaded", "success", true, "Okay", false, "", false);

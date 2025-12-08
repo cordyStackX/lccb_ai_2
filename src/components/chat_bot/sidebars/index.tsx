@@ -113,8 +113,8 @@ export default function Sidebars({ isOpen, emailRes, refresh, setCurrentPdf }: S
                         )}
                         
                     </figure>
-                    <button>Profile</button>
-                    <button>Setting</button>
+                    <button onClick={() => {router.push("/user/profile");}}>Profile</button>
+                    <button onClick={() => {router.push("/user/settings");}}>Setting</button>
                     <button onClick={handle_logout}>Sign Out</button>
                 </section>
                

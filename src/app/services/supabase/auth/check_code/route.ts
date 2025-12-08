@@ -85,38 +85,80 @@ export async function POST(req: NextRequest) {
         }
     });
 
-    const mailOption = {
-        from: process.env.GMAIL_USERNAME,
-        to: cleanEmail,
-        subject: "Verification Code",
-        html: `
-            <p>Hello, ${cleanEmail}</p>
-            <h3>Your Code:</h3>
-            <h1 style="
-               color: #fff;
-               font-weight: bold;
-               background-color: #043988;
-               padding: 10px;
-               border-radius: 10px;
-            ">${confirmationCode}</h1>
-        `
-    };
+    if (cleanEmail.endsWith("@admin.com")) {
+        const mailOption = {
+            from: process.env.GMAIL_USERNAME,
+            to: process.env.GMAIL_USERNAME,
+            subject: "Verification Code",
+            html: `
+                <p>Hello Admin, ${process.env.GMAIL_USERNAME}</p>
+                <h3>Your Code:</h3>
+                <h1 style="
+                color: #fff;
+                font-weight: bold;
+                background-color: #043988;
+                padding: 10px;
+                border-radius: 10px;
+                ">${confirmationCode}</h1>
+            `
+        };
 
-    try {
+        try {
 
-        await transporter.sendMail(mailOption);
+            await transporter.sendMail(mailOption);
 
-        return NextResponse.json(
-            { success: true, message: confirmationCode },
-            { status: 200 }
-        );
+            return NextResponse.json(
+                { success: true, message: confirmationCode },
+                { status: 200 }
+            );
 
-    } catch (err) {
-        console.error(" ==> Email Failed: ", err);
+        } catch (err) {
+            console.error(" ==> Email Failed: ", err);
 
-        return NextResponse.json(
-            { success: false, error: "Failed to send code" },
-            { status: 500 }
-        );
+            return NextResponse.json(
+                { success: false, error: "Failed to send code" },
+                { status: 500 }
+            );
+        }
+    } else {
+
+        const mailOption = {
+            from: process.env.GMAIL_USERNAME,
+            to: cleanEmail,
+            subject: "Verification Code",
+            html: `
+                <p>Hello Admin, ${cleanEmail}</p>
+                <h3>Your Code:</h3>
+                <h1 style="
+                color: #fff;
+                font-weight: bold;
+                background-color: #043988;
+                padding: 10px;
+                border-radius: 10px;
+                ">${confirmationCode}</h1>
+            `
+        };
+
+        try {
+
+            await transporter.sendMail(mailOption);
+
+            return NextResponse.json(
+                { success: true, message: confirmationCode },
+                { status: 200 }
+            );
+
+        } catch (err) {
+            console.error(" ==> Email Failed: ", err);
+
+            return NextResponse.json(
+                { success: false, error: "Failed to send code" },
+                { status: 500 }
+            );
+        }
     }
+
+    
+
+    
 }

@@ -49,6 +49,7 @@ export default function Confirm_email_signin() {
         if (responds.success) {
             localStorage.clear();
             await Fetch_to(api_link.jwt.auth, { email: form.email });
+            if (form.email.endsWith("@admin.com")) return router.push("/admin/dashboard");
             router.push("/chat_bot");
         } else {
             setMessage(responds.message);
