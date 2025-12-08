@@ -1,9 +1,20 @@
 import styles from "./css/styles.module.css";
+import { Spin as Hamburger } from "hamburger-react";
+import { Dispatch, SetStateAction } from "react";
 
-export default function Header() {
+interface HeaderProps {
+    isOpen: boolean;
+    setOpen: Dispatch<SetStateAction<boolean>>;
+}
+
+
+export default function Header({ isOpen, setOpen }: HeaderProps) {
     return(
-        <section className={`${styles.container} display_flex_center`}>
-            <h1>LACO AI</h1>
-        </section>
+        <header className={`${styles.container} display_flex_center`}>
+            
+            <Hamburger toggled={isOpen} toggle={setOpen}  />
+            
+            <h1>Welcome to LACO AI</h1>
+        </header>
     );
 }

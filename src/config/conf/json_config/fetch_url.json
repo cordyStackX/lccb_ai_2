@@ -13,5 +13,10 @@
 		"auth" : "/services/jwt/auth",
 		"deauth" : "/services/jwt/deauth",
 		"verify" : "/services/jwt/verify"
+	},
+	"responses" : "/services/api/response",
+	"storage" : {
+		"uploadPdf" : "/services/supabase/storage/uploadpdf",
+		"retrieve" : "/services/supabase/storage/retrieve"
 	}
 }

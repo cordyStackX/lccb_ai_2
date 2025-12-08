@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
         .eq("email", cleanEmail)
         .limit(1);
 
-         if (error) {
+        if (error) {
             console.error("Supabase Query Error: ", error);
             return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
         }

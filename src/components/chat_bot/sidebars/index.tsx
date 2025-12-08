@@ -5,20 +5,42 @@ import image_src from "@/config/images_links/assets.json";
 import { useState, useEffect } from "react";
 import { SweetAlert2, Fetch_to } from "@/utilities";
 import { useRouter } from "next/navigation";
+import { ProgressBar } from "react-loader-spinner";
 import Swal from "sweetalert2";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 
 interface SidebarsProps {
     isOpen: boolean;
+    emailRes: string;
+    refresh: boolean;
+    setCurrentPdf: (val: number | undefined) => void;}
+
+interface PdfFile {
+    id?: number;
+    file_name?: string;
 }
 
-export default function Sidebars({ isOpen }: SidebarsProps) {
+export default function Sidebars({ isOpen, emailRes, refresh, setCurrentPdf }: SidebarsProps) {
     const router = useRouter();
     const [profile, setProfile] = useState(false);
+    const [data, setData] = useState<PdfFile[]>([]);
+    const [selectedPdfId, setSelectedPdfId] = useState<number | undefined>();
 
     useEffect(() => {
         if (profile) setProfile(false);
     }, [isOpen]);
+
+    useEffect(() => {
+        const retrieve_pdf = async () => {
+            const response = await Fetch_to(api_link.storage.retrieve, { email: emailRes });
+            if (response.success) {
+                console.log(response.data.message);
+                setData(response.data.message);
+            }
+        };
+        retrieve_pdf();
+        setCurrentPdf(selectedPdfId);
+    }, [emailRes, refresh, selectedPdfId]);
 
     const handle_logout = async () => {
 
@@ -39,42 +61,57 @@ export default function Sidebars({ isOpen }: SidebarsProps) {
     };
 
     return(
-        <section className={`${styles.container} ${isOpen ? styles.open : ""}`}>
+        <aside className={`${styles.container} ${isOpen ? styles.open : ""}`}>
             <div className={`${styles.wrapper} display_flex_center`}>
-                <section className={`${styles.logo} display_flex_center`}>
-                    <figure>
-                        <Image 
-                        src={image_src.logo1}
-                        alt="logo"
-                        width={50}
-                        height={50}
-                        title="logo"
-                        priority
-                        />
-                    </figure>
-                </section>
                 <section className={styles.options}>
-                    <button>New Chat</button>
-                </section>
-                <section className={styles.chat_history}>
+                    <button onClick={() => {window.location.reload();}}>Clear Chat</button>
+                <section className={`${styles.chat_history} display_flex_center`}>
                     <select disabled>
                         <option>Your Documents</option>
                     </select>
+                    {data && data.length > 0 ? (
+                        data.map((pdf, index) => (
+                            <button key={index}
+                            onClick={() => setSelectedPdfId(pdf.id)}
+                            style={{
+                                backgroundColor: pdf.id === selectedPdfId ? "#fff" : "",
+                                color: pdf.id === selectedPdfId ? "#000" : ""
+                            }}
+                            >{pdf.file_name} {`(${pdf.id})`}</button>
+                        ))
+                    ) : (
+                        <ProgressBar visible={true}
+                        height="80"
+                        width="80"
+                        color="#4fa94d"
+                        ariaLabel="progress-bar-loading"
+                        />
+                    )}
+                </section>
                 </section>
                 <section className={styles.user_info}>
                     <figure className="display_flex_center" onClick={() => {setProfile(!profile);}}>
                         <img src={image_src.logo1} alt="User Pic" width={60} height={60}/>
-                        <figcaption>Marc Giestin Louis Cordova</figcaption>
+                        <figcaption>{emailRes ? emailRes : " --- "}</figcaption>
                     </figure>
                 </section>
                
                 <section className={`${styles.user_info_menu} display_flex_center ${profile ? styles.user_info_menu_open : ''}`}>
+                    <span onClick={() => {setProfile(false);}}>X</span>
                     <figure className="display_flex_center">
-                        <img src={image_src.logo1} alt="User Pic" width={60} height={60}/>
-                        <div>
-                            <figcaption>Marc Giestin Louis Cordova</figcaption>
-                            <p>cordovamarcgiestinlouis@gmail.com</p>
-                        </div>
+                        <Image src={image_src.logo1} alt="User Pic" width={60} height={60}/>
+                        {emailRes ? (
+                            <div>
+                                <figcaption> --- </figcaption>
+                                <p> {emailRes} </p>
+                            </div>
+                        ) : (
+                            <div>
+                                <figcaption> --- </figcaption>
+                                <p> --- </p>
+                            </div>
+                        )}
+                        
                     </figure>
                     <button>Profile</button>
                     <button>Setting</button>
@@ -82,7 +119,7 @@ export default function Sidebars({ isOpen }: SidebarsProps) {
                 </section>
                
             </div>
-        </section>
+        </aside>
     );
 }
 

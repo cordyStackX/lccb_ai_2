@@ -4,13 +4,17 @@ import { useEffect, useState, useRef } from "react";
 import Markdown from "react-markdown";
 import { FallingLines } from "react-loader-spinner";
 import { Fetch_to, Fetch_toFile, SweetAlert2 } from "@/utilities";
+import api_link from "@/config/conf/json_config/fetch_url.json";
 import Swal from "sweetalert2";
 
 type MainProps = {
-    emailRes: string
+    emailRes: string;
+    refresh: boolean;
+    currentPdf: number | undefined;
+    setRefresh: (val: boolean) => void;
 }
 
-export default function Main({ emailRes }: MainProps) {
+export default function Main({ emailRes, refresh, setRefresh, currentPdf }: MainProps) {
     const [messages, setMessages] = useState<
         { ask: string; respond: string }[]
     >([]);
@@ -19,6 +23,8 @@ export default function Main({ emailRes }: MainProps) {
     });
     const [status, setStatus] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [email, setEmail] = useState("");
+    const [pdf_id, setPdf_id] = useState<number | undefined>();
     const fileRef = useRef<HTMLInputElement>(null);
     const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -27,6 +33,11 @@ export default function Main({ emailRes }: MainProps) {
             chatEndRef.current.scrollIntoView({ behavior: "smooth" });
         }
     }, [messages]);
+
+    useEffect(() => {
+        setEmail(emailRes);
+        setPdf_id(currentPdf);
+    }, [emailRes, currentPdf]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setChatres({ ...chatres, [e.target.name]: e.target.value });
@@ -45,7 +56,7 @@ export default function Main({ emailRes }: MainProps) {
         const prompt = chatres.ask; 
         setChatres({ ask: "", respond2: "" });
 
-        const response = await Fetch_to("/services/api/response", { prompt });
+        const response = await Fetch_to(api_link.responses, { prompt, email, pdf_id });
 
         setMessages((prev) => {
             const updated = [...prev];
@@ -78,13 +89,20 @@ export default function Main({ emailRes }: MainProps) {
 
         console.log("PDF selected:", file);
 
-        const response = await Fetch_toFile("/services/supabase/uploadpdf", file, { email: emailRes });
+        const response = await Fetch_toFile(api_link.storage.uploadPdf, file, { email: emailRes });
         Swal.close();
 
         if (response.success) {
             SweetAlert2("Success", "Successfully uploaded", "success", true, "Okay", false, "", false);
+            if (fileRef.current) {
+                fileRef.current.value = "";
+            }
+            setRefresh(!refresh);
         } else {
             SweetAlert2("Error", `${response.message}`, "error", true, "Confirm", false, "", false);
+            if (fileRef.current) {
+                fileRef.current.value = "";
+            }
         }
 
     };
@@ -119,7 +137,7 @@ export default function Main({ emailRes }: MainProps) {
                 </section>
                ) : (
                     
-                    <h1>Ask Anything or Upload your PDF file</h1>
+                    <h1>Upload your PDF file and Choose your documents</h1>
                     
                )}
                {/* Hidden Input */}
