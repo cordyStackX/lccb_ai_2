@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     
     const cleanEmail = email.trim().toLowerCase();
 
-    const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes
+    const expiresAt = Date.now() + 60 * 1000; // 1 minutes
 
     //Check if their is existing code
     if (code) {

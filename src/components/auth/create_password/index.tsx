@@ -35,7 +35,7 @@ export default function Create_Password() {
             const saveEmail = localStorage.getItem("email");
             const code = localStorage.getItem("code");
             const response = await Fetch_to(api_link.checkcode, { email: saveEmail, code: code });
-            if (!response.success) return router.push("/auth/confirm-email-forgot-pwd");
+            if (!response.success) return router.push("/auth/signin");
             setForm(prev => ({ ...prev, email: saveEmail || ""}));
         };
         checkCode();

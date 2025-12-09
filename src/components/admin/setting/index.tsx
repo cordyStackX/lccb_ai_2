@@ -10,7 +10,7 @@ export default function Setting() {
     const ChangePassword = async() => {
         localStorage.setItem("email", "admin@admin.com");
         const response = await Fetch_to(api_link.checkcode, { email: "admin@admin.com" });
-        if (!response.success) return alert("Something went to the server find a developer to fix this problem");
+        if (!response.success) return alert(response.message || "Something went wrong to the server find a developer to fix this problem");
         router.push("/auth/confirm-email-forgot-pwd");
     };
 
