@@ -6,6 +6,7 @@ export async function POST(req: NextRequest) {
     const form = await req.formData();
     const file = form.get("file") as File;
     const email = form.get("email") as string;
+    const status = form.get("status") as string;
 
     const filename = file.name;
 
@@ -44,13 +45,10 @@ export async function POST(req: NextRequest) {
         }
 
         if (data) {
-
-            const { data: publicUrlData } = supabaseServer.storage.from(bucketName).getPublicUrl(filePath);
-            const publicUrl = publicUrlData.publicUrl;
             
             const { data, error } = await supabaseServer
             .from("pdf_file")
-            .insert([{ file: publicUrl, email: cleanEmail, file_name: filename }]);
+            .insert([{ file: filePath, email: cleanEmail, file_name: filename, status: status }]);
 
             if (error) {
                 console.error("Supabase Query Error: ", error);

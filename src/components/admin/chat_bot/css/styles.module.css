@@ -35,4 +35,32 @@
     margin: 2rem 0;
     padding: 2rem 1.5rem;
     border-radius: 5px;
+    color: var(--default-color-black);
+}
+.status table {
+    width: 100%;
+    height: auto;
+    background: var(--default-color-black);
+}
+.status th {
+    background: var(--primary);
+    color: var(--default-color-white);
+    padding: 1rem;
+}
+.status td {
+    padding: 1rem;
+    background: var(--default-color-white);
+    text-align: center;
+}
+.status select {
+    width: 130px;
+    padding: 0.5rem 0.5rem;
+    cursor: pointer;
+    margin: 0 auto;
+    background: transparent;
+    border: transparent;
+    outline: none;
+    color: var(--default-color-black);
+    font-size: 15px;
+    text-align: center;
 }

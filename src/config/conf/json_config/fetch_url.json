@@ -1,5 +1,6 @@
 {
 	"signin" : "/services/supabase/auth/signin",
+	"check_status" : "/services/supabase/auth/check_status",
 	"checkcode" : "/services/supabase/auth/check_code",
 	"signup" : {
 	    "checkEmail" : "/services/supabase/auth/signup/check_email",
@@ -17,6 +18,8 @@
 	"responses" : "/services/api/response",
 	"storage" : {
 		"uploadPdf" : "/services/supabase/storage/uploadpdf",
-		"retrieve" : "/services/supabase/storage/retrieve"
+		"retrieve" : "/services/supabase/storage/retrieve",
+		"updatepdf" : "/services/supabase/storage/updatepdf",
+		"deletepdf" : "/services/supabase/storage/deletepdf"
 	}
 }

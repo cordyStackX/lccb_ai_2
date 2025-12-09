@@ -33,6 +33,15 @@ export default function SignIn() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
+        const status = await Fetch_to(api_link.check_status, { email: form.email });
+
+        if (!status.success) {
+            setMessage(status.message || "Somethings Went Wrong");
+            setLoading(false); 
+            setStatus(true);
+            return;
+        }
+
         const responds = await Fetch_to(api_link.signin, form);
         if (responds.success) {
             localStorage.setItem("email", form.email);
