@@ -20,11 +20,11 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
         }
 
-        console.log(" ==> User trying to forgot password");
+        console.log(" ==> User trying to forgot password ", data);
 
-        if (data) return NextResponse.json({ success: true }, { status: 200 });
+        if (!data || data.length === 0) return NextResponse.json({ success: false, error: "Email not exist" }, { status: 409 });
 
-        return NextResponse.json({ success: false, error: "Email not exist" }, { status: 409 });
+        return NextResponse.json({ success: true }, { status: 200 });
 
     } catch (err: unknown) {
 

@@ -25,7 +25,7 @@ export default function Confirm_email_signin() {
     };
 
    useEffect(() => {
-        const saveEmail = localStorage.getItem("signup_email");
+        const saveEmail = localStorage.getItem("email");
         setForm(prev => ({ ...prev, email: saveEmail || "" }));
     }, []);
 

@@ -29,9 +29,15 @@ export default function Update_Password() {
         setIsDirty(true); 
     };
 
-     useEffect(() => {
-        const saveEmail = localStorage.getItem("signup_email");
-        setForm(prev => ({ ...prev, email: saveEmail || "" }));
+    useEffect(() => {
+        const checkCode = async () => {
+            const saveEmail = localStorage.getItem("email");
+            const code = localStorage.getItem("code");
+            const response = await Fetch_to(api_link.checkcode, { email: saveEmail, code: code });
+            if (!response.success) return router.push("/auth/confirm-email-forgot-pwd");
+            setForm(prev => ({ ...prev, email: saveEmail || ""}));
+        };
+        checkCode();
     }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {

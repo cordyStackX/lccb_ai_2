@@ -1,0 +1,58 @@
+.container {
+    width: 260px;
+    height: 100vh;
+    background-color: var(--primary);
+    flex-flow: column;
+}
+
+.options {
+    width: 100%;
+    height: 600px;
+    flex-flow: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 1rem;
+}
+.options button {
+    width: 230px;
+    padding: 0.8rem 1rem;
+    margin: 0.5rem 0;
+    cursor: pointer;
+    font-weight: bold;
+    text-align: start;
+    background: transparent;
+    border: transparent;
+    border-radius: 10px;
+}
+.options button:hover {
+    background-color: var(--fx-color-button);
+}
+.options_2 {
+    width: 100%;
+    height: auto;
+    flex-flow: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 1rem;
+}
+.options_2 button {
+    width: 230px;
+    padding: 0.8rem 1rem;
+    margin: 0.5rem 0;
+    cursor: pointer;
+    font-weight: bold;
+    text-align: start;
+    background: var(--default-color-red);
+    border: transparent;
+    border-radius: 10px;
+}
+.admin {
+    flex-flow: column;
+    padding: 2rem 1rem;
+}
+.admin p {
+    width: 200px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}

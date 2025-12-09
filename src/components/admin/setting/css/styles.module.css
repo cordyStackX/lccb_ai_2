@@ -1,0 +1,51 @@
+.container {
+    width: 100%;
+    height: 100vh;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    padding: 1rem;
+    color: var(--default-color-black);
+}
+.container p {
+    font-weight: bold;
+    margin: 0 1rem;
+}
+
+.wrapper {
+    width: var(--max-width);
+    margin: 0 auto;
+}
+
+.settings {
+    width: 100%;
+    height: auto;
+    background-color: var(--default-color-white-2);
+    box-shadow: 0 0 0.5rem 0.1rem var(--default-color-black);
+    margin: 2rem 0;
+    padding: 2rem 1.5rem;
+    border-radius: 5px;
+}
+.settings h3 {
+    margin: 0.5rem 2rem;
+}
+.setting_set {
+    padding: 2rem;
+    justify-content: flex-start;
+}
+.setting_set select {
+    cursor: pointer;
+    
+}
+.update_password {
+    justify-content: flex-start;
+    padding: 2rem;
+    border-bottom: 1px solid var(--primary);
+}
+.update_password button {
+    background-color: var(--primary);
+    width: 130px;
+    padding: 0.5rem 0.5rem;
+    cursor: pointer;
+    border-radius: 5px;
+    border: transparent;
+}

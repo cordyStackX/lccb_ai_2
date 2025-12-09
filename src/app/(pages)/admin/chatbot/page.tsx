@@ -1,18 +1,18 @@
 "use client";
-import { Dashboard, Sidebar } from "@/components/admin";
-import { useEffect, useState } from "react";
+import { Chat_bot, Sidebar } from "@/components/admin";
+import { useState, useEffect } from "react";
 
-export default function DashboardPage() {
+export default function Chat_botPage() {
     const [nav, setNav] = useState("");
 
     useEffect(() => {
-        setNav("dashboard");
+        setNav("chat_bot");
     }, [nav]);
-    
+
     return (
         <main className="admin display_flex_center">
             <Sidebar nav={nav} />
-            <Dashboard />
+            <Chat_bot />
         </main>
     );
 }

@@ -25,7 +25,7 @@ export default function Confirm_email_signup() {
     };
 
     useEffect(() => {
-        const saveEmail = localStorage.getItem("signup_email");
+        const saveEmail = localStorage.getItem("email");
         setForm(prev => ({ ...prev, email: saveEmail || "" }));
     }, []);
 
@@ -46,6 +46,7 @@ export default function Confirm_email_signup() {
     const ConfirmCode = async () => {
         setLoading(true);
         const responds = await Fetch_to(api_link.checkcode, { email: form.email, code: form.code });
+        localStorage.setItem("code", form.code);
         if (responds.success) {
             router.push("/auth/create-password");
         } else {

@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
         if (password.length < 8) return NextResponse.json({ success: false, error: "Must be more than 8 characters" }, { status: 409 });
 
         if (!email || !password) return NextResponse.json({ success: false, error: "You Rejected Invalid Info" }, { status: 404 });
-        
+
         const cleanEmail = email.trim().toLowerCase();
 
         const hashed = await bcrypt.hash(password, 10);

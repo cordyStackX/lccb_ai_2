@@ -1,18 +1,18 @@
 "use client";
-import { Dashboard, Sidebar } from "@/components/admin";
+import { ManageUser, Sidebar } from "@/components/admin";
 import { useEffect, useState } from "react";
 
-export default function DashboardPage() {
+export default function ManageUserPage() {
     const [nav, setNav] = useState("");
 
     useEffect(() => {
-        setNav("dashboard");
+        setNav("manage_user");
     }, [nav]);
     
     return (
         <main className="admin display_flex_center">
             <Sidebar nav={nav} />
-            <Dashboard />
+            <ManageUser />
         </main>
     );
 }

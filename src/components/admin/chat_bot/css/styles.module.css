@@ -3,52 +3,36 @@
     height: 100vh;
     overflow-x: hidden;
     overflow-y: scroll;
+    flex-flow: column;
+    justify-content: flex-start;
     padding: 0 2rem;
 }
+
+.uploader {
+    width: 100%;
+    height: auto;
+    background-color: var(--default-color-white-2);
+    box-shadow: 0 0 0.5rem 0.1rem var(--default-color-black);
+    margin: 2rem 0;
+    padding: 2rem 1.5rem;
+    border-radius: 5px;
+}
+.uploader button {
+    width: 240px;
+    padding: 1rem 0.5rem;
+    font-weight: bold;
+    background: var(--primary);
+    border: transparent;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
 .status {
     width: 100%;
     height: auto;
-    margin: 2rem 0;
     background-color: var(--default-color-white-2);
     box-shadow: 0 0 0.5rem 0.1rem var(--default-color-black);
-    padding: 2rem 1.5rem;
-    border-radius: 5px;
-}
-.container h2 {
-    color: var(--default-color-black);
-}
-.info {
-    width: 100%;
-    height: auto;
-    justify-content: space-around;
-    padding: 1rem;
-    margin-top: 0.5rem;
-}
-.info div {
-    width: 30%;
-    height: 150px;
-    background-color: var(--primary);
-    padding: 1.3rem;
-    border-radius: 5px;
-}
-.info p {
-    font-size: 2.3rem;
-    margin: 1rem;
-}
-
-.graph {
-    width: 100%;
-    height: auto;
     margin: 2rem 0;
-    background-color: var(--default-color-white-2);
-    box-shadow: 0 0 0.5rem 0.1rem var(--default-color-black);
     padding: 2rem 1.5rem;
     border-radius: 5px;
-}
-.info2 {
-    width: 100%;
-    height: auto;
-    margin-top: 0.5rem;
-    padding: 1rem;
-    flex-flow: column;
 }

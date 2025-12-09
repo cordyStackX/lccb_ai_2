@@ -35,7 +35,7 @@ export default function SignIn() {
         setLoading(true);
         const responds = await Fetch_to(api_link.signin, form);
         if (responds.success) {
-            localStorage.setItem("signup_email", form.email);
+            localStorage.setItem("email", form.email);
             await Fetch_to(api_link.checkcode, { email: form.email });
             router.push("/auth/confirm-email-signin");
         } else {

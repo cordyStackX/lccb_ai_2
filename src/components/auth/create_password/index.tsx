@@ -16,7 +16,7 @@ export default function Create_Password() {
     const router = useRouter();
 
     const [form, setForm] = useState({
-        email: "", password: "", c_password: ""
+        email: "", password: "", c_password: "", code: ""
     });
     const [status, setStatus] = useState(false);
     const [message, setMessage] = useState("");
@@ -31,8 +31,14 @@ export default function Create_Password() {
     };
 
      useEffect(() => {
-        const saveEmail = localStorage.getItem("signup_email");
-        setForm(prev => ({ ...prev, email: saveEmail || "" }));
+         const checkCode = async () => {
+            const saveEmail = localStorage.getItem("email");
+            const code = localStorage.getItem("code");
+            const response = await Fetch_to(api_link.checkcode, { email: saveEmail, code: code });
+            if (!response.success) return router.push("/auth/confirm-email-forgot-pwd");
+            setForm(prev => ({ ...prev, email: saveEmail || ""}));
+        };
+        checkCode();
     }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {

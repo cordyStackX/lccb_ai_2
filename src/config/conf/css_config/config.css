@@ -12,6 +12,7 @@
 	--default-color-red: #E94B3C;
 	--default-color-green: #4CAF50;  
 	--fx-color: rgba(233, 233, 233, 0.9);
+	--fx-color-button: rgba(233, 233, 233, 0.4);
 
 	/* Color Modes */
 	/* --adaptive-color-2: var(--background_linear_1);

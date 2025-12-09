@@ -1,11 +1,8 @@
 import { NextResponse, NextRequest } from "next/server";
 import nodemailer from "nodemailer";
+import { cooldownMap, CodeStore } from "@/lib/code_store";
 
-const cooldownMap = new Map<string, number>();
 const COOLDOWN_MS = 60 * 1000; // 1 minute
-
-// backend memory (not reset per request)
-const CodeStore = new Map<string, { code: string; expiresAt: number }>();
 
 
 export async function POST(req: NextRequest) {
@@ -17,6 +14,8 @@ export async function POST(req: NextRequest) {
     }
     
     const cleanEmail = email.trim().toLowerCase();
+
+    const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes
 
     //Check if their is existing code
     if (code) {
@@ -45,8 +44,13 @@ export async function POST(req: NextRequest) {
         }
 
         // Code correct
-        CodeStore.delete(cleanEmail);
-        cooldownMap.delete(cleanEmail);
+        CodeStore.set(cleanEmail, {
+            code: code,
+            expiresAt
+        });
+
+        console.log("CodeStore:", CodeStore);
+
         return NextResponse.json({ success: true }, { status: 200 });
     }
 
@@ -70,7 +74,6 @@ export async function POST(req: NextRequest) {
     cooldownMap.set(cleanEmail, now);
 
     const confirmationCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes
 
     CodeStore.set(cleanEmail, {
         code: confirmationCode,

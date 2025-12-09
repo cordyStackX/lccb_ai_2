@@ -35,7 +35,7 @@ export default function SignUp() {
         setLoading(true);
         const responds = await Fetch_to(api_link.signup.checkEmail, { email: form.email });
         if (responds.success) {
-            localStorage.setItem("signup_email", form.email);
+            localStorage.setItem("email", form.email);
             await Fetch_to(api_link.checkcode, { email: form.email });
             router.push("/auth/confirm-email-signup");
         } else {
