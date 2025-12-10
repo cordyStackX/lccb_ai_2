@@ -27,3 +27,4 @@ try:
 except Exception as e:
     print("❌ Error connecting to Supabase")
     print(e)
+

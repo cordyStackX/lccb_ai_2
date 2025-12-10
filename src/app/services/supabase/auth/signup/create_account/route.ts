@@ -4,6 +4,11 @@ import bcrypt from "bcrypt";
 import nodemailer from "nodemailer";
 
 export async function POST(req: NextRequest) {
+
+    const apikey = process.env.API_KEY;
+
+    if (!apikey) return NextResponse.json({ success: false, error: "API is not Valid" }, { status: 401 });
+
     try {
 
         const { email, password, c_password, name, year } = await req.json();

@@ -73,6 +73,7 @@ def delete_file_after_delay(file_path, delay=300):
 # ROUTE: Generate Markdown
 # -----------------------------------------
 
+
 @app.route("/generate-md", methods=["POST"])
 def generate_md():
     try:
@@ -108,11 +109,11 @@ def generate_md():
             text += page.extract_text() or ""
 
         # --- Strict instruction: only answer based on PDF ---
-        final_prompt = f"Read the PDF content below carefully. Base your answer primarily on this content. You may add a small amount of extra information ONLY if it directly supports or explains something from the PDF and stays on-topic. Do NOT go beyond the scope of the PDF. questions:\n\n{text}\n\nQuestion: {prompt}"
+        final_prompt = f"Read the PDF content below carefully. Base your answer primarily on this content. You may add a small amount of extra information ONLY if it directly supports or explains something from the Documents and stays on-topic. Do NOT go beyond the scope of the Documents. questions:\n\n{text}\n\n Question: {prompt}"
 
         # --- Call Gemini ---
         result = client.models.generate_content(
-            model="gemini-2.0-flash-lite",
+            model="gemini-2.5-flash-lite",
             contents=final_prompt
         )
 
@@ -123,6 +124,8 @@ def generate_md():
     except Exception as e:
         print("🔥 Gemini Error:", e, file=sys.stderr)
         return jsonify({"success": False, "error": str(e)}), 500
+    
+
  
 
 @app.route("/download-file", methods=["POST"])

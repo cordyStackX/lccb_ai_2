@@ -28,7 +28,6 @@ export default function Dashboard() {
     const [data, setData] = useState<ManageUserDataProps[]>([]);
     const [code_logs, setCode_logs] = useState<Code_Logs[]>([]);
     const [api_logs, setApi_logs] = useState<API_logs[]>([]);
-    const [refresh, setRefresh] = useState("");
 
     useEffect(() => {
         const RetrieveUserData = async () => {
@@ -39,15 +38,12 @@ export default function Dashboard() {
                 setData(response.data.message);
                 setCode_logs(response2.data.message);
                 setApi_logs(response3.data.message);
-                setInterval(() => {
-                    const refresh = Math.floor(10 + Math.random() * 90).toString();
-                    setRefresh(refresh);
-                }, 5000);
             }
         };
         RetrieveUserData();
         
-    }, [refresh]);
+    }, [data]);
+
 
     function getDayOfWeek(dateString: string) {
         return new Date(dateString).getDay(); // 0 Sun, 1 Mon, ...

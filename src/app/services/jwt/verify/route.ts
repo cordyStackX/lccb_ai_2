@@ -5,6 +5,10 @@ import { cookies } from "next/headers";
 export async function POST() {
     const token = (await cookies()).get("token")?.value;
 
+    const apikey = process.env.API_KEY;
+
+    if (!apikey) return NextResponse.json({ success: false, error: "API is not Valid" }, { status: 401 });
+
     if (!token) {
         return NextResponse.json({ success: false, error: "UnAuth" }, { status: 401 });
     }

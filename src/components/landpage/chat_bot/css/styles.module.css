@@ -1,0 +1,32 @@
+.container {
+    position: fixed;
+    width: 60px;
+    height: 60px;
+    background: var(--default-color-black);
+    z-index: 999;
+    right: 2rem;
+    bottom: 2rem;
+    border-radius: 50px;
+    transition: all 0.8s ease;
+    cursor: pointer;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container p {
+    opacity: 0; /* hidden initially */
+    margin-left: 10px; /* space from left edge */
+    color: white;
+    white-space: nowrap;
+    transition: opacity 0.8s ease; /* fade in after width expands */
+}
+
+.container:hover {
+    width: 150px;
+}
+
+.container:hover p {
+    opacity: 1; /* show text when hovered */
+}

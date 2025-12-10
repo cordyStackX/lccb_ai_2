@@ -16,6 +16,7 @@
 		"verify" : "/services/jwt/verify"
 	},
 	"responses" : "/services/api/response",
+	"responses2" : "/services/api/response2",
 	"storage" : {
 		"uploadPdf" : "/services/supabase/storage/uploadpdf",
 		"retrieve" : "/services/supabase/storage/retrieve",

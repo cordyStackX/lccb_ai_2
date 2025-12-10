@@ -5,6 +5,10 @@ import { cookies } from "next/headers";
 export async function POST(req: NextRequest) {
     const { email } = await req.json();
 
+    const apikey = process.env.API_KEY;
+
+    if (!apikey) return NextResponse.json({ success: false, error: "API is not Valid" }, { status: 401 });
+
     if (!email) return NextResponse.json({ success: false, error: "Email Not Found" }, { status: 404 });
 
     const token = jwt.sign(

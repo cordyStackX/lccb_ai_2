@@ -3,6 +3,10 @@ import { supabaseServer } from "@/lib/supabase-server";
 
 export async function POST(req: NextRequest) {
 
+    const apikey = process.env.API_KEY;
+
+    if (!apikey) return NextResponse.json({ success: false, error: "API is not Valid" }, { status: 401 });
+
     const { email } = await req.json();
 
     if (!email) return NextResponse.json({ success: false, error: "Email is required" }, { status: 404 });
@@ -28,7 +32,7 @@ export async function POST(req: NextRequest) {
         }
 
     } catch(err) {
-        
+
         console.error("Error: ", err);
         return NextResponse.json({ success: false, error: "User not found" }, { status: 409 });
 

@@ -5,27 +5,34 @@ import { supabaseServer } from "@/lib/supabase-server";
 
 export async function POST(params: NextRequest) {
     
-    const { prompt, email, pdf_id } = await params.json();
+    const { prompt } = await params.json();
 
     const apikey = process.env.API_KEY;
 
+    const email = "admin@admin.com";
+
     if (!apikey) return NextResponse.json({ success: false, error: "API is not Valid" }, { status: 401 });
-
-    if (!email) return NextResponse.json({ success: false, error: "Email not exist invalid user" }, { status: 404 });
-
-    if (!pdf_id) return NextResponse.json({ success: false, error: "Please provide Your Documents before we procceed" }, { status: 401 });
 
     const apiUrl = process.env.RENDER_API || api_links.python_links;
 
+    const { data } = await supabaseServer
+    .from("pdf_file")
+    .select("id, status")
+    .eq("email", email);
+
+    const speakPdf = data?.find((pdf) => pdf.status === "Speak");
+    
+    if(!speakPdf) return NextResponse.json({ success: false, error: "The Admin didn't Setup it" }, { status: 409 });
+
     if (!prompt) return NextResponse.json({ success: false, error: "Prompt is required" }, { status: 401 });
 
-    const response = await Fetch_to(`${apiUrl}download-file`, { token: apikey, pdf_id: pdf_id });
+    const response = await Fetch_to(`${apiUrl}download-file`, { token: apikey, pdf_id: speakPdf?.id });
 
     if (!response.success) return NextResponse.json({ success: false, error: "3rd party failed to read the data" }, { status: 409 });
 
     try {
 
-        const response = await Fetch_to(`${apiUrl}generate-md`, { prompt: prompt, token: apikey, email: email, pdf_id: pdf_id });
+        const response = await Fetch_to(`${apiUrl}generate-md`, { prompt: prompt, token: apikey, email: email, pdf_id: speakPdf?.id });
 
         await supabaseServer
         .from("API_logs")
