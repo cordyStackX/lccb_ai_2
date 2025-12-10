@@ -80,7 +80,7 @@ export default function ManageUser() {
                                         const newStatus = e.target.value;
                                         if (newStatus === "delete") {
                                             const refresh = Math.floor(10 + Math.random() * 90).toString();
-                                            const alert2 = await SweetAlert2("Signning Out", "Are you sure want to sign out?", "warning", true, "Yes", true, "No");
+                                            const alert2 = await SweetAlert2("Delete?", `Are you sure want to delete this ${data.email}`, "warning", true, "Yes", true, "No");
                                             if (!alert2.isConfirmed) return;
                                             SweetAlert2("Deleting", "Please wait..", "info", false, "", false, "", true);
                                             const response = await Fetch_to(api_link.admin.delete_user, { email: data.email });

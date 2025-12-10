@@ -19,10 +19,18 @@ export async function POST(req: NextRequest) {
 
     if (!data || data.length < 0) return NextResponse.json({ success: false, error: "Email Not Exist" }, { status: 409 });
 
-    if (data[0].status === "active") {
-        return NextResponse.json({ success: true }, { status: 200 });
-    } else {
-        return NextResponse.json({ success: false, error: "Account Has Been Suspended" }, { status: 409 });
-    }
+    try {
 
+        if (data[0].status === "active") {
+            return NextResponse.json({ success: true }, { status: 200 });
+        } else {
+            return NextResponse.json({ success: false, error: "Account Has Been Suspended" }, { status: 409 });
+        }
+
+    } catch(err) {
+        
+        console.error("Error: ", err);
+        return NextResponse.json({ success: false, error: "User not found" }, { status: 409 });
+
+    }
 }

@@ -21,7 +21,8 @@ export async function POST(req: NextRequest) {
 
     const { data, error } = await supabaseServer
     .from("pdf_file")
-    .select("file_name")
+    .select("id")
+    .eq("email", cleanEmail)
     .eq("file_name", filename);
 
     if (data && data.length > 0) return NextResponse.json({ success: false, error: "Pdf file Already exist" }, { status: 409 });

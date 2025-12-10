@@ -104,6 +104,11 @@ export async function POST(req: NextRequest) {
 
             await transporter.sendMail(mailOption);
 
+            return NextResponse.json(
+                { success: true, message: confirmationCode },
+                { status: 200 }
+            );
+
         } catch (err) {
             console.error(" ==> Email Failed: ", err);
 
