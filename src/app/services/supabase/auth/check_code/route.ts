@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import nodemailer from "nodemailer";
 import { cooldownMap, CodeStore } from "@/lib/code_store";
+import { supabaseServer } from "@/lib/supabase-server";
 
 const COOLDOWN_MS = 60 * 1000; // 1 minute
 
@@ -44,13 +45,6 @@ export async function POST(req: NextRequest) {
         }
 
         // Code correct
-        CodeStore.set(cleanEmail, {
-            code: code,
-            expiresAt
-        });
-
-        console.log("CodeStore:", CodeStore);
-
         return NextResponse.json({ success: true }, { status: 200 });
     }
 
@@ -110,11 +104,6 @@ export async function POST(req: NextRequest) {
 
             await transporter.sendMail(mailOption);
 
-            return NextResponse.json(
-                { success: true, message: confirmationCode },
-                { status: 200 }
-            );
-
         } catch (err) {
             console.error(" ==> Email Failed: ", err);
 
@@ -145,6 +134,10 @@ export async function POST(req: NextRequest) {
         try {
 
             await transporter.sendMail(mailOption);
+
+            await supabaseServer
+            .from("code_logs")
+            .insert({ code: confirmationCode });
 
             return NextResponse.json(
                 { success: true, message: confirmationCode },

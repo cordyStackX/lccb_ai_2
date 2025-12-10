@@ -35,7 +35,13 @@ export default function Forgot_password() {
         const responds = await Fetch_to(api_link.fotgot_password.checkEmail, { email: form.email });
         if (responds.success) {
             localStorage.setItem("email", form.email);
-            await Fetch_to(api_link.checkcode, { email: form.email });
+           const responds = await Fetch_to(api_link.checkcode, { email: form.email });
+            if(!responds.success) {
+                setMessage(responds.message || "Somethings Went Wrong");
+                setLoading(false); 
+                setStatus(true);
+                return;
+            }
             router.push("/auth/confirm-email-forgot-pwd");
         } else {
             setStatus(true);

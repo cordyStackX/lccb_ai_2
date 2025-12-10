@@ -1,7 +1,46 @@
+"use client";
 import styles from "./css/styles.module.css";
+import { Fetch_to, SweetAlert2 } from "@/utilities";
+import { useEffect, useState } from "react";
+import api_link from "@/config/conf/json_config/fetch_url.json";
+import Swal from "sweetalert2";
 
+interface ManageUserDataProps {
+    created_at?: string;
+    email?: string;
+    f_name?: string;
+    id?: number;
+    status?: string;
+    year?: string;
+}
 
 export default function ManageUser() {
+    const [data, setData] = useState<ManageUserDataProps[]>([]);
+    const [refresh, setRefresh] = useState("");
+    const [search, setSearch] = useState("");
+
+
+    useEffect(() => {
+        const RetrieveUserData = async () => {
+            const response = await Fetch_to(api_link.admin.retrieve_user);
+            if (response.success) {
+                setData(response.data.message);
+            }
+        };
+        RetrieveUserData();
+    }, [refresh]);
+
+    const filtered = data.filter((item) => {
+    const term = search.toLowerCase();
+
+    return (
+        item.f_name?.toLowerCase().includes(term) ||
+        item.email?.toLowerCase().includes(term) ||
+        item.year?.toLowerCase().includes(term) ||
+        item.status?.toLowerCase().includes(term)
+        );
+    });
+
 
     return(
         <section className={styles.container}>
@@ -10,8 +49,11 @@ export default function ManageUser() {
                 type="text"
                 name="search"
                 id="search"
-                placeholder="Search "
+                placeholder="Search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
                 />
+
             </section>
             <table className={styles.tables}>
                 <thead>
@@ -24,19 +66,53 @@ export default function ManageUser() {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>Marc Giestin Louis Cordova</td>
-                        <td>3 year</td>
-                        <td>cordovamarcgiestinlouis@gmail.com</td>
-                        <td>2025-12-08 17:07:09.234131+00</td>
-                        <td>
-                            <select>
-                                <option value="active">Active 🟢</option>
-                                <option value="suspended">Suspend 🟡</option>
-                                <option value="delete">Delete 🔴</option>
-                            </select>
-                        </td>
-                    </tr>
+                    {filtered && filtered.length > 0 ? (
+                        filtered.map((data, index) => (
+                            <tr key={index}>
+                                <td> {data.f_name} </td>
+                                <td> {data.year} </td>
+                                <td> {data.email} </td>
+                                <td> {data.created_at} </td>
+                                <td>
+                                    <select 
+                                    value={data.status}
+                                    onChange={ async(e) => {
+                                        const newStatus = e.target.value;
+                                        if (newStatus === "delete") {
+                                            const refresh = Math.floor(10 + Math.random() * 90).toString();
+                                            const alert2 = await SweetAlert2("Signning Out", "Are you sure want to sign out?", "warning", true, "Yes", true, "No");
+                                            if (!alert2.isConfirmed) return;
+                                            SweetAlert2("Deleting", "Please wait..", "info", false, "", false, "", true);
+                                            const response = await Fetch_to(api_link.admin.delete_user, { email: data.email });
+                                            Swal.close();
+                                            if (response) {
+                                                setRefresh(`${refresh}`);
+                                            } else {
+                                                SweetAlert2("Error", `${response}`, "error", true, "Confirm", false, "", false);
+                                            }
+                                        } else {
+                                            const refresh = Math.floor(10 + Math.random() * 90).toString();
+                                            SweetAlert2("Updating", "Please wait..", "info", false, "", false, "", true);
+                                            const response = await Fetch_to(api_link.admin.update_user_status, { id: data.id, status: newStatus });
+                                            Swal.close();
+                                            if (response.success) {
+                                                setRefresh(`${refresh}`);
+                                            } else {
+                                                SweetAlert2("Error", `${response.message}`, "error", true, "Confirm", false, "", false);
+                                            }
+                                        }
+                                    }}
+                                    >
+                                        <option value="active">Active 🟢</option>
+                                        <option value="suspend">Suspend 🟡</option>
+                                        <option value="delete">Delete 🔴</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        ))
+                    ) : (
+                        <tr></tr>
+                    )}
                 </tbody>
             </table>
         </section>

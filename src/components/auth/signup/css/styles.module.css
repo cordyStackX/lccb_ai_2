@@ -8,7 +8,7 @@
 }
 .form_styles {
     width: min(600px, 90dvw);
-    height: clamp(200px, 80vh, 420px);
+    height: clamp(200px, 80vh, 520px);
     border-radius: 10px;
     background: var(--fx-color);
     padding: clamp(1rem, 10dvw, 3rem);
@@ -18,7 +18,7 @@
 .form_styles input {
     width: 100%;
     height: auto;
-    margin: 1rem 0 0 0;
+    margin: 1rem 0;
     font-size: clamp(1rem, 0.5rem + 1vw, 1.1rem);
     padding: 5px 0;
     background: transparent;
@@ -33,6 +33,13 @@
 }
 .form_styles a {
     color: var(--default-color-blue);
+}
+.form_styles select {
+    background: var(--primary);
+    cursor: pointer;
+    padding: 0.5rem;
+    outline: none;
+    border: transparent;
 }
 .info {
     flex-flow: column;

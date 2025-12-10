@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import api_links from "@/config/conf/json_config/Api_links.json";
 import { Fetch_to } from "@/utilities";
+import { supabaseServer } from "@/lib/supabase-server";
 
 export async function POST(params: NextRequest) {
     
@@ -25,6 +26,10 @@ export async function POST(params: NextRequest) {
     try {
 
         const response = await Fetch_to(`${apiUrl}generate-md`, { prompt: prompt, token: apikey, email: email, pdf_id: pdf_id });
+
+        await supabaseServer
+        .from("API_logs")
+        .insert({ request: email });
 
         if (response.success) {
             return NextResponse.json({ success: true, message: response }, { status: 200 });

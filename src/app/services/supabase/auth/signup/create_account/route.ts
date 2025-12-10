@@ -6,7 +6,7 @@ import nodemailer from "nodemailer";
 export async function POST(req: NextRequest) {
     try {
 
-        const { email, password, c_password } = await req.json();
+        const { email, password, c_password, name, year } = await req.json();
 
         if (password !== c_password) return NextResponse.json({ succes: false, error: "Password is not match" }, { status: 409 });
 
@@ -16,11 +16,20 @@ export async function POST(req: NextRequest) {
         
         const cleanEmail = email.trim().toLowerCase();
 
+        const cleanName = name
+        .trim()
+        .replace(/\s+/g, " ")
+        .replace(/[^A-Za-z\s]/g, "")
+        .toLowerCase()
+        .replace(/\b\w/g, (c: string) => c.toUpperCase());
+
+        const status = "active";
+
         const hashed = await bcrypt.hash(password, 10);
 
         const { data, error } = await supabaseServer
         .from("auth")
-        .insert([{ email: cleanEmail, password: String(hashed) }]);
+        .insert([{ email: cleanEmail, password: String(hashed), f_name: cleanName, year: year, status: status }]);
 
         if (error) {
             console.error("Supabase Query Error: ", error);

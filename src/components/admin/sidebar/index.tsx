@@ -4,6 +4,9 @@ import Image from "next/image";
 import image_src from "@/config/images_links/assets.json";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { SweetAlert2, Fetch_to } from "@/utilities";
+import api_link from "@/config/conf/json_config/fetch_url.json";
+import Swal from "sweetalert2";
 
 interface SidebarProps {
     nav: string;
@@ -18,6 +21,23 @@ export default function Sidebar({ nav } : SidebarProps) {
         setNav_status(nav);
     }, [nav]);
 
+    const handle_logout = async () => {
+
+        const alert2 = await SweetAlert2("Signning Out", "Are you sure want to sign out?", "warning", true, "Yes", true, "No");
+
+        if (alert2.isConfirmed) {
+            SweetAlert2("Signning Out", "", "info", false, "", false, "", true);
+            const response = await Fetch_to(api_link.jwt.deauth);
+            Swal.close();
+            if (response.success) {   
+                const alert2 = await SweetAlert2("Sign Out", "Complete", "success", true, "Go to Signin Page", false, "");
+                if (alert2.isConfirmed) { router.push("/auth/signin"); }
+            } else {
+                SweetAlert2("Error", "Something went wrong", "error", true, "Ok", false, "");
+            }
+            
+        } 
+    };
 
     return(
         <aside className={`${styles.container} display_flex_center`}>
@@ -67,7 +87,7 @@ export default function Sidebar({ nav } : SidebarProps) {
                 >Setting</button>
             </section>
             <section className={`${styles.options_2} display_flex_center`}>
-                <button>Sign Out</button>
+                <button onClick={handle_logout}>Sign Out</button>
             </section>
         </aside>
     );

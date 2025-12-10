@@ -21,5 +21,12 @@
 		"retrieve" : "/services/supabase/storage/retrieve",
 		"updatepdf" : "/services/supabase/storage/updatepdf",
 		"deletepdf" : "/services/supabase/storage/deletepdf"
+	},
+	"admin" : {
+		"retrieve_user" : "/services/supabase/admin/retrieve_user",
+		"delete_user" : "/services/supabase/admin/delete_user",
+		"update_user_status" : "/services/supabase/admin/update_user_status",
+		"retrieve_code_logs" : "/services/supabase/admin/retrieve_code_logs",
+		"retrieve_API_logs" : "/services/supabase/admin/retrieve_API_logs"
 	}
 }

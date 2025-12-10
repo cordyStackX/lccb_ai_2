@@ -16,7 +16,7 @@ export default function SignUp() {
     const router = useRouter();
 
     const [form, setForm] = useState({
-        email: ""
+        email: "", name: "", year: ""
     });
     const [status, setStatus] = useState(false);
     const [message, setMessage] = useState("");
@@ -25,7 +25,7 @@ export default function SignUp() {
 
     usePreventExit(isDirty);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
         setIsDirty(true); 
     };
@@ -36,7 +36,15 @@ export default function SignUp() {
         const responds = await Fetch_to(api_link.signup.checkEmail, { email: form.email });
         if (responds.success) {
             localStorage.setItem("email", form.email);
-            await Fetch_to(api_link.checkcode, { email: form.email });
+            localStorage.setItem("name", form.name);
+            localStorage.setItem("year", form.year);
+            const responds = await Fetch_to(api_link.checkcode, { email: form.email });
+            if(!responds.success) {
+                setMessage(responds.message || "Somethings Went Wrong");
+                setLoading(false); 
+                setStatus(true);
+                return;
+            }
             router.push("/auth/confirm-email-signup");
         } else {
             setStatus(true);
@@ -85,6 +93,30 @@ export default function SignUp() {
                         style={status ? {borderBottom: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
                         required
                         />
+                        <input 
+                        type="text" 
+                        name="name" 
+                        id="name" 
+                        autoComplete="name"
+                        value={form.name}
+                        onChange={handleChange}
+                        placeholder="Enter Your Full Name"
+                        style={status ? {borderBottom: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
+                        required
+                        />
+                        <select 
+                        id="year"
+                        name="year"
+                        value={form.year}
+                        onChange={handleChange}
+                        required
+                        >
+                            <option value="">Select Year Level</option>
+                            <option value="1st Year College">1st Year College</option>
+                            <option value="2nd Year College">2nd Year College</option>
+                            <option value="3rd Year College">3rd Year College</option>
+                            <option value="4th Year College">4th Year College</option>
+                        </select>
                         {message && (
                             <p className={status ?  "error" : "success"}>{message}</p>
                         )}
