@@ -2,12 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import api_links from "@/config/conf/json_config/Api_links.json";
 import { Fetch_to } from "@/utilities";
 import { supabaseServer } from "@/lib/supabase-server";
-import { Security } from "@/lib/security";
 
 export async function POST(req: NextRequest) {
-
-    const auth = await Security(req);
-     if(auth?.error) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     
     const { prompt } = await req.json();
 
