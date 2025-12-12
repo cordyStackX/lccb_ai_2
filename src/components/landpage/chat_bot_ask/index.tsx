@@ -60,7 +60,7 @@ export default function Chat_bot({ show, setShow } : Chat_botProps) {
     };
 
     return(
-        <section className={`${styles.container} display_flex_center`} style={{ right: `${show ? "20px" : "-100%" }` }} >
+        <section className={`${styles.container} display_flex_center`} style={{ right: `${show ? "1%" : "-100%" }` }} >
             <span onClick={() => {setShow(false);}} >X</span>
             <h2>Chat Bot</h2>
             <section className={styles.chat}>

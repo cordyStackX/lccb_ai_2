@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import { NextResponse, NextRequest } from "next/server";
 import { cookies } from "next/headers";
+import { supabaseServer } from "@/lib/supabase-server";
 
 export async function POST(req: NextRequest) {
     const { email } = await req.json();
@@ -11,10 +12,21 @@ export async function POST(req: NextRequest) {
 
     if (!email) return NextResponse.json({ success: false, error: "Email Not Found" }, { status: 404 });
 
+    const { data, error } = await supabaseServer
+    .from("auth")
+    .select("id, f_name, email")
+    .eq("email", email)
+    .limit(1);
+
+    if (error) {
+        console.error("Supabase Query Error: ", error);
+        return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
+    }
+
     const token = jwt.sign(
-        { email },
+        { data },
         process.env.JWT_SECRET || "",
-        { expiresIn: "1h" }
+        { expiresIn: "120h" }
     );
 
     const cookieStore = await cookies();
@@ -23,6 +35,7 @@ export async function POST(req: NextRequest) {
         value: token,
         httpOnly: true,
         secure: true,
+        sameSite: "strict",
         path: "/",
         maxAge: 3600,
     });

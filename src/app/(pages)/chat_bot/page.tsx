@@ -16,7 +16,7 @@ export default function ChatPage() {
         async function check() {
             const response = await Fetch_to(api_link.jwt.verify);
             if (!response.success) return router.push("/");
-            setEmail(response.data.message.email);
+            setEmail(response.data.message.data[0].email);
         }
         check();
     }, []);

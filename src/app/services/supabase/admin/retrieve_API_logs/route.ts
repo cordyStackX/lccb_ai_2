@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
+import { Security } from "@/lib/security";
 
-export async function POST() {
+export async function POST(req: NextRequest) {
 
-    const apikey = process.env.API_KEY;
-
-    if (!apikey) return NextResponse.json({ success: false, error: "API is not Valid" }, { status: 401 });
+    const auth = await Security(req);
+    if (auth?.error) return auth.error;
     
     const { data, error } = await supabaseServer
     .from("API_logs")

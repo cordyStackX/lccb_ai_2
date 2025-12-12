@@ -2,10 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import api_links from "@/config/conf/json_config/Api_links.json";
 import { Fetch_to } from "@/utilities";
 import { supabaseServer } from "@/lib/supabase-server";
+import { Security } from "@/lib/security";
 
-export async function POST(params: NextRequest) {
+export async function POST(req: NextRequest) {
+
+    const auth = await Security(req);
+    if(auth?.error) return auth.error;
     
-    const { prompt } = await params.json();
+    const { prompt } = await req.json();
 
     const apikey = process.env.API_KEY;
 

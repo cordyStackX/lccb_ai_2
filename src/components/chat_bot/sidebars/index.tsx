@@ -39,6 +39,7 @@ export default function Sidebars({ isOpen, emailRes, refresh, setCurrentPdf }: S
             }
         };
         retrieve_pdf();
+        
         setCurrentPdf(selectedPdfId);
     }, [emailRes, refresh, selectedPdfId]);
 
