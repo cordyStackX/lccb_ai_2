@@ -5,7 +5,7 @@ import { Security } from "@/lib/security";
 export async function POST(req: NextRequest) {
 
     const auth = await Security(req);
-    if (auth?.error) return auth.error;
+    if(auth?.error) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     
     const { id, filePath } = await req.json();
 

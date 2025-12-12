@@ -7,7 +7,7 @@ import { Security } from "@/lib/security";
 export async function POST(req: NextRequest) {
     
     const auth = await Security(req);
-    if(auth?.error) return auth.error;
+    if(auth?.error) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
 
     const { prompt, email, pdf_id } = await req.json();
 
@@ -43,6 +43,7 @@ export async function POST(req: NextRequest) {
 
     } catch (err: unknown) {
         console.error("Back End Error: ", err);
+        return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
     }
 
 }
