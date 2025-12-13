@@ -8,7 +8,7 @@
 }
 .form_styles {
     width: min(600px, 90dvw);
-    height: clamp(200px, 80vh, 550px);
+    height: clamp(200px, 80vh, 650px);
     border-radius: 10px;
     background: var(--fx-color);
     padding: clamp(1rem, 10dvw, 3rem);
