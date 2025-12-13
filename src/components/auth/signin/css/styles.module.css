@@ -8,7 +8,7 @@
 }
 .form_styles {
     width: min(600px, 90dvw);
-    height: clamp(200px, 80vh, 650px);
+    height: clamp(300px, 80vh, 600px);
     border-radius: 10px;
     background: var(--fx-color);
     padding: clamp(1rem, 10dvw, 3rem);
@@ -30,7 +30,7 @@
 .form_styles input {
     width: 100%;
     height: auto;
-    margin: 1.5rem 0 0 0;
+    margin: 2rem 0 0 0;
     font-size: clamp(1rem, 0.5rem + 1vw, 1.1rem);
     padding: 5px 0;
     background: transparent;
@@ -82,12 +82,10 @@
 }
 .checkbox {
     justify-content: flex-start;
-    padding: 0.5rem;
-    text-align: center;
 }
 .checkbox input {
     width: 20px;
     height: 20px;
-    margin: 0 5px;
+    margin: 0 10px;
     cursor: pointer;
 }

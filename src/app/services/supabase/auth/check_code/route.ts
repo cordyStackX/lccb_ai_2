@@ -146,7 +146,7 @@ export async function POST(req: NextRequest) {
             .insert({ code: confirmationCode });
 
             return NextResponse.json(
-                { success: true, message: confirmationCode },
+                { success: true },
                 { status: 200 }
             );
 
