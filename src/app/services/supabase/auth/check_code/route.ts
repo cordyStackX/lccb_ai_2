@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
             to: cleanEmail,
             subject: "Verification Code",
             html: `
-                <p>Hello Admin, ${cleanEmail}</p>
+                <p>Hello, ${cleanEmail}</p>
                 <h3>Your Code:</h3>
                 <h1 style="
                 color: #fff;

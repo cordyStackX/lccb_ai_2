@@ -14,11 +14,15 @@ interface ManageUserDataProps {
     year?: string;
 }
 
+interface ApiLogs {
+    request?: string
+}
+
 export default function ManageUser() {
     const [data, setData] = useState<ManageUserDataProps[]>([]);
     const [refresh, setRefresh] = useState("");
     const [search, setSearch] = useState("");
-
+    const [apiLogs, setApiLogs] = useState<ApiLogs[]>([]);
 
     useEffect(() => {
         const RetrieveUserData = async () => {
@@ -28,6 +32,13 @@ export default function ManageUser() {
             }
         };
         RetrieveUserData();
+         const RetrieveUserDataLogs = async () => {
+            const response = await Fetch_to(api_link.admin.retrieve_API_logs);
+            if (response.success) {
+                setApiLogs(response.data.message);
+            }
+        };
+        RetrieveUserDataLogs();
     }, [refresh]);
 
     const filtered = data.filter((item) => {
@@ -40,6 +51,11 @@ export default function ManageUser() {
         item.status?.toLowerCase().includes(term)
         );
     });
+
+    const getApiCount = (email?: string) => {
+        if (!email) return 0;
+        return apiLogs.filter((log) => log.request === email).length;
+    };
 
 
     return(
@@ -62,6 +78,7 @@ export default function ManageUser() {
                         <th>Year</th>
                         <th>Gmail</th>
                         <th>Created_at</th>
+                        <th>API Request</th>
                         <th>Status</th>
                     </tr>
                 </thead>
@@ -72,7 +89,8 @@ export default function ManageUser() {
                                 <td> {data.f_name} </td>
                                 <td> {data.year} </td>
                                 <td> {data.email} </td>
-                                <td> {data.created_at} </td>
+                                <td> {data.created_at ? new Date(data.created_at).toLocaleDateString("en-US") : " - "} </td>
+                                <td>{getApiCount(data.email)}</td>
                                 <td>
                                     <select 
                                     value={data.status}

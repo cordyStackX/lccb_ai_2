@@ -5,12 +5,11 @@
     overflow-y: scroll;
     flex-flow: column;
     justify-content: flex-start;
+    align-items: flex-start;
     padding: 0 2rem;
 }
 
 .uploader {
-    width: 100%;
-    height: auto;
     background-color: var(--default-color-white-2);
     box-shadow: 0 0 0.5rem 0.1rem var(--default-color-black);
     margin: 2rem 0;
@@ -33,14 +32,18 @@
     background-color: var(--default-color-white-2);
     box-shadow: 0 0 0.5rem 0.1rem var(--default-color-black);
     margin: 2rem 0;
-    padding: 2rem 1.5rem;
+    padding: 2rem;
     border-radius: 5px;
     color: var(--default-color-black);
 }
 .status table {
     width: 100%;
     height: auto;
-    background: var(--default-color-black);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0px 0px 2px 1px var(--default-color-black);
+    border-collapse: collapse;
+    margin: 20px 0 0 0;
 }
 .status th {
     background: var(--primary);

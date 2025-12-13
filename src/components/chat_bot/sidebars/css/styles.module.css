@@ -1,6 +1,6 @@
 .container {
     width: 0;
-    height: 100vh;
+    height: 100dvh;
     background-color: var(--primary);
     z-index: 1;
     transition: all 800ms ease;
