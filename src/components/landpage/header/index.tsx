@@ -18,7 +18,7 @@ export default function Header() {
                     className={styles.image1}
                     />
                     <Image 
-                    src={image_src.sbit}
+                    src={image_src.plushie}
                     alt="LCCB Logo"
                     width={60}
                     height={60}

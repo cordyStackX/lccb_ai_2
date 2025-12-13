@@ -4,7 +4,8 @@
     bottom: 0;
     width: min(90%, 500px);
     height: 90vh;
-    background: var(--default-color-white);
+    background: rgb(255, 242, 244, 0.5);
+    backdrop-filter: blur(10px);
     z-index: 999;
     flex-flow: column;
     border-radius: 15px;
@@ -61,7 +62,6 @@
     align-items: flex-start;
     padding: 2rem 1rem;
     line-height: 2.5rem;
-    backdrop-filter: blur(100px);
     color: var(--default-color-black);
 }
 .ai_response pre {
@@ -118,6 +118,7 @@
 }
 .plushie_talk {
     justify-content: flex-start;
+    align-items: flex-start;
 }
 .plushie_talk div {
     margin: 0.5rem 0.8rem;

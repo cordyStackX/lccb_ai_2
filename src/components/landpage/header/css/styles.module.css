@@ -9,6 +9,8 @@
 .logo {
     width: 50%;
     height: 100%;
+    overflow-x: auto;
+    padding: 0 1rem;
 }
 .image1 {
     margin: 0 0 0 30px;

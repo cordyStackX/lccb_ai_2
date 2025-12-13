@@ -10,18 +10,45 @@
     transition: all 0.8s ease;
     cursor: pointer;
     overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    animation: spand_in 3000ms 2s ease-in-out;
 }
-
+@keyframes spand_in {
+    0% {
+        width: 60px;
+    }
+    20% {
+        width: 190px;
+    }
+    70% {
+        width: 190px;
+    }
+    100% {
+        width: 60px;
+    }
+}
 .container p {
-    opacity: 0; /* hidden initially */
-    margin-left: 10px; /* space from left edge */
+    opacity: 0;
+    margin-left: 10px; 
     color: white;
     white-space: nowrap;
     margin: 0 20px;
-    transition: opacity 0.8s ease; /* fade in after width expands */
+    transition: opacity 0.8s ease;
+    animation: fade_in 3000ms 2s ease-in-out; 
+}
+@keyframes fade_in {
+    0% {
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    70% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
 }
 
 .container:hover {
@@ -29,5 +56,12 @@
 }
 
 .container:hover p {
-    opacity: 1; /* show text when hovered */
+    opacity: 1;
+}
+.container:active {
+    transform: scale(0.6);
+}
+.plushie {
+    position: absolute;
+    right: 12px;
 }

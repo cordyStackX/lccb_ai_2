@@ -14,6 +14,19 @@
     padding: clamp(1rem, 10dvw, 3rem);
     position: relative;
     overflow: hidden;
+    opacity: 0;
+    transform: translateY(50px);
+    animation: fade_in 500ms forwards ease;
+}
+@keyframes fade_in {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 .form_styles input {
     width: 100%;

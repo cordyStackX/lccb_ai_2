@@ -1,6 +1,9 @@
 
 .landpage {
 	background: linear-gradient(0deg, var(--primary), var(--secondary));
+    position: fixed;
+    width: 100%;
+    z-index: -2;
 }
 
 .auth_page {

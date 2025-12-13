@@ -8,3 +8,5 @@ export { default as usePreventExit } from "./Prevent_Exit";
 export { default as SweetAlert2 } from "./SweetAlert2";
 
 export { default as Fetch_toFile } from "./Fetch_toFile";
+
+export { default as useInView } from "./InView";
