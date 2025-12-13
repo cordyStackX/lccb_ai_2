@@ -13,8 +13,22 @@ export default function Header() {
                     <Image 
                     src={image_src.logo1}
                     alt="LCCB Logo"
-                    width={70}
-                    height={70}
+                    width={80}
+                    height={80}
+                    className={styles.image1}
+                    />
+                    <Image 
+                    src={image_src.sbit}
+                    alt="LCCB Logo"
+                    width={60}
+                    height={60}
+                    className={styles.image1}
+                    />
+                    <Image 
+                    src={image_src.lccb}
+                    alt="LCCB Logo"
+                    width={65}
+                    height={65}
                     className={styles.image1}
                     />
                 </figure>

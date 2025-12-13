@@ -9,6 +9,7 @@ export default function ChatPage() {
     const router = useRouter();
     const [isOpen, setOpen] = useState(true);
     const [email, setEmail] = useState("");
+    const [name, setName] = useState("");
     const [refresh, setRefresh] = useState(false);
     const [currentPdf, setCurrentPdf] = useState<number | undefined>();
 
@@ -17,6 +18,7 @@ export default function ChatPage() {
             const response = await Fetch_to(api_link.jwt.verify);
             if (!response.success) return router.push("/");
             setEmail(response.data.message.data[0].email);
+            setName(response.data.message.data[0].f_name);
         }
         check();
     }, []);
@@ -25,7 +27,7 @@ export default function ChatPage() {
         <main className="chat_page display_flex_left">
             <Header isOpen={isOpen} setOpen={setOpen} />
             <div className="display_flex_center">
-                <Sidebars isOpen={isOpen} emailRes={email} refresh={refresh} setCurrentPdf={setCurrentPdf} />
+                <Sidebars isOpen={isOpen} emailRes={email} refresh={refresh} setCurrentPdf={setCurrentPdf} name={name} />
                 <Main emailRes={email} refresh={refresh} setRefresh={setRefresh} currentPdf={currentPdf}/>
             </div>
         </main>

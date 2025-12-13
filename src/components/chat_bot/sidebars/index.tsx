@@ -13,6 +13,7 @@ interface SidebarsProps {
     isOpen: boolean;
     emailRes: string;
     refresh: boolean;
+    name: string;
     setCurrentPdf: (val: number | undefined) => void;}
 
 interface PdfFile {
@@ -20,7 +21,7 @@ interface PdfFile {
     file_name?: string;
 }
 
-export default function Sidebars({ isOpen, emailRes, refresh, setCurrentPdf }: SidebarsProps) {
+export default function Sidebars({ isOpen, emailRes, refresh, setCurrentPdf, name }: SidebarsProps) {
     const router = useRouter();
     const [profile, setProfile] = useState(false);
     const [data, setData] = useState<PdfFile[]>([]);
@@ -41,7 +42,7 @@ export default function Sidebars({ isOpen, emailRes, refresh, setCurrentPdf }: S
         retrieve_pdf();
         
         setCurrentPdf(selectedPdfId);
-    }, [emailRes, refresh, selectedPdfId]);
+    }, [emailRes, refresh, selectedPdfId, name]);
 
     const handle_logout = async () => {
 
@@ -103,7 +104,7 @@ export default function Sidebars({ isOpen, emailRes, refresh, setCurrentPdf }: S
                         <Image src={image_src.logo1} alt="User Pic" width={60} height={60}/>
                         {emailRes ? (
                             <div>
-                                <figcaption> --- </figcaption>
+                                <figcaption> {name} </figcaption>
                                 <p> {emailRes} </p>
                             </div>
                         ) : (

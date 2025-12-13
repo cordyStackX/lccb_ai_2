@@ -2,10 +2,12 @@
 import styles from "./css/styles.module.css";
 import { useEffect, useState, useRef } from "react";
 import Markdown from "react-markdown";
-import { FallingLines } from "react-loader-spinner";
+import { Discuss } from "react-loader-spinner";
 import { Fetch_to, Fetch_toFile, SweetAlert2 } from "@/utilities";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import Swal from "sweetalert2";
+import Image from "next/image";
+import image_src from "@/config/images_links/assets.json";
 
 type MainProps = {
     emailRes: string;
@@ -121,14 +123,39 @@ export default function Main({ emailRes, refresh, setRefresh, currentPdf }: Main
                                 </div>
                                 <div ref={chatEndRef} className={`${styles.ai_response} ${msg.respond ? styles.fadeIn : ""}`}>
                                     {msg.respond ? (
-                                        <Markdown>{msg.respond}</Markdown>
-                                    ) : index === messages.length - 1 && loading ? (
-                                        <div className={`${styles.spinner_wrapper} display_flex_center`}>
-                                            <FallingLines 
-                                                width="100"
-                                                color="#1A54B8"
+                                        <div className={`display_flex_center ${styles.plushie_talk}`}>
+                                            <Image 
+                                            src={image_src.plushie}
+                                            alt="plushie"
+                                            width={45}
+                                            height={50}
                                             />
+                                            <div>
+                                                <Markdown>{msg.respond}</Markdown>
+                                            </div>
+
                                         </div>
+                                    ) : index === messages.length - 1 && loading ? (
+                                        <div className={`display_flex_center ${styles.plushie_talk}`}>
+                                            <Image 
+                                            src={image_src.plushie}
+                                            alt="plushie"
+                                            width={45}
+                                            height={50}
+                                            />
+                                            <div className={`${styles.spinner_wrapper} display_flex_center`}>
+                                                <Discuss
+                                                visible={true}
+                                                height="40"
+                                                width="40"
+                                                ariaLabel="discuss-loading"
+                                                wrapperStyle={{}}
+                                                wrapperClass="discuss-wrapper"
+                                                color="#fff"
+                                                />
+                                            </div>
+                                        </div>
+                                        
                                     ) : null}
                                 </div>
                             </div>

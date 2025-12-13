@@ -4,7 +4,9 @@ import { useEffect, useState, useRef } from "react";
 import { Fetch_to } from "@/utilities";
 import Markdown from "react-markdown";
 import api_link from "@/config/conf/json_config/fetch_url.json";
-import { FallingLines } from "react-loader-spinner";
+import { Discuss } from "react-loader-spinner";
+import Image from "next/image";
+import image_src from "@/config/images_links/assets.json";
 
 interface Chat_botProps {
     show: boolean;
@@ -74,14 +76,39 @@ export default function Chat_bot({ show, setShow } : Chat_botProps) {
                             </div>
                             <div ref={chatEndRef} className={`${styles.ai_response} ${msg.respond ? styles.fadeIn : ""}`}>
                                 {msg.respond ? (
-                                    <Markdown>{msg.respond}</Markdown>
-                                ) : index === messages.length - 1 && loading ? (
-                                    <div className={`${styles.spinner_wrapper} display_flex_center`}>
-                                        <FallingLines 
-                                            width="100"
-                                            color="#1A54B8"
+                                    <div className={`display_flex_center ${styles.plushie_talk}`}>
+                                        <Image 
+                                        src={image_src.plushie}
+                                        alt="plushie"
+                                        width={45}
+                                        height={50}
                                         />
+                                        <div>
+                                            <Markdown>{msg.respond}</Markdown>
+                                        </div>
+
                                     </div>
+                                ) : index === messages.length - 1 && loading ? (
+                                    <div className={`display_flex_center ${styles.plushie_talk}`}>
+                                        <Image 
+                                        src={image_src.plushie}
+                                        alt="plushie"
+                                        width={45}
+                                        height={50}
+                                        />
+                                        <div className={`${styles.spinner_wrapper} display_flex_center`}>
+                                            <Discuss
+                                            visible={true}
+                                            height="40"
+                                            width="40"
+                                            ariaLabel="discuss-loading"
+                                            wrapperStyle={{}}
+                                            wrapperClass="discuss-wrapper"
+                                            color="#fff"
+                                            />
+                                        </div>
+                                    </div>
+                                    
                                 ) : null}
                             </div>
                         </div>

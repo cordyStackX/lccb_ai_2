@@ -20,11 +20,12 @@
     margin-left: 10px; /* space from left edge */
     color: white;
     white-space: nowrap;
+    margin: 0 20px;
     transition: opacity 0.8s ease; /* fade in after width expands */
 }
 
 .container:hover {
-    width: 150px;
+    width: 190px;
 }
 
 .container:hover p {

@@ -113,8 +113,18 @@
     padding: 0 1.2rem;
     margin: 1.3rem 3rem;
     background: var(--default-color-white-2);
-    box-shadow: 0 0 10px 1px var(--foreground);
+    box-shadow: 0 0 2px 1px var(--foreground);
     bottom: 0;
+}
+.plushie_talk {
+    justify-content: flex-start;
+}
+.plushie_talk div {
+    margin: 0.5rem 0.8rem;
+    background: var(--primary);
+    padding: 1rem;
+    border-radius: 10px;
+    color: var(--default-color-white);
 }
 .expandableInput {
     width: 100%;
