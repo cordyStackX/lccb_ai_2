@@ -114,6 +114,10 @@ export default function SignIn() {
                         {message && (
                             <p className={status ?  "error" : "success"}>{message}</p>
                         )}
+                        <span className={`display_flex_center ${styles.checkbox}`}>
+                            <input type="checkbox" required />
+                            <p>I agree to the <Link href={"/privacy"}>Privacy Policy</Link> & <Link href={"/terms"}>Terms of Conditions</Link></p>
+                        </span>
                         <p>Create an Account? <Link href={"/auth/signup"}>Sign Up</Link></p>
                         <p><Link href={"/auth/forgot-password"}>Forgot Password?</Link></p>
                         <section className={`${styles.buttons} display_flex_center`}>

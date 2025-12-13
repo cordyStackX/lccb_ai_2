@@ -28,7 +28,7 @@
     outline: none;
 }
 .form_styles p {
-    margin: 1rem 0 0 0;
+    margin: 1rem 0;
     font-size: clamp(0.8rem, 0.5rem + 1vw, 1rem);
 }
 .form_styles a {
@@ -67,4 +67,15 @@
 }
 .buttons button:active {
     opacity: 0.3;
+}
+.checkbox {
+    justify-content: flex-start;
+    padding: 0.5rem;
+    text-align: center;
+}
+.checkbox input {
+    width: 20px;
+    height: 20px;
+    margin: 0 5px;
+    cursor: pointer;
 }

@@ -111,7 +111,10 @@ export default function Create_Password() {
                         {message && (
                             <p className={status ?  "error" : "success"}>{message}</p>
                         )}
-                        <p>Can{"'"}t create an account? <Link href={"/"}>Contact Us</Link></p>
+                         <span className={`display_flex_center ${styles.checkbox}`}>
+                            <input type="checkbox" required />
+                            <p>I agree to the <Link href={"/privacy"}>Privacy Policy</Link> & <Link href={"/terms"}>Terms of Conditions</Link></p>
+                        </span>
                         <section className={`${styles.buttons} display_flex_center`}>
                             <button type="button" onClick={() => {router.back();}} style={{backgroundColor: "var(--secondary)"}}>Back</button>
                             <button>Create</button>
