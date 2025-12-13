@@ -2,7 +2,7 @@
 import styles from "./css/styles.module.css";
 import { useEffect, useState, useRef } from "react";
 import Markdown from "react-markdown";
-import { Discuss } from "react-loader-spinner";
+import { ThreeDots } from "react-loader-spinner";
 import { Fetch_to, Fetch_toFile, SweetAlert2 } from "@/utilities";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import Swal from "sweetalert2";
@@ -144,14 +144,15 @@ export default function Main({ emailRes, refresh, setRefresh, currentPdf }: Main
                                             height={50}
                                             />
                                             <div className={`${styles.spinner_wrapper} display_flex_center`}>
-                                                <Discuss
+                                                <ThreeDots
                                                 visible={true}
-                                                height="40"
-                                                width="40"
-                                                ariaLabel="discuss-loading"
+                                                height="30"
+                                                width="50"
+                                                color="#cd9b13"
+                                                radius="9"
+                                                ariaLabel="three-dots-loading"
                                                 wrapperStyle={{}}
-                                                wrapperClass="discuss-wrapper"
-                                                color="#fff"
+                                                wrapperClass=""
                                                 />
                                             </div>
                                         </div>

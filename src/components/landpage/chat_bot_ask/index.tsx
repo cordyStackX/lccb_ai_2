@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { Fetch_to } from "@/utilities";
 import Markdown from "react-markdown";
 import api_link from "@/config/conf/json_config/fetch_url.json";
-import { Discuss } from "react-loader-spinner";
+import { ThreeDots } from "react-loader-spinner";
 import Image from "next/image";
 import image_src from "@/config/images_links/assets.json";
 
@@ -97,14 +97,15 @@ export default function Chat_bot({ show, setShow } : Chat_botProps) {
                                         height={50}
                                         />
                                         <div className={`${styles.spinner_wrapper} display_flex_center`}>
-                                            <Discuss
+                                            <ThreeDots
                                             visible={true}
-                                            height="40"
-                                            width="40"
-                                            ariaLabel="discuss-loading"
+                                            height="30"
+                                            width="50"
+                                            color="#cd9b13"
+                                            radius="9"
+                                            ariaLabel="three-dots-loading"
                                             wrapperStyle={{}}
-                                            wrapperClass="discuss-wrapper"
-                                            color="#fff"
+                                            wrapperClass=""
                                             />
                                         </div>
                                     </div>

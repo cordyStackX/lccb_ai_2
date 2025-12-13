@@ -3,7 +3,7 @@ import styles from "./css/styles.module.css";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import image_src from "@/config/images_links/assets.json";
-import { ThreeDots } from "react-loader-spinner";
+import { Circles } from "react-loader-spinner";
 import { useState } from "react";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import {
@@ -55,12 +55,13 @@ export default function Forgot_password() {
             <div className={`${styles.wrapper} display_flex_center`}>
                 {loading ? (
                     <div className={`${styles.form_styles} display_flex_center`}>
-                        <ThreeDots 
-                        height={90}
-                        width={90}
-                        radius={9}
-                        color="var(--adaptive-color-2)"
-                        ariaLabel="three-dots-loading"
+                        <Circles
+                        height="80"
+                        width="80"
+                        color="#1A54B8"
+                        ariaLabel="circles-loading"
+                        wrapperStyle={{}}
+                        wrapperClass=""
                         visible={true}
                         />
                     </div>
