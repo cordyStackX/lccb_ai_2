@@ -69,40 +69,41 @@ This is a **BETA VERSION** for educational and research purposes only. Not inten
 LACO AI follows a **Service-Oriented Architecture (SOA)** for modularity and scalability.
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': {'fontSize':'18px', 'fontFamily':'arial'}}}%%
 flowchart TD
     %% ===== User Interface =====
-    User["👤 User"]
+    User["<b>USER</b><br/>👤"]
     
     %% ===== Presentation Layer =====
-    UI_Pages["📱 App Pages<br/>(src/app)"]
-    UI_Components["🎨 UI Components<br/>(src/components)"]
+    UI_Pages["<b>APP PAGES</b><br/>📱<br/>(src/app)"]
+    UI_Components["<b>UI COMPONENTS</b><br/>🎨<br/>(src/components)"]
     
     %% ===== Authentication Layer =====
-    JWT_Service["🔐 JWT Service<br/>(/services/jwt)"]
-    Auth_Service["✉️ Auth Service<br/>(Supabase Auth)"]
-    Email_Verification["📧 Email Verification"]
+    JWT_Service["<b>JWT SERVICE</b><br/>🔐<br/>(/services/jwt)"]
+    Auth_Service["<b>AUTH SERVICE</b><br/>✉️<br/>(Supabase Auth)"]
+    Email_Verification["<b>EMAIL VERIFY</b><br/>📧"]
     
     %% ===== AI Processing =====
-    AI_Response["🤖 AI Response<br/>(response)"]
-    AI_Response2["🤖 AI Response v2<br/>(response2)"]
-    Gemini_API["⭐ Google Gemini API"]
+    AI_Response["<b>AI RESPONSE</b><br/>🤖<br/>(response)"]
+    AI_Response2["<b>AI RESPONSE V2</b><br/>🤖<br/>(response2)"]
+    Gemini_API["<b>GOOGLE GEMINI</b><br/>⭐"]
     
     %% ===== Storage Layer =====
-    Upload_PDF["📤 Upload PDF"]
-    Retrieve_PDF["📥 Retrieve PDF"]
-    Update_PDF["✏️ Update PDF"]
-    Delete_PDF["🗑️ Delete PDF"]
-    Storage[("💾 Supabase<br/>Storage")]
+    Upload_PDF["<b>UPLOAD PDF</b><br/>📤"]
+    Retrieve_PDF["<b>RETRIEVE PDF</b><br/>📥"]
+    Update_PDF["<b>UPDATE PDF</b><br/>✏️"]
+    Delete_PDF["<b>DELETE PDF</b><br/>🗑️"]
+    Storage[("<b>SUPABASE<br/>STORAGE</b><br/>💾")]
     
     %% ===== Admin Services =====
-    Manage_User["👥 User Management"]
-    API_Logs["📊 API Logs"]
-    Code_Logs["📋 Code Logs"]
-    Update_Status["🔄 Update Status"]
+    Manage_User["<b>USER MGMT</b><br/>👥"]
+    API_Logs["<b>API LOGS</b><br/>📊"]
+    Code_Logs["<b>CODE LOGS</b><br/>📋"]
+    Update_Status["<b>UPDATE STATUS</b><br/>🔄"]
     
     %% ===== Utilities =====
-    Security_Helper["🛡️ Security Helpers"]
-    Fetch_Utils["🔧 Fetch Utilities"]
+    Security_Helper["<b>SECURITY</b><br/>🛡️"]
+    Fetch_Utils["<b>FETCH UTILS</b><br/>🔧"]
     
     %% ===== Flow Connections =====
     User --> UI_Pages
@@ -135,13 +136,13 @@ flowchart TD
     Storage --> AI_Response
     
     %% ===== Styling =====
-    classDef userStyle fill:#e1f5ff,stroke:#01579b,stroke-width:3px
-    classDef uiStyle fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef authStyle fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
-    classDef aiStyle fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px
-    classDef storageStyle fill:#fce4ec,stroke:#880e4f,stroke-width:2px
-    classDef adminStyle fill:#fff9c4,stroke:#f57f17,stroke-width:2px
-    classDef utilStyle fill:#e0f2f1,stroke:#004d40,stroke-width:2px
+    classDef userStyle fill:#e1f5ff,stroke:#01579b,stroke-width:4px,color:#000
+    classDef uiStyle fill:#fff3e0,stroke:#e65100,stroke-width:3px,color:#000
+    classDef authStyle fill:#f3e5f5,stroke:#4a148c,stroke-width:3px,color:#000
+    classDef aiStyle fill:#e8f5e9,stroke:#1b5e20,stroke-width:3px,color:#000
+    classDef storageStyle fill:#fce4ec,stroke:#880e4f,stroke-width:3px,color:#000
+    classDef adminStyle fill:#fff9c4,stroke:#f57f17,stroke-width:3px,color:#000
+    classDef utilStyle fill:#e0f2f1,stroke:#004d40,stroke-width:3px,color:#000
     
     class User userStyle
     class UI_Pages,UI_Components uiStyle
