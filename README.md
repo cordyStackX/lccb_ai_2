@@ -1,5 +1,7 @@
 # LACO AI - Intelligent PDF Analysis System
 
+**Author**: [cordyStackX](https://github.com/cordyStackX) | **Year**: 2025
+
 ![Beta Version](https://img.shields.io/badge/version-beta-yellow)
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue)
 ![Educational](https://img.shields.io/badge/purpose-educational-green)
@@ -252,6 +254,7 @@ This project is licensed under the **Apache License 2.0** - see the [LICENSE](LI
 ### Important Links
 - **Privacy Policy**: [/privacy](/privacy)
 - **Terms & Conditions**: [/terms](/terms)
+- **Security Policy**: [SECURITY.md](SECURITY.md)
 - **Apache License**: [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 ---
@@ -372,6 +375,68 @@ PORT=10000
 ```
 
 **Disclaimer:** This project does **not** collect any user data for external purposes. All data is processed securely and stored temporarily.
+
+---
+
+## 📊 Project Diagrams
+
+### Data Flow Diagram (DFD)
+
+The Data Flow Diagram illustrates how data moves through the LACO AI system, from user input to AI-generated output.
+
+![Data Flow Diagram](./public/DFD.png)
+
+**Key Data Flows:**
+- User uploads PDF → Supabase Storage
+- PDF retrieval → Python Flask API
+- PDF text extraction → Google Gemini AI
+- AI response → User interface
+- Activity logging → Supabase Database
+
+---
+
+### Context Free Diagram (CFD)
+
+The Context Diagram shows the system boundaries and external entities that interact with LACO AI.
+
+![Context Free Diagram](./public/CFD.png)
+
+**External Entities:**
+- **Users**: Students, Educators, Researchers
+- **Google Gemini AI**: AI processing service
+- **Supabase**: Database and storage provider
+- **Email Service**: Authentication and notifications
+
+---
+
+## 📅 Project Timeline (Gantt Chart)
+
+Development timeline and milestones for the LACO AI project.
+
+### Phase 1: Planning & Design (Week 1-2)
+- Requirements gathering
+- System architecture design
+- UI/UX mockups
+
+### Phase 2: Core Development (Week 3-6)
+- Frontend development (Next.js + React)
+- Backend API development (Flask + Python)
+- Database setup (Supabase)
+
+### Phase 3: AI Integration (Week 7-8)
+- Google Gemini AI integration
+- PDF processing implementation
+- Chat functionality
+
+### Phase 4: Testing & Refinement (Week 9-10)
+- Bug fixes and optimization
+- Security hardening
+- Documentation
+
+### Phase 5: Deployment (Week 11-12)
+- Production deployment
+- Beta testing
+- Final adjustments
 
 
 ## Directory Tree
