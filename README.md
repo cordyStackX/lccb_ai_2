@@ -68,6 +68,77 @@ This is a **BETA VERSION** for educational and research purposes only. Not inten
 
 LACO AI follows a **Service-Oriented Architecture (SOA)** for modularity and scalability.
 
+```mermaid
+flowchart TB
+    %% ===== Presentation Layer =====
+    subgraph PL["Presentation Layer (Next.js / React)"]
+        UI_Pages["App Pages (src/app)"]
+        UI_Components["UI Components (src/components)"]
+    end
+
+    %% ===== Authentication & Security Services =====
+    subgraph AUTH["Authentication & Security Services"]
+        JWT_Service["JWT Service\n(/services/jwt)"]
+        Auth_Service["Auth Service\n(Supabase Auth)"]
+        Email_Verification["Email Verification\n(Nodemailer)"]
+    end
+
+    %% ===== AI Processing Services =====
+    subgraph AI["AI Processing Services"]
+        AI_Response["AI Response Service\n(/services/api/response)"]
+        AI_Response2["AI Response v2\n(/services/api/response2)"]
+        Gemini_API["Google Gemini API"]
+    end
+
+    %% ===== Storage Services =====
+    subgraph STORAGE["Document Storage Services"]
+        Upload_PDF["Upload PDF\n(storage/uploadpdf)"]
+        Retrieve_PDF["Retrieve PDF\n(storage/retrieve)"]
+        Update_PDF["Update PDF\n(storage/updatepdf)"]
+        Delete_PDF["Delete PDF\n(storage/deletepdf)"]
+    end
+
+    %% ===== Admin Services =====
+    subgraph ADMIN["Administrative Services"]
+        Manage_User["User Management\n(admin/manage_user)"]
+        API_Logs["API Usage Logs\n(retrieve_API_logs)"]
+        Code_Logs["Verification Logs\n(retrieve_code_logs)"]
+        Update_Status["Update User Status"]
+    end
+
+    %% ===== Utility Services =====
+    subgraph UTIL["Utility & Support Services"]
+        Security_Helper["Security Helpers\n(lib/security.ts)"]
+        Fetch_Utils["Fetch Utilities\n(utilities)"]
+        Meta_Data["Metadata Handler"]
+    end
+
+    %% ===== Connections =====
+    UI_Pages --> JWT_Service
+    UI_Pages --> Auth_Service
+    UI_Pages --> AI_Response
+    UI_Pages --> Upload_PDF
+    UI_Pages --> Retrieve_PDF
+
+    UI_Components --> Fetch_Utils
+
+    JWT_Service --> Security_Helper
+    Auth_Service --> Email_Verification
+
+    AI_Response --> Gemini_API
+    AI_Response2 --> Gemini_API
+
+    Manage_User --> Auth_Service
+    Manage_User --> Update_Status
+
+    Upload_PDF --> Storage[(Supabase Storage)]
+    Retrieve_PDF --> Storage
+    Update_PDF --> Storage
+    Delete_PDF --> Storage
+
+    API_Logs --> Storage
+    Code_Logs --> Storage
+```
 ---
 
 ## 📊 Use Cases
