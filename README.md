@@ -106,34 +106,34 @@ flowchart TD
     Fetch_Utils["<b>FETCH UTILS</b><br/>🔧"]
     
     %% ===== Flow Connections =====
-    User -->|red| UI_Pages
-    User -->|red| UI_Components
+    User --> UI_Pages
+    User --> UI_Components
     
-    UI_Pages -->|red| JWT_Service
-    UI_Pages -->|red| Auth_Service
-    UI_Pages -->|red| AI_Response
-    UI_Pages -->|red| Upload_PDF
+    UI_Pages --> JWT_Service
+    UI_Pages -->Auth_Service
+    UI_Pages -->AI_Response
+    UI_Pages --> Upload_PDF
     
-    UI_Components -->|red| Fetch_Utils
+    UI_Components -->Fetch_Utils
     
-    JWT_Service -->|red| Security_Helper
-    Auth_Service -->|red| Email_Verification
+    JWT_Service -->Security_Helper
+    Auth_Service -->Email_Verification
     
-    AI_Response -->|red| Gemini_API
-    AI_Response2 -->|red| Gemini_API
+    AI_Response -->Gemini_API
+    AI_Response2 --> Gemini_API
     
-    Manage_User -->|red| Auth_Service
-    Manage_User -->|red| Update_Status
+    Manage_User -->Auth_Service
+    Manage_User --> Update_Status
     
-    Upload_PDF -->|red| Storage
-    Retrieve_PDF -->|red| Storage
-    Update_PDF -->|red| Storage
-    Delete_PDF -->|red| Storage
+    Upload_PDF --> Storage
+    Retrieve_PDF -->Storage
+    Update_PDF -->Storage
+    Delete_PDF -->Storage
     
-    API_Logs -->|red| Storage
-    Code_Logs -->|red| Storage
+    API_Logs -->Storage
+    Code_Logs -->Storage
     
-    Storage -->|red| AI_Response
+    Storage -->AI_Response
     
     %% ===== Styling =====
     linkStyle default stroke:#ff4444,stroke-width:3px
