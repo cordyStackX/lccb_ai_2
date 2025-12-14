@@ -498,30 +498,7 @@ The Context Diagram shows the system boundaries and external entities that inter
 
 Development timeline and milestones for the LACO AI project.
 
-### Phase 1: Planning & Design (Week 1-2)
-- Requirements gathering
-- System architecture design
-- UI/UX mockups
-
-### Phase 2: Core Development (Week 3-6)
-- Frontend development (Next.js + React)
-- Backend API development (Flask + Python)
-- Database setup (Supabase)
-
-### Phase 3: AI Integration (Week 7-8)
-- Google Gemini AI integration
-- PDF processing implementation
-- Chat functionality
-
-### Phase 4: Testing & Refinement (Week 9-10)
-- Bug fixes and optimization
-- Security hardening
-- Documentation
-
-### Phase 5: Deployment (Week 11-12)
-- Production deployment
-- Beta testing
-- Final adjustments
+![Gant Chart](./public/GantChart.jpeg)
 
 
 ## Directory Tree
