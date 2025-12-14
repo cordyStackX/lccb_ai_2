@@ -334,11 +334,11 @@ This project is licensed under the **Apache License 2.0** - see the [LICENSE](LI
 ### For Questions or Issues
 - Open an issue on [GitHub Issues](https://github.com/cordyStackX/lccb_ai_2/issues)
 - Check existing documentation and README
-- Review [Privacy Policy](/privacy) and [Terms & Conditions](/terms)
+- Review [Privacy Policy](https://lccb-ai-2.vercel.app/privacy) and [Terms & Conditions](https://lccb-ai-2.vercel.app/lccb-ai-2.vercel.app/terms)
 
 ### Important Links
-- **Privacy Policy**: [/privacy](/privacy)
-- **Terms & Conditions**: [/terms](/terms)
+- **Privacy Policy**: [/privacy](https://lccb-ai-2.vercel.app/privacy)
+- **Terms & Conditions**: [/terms](https://lccb-ai-2.vercel.app/terms)
 - **Security Policy**: [SECURITY.md](SECURITY.md)
 - **Apache License**: [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
