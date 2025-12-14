@@ -69,7 +69,7 @@ This is a **BETA VERSION** for educational and research purposes only. Not inten
 LACO AI follows a **Service-Oriented Architecture (SOA)** for modularity and scalability.
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'fontSize':'18px', 'fontFamily':'arial'}}}%%
+%%{init: {'theme':'base', 'themeVariables': {'fontSize':'18px', 'fontFamily':'arial', 'lineColor':'#ff4444', 'primaryBorderColor':'#ff4444'}}}%%
 flowchart TD
     %% ===== User Interface =====
     User["<b>USER</b><br/>👤"]
@@ -106,36 +106,37 @@ flowchart TD
     Fetch_Utils["<b>FETCH UTILS</b><br/>🔧"]
     
     %% ===== Flow Connections =====
-    User --> UI_Pages
-    User --> UI_Components
+    User -->|red| UI_Pages
+    User -->|red| UI_Components
     
-    UI_Pages --> JWT_Service
-    UI_Pages --> Auth_Service
-    UI_Pages --> AI_Response
-    UI_Pages --> Upload_PDF
+    UI_Pages -->|red| JWT_Service
+    UI_Pages -->|red| Auth_Service
+    UI_Pages -->|red| AI_Response
+    UI_Pages -->|red| Upload_PDF
     
-    UI_Components --> Fetch_Utils
+    UI_Components -->|red| Fetch_Utils
     
-    JWT_Service --> Security_Helper
-    Auth_Service --> Email_Verification
+    JWT_Service -->|red| Security_Helper
+    Auth_Service -->|red| Email_Verification
     
-    AI_Response --> Gemini_API
-    AI_Response2 --> Gemini_API
+    AI_Response -->|red| Gemini_API
+    AI_Response2 -->|red| Gemini_API
     
-    Manage_User --> Auth_Service
-    Manage_User --> Update_Status
+    Manage_User -->|red| Auth_Service
+    Manage_User -->|red| Update_Status
     
-    Upload_PDF --> Storage
-    Retrieve_PDF --> Storage
-    Update_PDF --> Storage
-    Delete_PDF --> Storage
+    Upload_PDF -->|red| Storage
+    Retrieve_PDF -->|red| Storage
+    Update_PDF -->|red| Storage
+    Delete_PDF -->|red| Storage
     
-    API_Logs --> Storage
-    Code_Logs --> Storage
+    API_Logs -->|red| Storage
+    Code_Logs -->|red| Storage
     
-    Storage --> AI_Response
+    Storage -->|red| AI_Response
     
     %% ===== Styling =====
+    linkStyle default stroke:#ff4444,stroke-width:3px
     classDef userStyle fill:#e1f5ff,stroke:#01579b,stroke-width:4px,color:#000
     classDef uiStyle fill:#fff3e0,stroke:#e65100,stroke-width:3px,color:#000
     classDef authStyle fill:#f3e5f5,stroke:#4a148c,stroke-width:3px,color:#000
