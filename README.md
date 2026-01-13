@@ -484,7 +484,39 @@ The Data Flow Diagram illustrates how data moves through the LACO AI system, fro
 
 The Context Diagram shows the system boundaries and external entities that interact with LACO AI.
 
-![Context Free Diagram](./public/CFD.png)
+```mermaid
+flowchart TB
+    %% External entities
+    Students[Students] -->|Upload PDFs / Ask Questions| LACO[LACO AI System]
+    Teachers[Teachers] -->|Upload / Manage Content| LACO
+    Admin[Admin] -->|Monitor / Manage System| LACO
+    Kiosk[Touch Screen Kiosk] -->|Campus Info / Guidance| LACO
+
+    %% LACO AI System internal boundary
+    subgraph "LACO AI System"
+        direction TB
+        AI[AI Engine] 
+        Filtering[User-Level Filtering]
+        Departments[Departments: SARFAID, SBIT, SHTM, SSLATE]
+        Programs[Programs by Department]
+        Levels[Educational Levels / Tracks: Pre-K / Elementary / JHS / Night HS / SHS (Academic, Arts & TVL)]
+        
+        %% Internal connections
+        LACO --> Filtering
+        Filtering --> Departments
+        Departments --> Programs
+        Programs --> Levels
+        Levels --> AI
+        AI --> LACO
+    end
+
+    %% Outputs from system
+    LACO -->|AI Responses / Summaries| Students
+    LACO -->|Content Feedback / Reports| Teachers
+    LACO -->|System Reports / Logs| Admin
+    LACO -->|Filtered Campus Info| Kiosk
+
+```
 
 **External Entities:**
 - **Users**: Students, Educators, Researchers
