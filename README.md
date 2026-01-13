@@ -499,7 +499,7 @@ flowchart TB
         Filtering[User-Level Filtering]
         Departments[Departments: SARFAID, SBIT, SHTM, SSLATE]
         Programs[Programs by Department]
-        Levels[Educational Levels / Tracks: Pre-K / Elementary / JHS / Night HS / SHS (Academic, Arts & TVL)]
+        Levels[Educational Levels / Tracks: Pre-K, Elementary, JHS, Night HS, SHS - Academic, Arts, TVL]
         
         %% Internal connections
         LACO --> Filtering
