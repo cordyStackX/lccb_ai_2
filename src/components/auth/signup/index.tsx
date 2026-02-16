@@ -113,10 +113,11 @@ export default function SignUp() {
                         required
                         >
                             <option value="">Select Year Level</option>
-                            <option value="1st Year College">1st Year College</option>
-                            <option value="2nd Year College">2nd Year College</option>
-                            <option value="3rd Year College">3rd Year College</option>
-                            <option value="4th Year College">4th Year College</option>
+                            <option value="Kinder Garden">Kinder Garden</option>
+                            <option value="Elementary">Elementary</option>
+                            <option value="High School">High School</option>
+                            <option value="Senior High Scool">Senior High School</option>
+                            <option value="College">College</option>
                         </select>
                         {message && (
                             <p className={status ?  "error" : "success"}>{message}</p>

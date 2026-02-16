@@ -48,7 +48,10 @@ export default function Terms() {
                 <section className={styles.section}>
                     <h2>4. User Accounts and Eligibility</h2>
                     <ul>
-                        <li>You must be at least 13 years old to use this Service</li>
+                        <li>Users 13 years and older can create and use accounts independently</li>
+                        <li>Users under 13 years old may access the Service only under the supervision of teachers assigned by administrators</li>
+                        <li>For underage users, teachers are responsible for managing accounts, monitoring content, and filtering data</li>
+                        <li>Educational institutions must obtain appropriate parental consent before allowing underage users to access the platform</li>
                         <li>You must provide accurate and current information during registration</li>
                         <li>You are responsible for maintaining the confidentiality of your account credentials</li>
                         <li>You are responsible for all activities that occur under your account</li>

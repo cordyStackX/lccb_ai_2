@@ -119,7 +119,14 @@ export default function Privacy() {
 
                 <section className={styles.section}>
                     <h2>9. Children&apos;s Privacy</h2>
-                    <p>This service is not intended for users under 13 years of age. We do not knowingly collect information from children under 13.</p>
+                    <p>When users under 13 years of age access this educational platform, their data and interactions are supervised and filtered by teachers who have been assigned by the administrator.</p>
+                    <ul>
+                        <li>Teachers assigned by administrators are responsible for managing and monitoring content for underage users</li>
+                        <li>Data filtering and content moderation for children under 13 is handled through teacher oversight</li>
+                        <li>Teachers can review, filter, and control the AI interactions of their assigned students</li>
+                        <li>Parental consent is required and should be obtained by the educational institution or teacher before allowing underage users to access the platform</li>
+                        <li>We do not directly collect data from children without appropriate teacher supervision and institutional approval</li>
+                    </ul>
                 </section>
 
                 <section className={styles.section}>
