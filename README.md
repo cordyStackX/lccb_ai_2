@@ -86,7 +86,7 @@ flowchart TD
     %% ===== AI Processing =====
     AI_Response["<b>AI RESPONSE</b><br/>🤖<br/>(response)"]
     AI_Response2["<b>AI RESPONSE V2</b><br/>🤖<br/>(response2)"]
-    Gemini_API["<b>GOOGLE GEMINI</b><br/>⭐"]
+    Gemini_API["<b>Open AI</b><br/>⭐"]
     
     %% ===== Storage Layer =====
     Upload_PDF["<b>UPLOAD PDF</b><br/>📤"]
@@ -119,8 +119,8 @@ flowchart TD
     JWT_Service -->Security_Helper
     Auth_Service -->Email_Verification
     
-    AI_Response -->Gemini_API
-    AI_Response2 --> Gemini_API
+    AI_Response -->OpenAI_API
+    AI_Response2 --> OpenAI_API
     
     Manage_User -->Auth_Service
     Manage_User --> Update_Status
@@ -245,7 +245,7 @@ python main.py
 2. **API Request** → Next.js API routes handle client requests
 3. **Authentication** → JWT verification and user validation
 4. **PDF Processing** → Python Flask server downloads and processes PDF
-5. **AI Analysis** → Google Gemini AI analyzes content and generates response
+5. **AI Analysis** → Open AI analyzes content and generates response
 6. **Database Logging** → Supabase records API usage and user actions
 7. **Response Delivery** → AI-generated answer returned to frontend
 8. **Auto-Cleanup** → Temporary files deleted after 5 minutes
@@ -253,7 +253,7 @@ python main.py
 ### Technical Workflow
 ```
 User → Next.js UI → API Routes → JWT Auth → Flask API 
-→ Supabase Storage → PDF Processing → Gemini AI 
+→ Supabase Storage → PDF Processing → Open AI 
 → Response → Database Log → User Display
 ```
 
@@ -264,7 +264,7 @@ User → Next.js UI → API Routes → JWT Auth → Flask API
 ### Current Limitations
 - **Beta Version**: May contain bugs and unexpected behavior
 - **Large PDFs**: 900+ page documents may experience processing delays
-- **API Limits**: Subject to Google Gemini API rate limits
+- **API Limits**: Subject to Open AI API rate limits
 - **Temporary Storage**: Files auto-delete after 5 minutes
 - **No Offline Mode**: Requires internet connection for AI processing
 
@@ -325,7 +325,7 @@ This project is licensed under the **Apache License 2.0** - see the [LICENSE](LI
 - **Started**: 2025
 - **Language**: TypeScript, Python
 - **Framework**: Next.js, Flask
-- **AI Model**: Google Gemini 2.5 Flash
+- **AI Model**: GPT 5 Mini
 
 ---
 
@@ -378,7 +378,7 @@ This is a **BETA VERSION** educational research project. By using this software,
 ### Documentation
 - [Next.js Documentation](https://nextjs.org/docs)
 - [React Three Fiber](https://docs.pmnd.rs/react-three-fiber)
-- [Google Gemini AI](https://ai.google.dev/)
+- [Open AI](https://developers.openai.com/?utm_source=chatgpt.com)
 - [Supabase Docs](https://supabase.com/docs)
 
 ### Tutorials

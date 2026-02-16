@@ -4,7 +4,7 @@ import threading
 import time
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
-from google import genai
+from openai import OpenAI
 from flask_cors import CORS
 from supabase import create_client, Client
 from PyPDF2 import PdfReader
@@ -12,7 +12,7 @@ from PyPDF2 import PdfReader
 # -----------------------------------------
 # Load .env.local from project root
 # -----------------------------------------
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
 ENV_PATH = os.path.join(ROOT_DIR, ".env.local")
 load_dotenv(ENV_PATH)
 
@@ -25,13 +25,13 @@ CORS(app)  # allow Next.js to access the Flask server
 # -----------------------------------------
 # Environment variables
 # -----------------------------------------
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 EXPECTED_API_KEY = os.getenv("API_KEY")
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
-if not GOOGLE_API_KEY:
-    raise ValueError("GOOGLE_API_KEY is missing in .env.local")
+if not OPENAI_API_KEY:
+    raise ValueError("OPENAI_API_KEY is missing in .env.local")
 
 if not EXPECTED_API_KEY:
     raise ValueError("API_KEY must be set for security authentication")
@@ -43,9 +43,9 @@ if not SUPABASE_SERVICE_ROLE_KEY:
     raise ValueError("SUPABASE_SERVICE_ROLE_KEY not found")
 
 # -----------------------------------------
-# Gemini Client
+# OpenAI Client
 # -----------------------------------------
-client = genai.Client(api_key=GOOGLE_API_KEY)
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 # -----------------------------------------
 # Supabase Client
@@ -111,18 +111,23 @@ def generate_md():
         # --- Strict instruction: only answer based on PDF ---
         final_prompt = f"Read the PDF content below carefully. Base your answer primarily on this content. You may add a small amount of extra information ONLY if it directly supports or explains something from the Documents and stays on-topic. Do NOT go beyond the scope of the Documents. questions:\n\n{text}\n\n Question: {prompt}"
 
-        # --- Call Gemini ---
-        result = client.models.generate_content(
-            model="gemini-2.5-flash-lite",
-            contents=final_prompt
+        # --- Call OpenAI ---
+        response = client.chat.completions.create(
+            model="gpt-5-mini",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant that answers questions based on PDF documents. Stay focused on the document content."},
+                {"role": "user", "content": final_prompt}
+            ],
+            temperature=0.7,
+            max_tokens=2000
         )
 
-        md = result.text or ""
+        md = response.choices[0].message.content or ""
 
         return jsonify({"success": True, "markdown": md})
 
     except Exception as e:
-        print("🔥 Gemini Error:", e, file=sys.stderr)
+        print("🔥 OpenAI Error:", e, file=sys.stderr)
         return jsonify({"success": False, "error": str(e)}), 500
     
 
