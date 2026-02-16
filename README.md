@@ -50,7 +50,7 @@ This is a **BETA VERSION** for educational and research purposes only. Not inten
 
 ### Backend
 - **API Framework**: Flask (Python)
-- **AI Engine**: Google Gemini 2.5 Flash
+- **AI Engine**: GPT 5 Mini
 - **PDF Processing**: PyPDF2
 - **Database**: Supabase (PostgreSQL)
 - **Authentication**: JWT tokens
