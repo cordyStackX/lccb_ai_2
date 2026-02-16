@@ -26,7 +26,7 @@ npm -v
 npx -v
 
 echo -e "${YELLOW}==> Installing NPM packages...${RESET}"
-npm install -g pnpm
+sudo npm install -g pnpm
 pnpm install
 
 echo -e "${GREEN}==> Python version:${RESET}"
