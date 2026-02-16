@@ -113,7 +113,7 @@ def generate_md():
 
         # --- Call OpenAI ---
         response = client.chat.completions.create(
-            model="gpt-5-mini",
+            model="gpt-4.1-mini",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant that answers questions based on PDF documents. Stay focused on the document content."},
                 {"role": "user", "content": final_prompt}
