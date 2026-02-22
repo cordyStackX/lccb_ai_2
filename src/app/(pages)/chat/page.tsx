@@ -18,7 +18,7 @@ export default function Chat() {
     return(
         <section style={{ width: "100vw", height: "100vh", display: "flex", justifyContent: "center", alignItems: "center", flexFlow: "column" }}>
             <img src="/face.png" alt="cordystackx" width={200} height={200} />
-            <h1 style={{ color: "blue" }}> {"<---"} Under Developments {"--->"}</h1>
+            <h1 style={{ color: "blue" }}> {"<---"} Under Development {"--->"}</h1>
             <a href="https://github.com/cordyStackX/lccb_ai_2/issues" 
             style={{ color: "green", fontWeight: "bolder", cursor: "pointer" }}
             >Check the Github Repo</a>
