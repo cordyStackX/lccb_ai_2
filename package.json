@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"dev": "next dev",
-		"build": "next build",
+		"build": "next build 2>/dev/null",
 		"start": "next start",
 		"lint": "eslint"
 	},
@@ -39,7 +39,7 @@
 		"@types/three": "^0.182.0",
 		"@typescript-eslint/eslint-plugin": "^8.55.0",
 		"@typescript-eslint/parser": "^8.55.0",
-		"baseline-browser-mapping": "^2.9.19",
+		"baseline-browser-mapping": "^2.10.0",
 		"eslint": "^9.39.2",
 		"eslint-config-next": "16.0.0",
 		"eslint-import-resolver-alias": "^1.1.2",

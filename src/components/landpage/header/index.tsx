@@ -11,20 +11,6 @@ export default function Header() {
             <div className="wrapper display_flex_center">
                 <figure className={`${styles.logo} display_flex_center`}>
                     <Image 
-                    src={image_src.logo1}
-                    alt="LCCB Logo"
-                    width={80}
-                    height={80}
-                    className={styles.image1}
-                    />
-                    <Image 
-                    src={image_src.plushie}
-                    alt="LCCB Logo"
-                    width={60}
-                    height={60}
-                    className={styles.image1}
-                    />
-                    <Image 
                     src={image_src.lccb}
                     alt="LCCB Logo"
                     width={65}
