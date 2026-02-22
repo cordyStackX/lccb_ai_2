@@ -1,6 +1,6 @@
 {
 	"name": "lccb_ai_2",
-	"version": "0.1.0",
+	"version": "beta_0.5.0",
 	"private": true,
 	"scripts": {
 		"dev": "next dev",
