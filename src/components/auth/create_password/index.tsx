@@ -16,7 +16,7 @@ export default function Create_Password() {
     const router = useRouter();
 
     const [form, setForm] = useState({
-        email: "", password: "", c_password: "", name: "", year: ""
+        email: "", password: "", c_password: "", name: "", year: "", role: ""
     });
     const [status, setStatus] = useState(false);
     const [message, setMessage] = useState("");
@@ -35,10 +35,11 @@ export default function Create_Password() {
             const saveEmail = localStorage.getItem("email");
             const saveName = localStorage.getItem("name");
             const saveYear = localStorage.getItem("year");
+            const saveRole = localStorage.getItem("role");
             const code = localStorage.getItem("code");
             const response = await Fetch_to(api_link.checkcode, { email: saveEmail, code: code });
             if (!response.success) return router.push("/auth/signin");
-            setForm(prev => ({ ...prev, email: saveEmail || "", name: saveName || "", year: saveYear || ""}));
+            setForm(prev => ({ ...prev, email: saveEmail || "", name: saveName || "", year: saveYear || "", role: saveRole || ""}));
         };
         checkCode();
     }, []);

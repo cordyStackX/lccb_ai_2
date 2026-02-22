@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
 
     try {
 
-        const { email, password, c_password, name, year } = await req.json();
+        const { email, password, c_password, name, year, role } = await req.json();
 
         if (password !== c_password) return NextResponse.json({ succes: false, error: "Password is not match" }, { status: 409 });
 
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
 
         const { data, error } = await supabaseServer
         .from("auth")
-        .insert([{ email: cleanEmail, password: String(hashed), f_name: cleanName, year: year, status: status }]);
+        .insert([{ email: cleanEmail, password: String(hashed), f_name: cleanName, year: year, status: status, role: role }]);
 
         if (error) {
             console.error("Supabase Query Error: ", error);

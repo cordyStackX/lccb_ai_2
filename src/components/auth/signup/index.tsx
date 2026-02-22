@@ -16,7 +16,7 @@ export default function SignUp() {
     const router = useRouter();
 
     const [form, setForm] = useState({
-        email: "", name: "", year: ""
+        email: "", name: "", year: "", role: ""
     });
     const [status, setStatus] = useState(false);
     const [message, setMessage] = useState("");
@@ -38,6 +38,7 @@ export default function SignUp() {
             localStorage.setItem("email", form.email);
             localStorage.setItem("name", form.name);
             localStorage.setItem("year", form.year);
+            localStorage.setItem("role", form.role);
             const responds = await Fetch_to(api_link.checkcode, { email: form.email });
             if(!responds.success) {
                 setMessage(responds.message || "Somethings Went Wrong");
@@ -118,6 +119,18 @@ export default function SignUp() {
                             <option value="High School">High School</option>
                             <option value="Senior High Scool">Senior High School</option>
                             <option value="College">College</option>
+                        </select>
+
+                        <select 
+                        id="role"
+                        name="role"
+                        value={form.role}
+                        onChange={handleChange}
+                        required
+                        >
+                            <option value="">Select Your Role</option>
+                            <option value="Student">Student</option>
+                            <option value="Teacher">Teacher</option>
                         </select>
                         {message && (
                             <p className={status ?  "error" : "success"}>{message}</p>
