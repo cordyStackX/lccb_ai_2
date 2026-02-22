@@ -93,13 +93,19 @@ def generate_md():
         if not email:
             return jsonify({"success": False, "error": "Email not found"}), 400
 
-        # --- Get file name from Supabase ---
+        # --- Get file name from Supabase --- 
         row = supabase.table("pdf_file").select("file_name").eq("id", file_id).single().execute()
         if not row.data:
             return jsonify({"success": False, "error": "PDF not found"}), 404
+        
+        user = supabase.table("auth").select("year, role").eq("email", email).single().execute()
+        if not user.data:
+            return jsonify({"success": False, "error": "User not found"}), 404
 
         file_name = row.data["file_name"]
         tmp_path = f"tmp/{file_name}"
+        role = user.data["role"]
+        year = user.data["year"]
 
         # --- Check if file exists in tmp/ directory ---
         if not os.path.exists(tmp_path):
@@ -110,15 +116,24 @@ def generate_md():
         text = ""
         for page in reader.pages:
             text += page.extract_text() or ""
+        
+        # --- Read Txt prompt template ---
+        with open("python_txt_file/prompt.txt", "r", encoding="utf-8") as f:
+            template = f.read()
 
         # --- Strict instruction: only answer based on PDF ---
-        final_prompt = f"Read the PDF content below carefully. Base your answer primarily on this content. You may add a small amount of extra information ONLY if it directly supports or explains something from the Documents and stays on-topic. Do NOT go beyond the scope of the Documents. questions:\n\n{text}\n\n Question: {prompt}"
+        final_prompt = template.format(
+            documents=text,
+            question=prompt,
+            role=role,
+            year=year
+        )
 
         # --- Call OpenAI ---
         response = client.chat.completions.create(
             model="gpt-4.1-mini",
             messages=[
-                {"role": "system", "content": "You are a helpful assistant that answers questions based on PDF documents. Stay focused on the document content."},
+                {"role": "system", "content": "You name is LACO a helpful assistant that answers questions based on PDF documents. Stay focused on the document content."},
                 {"role": "user", "content": final_prompt}
             ],
             temperature=0.7,

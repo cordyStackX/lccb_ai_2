@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
                     LoginAttempts.set(email, state);
 
                     return NextResponse.json(
-                        { success: false, error: "Too many attempts. Locked for 3 minutes." },
+                        { success: false, error: "Too many attempts. Account Locked for 3 minutes." },
                         { status: 429 }
                     );
                 }
