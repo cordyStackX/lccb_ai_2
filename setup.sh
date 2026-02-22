@@ -25,7 +25,7 @@ node -v
 npm -v
 npx -v
 
-echo -e "${YELLOW}==> Installing NPM packages...${RESET}"
+echo -e "${YELLOW}==> Installing PNPM packages...${RESET}"
 sudo npm install -g pnpm
 pnpm install
 
@@ -38,7 +38,7 @@ python3 -m pip install --upgrade pip
 
 # Install Python packages
 echo -e "${YELLOW}==> Installing Python packages...${RESET}"
-pip install -r python/requirements.txt
+pip install -r python_txt_file/requirements.txt
 
 echo -e "${BLUE}<==> Building Next.js app... <==>${RESET}"
 echo -e "${YELLOW}==> Running lint...${RESET}"
