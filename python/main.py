@@ -111,25 +111,82 @@ def generate_md():
         if not os.path.exists(tmp_path):
             return jsonify({"success": False, "error": f"File not found in tmp/. Please download it first using /download-file"}), 404
 
-        # --- Read PDF text ---
+        # --- Read PDF and create chunks ---
         reader = PdfReader(tmp_path)
-        text = ""
-        for page in reader.pages:
-            text += page.extract_text() or ""
+        
+        # Create chunks (2 pages per chunk for 8-page PDF = 4 chunks)
+        chunks = []
+        chunk_size = 2  # pages per chunk
+        
+        for i in range(0, len(reader.pages), chunk_size):
+            chunk_text = ""
+            chunk_pages = reader.pages[i:i + chunk_size]
+            for page in chunk_pages:
+                chunk_text += page.extract_text() or ""
+            
+            if chunk_text.strip():  # only add non-empty chunks
+                chunks.append({
+                    "text": chunk_text,
+                    "pages": f"{i+1}-{min(i+chunk_size, len(reader.pages))}"
+                })
         
         # --- Read Txt prompt template ---
         with open("python_txt_file/prompt.txt", "r", encoding="utf-8") as f:
             template = f.read()
 
+        # --- Step 1: Find relevant chunks using embeddings/quick scan ---
+        # For efficiency, we'll use a lightweight approach: ask GPT which chunks are relevant
+        chunk_summaries = "\n\n".join([
+            f"Chunk {idx+1} (Pages {chunk['pages']}):\n{chunk['text'][:500]}..."
+            for idx, chunk in enumerate(chunks)
+        ])
+        
+        relevance_prompt = f"""Given this question: "{prompt}"
+
+Here are summaries of document chunks:
+{chunk_summaries}
+
+Which chunks (by number) are most relevant to answer this question? 
+Respond with ONLY comma-separated numbers (e.g., "1,3,4"). If all chunks seem relevant, say "ALL"."""
+
+        relevance_response = client.chat.completions.create(
+            model="gpt-4.1-mini",
+            messages=[
+                {"role": "system", "content": "You are a document analyst. Identify relevant document sections."},
+                {"role": "user", "content": relevance_prompt}
+            ],
+            temperature=0.3,
+            max_tokens=50
+        )
+        
+        relevant_indices_str = relevance_response.choices[0].message.content.strip()
+        
+        # --- Step 2: Use only relevant chunks ---
+        if relevant_indices_str.upper() == "ALL":
+            relevant_chunks = chunks
+        else:
+            try:
+                relevant_indices = [int(x.strip()) - 1 for x in relevant_indices_str.split(",")]
+                relevant_chunks = [chunks[i] for i in relevant_indices if 0 <= i < len(chunks)]
+            except:
+                # Fallback: use all chunks if parsing fails
+                relevant_chunks = chunks
+        
+        # Combine relevant chunks
+        combined_text = "\n\n".join([
+            f"[Pages {chunk['pages']}]\n{chunk['text']}"
+            for chunk in relevant_chunks
+        ])
+
         # --- Strict instruction: only answer based on PDF ---
         final_prompt = template.format(
-            documents=text,
+            documents=combined_text,
             question=prompt,
             role=role,
             year=year
         )
 
-        # --- Call OpenAI ---
+        # --- Call OpenAI with relevant context ---
         response = client.chat.completions.create(
             model="gpt-4.1-mini",
             messages=[
