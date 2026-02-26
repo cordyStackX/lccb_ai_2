@@ -3,6 +3,7 @@ import { Fetch_to } from "@/utilities";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import Under_Dev from "@/app/under-develop";
 
 export default function Chat() {
     const router = useRouter();
@@ -17,7 +18,7 @@ export default function Chat() {
 
     return(
        <main>
-            
+            <Under_Dev />
        </main>
     );
 
