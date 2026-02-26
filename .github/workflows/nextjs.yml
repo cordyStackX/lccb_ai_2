@@ -45,12 +45,15 @@ jobs:
         run: pnpm run build
         working-directory: ./
         env:
+          # Secrets
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-
+          API_KEY: ${{ secrets.API_KEY }}
+          
+          # Public variables
           NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           
