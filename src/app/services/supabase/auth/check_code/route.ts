@@ -3,7 +3,7 @@ import nodemailer from "nodemailer";
 import { cooldownMap, CodeStore } from "@/lib/code_store";
 import { supabaseServer } from "@/lib/supabase-server";
 
-const COOLDOWN_MS = 60 * 1000; // 1 minute
+const COOLDOWN_MS = 60 * 3000; // 3 minute
 
 
 export async function POST(req: NextRequest) {
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     
     const cleanEmail = email.trim().toLowerCase();
 
-    const expiresAt = Date.now() + 60 * 1000; // 1 minutes
+    const expiresAt = Date.now() + 60 * 3000; // 3 minutes
 
     //Check if their is existing code
     if (code) {

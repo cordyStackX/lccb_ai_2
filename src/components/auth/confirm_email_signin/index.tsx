@@ -34,7 +34,7 @@ export default function Confirm_email_signin() {
         const responds = await Fetch_to(api_link.checkcode, { email: e });
         if (responds.success) {
             setStatus(false);
-            setMessage("Code Send Successfully");
+            setMessage("Code sent successfully. Expires in 3 minutes.");
             setLoading(false);
         } else {
             setStatus(true);
