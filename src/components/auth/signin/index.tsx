@@ -66,16 +66,16 @@ export default function SignIn() {
     };
 
     return(
-        <section className={`${styles.container} display_flex_center`}>
-            <div className={`${styles.wrapper} display_flex_center`}>
+        <section className={`${styles.container} `}>
+            <div className={`${styles.wrapper} `}>
                 {loading ? (
-                    <div className={`${styles.form_styles} display_flex_center`} style={{ flexFlow: "column" }}>
+                    <div className={`${styles.form_styles}`} style={{ flexFlow: "column" }}>
                        <React_Spinners status="Signing in..." />
                     </div>
                 ) : (
                     <form className={styles.form_styles} onSubmit={handleSubmit}>
-                        <section className={`${styles.info}`}>
-                            <figure className={`${styles.logo}`}>
+                        <section className={`${styles.info} `}>
+                            <figure className={`${styles.logo} `}>
                                 <Image 
                                 src={image_src.logo1}
                                 alt="Logo"
@@ -112,13 +112,13 @@ export default function SignIn() {
                         {message && (
                             <p className={status ?  "error" : "success"}>{message}</p>
                         )}
-                        <span className={`${styles.checkbox}`}>
+                        <span className={`${styles.checkbox} `}>
                             <input type="checkbox" required />
                             <p>I agree to the <Link href={"/privacy"} onClick={() => {Progress(true);}}>Privacy Policy</Link> & <Link href={"/terms"} onClick={() => {Progress(true);}} >Terms of Conditions</Link></p>
                         </span>
                         <p>Register an Account? <Link href={"/auth/signup"} onClick={() => {Progress(true);}}>Registered</Link></p>
                         <p><Link href={"/auth/forgot-password"} onClick={() => {Progress(true);}}>Forgot Password?</Link></p>
-                        <section className={`${styles.buttons}`}>
+                        <section className={`${styles.buttons} `}>
                             <button>Sign In</button>
                         </section>
                     </form>

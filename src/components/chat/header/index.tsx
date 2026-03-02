@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export default function Header() {
     return(
-        <header className={`${styles.container} display_flex_center`}>
+        <header className={`${styles.container}`}>
             <h1>LACO AI</h1>
             <span className={styles.profile}>
                 <Image 

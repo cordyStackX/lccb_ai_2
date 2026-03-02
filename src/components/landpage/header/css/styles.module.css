@@ -6,11 +6,21 @@
     backdrop-filter: blur(10px);
     z-index: 999;
 }
+.wrapper {
+    width: var(--max-width);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    margin: 0 auto;
+}
 .logo {
     width: 50%;
     height: 100%;
     overflow-x: auto;
     padding: 0.5rem 0;
+    display: flex;
+    justify-content: left;
+    align-items: center;
 }
 .image1 {
     margin: 0 0 0 30px;
@@ -23,10 +33,16 @@
     width: 40%;
     height: 100%;
     font-size: clamp(0.8rem, 0.5rem + 1vw, 1rem);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 .buttons {
     width: 50%;
     height: 100%;
+    display: flex;
+    justify-content: right;
+    align-items: center;
 }
 .buttons button {
     margin: 0 30px;

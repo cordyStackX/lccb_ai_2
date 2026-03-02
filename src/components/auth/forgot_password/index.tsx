@@ -56,16 +56,16 @@ export default function Forgot_password() {
     };
 
     return(
-        <section className={`${styles.container} display_flex_center`}>
-            <div className={`${styles.wrapper} display_flex_center`}>
+        <section className={`${styles.container} `}>
+            <div className={`${styles.wrapper} `}>
                 {loading ? (
-                    <div className={`${styles.form_styles} display_flex_center`}>
+                    <div className={`${styles.form_styles} `}>
                         <React_Spinners status="Comfirming Your Email..." />
                     </div>
                 ) : (
                     <form className={styles.form_styles} onSubmit={handleSubmit}>
-                        <section className={`${styles.info} display_flex_center`}>
-                            <figure className={`${styles.logo} display_flex_center`}>
+                        <section className={`${styles.info} `}>
+                            <figure className={`${styles.logo} `}>
                                 <Image 
                                 src={image_src.logo1}
                                 alt="Logo"
@@ -92,7 +92,7 @@ export default function Forgot_password() {
                             <p className={status ?  "error" : "success"}>{message}</p>
                         )}
                        
-                        <section className={`${styles.buttons} display_flex_center`}>
+                        <section className={`${styles.buttons} `}>
                             <button type="button" onClick={() => {router.back(); Progress(true);}} style={{backgroundColor: "var(--secondary)"}}>Back</button>
                             <button>Next</button>
                         </section>

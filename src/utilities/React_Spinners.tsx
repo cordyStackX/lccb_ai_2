@@ -6,7 +6,7 @@ type StatusType = {
 
 export default function React_Spinners({status} : StatusType) {
     return(
-        <div className="display_flex_center" style={{ flexFlow: "column", padding: "3rem" }}>
+        <div style={{ flexFlow: "column", padding: "3rem", display: "flex", justifyContent: "center", alignItems: "center" }}>
             <Puff
             visible={true}
             height="80"

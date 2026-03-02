@@ -11,7 +11,7 @@ export default function Chat_bot({ show, setShow } : Chat_botProps) {
 
     return(
         <section 
-        className={`${styles.container} display_flex_center`}  
+        className={`${styles.container}`}  
         onClick={() => {setShow(!show);}}
         >
             <p>Ask Chat bot ?</p>

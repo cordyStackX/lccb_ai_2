@@ -8,8 +8,8 @@ export default function Header() {
     const router = useRouter();
     return(
         <header className={styles.container}>
-            <div className="wrapper display_flex_center">
-                <figure className={`${styles.logo} display_flex_center`}>
+            <div className={styles.wrapper}>
+                <figure className={`${styles.logo}`}>
                     <Image 
                     src={image_src.lccb}
                     alt="LCCB Logo"
@@ -18,10 +18,10 @@ export default function Header() {
                     className={styles.image1}
                     />
                 </figure>
-                <section className={`${styles.title} display_flex_center`}>
+                <section className={`${styles.title}`}>
                     <h2>LACO AI</h2>
                 </section>
-                <section className={`${styles.buttons} display_flex_center`}>
+                <section className={`${styles.buttons}`}>
                     <button onClick={() => {router.push("/auth/signup");}}>Ask LACO</button>
                 </section>
             </div>

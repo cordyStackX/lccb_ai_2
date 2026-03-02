@@ -78,16 +78,16 @@ export default function SignUp() {
     };
 
     return(
-        <section className={`${styles.container} display_flex_center`}>
-            <div className={`${styles.wrapper} display_flex_center`}>
+        <section className={`${styles.container} `}>
+            <div className={`${styles.wrapper} `}>
                 {loading ? (
-                    <div className={`${styles.form_styles} display_flex_center`} style={{ flexFlow: "column" }}>
+                    <div className={`${styles.form_styles} `} style={{ flexFlow: "column" }}>
                         <React_Spinners status="Registering Your Account..."/>
                     </div>
                 ) : (
                     <form className={styles.form_styles} onSubmit={handleSubmit}>
-                        <section className={`${styles.info} display_flex_center`}>
-                            <figure className={`${styles.logo} display_flex_center`}>
+                        <section className={`${styles.info} `}>
+                            <figure className={`${styles.logo} `}>
                                 <Image 
                                 src={image_src.logo1}
                                 alt="Logo"
@@ -170,7 +170,7 @@ export default function SignUp() {
                             <p className="neutral">For Teacher{"'"}s you need to contact the admin to activate your account</p>
                         ) : null}
                         <p>Already have an Account? <Link href={"/auth/signin"} onClick={() => {Progress(true);}}>Sign In</Link></p>
-                        <section className={`${styles.buttons} display_flex_center`}>
+                        <section className={`${styles.buttons} `}>
                             <button>Next</button>
                         </section>
                     </form>

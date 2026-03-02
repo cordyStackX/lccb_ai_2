@@ -10,11 +10,10 @@ export default function Banner() {
     const { ref: spand, isInView: spandIsInView } = useInView<HTMLButtonElement>(true);
 
     return(
-        <section className={`${styles.container} display_flex_center`}  >
-            <div className={`${styles.wrapper} display_flex_center`}>
-                <section className={`${styles.center} display_flex_center`}>
+        <section className={`${styles.container}`}  >
+            <div className={`${styles.wrapper}`}>
+                <section className={`${styles.center}`}>
                     <h1
-                    className="display_flex_center"
                     ref={title} style={{ '--fade-in' : titleIsInView ? 1 : 0 } as React.CSSProperties}
                     >
                     <span>LACO</span>
@@ -22,7 +21,6 @@ export default function Banner() {
                     <span>Intelligence</span>
                     </h1>
                     <p 
-                    className="display_flex_center"
                     ref={para} style={{ '--fade-in-p' : paraIsInView ? 1 : 0 } as React.CSSProperties}
                     >
                     <span>LACO</span> 
@@ -41,7 +39,7 @@ export default function Banner() {
                     <span>AI</span> 
                     <span>technologies.</span>
                     </p>
-                        <section className={`${styles.buttons} display_flex_center`}>
+                        <section className={`${styles.buttons}`}>
                             <button onClick={() => {router.push("/auth/signup"); Progress(true);}} 
                             ref={spand} 
                             

@@ -62,21 +62,21 @@ export default function Chat_bot({ show, setShow } : Chat_botProps) {
     };
 
     return(
-        <section className={`${styles.container} display_flex_center`} style={{ right: `${show ? "1%" : "-100%" }` }} >
+        <section className={`${styles.container}`} style={{ right: `${show ? "1%" : "-100%" }` }} >
             <span onClick={() => {setShow(false);}} >X</span>
             <h2>Chat Bot</h2>
             <section className={styles.chat}>
-                <div className="display_flex_center_column">
+                <div>
                     {messages.map((msg, index) => (
                         <div key={index} className={`${styles.response}`}>
-                            <div className={`${styles.user_respones} display_flex_center`}>
+                            <div className={`${styles.user_respones}`}>
                                 <div>
                                     <p>{msg.ask}</p>
                                 </div>
                             </div>
                             <div ref={chatEndRef} className={`${styles.ai_response} ${msg.respond ? styles.fadeIn : ""}`}>
                                 {msg.respond ? (
-                                    <div className={`display_flex_center ${styles.plushie_talk}`}>
+                                    <div className={` ${styles.plushie_talk}`}>
                                         <Image 
                                         src={image_src.plushie}
                                         alt="plushie"
@@ -89,14 +89,14 @@ export default function Chat_bot({ show, setShow } : Chat_botProps) {
 
                                     </div>
                                 ) : index === messages.length - 1 && loading ? (
-                                    <div className={`display_flex_center ${styles.plushie_talk}`}>
+                                    <div className={` ${styles.plushie_talk}`}>
                                         <Image 
                                         src={image_src.plushie}
                                         alt="plushie"
                                         width={45}
                                         height={50}
                                         />
-                                        <div className={`${styles.spinner_wrapper} display_flex_center`}>
+                                        <div className={`${styles.spinner_wrapper} `}>
                                             <ThreeDots
                                             visible={true}
                                             height="30"
@@ -117,7 +117,7 @@ export default function Chat_bot({ show, setShow } : Chat_botProps) {
                 </div>
             </section>
 
-            <form className={`${styles.ask} display_flex_center`} onSubmit={handleSubmit}>
+            <form className={`${styles.ask}`} onSubmit={handleSubmit}>
                 <textarea
                 id="chat"
                 name="ask"
