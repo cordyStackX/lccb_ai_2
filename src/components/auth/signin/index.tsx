@@ -4,12 +4,12 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import image_src from "@/config/images_links/assets.json";
 import Link from "next/link";
-import { Circles } from "react-loader-spinner";
 import { useState } from "react";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import {
     Fetch_to,
-    usePreventExit
+    usePreventExit,
+    React_Spinners
 } from "@/utilities";
 
 export default function SignIn() {
@@ -64,16 +64,8 @@ export default function SignIn() {
         <section className={`${styles.container} display_flex_center`}>
             <div className={`${styles.wrapper} display_flex_center`}>
                 {loading ? (
-                    <div className={`${styles.form_styles} display_flex_center`}>
-                        <Circles
-                        height="80"
-                        width="80"
-                        color="#1A54B8"
-                        ariaLabel="circles-loading"
-                        wrapperStyle={{}}
-                        wrapperClass=""
-                        visible={true}
-                        />
+                    <div className={`${styles.form_styles} display_flex_center`} style={{ flexFlow: "column" }}>
+                       <React_Spinners status="Signing in..." />
                     </div>
                 ) : (
                     <form className={styles.form_styles} onSubmit={handleSubmit}>
@@ -119,7 +111,7 @@ export default function SignIn() {
                             <input type="checkbox" required />
                             <p>I agree to the <Link href={"/privacy"}>Privacy Policy</Link> & <Link href={"/terms"}>Terms of Conditions</Link></p>
                         </span>
-                        <p>Create an Account? <Link href={"/auth/signup"}>Sign Up</Link></p>
+                        <p>Register an Account? <Link href={"/auth/signup"}>Registered</Link></p>
                         <p><Link href={"/auth/forgot-password"}>Forgot Password?</Link></p>
                         <section className={`${styles.buttons} display_flex_center`}>
                             <button>Sign In</button>

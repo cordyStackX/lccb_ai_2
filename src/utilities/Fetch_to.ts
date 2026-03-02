@@ -36,5 +36,5 @@ export default async function Fetch_to(
 		if (attempt < retries) await new Promise(res => setTimeout(res, delay));
 	}
 
-		return { success: false, message: `All ${retries} attempts failed for ${dir}` };
+		return { success: false, message: `Check Your Internet Connections` };
 }

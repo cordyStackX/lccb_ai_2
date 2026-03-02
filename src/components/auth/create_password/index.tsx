@@ -4,12 +4,12 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import image_src from "@/config/images_links/assets.json";
 import Link from "next/link";
-import { Circles } from "react-loader-spinner";
 import { useState, useEffect } from "react";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import {
     Fetch_to,
-    usePreventExit
+    usePreventExit,
+    React_Spinners
 } from "@/utilities";
 
 export default function Create_Password() {
@@ -63,15 +63,7 @@ export default function Create_Password() {
             <div className={`${styles.wrapper} display_flex_center`}>
                 {loading ? (
                     <div className={`${styles.form_styles} display_flex_center`}>
-                        <Circles
-                        height="80"
-                        width="80"
-                        color="#1A54B8"
-                        ariaLabel="circles-loading"
-                        wrapperStyle={{}}
-                        wrapperClass=""
-                        visible={true}
-                        />
+                        <React_Spinners status="Activating Your Account..." />
                     </div>
                 ) : (
                     <form className={styles.form_styles} onSubmit={handleSubmit}>

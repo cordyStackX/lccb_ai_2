@@ -45,6 +45,10 @@ export async function POST(req: NextRequest) {
             );
         }
 
+        // ✅ add this
+        CodeStore.delete(cleanEmail);
+        cooldownMap.delete(cleanEmail); // optional
+
         // Code correct
         return NextResponse.json({ success: true }, { status: 200 });
     }

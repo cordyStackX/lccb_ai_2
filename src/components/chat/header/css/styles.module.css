@@ -1,0 +1,19 @@
+.container {
+    width: 100%;
+    height: auto;
+    padding: 1.5rem 2.5rem;
+    position: fixed;
+    z-index: 999;
+    top: 0;
+    justify-content: space-between;
+    box-shadow: 0 0 2px 1px var(--foreground);
+}
+.container h1 {
+    font-size: clamp(1rem, 0.5rem + 1vw, 2rem);
+}
+.profile {
+    cursor: pointer;
+}
+.chevron {
+    margin: 0 0.5rem;
+}

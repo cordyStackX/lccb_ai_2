@@ -14,11 +14,24 @@ body {
 }
 
 body {
-	color: var(--adaptive-color-text);
+	color: var(--default-color-white);
 	background: var(--default-color-white);
 	font-family: Arial, Helvetica, sans-serif;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+}
+
+.blinkTwice {
+  animation: blinkTwice 5s ease infinite;
+}
+
+@keyframes blinkTwice {
+  0%   { opacity: 1; }
+  15%  { opacity: 0.5; }
+  30%  { opacity: 1; }
+  45%  { opacity: 0.5; }
+  60%  { opacity: 1; }
+  100% { opacity: 0.5; }
 }
 
 * {

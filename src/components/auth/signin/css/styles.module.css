@@ -8,7 +8,7 @@
 }
 .form_styles {
     width: min(600px, 90dvw);
-    height: clamp(550px, 80vh, 600px);
+    height: auto;
     border-radius: 10px;
     background: var(--fx-color);
     padding: clamp(1rem, 10dvw, 3rem);
@@ -16,6 +16,7 @@
     overflow: hidden;opacity: 0;
     transform: translateY(50px);
     animation: fade_in 500ms forwards ease;
+    transition: 1s ease all;
 }
 @keyframes fade_in {
     0% {
@@ -61,10 +62,7 @@
     margin: 0 0 0 0.5rem;
 }
 .buttons {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    padding: clamp(1rem, 10dvw, 3rem);
+    padding: 2rem 0 0 0;
     width: 100%;
     justify-content: right;
 }

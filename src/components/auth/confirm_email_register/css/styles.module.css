@@ -1,0 +1,85 @@
+.container {
+    width: 100%;
+    height: 100vh;
+}
+.wrapper {
+    width: var(--max-width);
+    margin: 10px auto;
+}
+.form_styles {
+    width: min(600px, 90dvw);
+    height: clamp(200px, 80vh, 450px);
+    border-radius: 10px;
+    background: var(--fx-color);
+    padding: clamp(1rem, 10dvw, 3rem);
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(50px);
+    animation: fade_in 500ms forwards ease;
+}
+@keyframes fade_in {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.form_styles input {
+    width: 100%;
+    height: auto;
+    margin: 1rem 0 0 0;
+    font-size: clamp(1rem, 0.5rem + 1vw, 1.3rem);
+    padding: 5px 0;
+    background: transparent;
+    border: transparent;
+    border-bottom: 2px solid var(--primary);
+    color: var(--foreground);
+    outline: none;
+    text-align: center;
+}
+.form_styles p {
+    margin: 1rem 0 0 0;
+    font-size: clamp(0.8rem, 0.5rem + 1vw, 1rem);
+}
+.form_styles a {
+    color: var(--default-color-blue);
+    cursor: pointer;
+}
+.info {
+    flex-flow: column;
+    align-items: flex-start;
+}
+.info h2 {
+    font-size: clamp(0.9rem, 0.5rem + 1vw, 1.2rem);
+    margin: 1rem 0 0 0;
+}
+.logo figcaption {
+    font-size: clamp(1.5rem, 0.5rem + 1vw, 3rem);
+    font-weight: 900;
+    opacity: 0.5;
+    margin: 0 0 0 0.5rem;
+}
+.buttons {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    padding: clamp(1rem, 10dvw, 3rem);
+    width: 100%;
+    justify-content: right;
+}
+.buttons button {
+    padding: 10px clamp(30px, 3vw, 50px);
+    margin: 0 0 0 10px;
+    background: var(--primary);
+    border-radius: 5px;
+    border: transparent;
+    font-size: 1rem;
+    cursor: pointer;
+}
+.buttons button:active {
+    opacity: 0.3;
+}

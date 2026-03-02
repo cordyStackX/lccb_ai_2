@@ -3,8 +3,8 @@
 	"check_status" : "/services/supabase/auth/check_status",
 	"checkcode" : "/services/supabase/auth/check_code",
 	"signup" : {
-	    "checkEmail" : "/services/supabase/auth/signup/check_email",
-		"createAccount" : "/services/supabase/auth/signup/create_account"
+	    "checkEmail" : "/services/supabase/auth/register/check_email",
+		"createAccount" : "/services/supabase/auth/register/create_account"
 	},
 	"fotgot_password" : {
 		"checkEmail" : "/services/supabase/auth/forgot_password/check_email",

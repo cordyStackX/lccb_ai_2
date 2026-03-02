@@ -29,8 +29,9 @@ export async function POST(req: NextRequest) {
 
     } catch(err) {
 
-        console.error("Error: ", err);
-        return NextResponse.json({ success: false, error: "User not found" }, { status: 409 });
+        console.log(err);
+
+        return NextResponse.json({ success: false, error: "Please Registered this Email" }, { status: 409 });
 
     }
 }
