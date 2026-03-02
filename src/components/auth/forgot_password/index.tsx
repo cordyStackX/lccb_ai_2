@@ -3,12 +3,13 @@ import styles from "./css/styles.module.css";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import image_src from "@/config/images_links/assets.json";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import {
     Fetch_to,
     usePreventExit,
-    React_Spinners
+    React_Spinners,
+    Progress
 } from "@/utilities";
 
 export default function Forgot_password() {
@@ -23,6 +24,10 @@ export default function Forgot_password() {
     const [isDirty, setIsDirty] = useState(false);
 
     usePreventExit(isDirty);
+
+    useEffect(() => {
+        Progress(false);
+    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -88,7 +93,7 @@ export default function Forgot_password() {
                         )}
                        
                         <section className={`${styles.buttons} display_flex_center`}>
-                            <button type="button" onClick={() => {router.back();}} style={{backgroundColor: "var(--secondary)"}}>Back</button>
+                            <button type="button" onClick={() => {router.back(); Progress(true);}} style={{backgroundColor: "var(--secondary)"}}>Back</button>
                             <button>Next</button>
                         </section>
                     </form>

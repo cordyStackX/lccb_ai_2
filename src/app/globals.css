@@ -34,6 +34,19 @@ body {
   100% { opacity: 0.5; }
 }
 
+/* Glow effect */
+#nprogress .bar {
+  background: #1A54B8;
+  height: 3px;
+
+  box-shadow:
+    0 0 5px #1A54B8,
+    0 0 10px #1A54B8,
+    0 0 20px #1A54B8;
+
+  transition: all 0.3s ease;
+}
+
 * {
 	box-sizing: border-box;
 	padding: 0;

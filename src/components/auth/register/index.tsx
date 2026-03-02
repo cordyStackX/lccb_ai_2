@@ -9,7 +9,8 @@ import api_link from "@/config/conf/json_config/fetch_url.json";
 import {
     Fetch_to,
     usePreventExit,
-    React_Spinners
+    React_Spinners,
+    Progress
 } from "@/utilities";
 
 export default function SignUp() {
@@ -37,7 +38,7 @@ export default function SignUp() {
         } else {
             setIfMinors(false);
         }
-        
+        Progress(false);
         if (form.role == "Teacher") {
             setIfMinors(false);
             setIfTeacher(true);
@@ -168,7 +169,7 @@ export default function SignUp() {
                         {ifTeaher ? (
                             <p className="neutral">For Teacher{"'"}s you need to contact the admin to activate your account</p>
                         ) : null}
-                        <p>Already have an Account? <Link href={"/auth/signin"}>Sign In</Link></p>
+                        <p>Already have an Account? <Link href={"/auth/signin"} onClick={() => {Progress(true);}}>Sign In</Link></p>
                         <section className={`${styles.buttons} display_flex_center`}>
                             <button>Next</button>
                         </section>

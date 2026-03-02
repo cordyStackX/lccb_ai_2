@@ -1,7 +1,7 @@
 "use client";
 import styles from "./css/styles.module.css";
 import { useRouter } from "next/navigation";
-import { useInView } from "@/utilities";
+import { useInView, Progress } from "@/utilities";
 
 export default function Banner() {
     const router = useRouter();
@@ -37,13 +37,14 @@ export default function Banner() {
                     <span>system</span>
                     <span>enhanced</span>
                     <span>by</span>
-                    <span>Gemini</span>
+                    <span>Open</span>
                     <span>AI</span> 
                     <span>technologies.</span>
                     </p>
                         <section className={`${styles.buttons} display_flex_center`}>
-                            <button onClick={() => {router.push("/auth/signup");}} 
+                            <button onClick={() => {router.push("/auth/signup"); Progress(true);}} 
                             ref={spand} 
+                            
                             style={{'--spand-in' : spandIsInView ? 1 : 0 } as React.CSSProperties} >Ask LACO</button>
                         </section>
                 </section>

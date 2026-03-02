@@ -4,12 +4,13 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import image_src from "@/config/images_links/assets.json";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import {
     Fetch_to,
     usePreventExit,
-    React_Spinners
+    React_Spinners,
+    Progress
 } from "@/utilities";
 
 export default function SignIn() {
@@ -24,6 +25,10 @@ export default function SignIn() {
     const [isDirty, setIsDirty] = useState(false);
 
     usePreventExit(isDirty);
+
+    useEffect(() => {
+        Progress(false);
+    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -109,10 +114,10 @@ export default function SignIn() {
                         )}
                         <span className={`display_flex_center ${styles.checkbox}`}>
                             <input type="checkbox" required />
-                            <p>I agree to the <Link href={"/privacy"}>Privacy Policy</Link> & <Link href={"/terms"}>Terms of Conditions</Link></p>
+                            <p>I agree to the <Link href={"/privacy"} onClick={() => {Progress(true);}}>Privacy Policy</Link> & <Link href={"/terms"} onClick={() => {Progress(true);}} >Terms of Conditions</Link></p>
                         </span>
-                        <p>Register an Account? <Link href={"/auth/signup"}>Registered</Link></p>
-                        <p><Link href={"/auth/forgot-password"}>Forgot Password?</Link></p>
+                        <p>Register an Account? <Link href={"/auth/signup"} onClick={() => {Progress(true);}}>Registered</Link></p>
+                        <p><Link href={"/auth/forgot-password"} onClick={() => {Progress(true);}}>Forgot Password?</Link></p>
                         <section className={`${styles.buttons} display_flex_center`}>
                             <button>Sign In</button>
                         </section>
