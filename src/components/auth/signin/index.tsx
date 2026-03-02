@@ -118,7 +118,7 @@ export default function SignIn() {
                         </span>
                         <p>Register an Account? <Link href={"/auth/signup"} onClick={() => {Progress(true);}}>Registered</Link></p>
                         <p><Link href={"/auth/forgot-password"} onClick={() => {Progress(true);}}>Forgot Password?</Link></p>
-                        <section className={`${styles.buttons}`}>
+                        <section className={`${styles.buttons} display_flex_center`}>
                             <button>Sign In</button>
                         </section>
                     </form>
