@@ -49,7 +49,13 @@
 }
 .info {
     flex-flow: column;
-    align-items: flex-start;
+    justify-content: flex-start;
+    display: flex;
+}
+.logo, .checkbox {
+    align-items: center;
+    justify-content: flex-start;
+    display: flex;
 }
 .info h1 {
     font-size: clamp(1.3rem, 0.5rem + 1vw, 2rem);
@@ -79,7 +85,9 @@
     opacity: 0.3;
 }
 .checkbox {
+    align-items: center;
     justify-content: flex-start;
+    display: flex;
 }
 .checkbox input {
     width: 20px;
