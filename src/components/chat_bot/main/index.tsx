@@ -110,13 +110,13 @@ export default function Main({ emailRes, refresh, setRefresh, currentPdf }: Main
     };
 
     return(
-        <section className={`${styles.container} display_flex_center_column`}>
+        <section className={`${styles.container} `}>
                {status ?(
                 <section className={styles.chat}>
-                    <div className="display_flex_center_column">
+                    <div>
                         {messages.map((msg, index) => (
                             <div key={index} className={`${styles.response}`}>
-                                <div className={`${styles.user_respones} display_flex_center`}>
+                                <div className={`${styles.user_respones}`}>
                                     <div>
                                         <p>{msg.ask}</p>
                                     </div>
@@ -136,14 +136,14 @@ export default function Main({ emailRes, refresh, setRefresh, currentPdf }: Main
 
                                         </div>
                                     ) : index === messages.length - 1 && loading ? (
-                                        <div className={`display_flex_center ${styles.plushie_talk}`}>
+                                        <div className={` ${styles.plushie_talk}`}>
                                             <Image 
                                             src={image_src.plushie}
                                             alt="plushie"
                                             width={45}
                                             height={50}
                                             />
-                                            <div className={`${styles.spinner_wrapper} display_flex_center`}>
+                                            <div className={`${styles.spinner_wrapper}`}>
                                                 <ThreeDots
                                                 visible={true}
                                                 height="30"
@@ -178,7 +178,7 @@ export default function Main({ emailRes, refresh, setRefresh, currentPdf }: Main
                 onChange={HandleFile}
                 />
             </>
-            <form className={`${styles.ask} display_flex_center`} onSubmit={handleSubmit} style={{ position: status ? "fixed" : "initial" }}>
+            <form className={`${styles.ask} `} onSubmit={handleSubmit} style={{ position: status ? "fixed" : "initial" }}>
                 <span onClick={UploadPdf}>+</span>
                 <textarea
                 id="chat"

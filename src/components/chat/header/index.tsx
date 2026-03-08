@@ -1,10 +1,40 @@
 import styles from "./css/styles.module.css";
 import Image from "next/image";
+// import { SweetAlert2, Fetch_to } from "@/utilities";
+import { Spin as Hamburger } from "hamburger-react";
+// import Swal from "sweetalert2";
+// import api_link from "@/config/conf/json_config/fetch_url.json";
+// import { useRouter } from "next/navigation";
 
 export default function Header() {
+    // const router = useRouter();
+
+    // const handle_logout = async () => {
+
+    //     const alert2 = await SweetAlert2("Signning Out", "Are you sure want to sign out?", "warning", true, "Yes", true, "No");
+
+    //     if (alert2.isConfirmed) {
+    //         SweetAlert2("Signning Out", "", "info", false, "", false, "", true);
+    //         const response = await Fetch_to(api_link.jwt.deauth);
+    //         Swal.close();
+    //         if (response.success) {   
+    //             const alert2 = await SweetAlert2("Sign Out", "Complete", "success", true, "Go to Signin Page", false, "");
+    //             if (alert2.isConfirmed) { router.push("/auth/signin"); }
+    //         } else {
+    //             SweetAlert2("Error", "Something went wrong", "error", true, "Ok", false, "");
+    //         }
+            
+    //     } 
+    // };
+
+
     return(
         <header className={`${styles.container}`}>
-            <h1>LACO AI</h1>
+
+            <span>
+                <div className={styles.hamburger}><Hamburger  /></div>
+                <h1>LACO AI</h1>
+            </span>
             <span className={styles.profile}>
                 <Image 
                 src="/profile.png"

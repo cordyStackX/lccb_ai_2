@@ -103,7 +103,7 @@ def generate_md():
             return jsonify({"success": False, "error": "User not found"}), 404
 
         file_name = row.data["file_name"]
-        tmp_path = f"tmp/{file_name}"
+        tmp_path = f"tmp/{email}_{file_name}"
         role = user.data["role"]
         year = user.data["year"]
 
@@ -133,6 +133,9 @@ def generate_md():
         # --- Read Txt prompt template ---
         with open("python_txt_file/prompt.txt", "r", encoding="utf-8") as f:
             template = f.read()
+
+        with open("python_txt_file/system.txt", "r", encoding="utf-8") as f:
+            system_role = f.read()
 
         # --- Step 1: Find relevant chunks using embeddings/quick scan ---
         # For efficiency, we'll use a lightweight approach: ask GPT which chunks are relevant
@@ -182,6 +185,9 @@ Respond with ONLY comma-separated numbers (e.g., "1,3,4"). If all chunks seem re
         final_prompt = template.format(
             documents=combined_text,
             question=prompt,
+        )
+
+        systemRole = system_role.format(
             role=role,
             year=year
         )
@@ -190,7 +196,7 @@ Respond with ONLY comma-separated numbers (e.g., "1,3,4"). If all chunks seem re
         response = client.chat.completions.create(
             model="gpt-4.1-mini",
             messages=[
-                {"role": "system", "content": "You name is LACO a helpful assistant that answers questions based on PDF documents. Stay focused on the document content."},
+                {"role": "system", "content": systemRole},
                 {"role": "user", "content": final_prompt}
             ],
             temperature=0.7,
@@ -223,13 +229,14 @@ def download_file():
             return jsonify({"success": False, "error": "Missing file id"}), 400
 
         # ---- Get file metadata from Supabase row ----
-        row = supabase.table("pdf_file").select("file, file_name").eq("id", file_id).single().execute()
+        row = supabase.table("pdf_file").select("file, file_name, email").eq("id", file_id).single().execute()
         if not row.data:
             return jsonify({"success": False, "error": "File not found"}), 404
 
         # ---- Get the path relative to the bucket ----
         file_url = row.data["file"]           # could be full public URL
         file_name = row.data["file_name"]
+        email = row.data["email"]
 
         # Extract path inside bucket
         if "/pdfs/" in file_url:
@@ -243,7 +250,7 @@ def download_file():
             return jsonify({"success": False, "error": "Failed to download file"}), 500
 
         # ---- Save to tmp ----
-        tmp_path = f"tmp/{file_name}"
+        tmp_path = f"tmp/{email}_{file_name}"
         with open(tmp_path, "wb") as f:
             f.write(file_bytes)
 

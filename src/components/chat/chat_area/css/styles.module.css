@@ -1,0 +1,13 @@
+.container {
+    width: 40%;
+    height: 80vh;
+    z-index: 1;
+    transition: all 800ms ease;
+    overflow: hidden;
+    opacity: 1;
+    border: 1px solid var(--foreground);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 15px;
+}

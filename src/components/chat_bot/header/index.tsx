@@ -10,7 +10,7 @@ interface HeaderProps {
 
 export default function Header({ isOpen, setOpen }: HeaderProps) {
     return(
-        <header className={`${styles.container} display_flex_center`}>
+        <header className={`${styles.container}`}>
             
             <Hamburger toggled={isOpen} toggle={setOpen}  />
             
