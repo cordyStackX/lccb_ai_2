@@ -194,7 +194,7 @@ Respond with ONLY comma-separated numbers (e.g., "1,3,4"). If all chunks seem re
 
         # --- Call OpenAI with relevant context ---
         response = client.chat.completions.create(
-            model="gpt-4.1-mini",
+            model="gpt-5-mini",
             messages=[
                 {"role": "system", "content": systemRole},
                 {"role": "user", "content": final_prompt}
