@@ -4,12 +4,12 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import image_src from "@/config/images_links/assets.json";
 import Link from "next/link";
-import { Circles } from "react-loader-spinner";
 import { useState, useEffect } from "react";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import {
     Fetch_to,
-    usePreventExit
+    usePreventExit,
+    React_Spinners
 } from "@/utilities";
 
 export default function Create_Password() {
@@ -59,24 +59,16 @@ export default function Create_Password() {
     };
 
     return(
-        <section className={`${styles.container} display_flex_center`}>
-            <div className={`${styles.wrapper} display_flex_center`}>
+        <section className={`${styles.container} `}>
+            <div className={`${styles.wrapper} `}>
                 {loading ? (
-                    <div className={`${styles.form_styles} display_flex_center`}>
-                        <Circles
-                        height="80"
-                        width="80"
-                        color="#1A54B8"
-                        ariaLabel="circles-loading"
-                        wrapperStyle={{}}
-                        wrapperClass=""
-                        visible={true}
-                        />
+                    <div className={`${styles.form_styles} `}>
+                        <React_Spinners status="Activating Your Account..." />
                     </div>
                 ) : (
                     <form className={styles.form_styles} onSubmit={handleSubmit}>
-                        <section className={`${styles.info} display_flex_center`}>
-                            <figure className={`${styles.logo} display_flex_center`}>
+                        <section className={`${styles.info} `}>
+                            <figure className={`${styles.logo} `}>
                                 <Image 
                                 src={image_src.logo1}
                                 alt="Logo"
@@ -117,7 +109,7 @@ export default function Create_Password() {
                             <input type="checkbox" required />
                             <p>I agree to the <Link href={"/privacy"}>Privacy Policy</Link> & <Link href={"/terms"}>Terms of Conditions</Link></p>
                         </span>
-                        <section className={`${styles.buttons} display_flex_center`}>
+                        <section className={`${styles.buttons} `}>
                             <button type="button" onClick={() => {router.back();}} style={{backgroundColor: "var(--secondary)"}}>Back</button>
                             <button>Create</button>
                         </section>

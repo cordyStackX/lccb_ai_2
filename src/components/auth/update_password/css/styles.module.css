@@ -1,18 +1,23 @@
 .container {
     width: 100%;
     height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 .wrapper {
     width: var(--max-width);
     margin: 10px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 .form_styles {
     width: min(600px, 90dvw);
-    height: clamp(200px, 80vh, 480px);
+    height: auto;
     border-radius: 10px;
     background: var(--fx-color);
     padding: clamp(1rem, 10dvw, 3rem);
-    position: relative;
     overflow: hidden;
     opacity: 0;
     transform: translateY(50px);
@@ -28,17 +33,18 @@
         transform: translateY(0);
     }
 }
+
 .form_styles input {
     width: 100%;
     height: auto;
-    margin: 2rem 0 0 0;
+    margin: 1rem 0;
     font-size: clamp(1rem, 0.5rem + 1vw, 1.1rem);
     padding: 5px 0;
     background: transparent;
     border: transparent;
     border-bottom: 2px solid var(--primary);
-    color: var(--foreground);
     outline: none;
+    color: var(--foreground);
 }
 .form_styles p {
     margin: 1rem 0 0 0;
@@ -47,13 +53,27 @@
 .form_styles a {
     color: var(--default-color-blue);
 }
+.form_styles select {
+    background: var(--primary);
+    cursor: pointer;
+    padding: 0.5rem;
+    margin: 0.3rem 0.5rem;
+    outline: none;
+    border: transparent;
+}
 .info {
     flex-flow: column;
     align-items: flex-start;
+    display: flex;
 }
 .info h1 {
     font-size: clamp(1.3rem, 0.5rem + 1vw, 2rem);
     margin: 1rem 0 0 0;
+}
+.logo {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
 }
 .logo figcaption {
     font-size: clamp(1.5rem, 0.5rem + 1vw, 3rem);
@@ -62,11 +82,9 @@
     margin: 0 0 0 0.5rem;
 }
 .buttons {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    padding: clamp(1rem, 10dvw, 3rem);
+    padding: 2rem 0 0 0;
     width: 100%;
+    display: flex;
     justify-content: right;
 }
 .buttons button {
@@ -80,4 +98,25 @@
 }
 .buttons button:active {
     opacity: 0.3;
+}
+.checkbox {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: 100%;
+    height: 35px;
+    position: relative;
+}
+.checkbox p {
+    position: absolute;
+    top: 0;
+    left: 2.3rem;
+}
+.checkbox input {
+    width: 20px;
+    height: 20px;
+    margin: 0 10px;
+    cursor: pointer;
+    position: absolute;
+    bottom: 0;
 }

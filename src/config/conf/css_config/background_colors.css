@@ -1,18 +1,23 @@
 
 .landpage {
-	background: linear-gradient(0deg, var(--primary), var(--foreground));
+	background: linear-gradient(0deg, var(--primary), var(--default-color-white-2));
     position: fixed;
     width: 100%;
     z-index: -2;
 }
 
 .auth_page {
-    background: linear-gradient(0deg, var(--primary), var(--foreground));
+    background: linear-gradient(0deg, var(--primary), var(--default-color-white-2));
     color: var(--foreground);
 }
 
 .chat_page { 
     background: linear-gradient(90deg, var(--adaptive-color-1), var(--adaptive-color-3));
+}
+
+.chat_page_2 { 
+    background: linear-gradient(90deg, var(--adaptive-color-1), var(--adaptive-color-3));
+    color: var(--foreground);
 }
 
 .admin {

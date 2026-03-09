@@ -1,5 +1,7 @@
 # LACO AI - Intelligent PDF Analysis System
 
+**Developing Area**: [Development Page](https://lccb-ai-2-git-developingarea-cordystackg.vercel.app/)
+
 **Author**: [cordyStackX](https://github.com/cordyStackX) | **Year**: 2025
 
 ![Beta Version](https://img.shields.io/badge/version-beta-yellow)

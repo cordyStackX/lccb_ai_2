@@ -3,11 +3,11 @@ import styles from "./css/styles.module.css";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import image_src from "@/config/images_links/assets.json";
-import { Circles } from "react-loader-spinner";
 import { useState, useEffect } from "react";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import {
     Fetch_to,
+    React_Spinners
 } from "@/utilities";
 
 export default function Confirm_email_signin() {
@@ -59,24 +59,16 @@ export default function Confirm_email_signin() {
     };
     
     return(
-        <section className={`${styles.container} display_flex_center`}>
+        <section className={`${styles.container} `}>
             <div className="wrapper display_flex_center">
                 {loading ? (
-                    <div className={`${styles.form_styles} display_flex_center`}>
-                        <Circles
-                        height="80"
-                        width="80"
-                        color="#1A54B8"
-                        ariaLabel="circles-loading"
-                        wrapperStyle={{}}
-                        wrapperClass=""
-                        visible={true}
-                        />
+                    <div className={`${styles.form_styles} `}>
+                       <React_Spinners status="Confirming Auth..." />
                     </div>
                 ) : (
                     <form className={styles.form_styles} onSubmit={ConfirmCode}>
-                        <section className={`${styles.info} display_flex_center`}>
-                            <figure className={`${styles.logo} display_flex_center`}>
+                        <section className={`${styles.info} `}>
+                            <figure className={`${styles.logo} `}>
                                 <Image 
                                 src={image_src.logo1}
                                 alt="Logo"
@@ -101,8 +93,8 @@ export default function Confirm_email_signin() {
                         {message && (
                             <p className={status ?  "error" : "success"}>{message}</p>
                         )}
-                        <p>Didn{"'"}t Recieve? <a onClick={() => {SendCode(form.email);}}>Resend Code</a></p>
-                        <section className={`${styles.buttons} display_flex_center`}>
+                        <p>Didn{"'"}t Recieve? <a onClick={() => {SendCode(form.email);}} style={{ cursor: "pointer" }}>Resend Code</a></p>
+                        <section className={`${styles.buttons} `}>
                             <button type="button" onClick={() => {router.back();}} style={{backgroundColor: "var(--secondary)"}}>Back</button>
                             <button>Confirm</button>
                         </section>

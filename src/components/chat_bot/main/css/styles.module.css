@@ -1,9 +1,13 @@
 .container {
     width: 100%;
-    height: 100vh;
+    height: 100dvh;
     position: relative;
     overflow: hidden;
     color: var(--foreground);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-flow: column;
 }
 .container h1 {
     text-align: center;
@@ -29,6 +33,8 @@
     height: auto;
     justify-content: right;
     margin: 2rem 0;
+    display: flex;
+    align-items: center;
 }
 .user_respones div {
     width: 500px;
@@ -85,6 +91,7 @@
 .spinner_wrapper {
     justify-content: left;
     padding: 1rem 0;
+    display: flex;
 }
 
 .ask {
@@ -97,10 +104,14 @@
     background: var(--default-color-white-2);
     box-shadow: 0 0 2px 1px var(--foreground);
     bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 .plushie_talk {
     justify-content: flex-start;
     align-items: flex-start;
+    display: flex;
 }
 .plushie_talk div {
     margin: 0 1rem;

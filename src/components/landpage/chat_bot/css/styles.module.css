@@ -11,6 +11,8 @@
     cursor: pointer;
     overflow: hidden;
     justify-content: flex-start;
+    display: flex;
+    align-items: center;
     animation: spand_in 3000ms 2s ease-in-out;
 }
 @keyframes spand_in {

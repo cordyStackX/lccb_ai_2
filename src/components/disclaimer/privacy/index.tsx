@@ -1,6 +1,14 @@
+"use client";
 import styles from "./css/styles.module.css";
+import { Progress } from "@/utilities";
+import { useEffect } from "react";
 
 export default function Privacy() {
+
+    useEffect(() => {
+        Progress(false);
+    }, []);
+
 
     return(
         <section className={styles.container}>

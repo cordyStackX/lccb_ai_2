@@ -1,0 +1,36 @@
+.container {
+    width: 100%;
+    height: auto;
+    padding: 1.2rem 1rem;
+    position: fixed;
+    z-index: 999;
+    top: 0;
+    justify-content: space-between;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--foreground);
+}
+.container h1 {
+    font-size: clamp(1rem, 0.5rem + 1vw, 2rem);
+    margin-left: 1rem;
+}
+.container span {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.profile {
+    cursor: pointer;
+}
+.chevron {
+    margin: 0 0.5rem;
+}
+.hamburger {
+    display: none;
+}
+
+@media (max-width: 1023px) {
+    .hamburger {
+        display: flex;
+    }
+}

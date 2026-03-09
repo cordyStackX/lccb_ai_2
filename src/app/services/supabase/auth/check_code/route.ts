@@ -5,8 +5,11 @@ import { supabaseServer } from "@/lib/supabase-server";
 
 const COOLDOWN_MS = 60 * 3000; // 3 minute
 
+let callCount = 0;
+
 
 export async function POST(req: NextRequest) {
+    callCount++;
 
     const { email, code } = await req.json();
 
@@ -43,6 +46,12 @@ export async function POST(req: NextRequest) {
                 { success: false, error: "Invalid code" },
                 { status: 409 }
             );
+        }
+
+        if (callCount >= 4) {
+            // ✅ add this
+            CodeStore.delete(cleanEmail);
+            cooldownMap.delete(cleanEmail); 
         }
 
         // Code correct
