@@ -103,7 +103,7 @@ def generate_md():
             return jsonify({"success": False, "error": "User not found"}), 404
 
         file_name = row.data["file_name"]
-        tmp_path = f"tmp/{email}_{file_name}"
+        tmp_path = f"/tmp/{email}_{file_name}"
         role = user.data["role"]
         year = user.data["year"]
 
@@ -244,7 +244,7 @@ def download_file():
             file_path = file_url  # assume already relative path
 
         # ---- Check if file already exists in tmp ----
-        tmp_path = f"tmp/{email}_{file_name}"
+        tmp_path = f"/tmp/{email}_{file_name}"
         if os.path.exists(tmp_path):
             return jsonify({
                 "success": True,
