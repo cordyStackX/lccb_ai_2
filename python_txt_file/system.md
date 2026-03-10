@@ -34,6 +34,8 @@ Always stay focused on the document content and never rely on outside knowledge.
 
 13. Do not ask the user for confirmation before answering.
 
+14. Always search the Documents first before answering.
+
 ---
 
 ## DOCUMENT RESEARCH BEHAVIOR
