@@ -1,0 +1,123 @@
+.container {
+    width: 0;
+    height: 100dvh;
+    background-color: var(--default-color-white);
+    z-index: 1;
+    transition: all 800ms ease;
+    overflow: hidden;
+    opacity: 0;
+    border-right: 1px solid var(--foreground);
+    color: var(--foreground);
+}
+.open {
+    width: 400px;
+    opacity: 1;
+}
+.wrapper {
+    width: var(--max-width);
+    height: 100%;
+    margin: 10px auto;
+    flex-flow: column;
+}
+.options {
+    width: 100%;
+    height: auto;
+    overflow: hidden;
+    padding: 0.5rem 0.7rem;
+    margin: 1rem 0;
+}
+.options button {
+    width: 100%;
+    height: 50px;
+    cursor: pointer;
+    background: var(--primary);
+    border: transparent;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 0.9rem;
+    margin: 5rem 0 0 0;
+}
+.search_pdf {
+    width: 100%;
+    height: 50px;
+    padding: 1rem;
+    background: transparent;
+    border: 1px solid var(--foreground);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    border-radius: 5px;
+    text-align: left;
+    font-size: 0.9rem;
+    margin: 1rem 0;
+    color: var(--foreground);
+}
+.chat_history {
+    width: 100%;
+    height: 700px;
+    padding: 0.5rem 0.1rem;
+    flex-flow: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+.chat_history select {
+    background: transparent;
+    border: transparent;
+    outline: none;
+    cursor: pointer;
+    margin: 1rem 0;
+    color: var(--adaptive-color-text);
+    font-weight: 900;
+}
+.pdf_base {
+    width: 100%;
+    height: auto;
+}
+.pdf_base h3 {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+.pdf_container {
+    width: 100%;
+    height: 600px;
+    overflow: auto;
+}
+.pdf_container span {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.pdf_icon {
+    margin: 0 0.5rem;
+}
+.pdf_container button {
+    width: 100%;
+    height: 50px;
+    cursor: pointer;
+    background: transparent;
+    border: transparent;
+    text-align: left;
+    margin: 0.5rem;
+    font-size: 0.9rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    color: var(--foreground);
+}
+
+@media (max-width: 1200px) {
+    .container {
+        position: fixed;
+        left: 0;
+        width: 0;
+    }
+    .open {
+        width: 250px;
+        opacity: 1;
+        overflow: visible;
+    }
+}

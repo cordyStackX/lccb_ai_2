@@ -114,9 +114,9 @@ def generate_md():
         # --- Read PDF and create chunks ---
         reader = PdfReader(tmp_path)
         
-        # Create chunks (2 pages per chunk for 8-page PDF = 4 chunks)
+        # Create chunks (4 pages per chunk for 8-page PDF = 4 chunks)
         chunks = []
-        chunk_size = 2  # pages per chunk
+        chunk_size = 4  # pages per chunk
         
         for i in range(0, len(reader.pages), chunk_size):
             chunk_text = ""
@@ -131,10 +131,10 @@ def generate_md():
                 })
         
         # --- Read Txt prompt template ---
-        with open("python_txt_file/prompt.txt", "r", encoding="utf-8") as f:
+        with open("python_txt_file/prompt.md", "r", encoding="utf-8") as f:
             template = f.read()
 
-        with open("python_txt_file/system.txt", "r", encoding="utf-8") as f:
+        with open("python_txt_file/system.md", "r", encoding="utf-8") as f:
             system_role = f.read()
 
         # --- Step 1: Find relevant chunks using embeddings/quick scan ---
@@ -145,7 +145,6 @@ def generate_md():
         ])
         
         relevance_prompt = f"""Given this question: "{prompt}"
-
 Here are summaries of document chunks:
 {chunk_summaries}
 
@@ -194,7 +193,7 @@ Respond with ONLY comma-separated numbers (e.g., "1,3,4"). If all chunks seem re
 
         # --- Call OpenAI with relevant context ---
         response = client.chat.completions.create(
-            model="gpt-5-mini",
+            model="gpt-4.1-mini",
             messages=[
                 {"role": "system", "content": systemRole},
                 {"role": "user", "content": final_prompt}
@@ -244,13 +243,22 @@ def download_file():
         else:
             file_path = file_url  # assume already relative path
 
+        # ---- Check if file already exists in tmp ----
+        tmp_path = f"tmp/{email}_{file_name}"
+        if os.path.exists(tmp_path):
+            return jsonify({
+                "success": True,
+                "tmp_path": tmp_path,
+                "file_name": file_name,
+                "cached": True
+            })
+
         # ---- Download content using service role key ----
         file_bytes = supabase.storage.from_("pdfs").download(file_path)
         if not file_bytes:
             return jsonify({"success": False, "error": "Failed to download file"}), 500
 
         # ---- Save to tmp ----
-        tmp_path = f"tmp/{email}_{file_name}"
         with open(tmp_path, "wb") as f:
             f.write(file_bytes)
 

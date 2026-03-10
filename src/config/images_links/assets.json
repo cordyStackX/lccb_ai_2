@@ -3,5 +3,7 @@
     "admin" : "/admin.png",
     "plushie" : "/logo2.png",
     "sbit" : "/sbit_logo.png",
-    "lccb" : "/lccb_logo.png"
+    "lccb" : "/lccb_logo.png",
+    "face" : "/face.png",
+    "pdf_icon" : "/pdf.png"
 }

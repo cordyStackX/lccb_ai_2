@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
         secure: true,
         sameSite: "strict",
         path: "/",
-        maxAge: 3600,
+        maxAge: 86400,
     });
 
     console.log(" ==> User is Successfully Log In");

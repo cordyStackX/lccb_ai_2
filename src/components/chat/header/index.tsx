@@ -1,49 +1,57 @@
 import styles from "./css/styles.module.css";
-import Image from "next/image";
-// import { SweetAlert2, Fetch_to } from "@/utilities";
 import { Spin as Hamburger } from "hamburger-react";
-// import Swal from "sweetalert2";
-// import api_link from "@/config/conf/json_config/fetch_url.json";
-// import { useRouter } from "next/navigation";
+import { Dispatch, SetStateAction } from "react";
+import Image from "next/image";
+import image_src from "@/config/images_links/assets.json";
+import { useState } from "react";
+import { Fetch_to, SweetAlert2 } from "@/utilities";
+import Swal from "sweetalert2";
+import { useRouter } from "next/navigation";
+import api_link from "@/config/conf/json_config/fetch_url.json";
 
-export default function Header() {
-    // const router = useRouter();
+interface HeaderProps {
+    isOpen: boolean;
+    setOpen: Dispatch<SetStateAction<boolean>>;
+}
 
-    // const handle_logout = async () => {
 
-    //     const alert2 = await SweetAlert2("Signning Out", "Are you sure want to sign out?", "warning", true, "Yes", true, "No");
+export default function Header({ isOpen, setOpen }: HeaderProps) {
+    const router = useRouter();
+    const [profile, setProfile] = useState(false);
 
-    //     if (alert2.isConfirmed) {
-    //         SweetAlert2("Signning Out", "", "info", false, "", false, "", true);
-    //         const response = await Fetch_to(api_link.jwt.deauth);
-    //         Swal.close();
-    //         if (response.success) {   
-    //             const alert2 = await SweetAlert2("Sign Out", "Complete", "success", true, "Go to Signin Page", false, "");
-    //             if (alert2.isConfirmed) { router.push("/auth/signin"); }
-    //         } else {
-    //             SweetAlert2("Error", "Something went wrong", "error", true, "Ok", false, "");
-    //         }
+    const handle_logout = async () => {
+
+        const alert2 = await SweetAlert2("Signning Out", "Are you sure want to sign out?", "warning", true, "Yes", true, "No");
+
+        if (alert2.isConfirmed) {
+            SweetAlert2("Signning Out", "", "info", false, "", false, "", true);
+            const response = await Fetch_to(api_link.jwt.deauth);
+            Swal.close();
+            if (response.success) {   
+                const alert2 = await SweetAlert2("Sign Out", "Complete", "success", true, "Go to Signin Page", false, "");
+                if (alert2.isConfirmed) { router.push("/auth/signin"); }
+            } else {
+                SweetAlert2("Error", "Something went wrong", "error", true, "Ok", false, "");
+            }
             
-    //     } 
-    // };
-
+        } 
+    };
 
     return(
         <header className={`${styles.container}`}>
-
-            <span>
-                <div className={styles.hamburger}><Hamburger  /></div>
-                <h1>LACO AI</h1>
-            </span>
-            <span className={styles.profile}>
-                <Image 
-                src="/profile.png"
-                alt="User Profile"
-                width={35}
-                height={35}
+            
+            <Hamburger toggled={isOpen} toggle={setOpen}  />
+            
+            <h1>LACO AI</h1>
+            <span className={styles.profile} onClick={() => setProfile(!profile)}>
+                <Image
+                src={image_src.face}
+                alt="Profile Pic"
+                width={30}
+                height={30}
                 />
                 <svg
-                className={styles.chevron}
+                className={profile ? styles.chevron_open : styles.chevron}
                 width="30"
                 height="30"
                 viewBox="0 0 20 20"
@@ -57,6 +65,18 @@ export default function Header() {
                 </svg>
             </span>
             
+            <section className={`${styles.user_info_menu} ${profile ? styles.user_info_menu_open : ''}`}>
+                <figure className={styles.profile_info_img}>
+                    <Image src={image_src.face} alt="User Pic" width={60} height={60}/>
+                    <div>
+                        <figcaption> Marc Giestin Louis Cordova </figcaption>
+                        <p> mglgain@gmail.com </p>
+                    </div>
+                </figure>
+               
+                <button className={styles.setting} onClick={() => {router.push("/user/settings");}}>Setting</button>
+                <button className={styles.signout} onClick={handle_logout}>Sign Out</button>
+            </section>
 
         </header>
     );
