@@ -3,28 +3,92 @@ import { supabaseServer } from "@/lib/supabase-server";
 import { Security } from "@/lib/security";
 
 export async function POST(req: NextRequest) {
+  const auth = await Security(req);
+  if (auth?.error) {
+    return NextResponse.json(
+      { success: false, error: "Unauthorized" },
+      { status: 401 }
+    );
+  }
 
-    const auth = await Security(req);
-    if(auth?.error) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    
-    const { email } = await req.json();
+  const { email } = await req.json();
+  const cleanEmail = email?.trim().toLowerCase();
 
-    const cleanEmail = email.trim().toLowerCase();
+  if (!cleanEmail) {
+    return NextResponse.json(
+      { success: false, error: "Email not found" },
+      { status: 404 }
+    );
+  }
 
-    if (!cleanEmail) return NextResponse.json({ success: false, error: "Email not found" }, { status: 404 });
-
-    const { data, error } = await supabaseServer
+  const { data, error } = await supabaseServer
     .from("pdf_file")
     .select("id, file, file_name, status")
     .eq("email", cleanEmail);
 
-    if (error) {
-        console.error("Supabase Query Error: ", error);
-        return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
-    }
+  if (error) {
+    console.error("Supabase Query Error:", error);
+    return NextResponse.json(
+      { success: false, error: "Something went wrong" },
+      { status: 500 }
+    );
+  }
 
-    if (data.length <= 0) return NextResponse.json({ success: true, error: [{ id: 0, file_name: "No PDF Found" }] }, { status: 400 });
+  if (!data || data.length === 0) {
+    return NextResponse.json(
+      { success: true, error: [{ id: 0, file_name: "No PDF Found" }] },
+      { status: 400 }
+    );
+  }
 
-    return NextResponse.json({ success: true, message: data }, { status: 200 });
+  const bucketName = "pdfs";
 
+  const filesWithSize = await Promise.all(
+    data.map(async (item) => {
+      try {
+        const fullPath = item.file; // example: documents/user1/sample.pdf
+        const pathParts = fullPath.split("/");
+        const fileName = pathParts.pop();
+        const folderPath = pathParts.join("/");
+
+        const { data: storageFiles, error: storageError } = await supabaseServer
+          .storage
+          .from(bucketName)
+          .list(folderPath);
+
+        if (storageError) {
+          console.error("Storage Error:", storageError);
+          return {
+            ...item,
+            file_size: null,
+            file_size_mb: null,
+          };
+        }
+
+        const matchedFile = storageFiles.find((f) => f.name === fileName);
+
+        const sizeBytes = matchedFile?.metadata?.size ?? null;
+
+        return {
+          ...item,
+          file_size: sizeBytes,
+          file_size_mb: sizeBytes
+            ? (sizeBytes / (1024 * 1024)).toFixed(2)
+            : null,
+        };
+      } catch (err) {
+        console.error("File size processing error:", err);
+        return {
+          ...item,
+          file_size: null,
+          file_size_mb: null,
+        };
+      }
+    })
+  );
+
+  return NextResponse.json(
+    { success: true, message: filesWithSize },
+    { status: 200 }
+  );
 }
