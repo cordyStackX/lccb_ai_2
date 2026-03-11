@@ -52,6 +52,7 @@ export async function POST(req: NextRequest) {
             // ✅ add this
             CodeStore.delete(cleanEmail);
             cooldownMap.delete(cleanEmail); 
+            callCount = 0;
         }
 
         // Code correct

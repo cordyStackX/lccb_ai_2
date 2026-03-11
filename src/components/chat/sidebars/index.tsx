@@ -26,6 +26,7 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, name }: Side
     const fileRef = useRef<HTMLInputElement>(null);
     const [refresh, setRefresh] = useState(Boolean);
     const [searchQuery, setSearchQuery] = useState("");
+    const [showNoData, setShowNoData] = useState(false);
 
     useEffect(() => {
         if (profile) setProfile(false);
@@ -37,6 +38,8 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, name }: Side
             if (response.success) {
                 console.log(response.data.message);
                 setData(response.data.message);
+            } else {
+                setShowNoData(true);
             }
         };
         retrieve_pdf();
@@ -98,7 +101,7 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, name }: Side
             </>
             <div className={`${styles.wrapper}`}>
                 <section className={styles.options}>
-                    <button onClick={UploadPdf}>Upload New PDF</button>
+                    <button onClick={UploadPdf} title="Upload your pdf" >Upload New PDF</button>
                     <input 
                         type="text" 
                         placeholder="Search PDF" 
@@ -127,8 +130,9 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, name }: Side
                                             />
                                             <button key={index}
                                             onClick={() => setSelectedPdfId(pdf.id)}
+                                            title={pdf.file_name}
                                             style={{ fontWeight: pdf.id === selectedPdfId ? "bold" : "" }}
-                                            >  {pdf.file_name} {`(${pdf.id})`} <br /> {pdf.file_size_mb} MB </button>
+                                            >  {pdf.file_name} <br /> {pdf.file_size_mb} MB </button>
                                         <span
                                         style={{ display: pdf.id === selectedPdfId ? "block" : "none" }}
                                         >⬤</span>
@@ -141,7 +145,16 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, name }: Side
                                     </p>
                                 )
                             ) : (
-                                <React_Spinners status="Fetching..."/>
+                                <div>
+                                    {showNoData ? (
+                                        <p style={{ textAlign: "center", padding: "1rem", color: "var(--foreground)", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
+                                            No PDF Found
+                                        </p>
+                                    ) : (
+                                        <React_Spinners status="Fetching..."/>
+                                    )}
+                                </div>
+                                
                             )}
                         </div>
                     </div>
