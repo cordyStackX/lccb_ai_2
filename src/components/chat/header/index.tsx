@@ -12,10 +12,12 @@ import api_link from "@/config/conf/json_config/fetch_url.json";
 interface HeaderProps {
     isOpen: boolean;
     setOpen: Dispatch<SetStateAction<boolean>>;
+    name: string;
+    email: string;
 }
 
 
-export default function Header({ isOpen, setOpen }: HeaderProps) {
+export default function Header({ isOpen, setOpen, name, email }: HeaderProps) {
     const router = useRouter();
     const [profile, setProfile] = useState(false);
 
@@ -44,12 +46,15 @@ export default function Header({ isOpen, setOpen }: HeaderProps) {
             
             <h1>LACO AI</h1>
             <span className={styles.profile} onClick={() => setProfile(!profile)}>
-                <Image
-                src={image_src.face}
-                alt="Profile Pic"
-                width={30}
-                height={30}
-                />
+                <span>
+                    <Image
+                    src={image_src.profile}
+                    alt="Profile Pic"
+                    width={40}
+                    height={40}
+                    />
+                </span>
+                
                 <svg
                 className={profile ? styles.chevron_open : styles.chevron}
                 width="30"
@@ -67,15 +72,17 @@ export default function Header({ isOpen, setOpen }: HeaderProps) {
             
             <section className={`${styles.user_info_menu} ${profile ? styles.user_info_menu_open : ''}`}>
                 <figure className={styles.profile_info_img}>
-                    <Image src={image_src.face} alt="User Pic" width={60} height={60}/>
+                    <span>
+                        <Image src={image_src.profile} alt="User Pic" width={70} height={70}/>
+                    </span>
                     <div>
-                        <figcaption> Marc Giestin Louis Cordova </figcaption>
-                        <p> mglgain@gmail.com </p>
+                        <figcaption> {name} </figcaption>
+                        <p title={email} > {email} </p>
                     </div>
                 </figure>
                
-                <button className={styles.setting} onClick={() => {router.push("/user/settings");}}>Setting</button>
-                <button className={styles.signout} onClick={handle_logout}>Sign Out</button>
+                <button className={styles.setting} title="My Profile" onClick={() => {alert("Under Development");}}>My Profile</button>
+                <button className={styles.signout} title="Sign Out" onClick={handle_logout}>Sign Out</button>
             </section>
 
         </header>

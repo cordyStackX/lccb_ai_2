@@ -24,7 +24,7 @@ export default function ChatPage() {
 
     return(
         <main className="chat_page">
-            <Header isOpen={isOpen} setOpen={setOpen} />
+            <Header isOpen={isOpen} setOpen={setOpen} name={name} email={email} />
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center"}}>
                 <Sidebars isOpen={isOpen} emailRes={email} setCurrentPdf={setCurrentPdf} name={name} />
                 <Main emailRes={email} currentPdf={currentPdf}/>

@@ -47,6 +47,7 @@ export default function Main({ emailRes, currentPdf }: MainProps) {
         if (!lastMessage.respond || loading) return;
 
         setIsAnimating(true);
+        setLoading(true);
         setAnimatedText("");
         
         let currentIndex = 0;
@@ -58,12 +59,13 @@ export default function Main({ emailRes, currentPdf }: MainProps) {
                 currentIndex++;
             } else {
                 setIsAnimating(false);
+                setLoading(false);
                 clearInterval(intervalId);
             }
-        }, 5); // Faster speed for better UX
+        }, 10); // Faster speed for better UX
 
         return () => clearInterval(intervalId);
-    }, [messages, loading]);
+    }, [messages]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setChatres({ ...chatres, [e.target.name]: e.target.value });
@@ -94,7 +96,6 @@ export default function Main({ emailRes, currentPdf }: MainProps) {
             };
             return updated;
         });
-
         setLoading(false);
     };
 
@@ -208,7 +209,7 @@ export default function Main({ emailRes, currentPdf }: MainProps) {
                 autoComplete="off"
                 spellCheck={false}
                 />
-                <button disabled={loading} style={{ opacity: `${loading ? "0.5" : "1" }` }}>Ask</button>
+                <button disabled={loading} title="Send your message" style={{ opacity: `${loading ? "0.5" : "1" }` }}>Ask</button>
             </form>
         </section>
     );
