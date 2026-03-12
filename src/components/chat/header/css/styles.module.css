@@ -5,7 +5,7 @@
     position: fixed;
     color: var(--foreground);
     background-color: var(--default-color-white);
-    z-index: 999;
+    z-index: 9;
     top: 0;
     justify-content: space-between;
     display: flex;
@@ -39,6 +39,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    border: 1px solid var(--primary);
 }
 .user_info_menu {
     position: fixed;
@@ -50,7 +51,7 @@
     display: none;
     justify-content: center;
     align-items: center;
-    padding: 3rem 1rem;
+    padding: 3rem 1rem 0 0;
     box-shadow: 0 0 3px 1px var(--foreground);
 }
 .user_info_menu_open {
@@ -67,11 +68,12 @@
     background-color: var(--primary);
     margin: 1rem;
     overflow: hidden;
-    width: 70px;
-    height: 70px;
+    width: 120px;
+    height: 120px;
     display: flex;
     justify-content: center;
     align-items: center;
+    border: 2px solid var(--primary);
 }
 .profile_info_img p {
     width: 200px;

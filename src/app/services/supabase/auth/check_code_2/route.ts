@@ -4,6 +4,7 @@ import { cooldownMap, CodeStore } from "@/lib/code_store";
 
 const COOLDOWN_MS = 60 * 3000; // 3 minute
 
+let callCount = 0;
 
 export async function POST(req: NextRequest) {
 
@@ -21,8 +22,10 @@ export async function POST(req: NextRequest) {
     //Check if their is existing code
     if (code) {
         const stored = CodeStore.get(cleanEmail);
+        callCount++;
 
         if (!stored) {
+            callCount = 0;
             return NextResponse.json(
                 { success: false, error: "Code expired or not found" },
                 { status: 400 }
@@ -31,10 +34,12 @@ export async function POST(req: NextRequest) {
 
         if (Date.now() > stored.expiresAt) {
             CodeStore.delete(cleanEmail);
+            callCount = 0;
             return NextResponse.json(
                 { success: false, error: "Code expired" },
                 { status: 409 }
             );
+            
         }
 
         if (stored.code !== code) {
@@ -44,9 +49,13 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        CodeStore.delete(cleanEmail);
-        cooldownMap.delete(cleanEmail); 
-
+        if (callCount >= 3) {
+            // ✅ add this
+            CodeStore.delete(cleanEmail);
+            cooldownMap.delete(cleanEmail); 
+            callCount = 0;
+        }
+        
         // Code correct
         return NextResponse.json({ success: true }, { status: 200 });
     }

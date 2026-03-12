@@ -3,23 +3,19 @@ import { supabaseServer } from "@/lib/supabase-server";
 import { Security } from "@/lib/security";
 
 export async function POST(req: NextRequest) {
-  const auth = await Security(req);
-  if (auth?.error) {
-    return NextResponse.json(
-      { success: false, error: "Unauthorized" },
-      { status: 401 }
-    );
-  }
 
-  const { email } = await req.json();
-  const cleanEmail = email?.trim().toLowerCase();
+    const auth = await Security(req);
+    if(auth?.error) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
 
-  if (!cleanEmail) {
-    return NextResponse.json(
-      { success: false, error: "Email not found" },
-      { status: 404 }
-    );
-  }
+    const { email } = await req.json();
+    const cleanEmail = email?.trim().toLowerCase();
+
+    if (!cleanEmail) {
+      return NextResponse.json(
+        { success: false, error: "Email not found" },
+        { status: 404 }
+      );
+    }
 
   const { data, error } = await supabaseServer
     .from("pdf_file")

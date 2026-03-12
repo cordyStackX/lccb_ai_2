@@ -2,6 +2,7 @@
 	"signin" : "/services/supabase/auth/signin",
 	"check_status" : "/services/supabase/auth/check_status",
 	"checkcode" : "/services/supabase/auth/check_code",
+	"checkcode_2" : "/services/supabase/auth/check_code_2",
 	"signup" : {
 	    "checkEmail" : "/services/supabase/auth/register/check_email",
 		"createAccount" : "/services/supabase/auth/register/create_account"
@@ -10,6 +11,7 @@
 		"checkEmail" : "/services/supabase/auth/forgot_password/check_email",
 		"updateAccount" : "/services/supabase/auth/forgot_password/update_account"
 	},
+	"update" : "/services/supabase/auth/update",
 	"jwt" : {
 		"auth" : "/services/jwt/auth",
 		"deauth" : "/services/jwt/deauth",
@@ -21,7 +23,8 @@
 		"uploadPdf" : "/services/supabase/storage/uploadpdf",
 		"retrieve" : "/services/supabase/storage/retrieve",
 		"updatepdf" : "/services/supabase/storage/updatepdf",
-		"deletepdf" : "/services/supabase/storage/deletepdf"
+		"deletepdf" : "/services/supabase/storage/deletepdf",
+		"uploadimg" : "/services/supabase/storage/uploadimg"
 	},
 	"admin" : {
 		"retrieve_user" : "/services/supabase/admin/retrieve_user",
