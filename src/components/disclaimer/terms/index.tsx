@@ -117,7 +117,7 @@ export default function Terms() {
                         <li>AI responses powered by OpenAI may be inaccurate, incomplete, biased, or unreliable</li>
                         <li>Large PDF files may experience processing delays, timeouts, or failures</li>
                         <li>Rate limiting enforced: 1 request per second per IP address</li>
-                        <li>Exceeding rate limits results in HTTP 429 "Too Many Requests" errors</li>
+                        <li>Exceeding rate limits results in HTTP 429 {'"'}Too Many Requests{'"'} errors</li>
                         <li>Email verification required for password reset and account recovery</li>
                         <li>JWT tokens may expire, requiring re-authentication</li>
                         <li>Search functionality limited to file names only</li>
