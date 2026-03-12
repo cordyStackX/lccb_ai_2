@@ -37,7 +37,7 @@ export default function Create_Password() {
             const saveYear = localStorage.getItem("year");
             const saveRole = localStorage.getItem("role");
             const code = localStorage.getItem("code");
-            const response = await Fetch_to(api_link.checkcode, { email: saveEmail, code: code });
+            const response = await Fetch_to(api_link.checkcode_2, { email: saveEmail, code: code });
             if (!response.success) return router.push("/auth/signin");
             setForm(prev => ({ ...prev, email: saveEmail || "", name: saveName || "", year: saveYear || "", role: saveRole || ""}));
         };

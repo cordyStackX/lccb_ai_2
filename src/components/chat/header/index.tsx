@@ -1,9 +1,8 @@
 import styles from "./css/styles.module.css";
 import { Spin as Hamburger } from "hamburger-react";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import Image from "next/image";
 import image_src from "@/config/images_links/assets.json";
-import { useState } from "react";
 import { Fetch_to, SweetAlert2 } from "@/utilities";
 import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
@@ -12,12 +11,14 @@ import api_link from "@/config/conf/json_config/fetch_url.json";
 interface HeaderProps {
     isOpen: boolean;
     setOpen: Dispatch<SetStateAction<boolean>>;
+    setShowProfile: Dispatch<SetStateAction<boolean>>;
     name: string;
     email: string;
+    profilePic: string
 }
 
 
-export default function Header({ isOpen, setOpen, name, email }: HeaderProps) {
+export default function Header({ isOpen, setOpen, setShowProfile, name, email, profilePic }: HeaderProps) {
     const router = useRouter();
     const [profile, setProfile] = useState(false);
 
@@ -48,10 +49,11 @@ export default function Header({ isOpen, setOpen, name, email }: HeaderProps) {
             <span className={styles.profile} onClick={() => setProfile(!profile)}>
                 <span>
                     <Image
-                    src={image_src.profile}
+                    src={profilePic ? profilePic : image_src.profile}
                     alt="Profile Pic"
                     width={40}
                     height={40}
+                    unoptimized
                     />
                 </span>
                 
@@ -73,7 +75,7 @@ export default function Header({ isOpen, setOpen, name, email }: HeaderProps) {
             <section className={`${styles.user_info_menu} ${profile ? styles.user_info_menu_open : ''}`}>
                 <figure className={styles.profile_info_img}>
                     <span>
-                        <Image src={image_src.profile} alt="User Pic" width={70} height={70}/>
+                        <Image src={profilePic ? profilePic : image_src.profile} alt="User Pic" width={120} height={120} unoptimized/>
                     </span>
                     <div>
                         <figcaption> {name} </figcaption>
@@ -81,7 +83,7 @@ export default function Header({ isOpen, setOpen, name, email }: HeaderProps) {
                     </div>
                 </figure>
                
-                <button className={styles.setting} title="My Profile" onClick={() => {alert("Under Development");}}>My Profile</button>
+                <button className={styles.setting} title="My Profile" onClick={() => {setShowProfile(true);}}>My Profile</button>
                 <button className={styles.signout} title="Sign Out" onClick={handle_logout}>Sign Out</button>
             </section>
 

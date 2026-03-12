@@ -14,17 +14,25 @@ export async function POST(req: NextRequest) {
 
     const { data, error } = await supabaseServer
     .from("auth")
-    .select("id, f_name, email")
+    .select("id, f_name, email, role, year")
     .eq("email", email)
     .limit(1);
 
-    if (error) {
+    const { data: profile_links, error: profile_links_error } = await supabaseServer
+    .from("profile_pic")
+    .select("file_link")
+    .eq("email", email)
+    .limit(1);
+
+    if (error || profile_links_error) {
         console.error("Supabase Query Error: ", error);
         return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
     }
 
+    const final_data = {data, profile_links};
+
     const token = jwt.sign(
-        { data },
+        { final_data },
         process.env.JWT_SECRET || "",
         { expiresIn: "120h" }
     );

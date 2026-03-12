@@ -33,7 +33,7 @@ export default function Update_Password() {
         const checkCode = async () => {
             const saveEmail = localStorage.getItem("email");
             const code = localStorage.getItem("code");
-            const response = await Fetch_to(api_link.checkcode, { email: saveEmail, code: code });
+            const response = await Fetch_to(api_link.checkcode_2, { email: saveEmail, code: code });
             if (!response.success) return router.push("/auth/signin");
             setForm(prev => ({ ...prev, email: saveEmail || ""}));
         };
@@ -46,6 +46,7 @@ export default function Update_Password() {
         const responds = await Fetch_to(api_link.fotgot_password.updateAccount, form);
         if (responds.success) {
             localStorage.clear();
+            await Fetch_to(api_link.jwt.deauth);
             router.push("/auth/signin");
         } else {
             setStatus(true);

@@ -62,7 +62,7 @@ export default function SignUp() {
             localStorage.setItem("year", form.year);
             localStorage.setItem("role", form.role);
             localStorage.setItem("assign_by", form.assign_by);
-            const responds = await Fetch_to(api_link.checkcode, { email: form.email });
+            const responds = await Fetch_to(api_link.checkcode_2, { email: form.email });
             if(!responds.success) {
                 setMessage(responds.message || "Somethings Went Wrong");
                 setLoading(false); 
