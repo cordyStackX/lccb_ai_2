@@ -22,21 +22,41 @@ This is a **BETA VERSION** for educational and research purposes only. Not inten
 ### 📄 Intelligent PDF Processing
 - **Smart Summarization**: Automatically generate concise summaries of lengthy PDF documents
 - **Context-Aware Analysis**: AI understands document structure and extracts key information
+- **Multi-PDF Support**: Upload and manage multiple documents simultaneously
+- **Search & Filter**: Find PDFs quickly by filename
+- **Right-Click Management**: Delete PDFs easily via context menu
 
 ### 💬 Interactive AI Chat
 - **Ask Questions**: Query your documents and receive accurate, context-based answers
-- **Real-time Responses**: Powered by Google Gemini AI for instant feedback
+- **Real-time Responses**: Powered by OpenAI for instant, intelligent feedback
 - **Conversation Memory**: Maintains chat history for continuous dialogue
+- **PDF Context**: Select specific PDFs to chat about with AI assistance
+- **Streaming Responses**: Real-time AI response generation
+
+### 👥 User Management & Roles
+- **Role-Based Access**: Admin, Teacher, and Student permissions
+- **Admin Dashboard**: User management, API logs, system monitoring
+- **Teacher Supervision**: Monitor and filter content for students under 13
+- **Student Accounts**: Independent access for users 13 and older
+- **Profile Management**: Update name, upload profile pictures, change passwords
 
 ### 🔒 Security & Privacy
-- **Temporary Storage**: Uploaded PDFs automatically deleted after 5 minutes
-- **Encrypted Authentication**: Secure JWT-based user authentication
-- **No Data Collection**: Privacy-first approach - your documents remain confidential
+- **Persistent Storage**: PDFs stored securely until manually deleted via right-click context menu
+- **Profile Pictures**: Upload and manage profile pictures with automatic updates
+- **Encrypted Authentication**: Secure JWT-based user authentication with HTTP-only cookies
+- **Rate Limiting**: 1 request per second per IP to prevent spam and abuse
+- **CSRF Protection**: Origin validation and security headers
+- **No External Data Sharing**: Privacy-first approach - your documents remain confidential
+- **Email Verification**: Secure password reset with verification codes
+- **Role-Based Access**: Admin, Teacher, and Student permissions
 
 ### 🎨 Modern User Interface
 - **Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
 - **Interactive 3D Effects**: Engaging visual effects using Three.js and React Three Fiber
 - **Intuitive Navigation**: User-friendly dashboard and chat interface
+- **Dark/Light Theme**: Adaptive color scheme for comfortable viewing
+- **Loading States**: SweetAlert2 notifications and progress indicators
+- **Real-time Updates**: Instant feedback for user actions
 
 ---
 
@@ -51,12 +71,14 @@ This is a **BETA VERSION** for educational and research purposes only. Not inten
 - **Routing**: Next.js App Router
 
 ### Backend
-- **API Framework**: Flask (Python)
-- **AI Engine**: GPT 5 Mini
-- **PDF Processing**: PyPDF2
-- **Database**: Supabase (PostgreSQL)
-- **Authentication**: JWT tokens
-- **File Storage**: Supabase Storage
+- **API Framework**: Flask (Python) via FastAPI on Render
+- **AI Engine**: OpenAI (GPT-3.5-turbo / GPT-4)
+- **PDF Processing**: PyPDF2, Python file handling
+- **Database**: Supabase (PostgreSQL) with row-level security
+- **Authentication**: JWT tokens with HTTP-only cookies
+- **File Storage**: Supabase Storage (public and secure buckets)
+- **Rate Limiting**: In-memory cooldown tracking (1 req/sec per IP)
+- **Security**: CSRF protection, origin validation, bcrypt password hashing
 
 ### DevOps & Tools
 - **Package Manager**: pnpm
@@ -88,7 +110,7 @@ flowchart TD
     %% ===== AI Processing =====
     AI_Response["<b>AI RESPONSE</b><br/>🤖<br/>(response)"]
     AI_Response2["<b>AI RESPONSE V2</b><br/>🤖<br/>(response2)"]
-    Gemini_API["<b>Open AI</b><br/>⭐"]
+    OpenAI_API["<b>OpenAI API</b><br/>⭐"]
     
     %% ===== Storage Layer =====
     Upload_PDF["<b>UPLOAD PDF</b><br/>📤"]
@@ -150,7 +172,7 @@ flowchart TD
     class User userStyle
     class UI_Pages,UI_Components uiStyle
     class JWT_Service,Auth_Service,Email_Verification authStyle
-    class AI_Response,AI_Response2,Gemini_API aiStyle
+    class AI_Response,AI_Response2,OpenAI_API aiStyle
     class Upload_PDF,Retrieve_PDF,Update_PDF,Delete_PDF,Storage storageStyle
     class Manage_User,API_Logs,Code_Logs,Update_Status adminStyle
     class Security_Helper,Fetch_Utils utilStyle
@@ -221,12 +243,40 @@ python main.py
 - Navigate to `/auth/signup` to create an account
 - Verify email through confirmation link
 - Login at `/auth/signin`
-- Secure JWT-based authentication
+- Secure JWT-based authentication with HTTP-only cookies
+- Use email verification for password recovery
 
 ### 2. Uploading PDFs
 - Access the dashboard after login
-- Click "Upload PDF" button
-- Select your PDF file (supports large files up to 900+ pages)
+- Click "Upload New PDF" button
+- Select your PDF file (supports various sizes)
+- PDFs stored securely until you manually delete them
+- Search and filter PDFs by filename
+
+### 3. Managing PDFs
+- **Search**: Use the search bar to filter PDFs by name
+- **Select**: Click on a PDF to use it for AI chat
+- **Delete**: Right-click any PDF and select "Delete PDF" to remove it
+- **View Details**: See filename and file size for each PDF
+
+### 4. Chatting with AI
+- Select a PDF document from your library
+- Type your question in the chat interface
+- OpenAI analyzes the selected PDF and provides intelligent responses
+- Chat history persists for reference
+
+### 5. Profile Management
+- Click on your profile to access settings
+- **Update Name**: Edit your display name
+- **Profile Picture**: Upload and update your profile photo
+- **Change Password**: Secure password reset with email verification
+- **View Role**: See your assigned role (Admin, Teacher, or Student)
+
+### 6. Admin Features (Admin Only)
+- **User Management**: Create, update, delete user accounts
+- **API Logs**: Monitor API usage and system performance
+- **Role Assignment**: Assign Teacher or Student roles
+- **Status Control**: Activate or deactivate user accounts
 ---
 
 ## 🎨 Design & User Experience
@@ -240,23 +290,31 @@ python main.py
 ### User Flow
 1. **Landing Page** → Feature overview and project description
 2. **Authentication** → Secure signup/login with email verification
+3. **Dashboard/Chat Interface** → Upload and manage PDFs
+4. **PDF Selection** → Choose document for AI interaction
+5. **AI Chat** → Ask questions and receive OpenAI-powered responses
+6. **Profile Management** → Update name, profile picture, password
+7. **PDF Management** → Search, filter, and delete via right-click menu
+8. **Admin Panel** (Admin only) → User management and system monitoring
 ## ⚡ **How It Works**
 
 ### Request Flow
 1. **User Interaction** → Frontend components (React/Next.js)
 2. **API Request** → Next.js API routes handle client requests
-3. **Authentication** → JWT verification and user validation
-4. **PDF Processing** → Python Flask server downloads and processes PDF
-5. **AI Analysis** → Open AI analyzes content and generates response
-6. **Database Logging** → Supabase records API usage and user actions
-7. **Response Delivery** → AI-generated answer returned to frontend
-8. **Auto-Cleanup** → Temporary files deleted after 5 minutes
+3. **Rate Limiting** → Cooldown check (1 request/second per IP)
+4. **Authentication** → JWT verification, CSRF protection, origin validation
+5. **PDF Processing** → Python Flask server downloads and processes PDF from Supabase
+6. **AI Analysis** → OpenAI analyzes content and generates contextual response
+7. **Database Logging** → Supabase records API usage, user actions, and timestamps
+8. **Response Delivery** → AI-generated answer returned to frontend
+9. **File Management** → PDFs stored until manual deletion via context menu
 
 ### Technical Workflow
 ```
-User → Next.js UI → API Routes → JWT Auth → Flask API 
-→ Supabase Storage → PDF Processing → Open AI 
-→ Response → Database Log → User Display
+User → Next.js UI → API Routes → Rate Limit Check → JWT Auth 
+→ CSRF/Origin Validation → Flask API → Supabase Storage 
+→ PDF Download → PDF Processing → OpenAI API 
+→ AI Response → Database Log → User Display
 ```
 
 ---
@@ -265,18 +323,25 @@ User → Next.js UI → API Routes → JWT Auth → Flask API
 
 ### Current Limitations
 - **Beta Version**: May contain bugs and unexpected behavior
-- **Large PDFs**: 900+ page documents may experience processing delays
-- **API Limits**: Subject to Open AI API rate limits
-- **Temporary Storage**: Files auto-delete after 5 minutes
+- **Rate Limiting**: 1 request per second per IP address (HTTP 429 on excess)
+- **Large PDFs**: Very large documents may experience processing delays or timeouts
+- **OpenAI API Limits**: Subject to OpenAI API rate limits and quotas
+- **File Persistence**: PDFs stored until manual deletion (no auto-cleanup)
 - **No Offline Mode**: Requires internet connection for AI processing
+- **Search Limited**: Search only by filename, not document content
+- **Email Dependency**: Password reset requires email verification
 
 ### Planned Improvements
 - [ ] Enhanced PDF chunking algorithm for better context retention
-- [ ] Support for more document formats (DOCX, TXT, etc.)
-- [ ] Conversation history export
-- [ ] Multi-language support
-- [ ] Advanced search within documents
-- [ ] Document comparison feature
+- [ ] Support for more document formats (DOCX, TXT, PPTX)
+- [ ] Conversation history export and management
+- [ ] Multi-language support for international users
+- [ ] Advanced search within document content
+- [ ] Document comparison and diff features
+- [ ] Batch PDF processing
+- [ ] Mobile app version
+- [ ] Improved admin analytics dashboard
+- [ ] Custom AI model fine-tuning for educational content
 
 ---
 
@@ -327,7 +392,9 @@ This project is licensed under the **Apache License 2.0** - see the [LICENSE](LI
 - **Started**: 2025
 - **Language**: TypeScript, Python
 - **Framework**: Next.js, Flask
-- **AI Model**: GPT 5 Mini
+- **AI Model**: OpenAI (GPT-3.5-turbo / GPT-4)
+- **Database**: Supabase PostgreSQL
+- **Deployment**: Vercel (Frontend), Render (Backend API)
 
 ---
 
@@ -349,9 +416,11 @@ This project is licensed under the **Apache License 2.0** - see the [LICENSE](LI
 ## 🌟 Acknowledgments
 
 - **La Consolacion College Bacolod** - Inspiration and educational purpose
-- **Google Gemini AI** - Powerful AI processing capabilities
-- **Supabase** - Database and authentication infrastructure
-- **Next.js Team** - Excellent web framework
+- **OpenAI** - Powerful AI processing and natural language capabilities
+- **Supabase** - Database, authentication, and storage infrastructure
+- **Next.js Team** - Excellent React framework and developer experience
+- **Vercel** - Deployment platform for Next.js applications
+- **Render** - Python API hosting platform
 - **Open Source Community** - Libraries and tools used in this project
 
 ---
@@ -380,8 +449,9 @@ This is a **BETA VERSION** educational research project. By using this software,
 ### Documentation
 - [Next.js Documentation](https://nextjs.org/docs)
 - [React Three Fiber](https://docs.pmnd.rs/react-three-fiber)
-- [Open AI](https://developers.openai.com/?utm_source=chatgpt.com)
+- [OpenAI API Documentation](https://platform.openai.com/docs)
 - [Supabase Docs](https://supabase.com/docs)
+- [Flask Documentation](https://flask.palletsprojects.com/)
 
 ### Tutorials
 - [Flask REST API Tutorial](https://flask.palletsprojects.com/)
@@ -396,20 +466,22 @@ LACO AI is a **hybrid SOA system** combining modern web technologies with powerf
 - *Frontend* acts as the **service consumer**
 - *Next.js API routes* as the **middleware layer**
 - *Python Flask* as the **AI service provider**
-- *Supabase* as the **data and storage layer**he dashboard
-- Delete documents when no longer needed
-- Documents auto-delete after 5 minutes for security
+- *Supabase* as the **data and storage layer**
 
 ---
 
 ## 🔒 Security & Privacy
 
 ### Data Protection
-- **Temporary Storage**: PDFs deleted automatically after 5 minutes
-- **Encrypted Passwords**: Industry-standard encryption (bcrypt)
-- **JWT Authentication**: Secure token-based sessions
-- **API Key Protection**: All endpoints require authentication
-- **No External Data Collection**: Your documents stay private
+- **Persistent Storage**: PDFs stored in Supabase until you manually delete them
+- **Right-Click Delete**: Easy PDF removal via context menu
+- **Profile Pictures**: Securely stored, automatically replaced when updated
+- **Encrypted Passwords**: Industry-standard bcrypt hashing
+- **JWT Authentication**: HTTP-only cookies for secure token storage
+- **API Key Protection**: All endpoints require authentication and rate limiting
+- **CSRF Protection**: Origin header validation on all requests
+- **No External Data Sharing**: Your documents processed by OpenAI per their privacy policy
+- **Rate Limiting**: Cooldown mechanism prevents spam (1 req/sec per IP)
 
 ### Compliance
 - Apache License 2.0
@@ -437,24 +509,31 @@ This project is developed strictly for:
 
 ### Prerequisites
 - Node.js 18+ and pnpm
-- Python 3.13+
+- Python 3.11+ (3.13 recommended)
 - Ubuntu/Linux environment (WSL supported)
-- Google Gemini API key
-- Supabase account
+- OpenAI API key
+- Supabase account with database and storage setup
 
 ### Environment Variables
 Create a `.env.local` file in the project root:
 
 ```env
-# Google AI
-GOOGLE_API_KEY=your_gemini_api_key
+# OpenAI
+OPENAI_API_KEY=your_openai_api_key
 
 # API Security
 API_KEY=your_secure_api_key
+JWT_SECRET=your_jwt_secret_key
+APP_URL=http://localhost:3000
 
 # Supabase
 SUPABASE_URL=your_supabase_url
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+
+# Database
+POSTGRES_URL=your_postgres_connection_string
 
 # Optional
 RENDER_API=your_render_api_url
@@ -474,11 +553,13 @@ The Data Flow Diagram illustrates how data moves through the LACO AI system, fro
 ![Data Flow Diagram](./public/DFD.png)
 
 **Key Data Flows:**
-- User uploads PDF → Supabase Storage
+- User uploads PDF → Supabase Storage (persistent until manual deletion)
 - PDF retrieval → Python Flask API
-- PDF text extraction → Google Gemini AI
-- AI response → User interface
+- PDF text extraction → OpenAI API
+- AI response generation → User interface
 - Activity logging → Supabase Database
+- Profile picture upload → Supabase public bucket
+- Rate limiting → In-memory cooldown tracking
 
 ---
 
@@ -521,10 +602,11 @@ flowchart TB
 ```
 
 **External Entities:**
-- **Users**: Students, Educators, Researchers
-- **Google Gemini AI**: AI processing service
-- **Supabase**: Database and storage provider
-- **Email Service**: Authentication and notifications
+- **Users**: Students, Teachers, Administrators
+- **OpenAI**: AI processing and natural language understanding
+- **Supabase**: Database, authentication, and file storage provider
+- **Email Service**: Authentication codes and password reset notifications
+- **Render**: Python Flask API hosting
 
 ---
 

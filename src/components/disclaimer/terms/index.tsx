@@ -59,10 +59,32 @@ export default function Terms() {
                         <li>Users under 13 years old may access the Service only under the supervision of teachers assigned by administrators</li>
                         <li>For underage users, teachers are responsible for managing accounts, monitoring content, and filtering data</li>
                         <li>Educational institutions must obtain appropriate parental consent before allowing underage users to access the platform</li>
-                        <li>You must provide accurate and current information during registration</li>
-                        <li>You are responsible for maintaining the confidentiality of your account credentials</li>
+                        <li>You must provide accurate and current information during registration (email, name, role, year level)</li>
+                        <li>You are responsible for maintaining the confidentiality of your account credentials and JWT tokens</li>
                         <li>You are responsible for all activities that occur under your account</li>
-                        <li>We reserve the right to terminate accounts at our discretion</li>
+                        <li>We reserve the right to terminate accounts at our discretion, especially for policy violations</li>
+                        <li>Email verification required for password reset and account recovery</li>
+                    </ul>
+
+                    <h3>Platform Features by Role</h3>
+                    <p><strong>Students can:</strong></p>
+                    <ul>
+                        <li>Upload PDF documents (stored until manual deletion via right-click menu)</li>
+                        <li>Search and filter PDFs by name</li>
+                        <li>Chat with OpenAI about selected PDFs</li>
+                        <li>Update profile name and upload profile picture</li>
+                        <li>Change password with email verification</li>
+                    </ul>
+                    <p><strong>Teachers additionally can:</strong></p>
+                    <ul>
+                        <li>Supervise and monitor students under 13 years old</li>
+                        <li>Filter and manage content for assigned students</li>
+                    </ul>
+                    <p><strong>Administrators additionally can:</strong></p>
+                    <ul>
+                        <li>Manage user accounts (create, update, delete)</li>
+                        <li>View API logs and usage statistics</li>
+                        <li>Assign roles and monitor system health</li>
                     </ul>
                 </section>
 
@@ -70,14 +92,18 @@ export default function Terms() {
                     <h2>5. Acceptable Use Policy</h2>
                     <p>You agree NOT to:</p>
                     <ul>
-                        <li>Upload or process sensitive, confidential, or personal data</li>
-                        <li>Use the Service for any illegal, harmful, or malicious purposes</li>
-                        <li>Attempt to bypass security measures or access unauthorized features</li>
-                        <li>Reverse engineer, decompile, or extract source code</li>
-                        <li>Overload or disrupt the Service infrastructure</li>
-                        <li>Upload copyrighted material without proper authorization</li>
-                        <li>Use the Service to generate harmful, offensive, or inappropriate content</li>
-                        <li>Share account credentials with unauthorized parties</li>
+                        <li>Upload sensitive, confidential, classified, or personal data to PDFs</li>
+                        <li>Use the Service for any illegal, harmful, fraudulent, or malicious purposes</li>
+                        <li>Attempt to bypass JWT authentication, rate limiting, or CSRF protection</li>
+                        <li>Spam the API or abuse the 1 request per second rate limit</li>
+                        <li>Reverse engineer, decompile, or extract source code (except as permitted by Apache License 2.0)</li>
+                        <li>Overload or perform denial-of-service attacks on the infrastructure</li>
+                        <li>Upload copyrighted PDFs without proper authorization</li>
+                        <li>Use the AI chat feature to generate harmful, offensive, discriminatory, or inappropriate content</li>
+                        <li>Share account credentials or JWT tokens with unauthorized parties</li>
+                        <li>Attempt to access other users&apos; PDFs, chats, or profile data</li>
+                        <li>Abuse admin or teacher privileges for unauthorized purposes</li>
+                        <li>Manipulate or falsify role assignments (admin, teacher, student)</li>
                     </ul>
                 </section>
 
@@ -86,10 +112,16 @@ export default function Terms() {
                     <ul>
                         <li>This is a beta service with no guaranteed uptime or availability</li>
                         <li>We may experience downtime, bugs, errors, or data loss</li>
-                        <li>PDF files are automatically deleted after 5 minutes</li>
-                        <li>AI responses may be inaccurate, incomplete, or unreliable</li>
-                        <li>Large PDF files (900+ pages) may experience processing delays or failures</li>
-                        <li>API rate limits and usage restrictions may apply</li>
+                        <li>PDF files are stored until manually deleted via right-click context menu</li>
+                        <li>Profile pictures are stored permanently until replaced or account deleted</li>
+                        <li>AI responses powered by OpenAI may be inaccurate, incomplete, biased, or unreliable</li>
+                        <li>Large PDF files may experience processing delays, timeouts, or failures</li>
+                        <li>Rate limiting enforced: 1 request per second per IP address</li>
+                        <li>Exceeding rate limits results in HTTP 429 "Too Many Requests" errors</li>
+                        <li>Email verification required for password reset and account recovery</li>
+                        <li>JWT tokens may expire, requiring re-authentication</li>
+                        <li>Search functionality limited to file names only</li>
+                        <li>Chat history persists indefinitely unless manually cleared</li>
                     </ul>
                 </section>
 
@@ -108,21 +140,30 @@ export default function Terms() {
                     <h2>8. Third-Party Services</h2>
                     <p>This Service integrates with:</p>
                     <ul>
-                        <li><strong>Supabase:</strong> Database and authentication</li>
-                        <li><strong>Google Gemini AI:</strong> AI content generation</li>
-                        <li><strong>Render:</strong> API hosting</li>
+                        <li><strong>Supabase:</strong> PostgreSQL database, user authentication, and file storage</li>
+                        <li><strong>OpenAI:</strong> AI-powered chat responses and PDF document analysis</li>
+                        <li><strong>Render:</strong> Python FastAPI backend hosting</li>
+                        <li><strong>Vercel/GitHub Pages:</strong> Next.js frontend deployment</li>
                     </ul>
-                    <p>These services have their own terms and privacy policies. We are not responsible for their practices, availability, or data handling.</p>
+                    <p>These services have their own terms and privacy policies. We are not responsible for their practices, availability, outages, data breaches, or data handling. OpenAI processes your PDF content and prompts according to their terms of service.</p>
                 </section>
 
                 <section className={styles.section}>
                     <h2>9. Data and Privacy</h2>
                     <ul>
                         <li>Your data is handled according to our Privacy Policy</li>
-                        <li>PDF files are temporarily stored and deleted after 5 minutes</li>
-                        <li>We log API requests for research and debugging purposes</li>
+                        <li>PDF files are stored in Supabase storage buckets until you manually delete them</li>
+                        <li>Profile pictures stored permanently until replaced or account deleted</li>
+                        <li>Chat conversations stored indefinitely in your account</li>
+                        <li>We log API requests, timestamps, and errors for research and debugging</li>
+                        <li>Admins can access user management features and API logs</li>
+                        <li>Teachers can monitor content for students under their supervision</li>
+                        <li>Rate limiting tracks IP addresses temporarily for spam prevention</li>
+                        <li>JWT authentication tokens stored in HTTP-only cookies</li>
+                        <li>Email addresses stored in local storage for session recovery</li>
                         <li>We cannot guarantee the security or confidentiality of your data</li>
                         <li><strong>Do not upload sensitive, confidential, or personal information</strong></li>
+                        <li><strong>Your PDF content is sent to OpenAI for processing</strong></li>
                     </ul>
                 </section>
 
