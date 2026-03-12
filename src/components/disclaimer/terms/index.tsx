@@ -13,7 +13,7 @@ export default function Terms() {
         <section className={styles.container}>
             <div className={styles.content}>
                 <h1>Terms and Conditions</h1>
-                <p className={styles.updated}>Last Updated: December 13, 2025</p>
+                <p className={styles.updated}>Last Updated: March 12, 2026</p>
 
                 <div className={styles.notice}>
                     <h2>⚠️ Important Notice</h2>
