@@ -10,7 +10,6 @@ import Image from "next/image";
 interface SidebarsProps {
     isOpen: boolean;
     emailRes: string;
-    name: string;
     setCurrentPdf: (val: number | undefined) => void;}
 
 interface PdfFile {
@@ -20,7 +19,7 @@ interface PdfFile {
     file?: string;
 }
 
-export default function Sidebars({ isOpen, emailRes, setCurrentPdf, name }: SidebarsProps) {
+export default function Sidebars({ isOpen, emailRes, setCurrentPdf }: SidebarsProps) {
     const [profile, setProfile] = useState(false);
     const [data, setData] = useState<PdfFile[]>([]);
     const [selectedPdfId, setSelectedPdfId] = useState<number | undefined>();
@@ -51,13 +50,15 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, name }: Side
             if (response.success) {
                 setData(response.data.message);
             } else {
-                setShowNoData(true);
+                setTimeout(() => {
+                    setShowNoData(true);
+                }, 5000);
             }
         };
         retrieve_pdf();
         
         setCurrentPdf(selectedPdfId);
-    }, [emailRes, refresh, selectedPdfId, name]);
+    }, [emailRes, refresh, selectedPdfId]);
 
     // Filter PDFs based on search query
     const filteredPdfs = data.filter(pdf => 
