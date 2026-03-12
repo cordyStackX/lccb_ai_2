@@ -43,27 +43,45 @@ export default function Privacy() {
                     <h2>3. Information We Collect</h2>
                     <h3>3.1 Account Information</h3>
                     <ul>
-                        <li>Email address</li>
-                        <li>First name</li>
-                        <li>Password (encrypted)</li>
-                        <li>Account creation date</li>
-                        <li>Account status</li>
+                        <li>Email address (used as unique identifier)</li>
+                        <li>Full name</li>
+                        <li>Password (encrypted using industry-standard hashing)</li>
+                        <li>User role (Admin, Teacher, or Student)</li>
+                        <li>Year level (for students)</li>
+                        <li>Profile picture (optional)</li>
+                        <li>Account creation date and timestamps</li>
+                        <li>Account status (active/inactive)</li>
+                        <li>Email verification status</li>
                     </ul>
 
                     <h3>3.2 Usage Data</h3>
                     <ul>
-                        <li>API request logs</li>
-                        <li>PDF file names and upload information</li>
-                        <li>Chat prompts and AI-generated responses</li>
-                        <li>Access logs and timestamps</li>
+                        <li>PDF file uploads (name, size, file path)</li>
+                        <li>Chat conversations with AI (prompts and responses)</li>
+                        <li>Selected PDF documents for chat context</li>
+                        <li>Search queries within PDF lists</li>
+                        <li>API request logs and response times</li>
+                        <li>User activity timestamps</li>
+                        <li>Profile updates and password changes</li>
+                        <li>File deletion activities</li>
                     </ul>
 
                     <h3>3.3 Technical Data</h3>
                     <ul>
-                        <li>IP address</li>
+                        <li>IP address (for rate limiting and security)</li>
                         <li>Browser type and version</li>
                         <li>Device information</li>
-                        <li>Cookies and local storage data</li>
+                        <li>JWT authentication tokens (stored in cookies)</li>
+                        <li>Local storage data (email for session recovery)</li>
+                        <li>Request headers and origin validation</li>
+                    </ul>
+
+                    <h3>3.4 Admin and Teacher Data</h3>
+                    <ul>
+                        <li>Admin users have access to user management features</li>
+                        <li>Teachers can monitor and filter content for assigned students</li>
+                        <li>Admin activity logs (user creation, status updates, deletions)</li>
+                        <li>API usage logs accessible by admins</li>
                     </ul>
                 </section>
 
@@ -71,24 +89,36 @@ export default function Privacy() {
                     <h2>4. How We Use Your Information</h2>
                     <p>We use collected information for:</p>
                     <ul>
-                        <li>Providing and maintaining the service</li>
-                        <li>User authentication and account management</li>
-                        <li>Processing PDF documents and generating AI responses</li>
+                        <li>User authentication via JWT tokens and email verification</li>
+                        <li>Role-based access control (Admin, Teacher, Student)</li>
+                        <li>Processing PDF documents with OpenAI for educational chat</li>
+                        <li>Generating AI-powered responses to user questions</li>
+                        <li>Storing and managing profile pictures</li>
+                        <li>Enabling search and filtering of uploaded PDFs</li>
+                        <li>Teacher supervision and content filtering for students under 13</li>
+                        <li>Admin features: user management, API logs, and system monitoring</li>
+                        <li>Rate limiting to prevent spam and abuse (1 request per second per IP)</li>
+                        <li>CSRF protection and origin validation</li>
                         <li>Research and educational analysis</li>
-                        <li>Improving platform functionality and user experience</li>
-                        <li>Monitoring system performance and debugging</li>
-                        <li>Preventing fraud and unauthorized access</li>
+                        <li>Debugging and system performance monitoring</li>
                     </ul>
                 </section>
 
                 <section className={styles.section}>
                     <h2>5. Data Storage and Security</h2>
                     <ul>
-                        <li>User data is stored in Supabase (PostgreSQL database)</li>
-                        <li>PDF files are temporarily stored and automatically deleted after 5 minutes</li>
-                        <li>Passwords are encrypted using industry-standard algorithms</li>
-                        <li>API communications are secured with authentication tokens</li>
+                        <li>User data stored in Supabase PostgreSQL database with row-level security</li>
+                        <li>Profile pictures stored in Supabase public storage buckets</li>
+                        <li>PDF files stored temporarily in Supabase storage buckets</li>
+                        <li>Passwords encrypted using bcrypt or similar industry-standard hashing</li>
+                        <li>JWT tokens with secret key encryption for session management</li>
+                        <li>API endpoints protected with JWT authentication and rate limiting</li>
+                        <li>CSRF protection via origin header validation</li>
+                        <li>Rate limiting: 1 request per second per IP address to prevent spam</li>
+                        <li>Cooldown mechanism tracks requests using in-memory maps</li>
+                        <li>Old profile pictures automatically deleted when updating</li>
                         <li>We implement reasonable security measures but cannot guarantee absolute security</li>
+                        <li>HTTPS encryption for all data transmission</li>
                     </ul>
                 </section>
 
@@ -96,20 +126,26 @@ export default function Privacy() {
                     <h2>6. Third-Party Services</h2>
                     <p>We use the following third-party services:</p>
                     <ul>
-                        <li><strong>Supabase:</strong> Database and authentication services</li>
-                        <li><strong>Google Gemini AI:</strong> AI content generation and PDF analysis</li>
-                        <li><strong>Render:</strong> API hosting and deployment</li>
+                        <li><strong>Supabase:</strong> PostgreSQL database, authentication, and file storage services</li>
+                        <li><strong>OpenAI:</strong> AI-powered chat responses and PDF document analysis</li>
+                        <li><strong>Render:</strong> Python API hosting for backend services</li>
+                        <li><strong>Vercel/GitHub Pages:</strong> Next.js application deployment</li>
+                        <li><strong>Next.js:</strong> React framework for the web application</li>
                     </ul>
-                    <p>These services have their own privacy policies and terms of service. We are not responsible for their practices.</p>
+                    <p>These services have their own privacy policies and terms of service. We are not responsible for their data handling practices, security measures, or service availability.</p>
                 </section>
 
                 <section className={styles.section}>
                     <h2>7. Data Retention</h2>
                     <ul>
-                        <li>Account data: Retained until account deletion</li>
-                        <li>PDF files: Automatically deleted after 5 minutes</li>
-                        <li>API logs: Retained for debugging and research purposes</li>
-                        <li>Chat history: Stored in your account (can be manually deleted)</li>
+                        <li><strong>Account data:</strong> Retained until manual account deletion by user or admin</li>
+                        <li><strong>Profile pictures:</strong> Stored permanently until replaced or account deleted</li>
+                        <li><strong>PDF files:</strong> Stored in database and storage bucket until manually deleted via context menu</li>
+                        <li><strong>Chat history:</strong> Stored indefinitely in your account until manually cleared</li>
+                        <li><strong>API logs:</strong> Retained for debugging, research, and admin monitoring purposes</li>
+                        <li><strong>Authentication tokens:</strong> JWT tokens expire based on configured session duration</li>
+                        <li><strong>Rate limit data:</strong> Stored temporarily in memory; old entries auto-cleaned</li>
+                        <li><strong>Verification codes:</strong> Email codes for password reset and verification</li>
                     </ul>
                 </section>
 
@@ -117,16 +153,51 @@ export default function Privacy() {
                     <h2>8. Your Rights</h2>
                     <p>You have the right to:</p>
                     <ul>
-                        <li>Access your personal data</li>
-                        <li>Request correction of inaccurate data</li>
-                        <li>Request deletion of your account and data</li>
-                        <li>Opt-out of data collection (by not using the service)</li>
-                        <li>Export your data (contact us for requests)</li>
+                        <li>Access your personal data through your profile settings</li>
+                        <li>Update your name and profile picture</li>
+                        <li>Change your password via email verification</li>
+                        <li>View your uploaded PDFs and chat history</li>
+                        <li>Delete individual PDFs via right-click context menu</li>
+                        <li>Request correction of inaccurate account data</li>
+                        <li>Request deletion of your account and all associated data</li>
+                        <li>Export your data (contact us for manual export requests)</li>
+                        <li>Opt-out of data collection by not using the service</li>
+                        <li>Be informed of data breaches affecting your information</li>
+                    </ul>
+                    <p><strong>Note:</strong> Profile updates, password changes, and PDF deletions can be performed directly through the application interface.</p>
+                </section>
+
+                <section className={styles.section}>
+                    <h2>9. User Roles and Permissions</h2>\n                    <h3>9.1 Students</h3>
+                    <ul>
+                        <li>Can upload and manage their own PDF documents</li>
+                        <li>Can chat with AI about their PDFs</li>
+                        <li>Can search and filter their PDF library</li>
+                        <li>Can update their profile and password</li>
+                        <li>Students under 13 require teacher supervision</li>
+                    </ul>
+
+                    <h3>9.2 Teachers</h3>
+                    <ul>
+                        <li>Have all student permissions</li>
+                        <li>Can be assigned by administrators to supervise students</li>
+                        <li>Responsible for monitoring and filtering content for assigned students under 13</li>
+                        <li>Can review student interactions and manage their access</li>
+                    </ul>
+
+                    <h3>9.3 Administrators</h3>
+                    <ul>
+                        <li>Full access to user management features</li>
+                        <li>Can create, update, and delete user accounts</li>
+                        <li>Can view and manage API usage logs</li>
+                        <li>Can assign teacher roles to users</li>
+                        <li>Can monitor system health and performance</li>
+                        <li>Access to all administrative dashboards and logs</li>
                     </ul>
                 </section>
 
                 <section className={styles.section}>
-                    <h2>9. Children&apos;s Privacy</h2>
+                    <h2>10. Children&apos;s Privacy</h2>
                     <p>When users under 13 years of age access this educational platform, their data and interactions are supervised and filtered by teachers who have been assigned by the administrator.</p>
                     <ul>
                         <li>Teachers assigned by administrators are responsible for managing and monitoring content for underage users</li>
@@ -138,7 +209,7 @@ export default function Privacy() {
                 </section>
 
                 <section className={styles.section}>
-                    <h2>10. No Illegal Activities</h2>
+                    <h2>11. No Illegal Activities</h2>
                     <p>This platform is strictly for educational and research purposes. We:</p>
                     <ul>
                         <li>Do not engage in any illegal activities</li>
@@ -149,12 +220,12 @@ export default function Privacy() {
                 </section>
 
                 <section className={styles.section}>
-                    <h2>11. Changes to This Privacy Policy</h2>
+                    <h2>12. Changes to This Privacy Policy</h2>
                     <p>As this is a beta educational project, we may update this Privacy Policy at any time. Changes will be posted on this page with an updated revision date.</p>
                 </section>
 
                 <section className={styles.section}>
-                    <h2>12. Contact Information</h2>
+                    <h2>13. Contact Information</h2>
                     <p>For questions about this Privacy Policy, please contact:</p>
                     <p><strong>Project Owner:</strong> cordyStackX</p>
                     <p><strong>License:</strong> Apache License 2.0</p>
@@ -163,7 +234,8 @@ export default function Privacy() {
 
                 <div className={styles.disclaimer}>
                     <h2>Disclaimer</h2>
-                    <p>This is an educational beta project. Use at your own risk. We provide no warranties and are not liable for any damages arising from use of this service.</p>
+                    <p><strong>THIS IS A BETA EDUCATIONAL PROJECT FOR RESEARCH AND EXPERIMENTAL PURPOSES ONLY.</strong></p>
+                    <p>This is an educational beta project. Use at your own risk. We provide no warranties and are not liable for any damages arising from use of this service. Do not upload sensitive or confidential information. Your data is processed by third-party services including OpenAI.</p>
                 </div>
             </div>
         </section>
