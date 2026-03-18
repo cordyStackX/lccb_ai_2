@@ -30,7 +30,7 @@
 		"retrieve_user" : "/services/supabase/admin/retrieve_user",
 		"delete_user" : "/services/supabase/admin/delete_user",
 		"update_user_status" : "/services/supabase/admin/update_user_status",
-		"retrieve_code_logs" : "/services/supabase/admin/retrieve_code_logs",
+		"retrieve_pdf_record" : "/services/supabase/admin/retrieve_pdf_record",
 		"retrieve_API_logs" : "/services/supabase/admin/retrieve_API_logs",
 		"retrieve_user_api_log" : "/services/supabase/admin/retrieve_user_api_log"
 	}

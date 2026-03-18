@@ -32,6 +32,7 @@ export default function ChatPage() {
             setName(result.f_name);
             setRole(result.role);
             setYear(result.year);
+            if (!result2) return;
             setProfilePic(result2.file_link);
         }
         check();

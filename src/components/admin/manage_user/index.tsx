@@ -12,6 +12,7 @@ interface ManageUserDataProps {
     id?: number;
     status?: string;
     year?: string;
+    role?: string
 }
 
 interface ApiLogs {
@@ -77,6 +78,7 @@ export default function ManageUser() {
                         <th>Name</th>
                         <th>Year</th>
                         <th>Gmail</th>
+                        <th>Role</th>
                         <th>Created_at</th>
                         <th>API Request</th>
                         <th>Status</th>
@@ -89,6 +91,7 @@ export default function ManageUser() {
                                 <td> {data.f_name} </td>
                                 <td> {data.year} </td>
                                 <td> {data.email} </td>
+                                <td> {data.role} </td>
                                 <td> {data.created_at ? new Date(data.created_at).toLocaleDateString("en-US") : " - "} </td>
                                 <td>{getApiCount(data.email)}</td>
                                 <td>
@@ -129,7 +132,11 @@ export default function ManageUser() {
                             </tr>
                         ))
                     ) : (
-                        <tr></tr>
+                        <tr>
+                            <td colSpan={6} style={{ textAlign: "center", padding: "2rem" }}>
+                                No User Found
+                            </td>
+                        </tr>
                     )}
                 </tbody>
             </table>
