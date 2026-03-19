@@ -14,8 +14,7 @@ interface ManageUserDataProps {
     year?: string;
 }
 
-interface Code_Logs {
-    code?: string;
+interface PDF_record {
     created_at?: string;
 }
 
@@ -26,23 +25,23 @@ interface API_logs {
 
 export default function Dashboard() {
     const [data, setData] = useState<ManageUserDataProps[]>([]);
-    const [code_logs, setCode_logs] = useState<Code_Logs[]>([]);
+    const [pdf_record, setPdf_record] = useState<PDF_record[]>([]);
     const [api_logs, setApi_logs] = useState<API_logs[]>([]);
 
     useEffect(() => {
         const RetrieveUserData = async () => {
             const response = await Fetch_to(api_link.admin.retrieve_user);
-            const response2 = await Fetch_to(api_link.admin.retrieve_code_logs);
+            const response2 = await Fetch_to(api_link.admin.retrieve_pdf_record);
             const response3 = await Fetch_to(api_link.admin.retrieve_API_logs);
             if (response.success) {
                 setData(response.data.message);
-                setCode_logs(response2.data.message);
+                setPdf_record(response2.data.message);
                 setApi_logs(response3.data.message);
             }
         };
         RetrieveUserData();
         
-    }, [data]);
+    }, []);
 
 
     function getDayOfWeek(dateString: string) {
@@ -51,7 +50,7 @@ export default function Dashboard() {
 
     const weeklyUsers = [0,0,0,0,0,0,0];
 
-    const weeklyCode_logs = [0,0,0,0,0,0,0];
+    const weeklyPDF_record = [0,0,0,0,0,0,0];
 
     const weeklyAPI_logs = [0,0,0,0,0,0,0];
 
@@ -62,13 +61,13 @@ export default function Dashboard() {
         }
     });
 
-    code_logs.forEach(code => {
-        if (code.created_at) {
-            const day = getDayOfWeek(code.created_at);
-            weeklyCode_logs[day]++;
+    pdf_record.forEach(pdf => {
+        if (pdf.created_at) {
+            const day = getDayOfWeek(pdf.created_at);
+            weeklyPDF_record[day]++;
         }
     });
-
+    
     api_logs.forEach(api => {
         if (api.created_at) {
             const day = getDayOfWeek(api.created_at);
@@ -86,14 +85,14 @@ export default function Dashboard() {
         { name: "Sat", users: weeklyUsers[6] },
     ];
 
-    const Code_logs = [
-        { name: "Sun", code: weeklyCode_logs[0] },
-        { name: "Mon", code: weeklyCode_logs[1] },
-        { name: "Tue", code: weeklyCode_logs[2] },
-        { name: "Wed", code: weeklyCode_logs[3] },
-        { name: "Thu", code: weeklyCode_logs[4] },
-        { name: "Fri", code: weeklyCode_logs[5] },
-        { name: "Sat", code: weeklyCode_logs[6] },
+    const Pdf_set = [
+        { name: "Sun", pdf: weeklyPDF_record[0] },
+        { name: "Mon", pdf: weeklyPDF_record[1] },
+        { name: "Tue", pdf: weeklyPDF_record[2] },
+        { name: "Wed", pdf: weeklyPDF_record[3] },
+        { name: "Thu", pdf: weeklyPDF_record[4] },
+        { name: "Fri", pdf: weeklyPDF_record[5] },
+        { name: "Sat", pdf: weeklyPDF_record[6] },
     ];
 
     const Api_logs = [
@@ -111,14 +110,14 @@ export default function Dashboard() {
             
             <section className={styles.status}>
                 <h2>System Status Today</h2>
-                <div className={`${styles.info} display_flex_center`}>
+                <div className={`${styles.info}`}>
                     <div>
                         <h3>Active Accounts</h3>
                         <p> {data.length} </p>
                     </div>
                     <div>
-                        <h3>Requested Active Code</h3>
-                        <p> {code_logs.length} </p>
+                        <h3>Number of Pdf uploaded</h3>
+                        <p> {pdf_record.length} </p>
                     </div>
                     <div>
                         <h3>AI API Requested</h3>
@@ -126,47 +125,48 @@ export default function Dashboard() {
                     </div>
                 </div>
             </section>
-            <section className={styles.graph}>
-                <h2>Active Accounts Weekly</h2>
-                 <div className={`${styles.info2} display_flex_center`}>
-                    <div>
-                       <BarChart width={1200} height={450} data={UserSet}>
-                            <XAxis dataKey="name" stroke="#2f28beff"/>
-                            <YAxis stroke="#2f28beff"/>
-                            <Tooltip />
-                            <Bar type="monotone" dataKey="users" fill="#2f28beff" />
-                        </BarChart>
+            <div className={styles.graph_container}>
+                <section className={styles.graph}>
+                    <h2>Active Accounts Weekly</h2>
+                    <div className={`${styles.info2}`}>
+                        <div>
+                        <BarChart width={380} height={250} data={UserSet}>
+                                <XAxis dataKey="name" stroke="#2f28beff"/>
+                                <Tooltip />
+                                <Bar type="monotone" dataKey="users" fill="#2f28beff" />
+                            </BarChart>
+                        </div>
                     </div>
-                </div>
-            </section>
-            <section className={styles.graph}>
-                <h2>Requested Code Weekly</h2>
-                 <div className={`${styles.info2} display_flex_center`}>
-                    <div>
-                       <BarChart width={1200} height={450} data={Code_logs}>
-                            <XAxis dataKey="name" stroke="#2f28beff"/>
-                            <YAxis stroke="#2f28beff"/>
-                            <Tooltip />
-                            <Bar type="monotone" dataKey="code" fill="#2f28beff" />
-                        </BarChart>
+                </section>
+                <section className={styles.graph}>
+                    <h2>Number of PDF Weekly</h2>
+                    <div className={`${styles.info2}`}>
+                        <div>
+                        <BarChart width={380} height={250} data={Pdf_set}>
+                                <XAxis dataKey="name" stroke="#2f28beff"/>
+                                <Tooltip />
+                                <Bar type="monotone" dataKey="pdf" fill="#2f28beff" />
+                            </BarChart>
+                        </div>
                     </div>
-                </div>
-                
-            </section>
-            <section className={styles.graph}>
-                <h2>AI API Requested Weekly</h2>
-                 <div className={`${styles.info2} display_flex_center`}>
-                    <div>
-                       <BarChart width={1200} height={450} data={Api_logs}>
-                            <XAxis dataKey="name" stroke="#2f28beff"/>
-                            <YAxis stroke="#2f28beff"/>
-                            <Tooltip />
-                            <Bar type="monotone" dataKey="api" fill="#2f28beff" />
-                        </BarChart>
+                    
+                </section>
+                <section className={styles.graph}>
+                    <h2>AI API Requested Weekly</h2>
+                    <div className={`${styles.info2}`}>
+                        <div>
+                        <BarChart width={400} height={250} data={Api_logs}>
+                                <XAxis dataKey="name" stroke="#2f28beff"/>
+                                <YAxis stroke="#2f28beff"/>
+                                <Tooltip />
+                                <Bar type="monotone" dataKey="api" fill="#2f28beff" />
+                            </BarChart>
+                        </div>
                     </div>
-                </div>
-                
-            </section>
+                    
+                </section>
+            </div>
+            
         </section>
     );
 

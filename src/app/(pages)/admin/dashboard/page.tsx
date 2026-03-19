@@ -22,7 +22,7 @@ export default function DashboardPage() {
     }, [nav]);
     
     return (
-        <main className="admin display_flex_center">
+        <main className="admin">
             <Sidebar nav={nav} />
             <Dashboard />
         </main>

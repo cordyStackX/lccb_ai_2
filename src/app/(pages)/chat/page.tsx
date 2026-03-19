@@ -32,6 +32,7 @@ export default function ChatPage() {
             setName(result.f_name);
             setRole(result.role);
             setYear(result.year);
+            if (!result2) return;
             setProfilePic(result2.file_link);
         }
         check();
@@ -41,7 +42,7 @@ export default function ChatPage() {
         <main className="chat_page">
             <Header isOpen={isOpen} setOpen={setOpen} setShowProfile={setShowProfile} name={name} email={email} profilePic={profilePic} />
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center"}}>
-                <Sidebars isOpen={isOpen} emailRes={email} setCurrentPdf={setCurrentPdf} name={name} />
+                <Sidebars isOpen={isOpen} emailRes={email} setCurrentPdf={setCurrentPdf} />
                 <Main emailRes={email} currentPdf={currentPdf}/>
                 <Profile showProfile={showProfile} setShowProfile={setShowProfile} email={email} name={name} role={role} year={year} profilePic={profilePic} />
             </div> 

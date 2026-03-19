@@ -40,8 +40,8 @@ export default function Sidebar({ nav } : SidebarProps) {
     };
 
     return(
-        <aside className={`${styles.container} display_flex_center`}>
-            <figure className={`${styles.admin} display_flex_center`}>
+        <aside className={`${styles.container}`}>
+            <figure className={`${styles.admin}`}>
                 <Image 
                 src={image_src.admin}
                 alt="admin"
@@ -52,7 +52,7 @@ export default function Sidebar({ nav } : SidebarProps) {
                 <figcaption>Admin</figcaption>
                 <p>{process.env.NEXT_PUBLIC_GMAIL_USERNAME}</p>
             </figure>
-            <section className={`${styles.options} display_flex_center`}>
+            <section className={`${styles.options}`}>
                 <button 
                 disabled={nav_status === "dashboard" ? true : false}
                 style={{ 
@@ -86,7 +86,7 @@ export default function Sidebar({ nav } : SidebarProps) {
                 onClick={() => {router.push("/admin/setting");}}
                 >Setting</button>
             </section>
-            <section className={`${styles.options_2} display_flex_center`}>
+            <section className={`${styles.options_2}`}>
                 <button onClick={handle_logout}>Sign Out</button>
             </section>
         </aside>

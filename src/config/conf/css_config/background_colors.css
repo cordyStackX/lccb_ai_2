@@ -23,4 +23,7 @@
 .admin {
     background: linear-gradient(90deg, var(--adaptive-color-1), var(--adaptive-color-3)); 
     width: max(1500px, 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }

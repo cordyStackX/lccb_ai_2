@@ -21,6 +21,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
     }
 
+    if (data && data.length < 0) return NextResponse.json({ success: true, error: "No Image found" }, { status: 404 });
+
     return NextResponse.json({ success: true, message: data }, { status: 200 });
 
 }
