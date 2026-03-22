@@ -39,18 +39,49 @@ export async function POST(req: NextRequest) {
 
   const bucketName = "pdfs";
 
+  const toRelativePath = (value: string) => {
+    let path = value.trim();
+
+    // Handle full public URL and plain paths consistently.
+    if (path.includes("/storage/v1/object/public/")) {
+      path = path.split("/storage/v1/object/public/")[1] || path;
+    }
+
+    if (path.includes("/pdfs/")) {
+      path = path.split("/pdfs/")[1] || path;
+    }
+
+    path = path.replace(/^\/+/, "");
+
+    if (path.startsWith(`${bucketName}/`)) {
+      path = path.slice(bucketName.length + 1);
+    }
+
+    return decodeURIComponent(path);
+  };
+
   const filesWithSize = await Promise.all(
     data.map(async (item) => {
       try {
-        const fullPath = item.file; // example: documents/user1/sample.pdf
-        const pathParts = fullPath.split("/");
+        const fullPath = String(item.file || "");
+        const relativePath = toRelativePath(fullPath);
+
+        if (!relativePath) {
+          return {
+            ...item,
+            file_size: null,
+            file_size_mb: null,
+          };
+        }
+
+        const pathParts = relativePath.split("/");
         const fileName = pathParts.pop();
         const folderPath = pathParts.join("/");
 
         const { data: storageFiles, error: storageError } = await supabaseServer
           .storage
           .from(bucketName)
-          .list(folderPath);
+          .list(folderPath || "", { search: fileName, limit: 100 });
 
         if (storageError) {
           console.error("Storage Error:", storageError);
@@ -61,9 +92,14 @@ export async function POST(req: NextRequest) {
           };
         }
 
-        const matchedFile = storageFiles.find((f) => f.name === fileName);
+        const matchedFile = storageFiles?.find((f) => f.name === fileName);
 
-        const sizeBytes = matchedFile?.metadata?.size ?? null;
+        const sizeValue = matchedFile?.metadata?.size;
+        const sizeBytes = typeof sizeValue === "number"
+          ? sizeValue
+          : typeof sizeValue === "string"
+            ? Number(sizeValue)
+            : null;
 
         return {
           ...item,
@@ -82,6 +118,7 @@ export async function POST(req: NextRequest) {
       }
     })
   );
+
 
   return NextResponse.json(
     { success: true, message: filesWithSize },

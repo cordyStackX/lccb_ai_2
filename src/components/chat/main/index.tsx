@@ -84,7 +84,20 @@ export default function Main({ emailRes, currentPdf }: MainProps) {
         const prompt = chatres.ask; 
         setChatres({ ask: "", respond2: "" });
 
-        const response = await Fetch_to(api_link.responses, { prompt, email, pdf_id });
+        const lastUserResponse = messages.length > 0
+            ? messages[messages.length - 1].ask
+            : "";
+        const lastAIResponse = messages.length > 0
+            ? messages[messages.length - 1].respond
+            : "";
+
+        const response = await Fetch_to(api_link.responses, {
+            prompt,
+            email,
+            pdf_id,
+            last_user_response: lastUserResponse,
+            last_ai_response: lastAIResponse,
+        });
 
         setMessages((prev) => {
             const updated = [...prev];
