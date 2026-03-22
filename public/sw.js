@@ -1,24 +1,37 @@
-// Minimal service worker to prevent 404 errors
-// This can be removed if you don't plan to use PWA features
+const CACHE_NAME = "app-cache-v1";
+const OFFLINE_URL = "/offline";
+const OFFLINE_IMAGE = "/offline.png";
 
-self.addEventListener('install', (event) => {
-  // Skip waiting to activate immediately
-  event.skipWaiting();
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) =>
+      cache.addAll([OFFLINE_URL, OFFLINE_IMAGE])
+    )
+  );
+  self.skipWaiting();
 });
 
-self.addEventListener('activate', (event) => {
-  // Clean up any old caches if needed
+self.addEventListener("activate", (event) => {
   event.waitUntil(self.clients.claim());
 });
 
-// Optional: Add basic offline fallback
-self.addEventListener('fetch', (event) => {
-  // Skip WebSocket requests and dev server requests
-  if (event.request.url.includes('/_next/') || 
-      event.request.url.includes('ws:') || 
-      event.request.url.includes('wss:') ||
-      event.request.headers.get('upgrade') === 'websocket') {
+self.addEventListener("fetch", (event) => {
+  const request = event.request;
+
+  if (request.headers.get("upgrade") === "websocket") {
     return;
   }
-  // You can add caching strategies here if needed
+
+  if (request.mode === "navigate") {
+    event.respondWith(
+      fetch(request).catch(() => caches.match(OFFLINE_URL))
+    );
+    return;
+  }
+
+  event.respondWith(
+    caches.match(request).then((response) => {
+      return response || fetch(request);
+    })
+  );
 });

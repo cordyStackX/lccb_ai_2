@@ -1,5 +1,6 @@
 import { MetadataUtils } from "@/utilities";
 import { Geist, Geist_Mono, Roboto_Slab } from "next/font/google";
+import PWARegister from "@/components/pwa_register";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -17,6 +18,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+
 export const metadata = MetadataUtils();
 
 export default function RootLayout({
@@ -27,6 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} ${robotoSlab.className}`}>
+        <PWARegister />
         {children}
       </body>
     </html>
