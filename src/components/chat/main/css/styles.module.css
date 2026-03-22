@@ -15,17 +15,20 @@
 }
 .chat {
     width: 100%;
-    height: 80vh;
+    height: 75vh;
     overflow-y: auto; 
     align-items: flex-start;
     flex: 1;
     gap: 1rem;
     margin: 70px;
 }
+.chat div{
+    padding: 0 0 1rem 0;
+}
 .response {
     width: min(800px, 90dvw);
     height: auto;
-    margin: 2rem auto;
+    margin: 1rem auto;
 }
 .user_respones {
     width: 100%;
@@ -47,7 +50,7 @@
     flex-direction: column; 
     justify-content: flex-start;
     align-items: flex-start;
-    padding: 2rem 1rem;
+    padding: 0 0 2rem 0;
     line-height: 2.5rem;
     backdrop-filter: blur(100px);
 }
@@ -94,11 +97,11 @@
 }
 
 .ask {
-    width: min(800px, 90dvw);
+    width: min(900px, 90dvw);
     height: auto;
     overflow: hidden;
     border-radius: 5px;
-    padding: 0 1.2rem;
+    padding: 0.3rem 1.2rem;
     margin: 1.3rem 3rem;
     background: var(--default-color-white-2);
     box-shadow: 0 0 2px 1px var(--foreground);
@@ -111,11 +114,12 @@
     justify-content: flex-start;
     align-items: flex-start;
     display: flex;
+    width: min(100%, 670px);
 }
 .plushie_talk div {
-    margin: 0 1rem;
+    margin: 0 0.2rem;
     background: var(--primary);
-    padding: 1.2rem;
+    padding: 1rem 1.5rem;
     border-radius: 10px;
     color: var(--default-color-white);
 }
