@@ -1,11 +1,12 @@
 const CACHE_NAME = "app-cache-v1";
-const urlsToCache = ["/", "/offline.html"];
+const OFFLINE_URL = "/offline";
+const OFFLINE_IMAGE = "/offline.png";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(urlsToCache);
-    })
+    caches.open(CACHE_NAME).then((cache) =>
+      cache.addAll([OFFLINE_URL, OFFLINE_IMAGE])
+    )
   );
   self.skipWaiting();
 });
@@ -15,19 +16,22 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-  if (
-    event.request.url.includes("/_next/") ||
-    event.request.headers.get("upgrade") === "websocket"
-  ) {
+  const request = event.request;
+
+  if (request.headers.get("upgrade") === "websocket") {
+    return;
+  }
+
+  if (request.mode === "navigate") {
+    event.respondWith(
+      fetch(request).catch(() => caches.match(OFFLINE_URL))
+    );
     return;
   }
 
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return (
-        response ||
-        fetch(event.request).catch(() => caches.match("/offline.html"))
-      );
+    caches.match(request).then((response) => {
+      return response || fetch(request);
     })
   );
 });
