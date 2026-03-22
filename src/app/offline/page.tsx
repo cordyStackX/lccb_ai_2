@@ -28,9 +28,6 @@ export default function Offline() {
                 fontSize: "clamp(1rem, 1vw + 1.3rem, 2rem)",
                 color: "#fff"
             }} >No Internet Connections</h2>
-            <a  style={{
-                cursor: "pointer"
-            }} onClick={() => {window.location.reload();}} ><u>Click here to Reload</u></a>
         </div>
     );
 }
