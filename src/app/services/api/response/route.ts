@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     const auth = await Security(req);
     if(auth?.error) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
 
-    const { prompt, email, pdf_id } = await req.json();
+    const { prompt, email, pdf_id, last_user_response, last_ai_response } = await req.json();
 
     const apikey = process.env.API_KEY;
 
@@ -29,7 +29,14 @@ export async function POST(req: NextRequest) {
 
     try {
 
-        const response = await Fetch_to(`${apiUrl}generate-md`, { prompt: prompt, token: apikey, email: email, pdf_id: pdf_id });
+        const response = await Fetch_to(`${apiUrl}generate-md`, {
+            prompt: prompt,
+            token: apikey,
+            email: email,
+            pdf_id: pdf_id,
+            last_user_response: last_user_response,
+            last_ai_response: last_ai_response,
+        });
 
         await supabaseServer
         .from("API_logs")

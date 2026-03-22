@@ -5,7 +5,7 @@ import { supabaseServer } from "@/lib/supabase-server";
 
 export async function POST(req: NextRequest) {
     
-    const { prompt } = await req.json();
+    const { prompt, last_user_response, last_ai_response } = await req.json();
 
     const apikey = process.env.API_KEY;
 
@@ -32,7 +32,14 @@ export async function POST(req: NextRequest) {
 
     try {
 
-        const response = await Fetch_to(`${apiUrl}generate-md`, { prompt: prompt, token: apikey, email: email, pdf_id: speakPdf?.id });
+        const response = await Fetch_to(`${apiUrl}generate-md`, {
+            prompt: prompt,
+            token: apikey,
+            email: email,
+            pdf_id: speakPdf?.id,
+            last_user_response: last_user_response,
+            last_ai_response: last_ai_response,
+        });
 
         await supabaseServer
         .from("API_logs")

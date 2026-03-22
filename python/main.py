@@ -80,6 +80,8 @@ def generate_md():
         data = request.json or {}
         received_token = data.get("token")
         prompt = data.get("prompt", "")
+        last_user_response = str(data.get("last_user_response", "")).strip()
+        last_ai_response = str(data.get("last_ai_response", "")).strip()
         email = data.get("email")
         file_id = data.get("pdf_id")  # new: PDF id
 
@@ -186,6 +188,18 @@ Respond with ONLY comma-separated numbers (e.g., "1,3,4"). If all chunks seem re
             question=prompt,
         )
 
+        if last_user_response:
+            final_prompt += (
+                "\n\nConversation context (latest previous user message):\n"
+                f"{last_user_response}"
+            )
+
+        if last_ai_response:
+            final_prompt += (
+                "\n\nConversation context (latest previous AI response):\n"
+                f"{last_ai_response}"
+            )
+
         systemRole = system_role.format(
             role=role,
             year=year
@@ -193,7 +207,7 @@ Respond with ONLY comma-separated numbers (e.g., "1,3,4"). If all chunks seem re
 
         # --- Call OpenAI with relevant context ---
         response = client.chat.completions.create(
-            model="gpt-4.1-mini",
+            model="gpt-4o-2024-05-13",
             messages=[
                 {"role": "system", "content": systemRole},
                 {"role": "user", "content": final_prompt}
