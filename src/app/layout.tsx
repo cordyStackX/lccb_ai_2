@@ -1,5 +1,6 @@
 import { MetadataUtils } from "@/utilities";
 import { Geist, Geist_Mono, Roboto_Slab } from "next/font/google";
+import type { Viewport } from "next";
 import PWARegister from "@/components/pwa_register";
 import "./globals.css";
 
@@ -20,6 +21,11 @@ const geistMono = Geist_Mono({
 
 
 export const metadata = MetadataUtils();
+
+export const viewport: Viewport = {
+  themeColor: "#1A54B8",
+  viewportFit: "cover",
+};
 
 export default function RootLayout({
   children,
