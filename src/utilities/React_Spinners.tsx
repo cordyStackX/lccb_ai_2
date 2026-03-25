@@ -12,7 +12,7 @@ export default function React_Spinners({status} : StatusType) {
             visible={true}
             height="80"
             width="80"
-            color="#1A54B8"
+            color="#123a9b"
             ariaLabel="puff-loading"
             wrapperStyle={{}}
             wrapperClass=""
