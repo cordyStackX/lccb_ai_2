@@ -1,3 +1,4 @@
+"use client";
 import { Puff } from "react-loader-spinner";
 
 type StatusType = {
