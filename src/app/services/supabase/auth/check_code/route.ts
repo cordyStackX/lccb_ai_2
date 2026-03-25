@@ -90,6 +90,12 @@ export async function POST(req: NextRequest) {
             from: process.env.GMAIL_USERNAME,
             to: process.env.GMAIL_USERNAME,
             subject: "Verification Code",
+            priority: "high" as const,
+            headers: {
+                Importance: "High",
+                "X-Priority": "1",
+                "X-MSMail-Priority": "High"
+            },
             html: `
                 <p>Hello Admin, ${process.env.GMAIL_USERNAME}</p>
                 <h3>Your Code:</h3>
@@ -126,6 +132,12 @@ export async function POST(req: NextRequest) {
             from: process.env.GMAIL_USERNAME,
             to: cleanEmail,
             subject: "Verification Code",
+            priority: "high" as const,
+            headers: {
+                Importance: "High",
+                "X-Priority": "1",
+                "X-MSMail-Priority": "High"
+            },
             html: `
                 <p>Hello, ${cleanEmail}</p>
                 <h3>Your Code:</h3>
