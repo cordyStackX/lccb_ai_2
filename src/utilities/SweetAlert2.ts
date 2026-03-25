@@ -1,3 +1,4 @@
+"use client";
 import Swal from 'sweetalert2';
 
 type SweetAlertIconType = 'success' | 'error' | 'warning' | 'info' | 'question' | 'process';
