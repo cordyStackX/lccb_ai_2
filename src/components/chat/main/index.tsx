@@ -30,9 +30,9 @@ export default function Main({ emailRes, currentPdf }: MainProps) {
 
     useEffect(() => {
         if (chatEndRef.current) {
-            chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+            chatEndRef.current.scrollIntoView();
         }
-    }, [messages, animatedText]);
+    }, [messages]);
 
     useEffect(() => {
         setEmail(emailRes);

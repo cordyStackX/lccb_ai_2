@@ -7,9 +7,22 @@ import {
 	Fx_effect
 } from "@/components/landpage";
 import { useState } from "react";
+import { Fetch_to } from "@/utilities";
+import api_link from "@/config/conf/json_config/fetch_url.json";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Home() {
+	const router = useRouter();
 	const [show, setShow] = useState(false);
+
+	useEffect(() => {
+        async function check() {
+            const response = await Fetch_to(api_link.jwt.verify);
+            if (response.success) return router.push("/chat");
+        }
+        check();
+    }, []);
 
 	return (
 		<main className="landpage">
