@@ -25,7 +25,7 @@ export default function SweetAlert2(
     confirmButtonText: ok,
     cancelButtonText: cancel,
     allowOutsideClick: false,
-    background: '#1A54B8',  
+    background: '#123a9b',  
     color: '#fff',         
     didOpen: () => {
       if (showLoading || isProcess) {
