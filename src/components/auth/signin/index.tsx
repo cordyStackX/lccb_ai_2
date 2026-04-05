@@ -50,7 +50,7 @@ export default function SignIn() {
         const responds = await Fetch_to(api_link.signin, form);
         if (responds.success) {
             localStorage.setItem("email", form.email);
-            const responds = await Fetch_to(api_link.checkcode, { email: form.email });
+            const responds = await Fetch_to(api_link.checkcode, { email: form.email, key: "signin" });
             if(!responds.success) {
                 setMessage(responds.message || "Somethings Went Wrong");
                 setLoading(false); 
@@ -85,7 +85,6 @@ export default function SignIn() {
                                 />
                                 <figcaption>LACO AI</figcaption>
                             </figure>
-                            <h1>Sign in</h1>
                         </section>
                         <input 
                         type="email" 
@@ -95,7 +94,7 @@ export default function SignIn() {
                         value={form.email}
                         onChange={handleChange}
                         placeholder="Email"
-                        style={status ? {borderBottom: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
+                        style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
                         required
                         />
                          <input 
@@ -106,7 +105,7 @@ export default function SignIn() {
                         value={form.password}
                         onChange={handleChange}
                         placeholder="Password"
-                        style={status ? {borderBottom: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
+                        style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
                         required
                         />
                         {message && (
@@ -116,11 +115,12 @@ export default function SignIn() {
                             <input type="checkbox" required />
                             <p>I agree to the <Link href={"/privacy"} onClick={() => {Progress(true);}}>Privacy Policy</Link> & <Link href={"/terms"} onClick={() => {Progress(true);}} >Terms of Conditions</Link></p>
                         </span>
+                       
+                        <section className={`${styles.buttons} `}>
+                            <button>Log In</button>
+                        </section>
                         <p>Register an Account? <Link href={"/auth/signup"} onClick={() => {Progress(true);}}>Registered</Link></p>
                         <p><Link href={"/auth/forgot-password"} onClick={() => {Progress(true);}}>Forgot Password?</Link></p>
-                        <section className={`${styles.buttons} `}>
-                            <button>Sign In</button>
-                        </section>
                     </form>
                 )}
             </div>

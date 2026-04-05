@@ -2,7 +2,6 @@
 	"signin" : "/services/supabase/auth/signin",
 	"check_status" : "/services/supabase/auth/check_status",
 	"checkcode" : "/services/supabase/auth/check_code",
-	"checkcode_2" : "/services/supabase/auth/check_code_2",
 	"signup" : {
 	    "checkEmail" : "/services/supabase/auth/register/check_email",
 		"createAccount" : "/services/supabase/auth/register/create_account"

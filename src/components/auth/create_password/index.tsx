@@ -16,7 +16,7 @@ export default function Create_Password() {
     const router = useRouter();
 
     const [form, setForm] = useState({
-        email: "", password: "", c_password: "", name: "", year: "", role: ""
+        email: "", password: "", c_password: "", name: "", year: "", role: "", code: ""
     });
     const [status, setStatus] = useState(false);
     const [message, setMessage] = useState("");
@@ -37,9 +37,9 @@ export default function Create_Password() {
             const saveYear = localStorage.getItem("year");
             const saveRole = localStorage.getItem("role");
             const code = localStorage.getItem("code");
-            const response = await Fetch_to(api_link.checkcode_2, { email: saveEmail, code: code });
+            const response = await Fetch_to(api_link.checkcode, { email: saveEmail, code: code });
             if (!response.success) return router.push("/auth/signin");
-            setForm(prev => ({ ...prev, email: saveEmail || "", name: saveName || "", year: saveYear || "", role: saveRole || ""}));
+            setForm(prev => ({ ...prev, email: saveEmail || "", name: saveName || "", year: saveYear || "", role: saveRole || "", code: code || ""}));
         };
         checkCode();
     }, []);
@@ -50,6 +50,7 @@ export default function Create_Password() {
         const responds = await Fetch_to(api_link.signup.createAccount, form);
         if (responds.success) {
             localStorage.clear();
+            await Fetch_to(api_link.checkcode, { email: form.email, code: form.code, key: "confirm_code" });
             router.push("/auth/signin");
         } else {
             setStatus(true);
@@ -88,7 +89,7 @@ export default function Create_Password() {
                         value={form.password}
                         onChange={handleChange}
                         placeholder="Create your password"
-                        style={status ? {borderBottom: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
+                        style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
                         required
                         />
                         <input 
@@ -99,7 +100,7 @@ export default function Create_Password() {
                         value={form.c_password}
                         onChange={handleChange}
                         placeholder="Confirm Your Password"
-                        style={status ? {borderBottom: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
+                        style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
                         required
                         />
                         {message && (
@@ -111,7 +112,7 @@ export default function Create_Password() {
                         </span>
                         <section className={`${styles.buttons} `}>
                             <button type="button" onClick={() => {router.back();}} style={{backgroundColor: "var(--secondary)"}}>Back</button>
-                            <button>Create</button>
+                            <button>Activate</button>
                         </section>
                     </form>
                 )}

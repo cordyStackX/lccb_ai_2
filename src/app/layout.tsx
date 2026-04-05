@@ -1,21 +1,18 @@
 import { MetadataUtils } from "@/utilities";
-import { Geist, Geist_Mono, Roboto_Slab } from "next/font/google";
+import { Roboto, Roboto_Mono } from "next/font/google";
 import type { Viewport } from "next";
 import PWARegister from "@/components/pwa_register";
 import "./globals.css";
 
-const geistSans = Geist({
+const robotoSans = Roboto({
   variable: "--font-geist-sans",
+  weight: ["100", "300", "400", "500", "700", "900"],
   subsets: ["latin"],
 });
 
-const robotoSlab = Roboto_Slab({
-  weight: ["100", "300", "400", "700", "900"], 
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
+const robotoMono = Roboto_Mono({
   variable: "--font-geist-mono",
+  weight: ["100", "300", "400", "500", "700"],
   subsets: ["latin"],
 });
 
@@ -34,7 +31,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} ${robotoSlab.className}`}>
+      <body className={`${robotoSans.variable} ${robotoMono.variable} ${robotoSans.className}`}>
         <PWARegister />
         {children}
       </body>

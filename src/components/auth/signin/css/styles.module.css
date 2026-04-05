@@ -13,15 +13,18 @@
     align-items: center;
 }
 .form_styles {
-    width: min(600px, 90dvw);
+    width: min(500px, 90dvw);
     height: auto;
     border-radius: 10px;
-    background: var(--fx-color);
     padding: clamp(1rem, 10dvw, 3rem);
     overflow: hidden;
     opacity: 0;
     transform: translateY(50px);
     animation: fade_in 500ms forwards ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-flow: column;
 }
 @keyframes fade_in {
     0% {
@@ -39,12 +42,13 @@
     height: auto;
     margin: 1rem 0;
     font-size: clamp(1rem, 0.5rem + 1vw, 1.1rem);
-    padding: 5px 0;
+    padding: 15px 30px;
     background: transparent;
     border: transparent;
-    border-bottom: 2px solid var(--primary);
+    border: 2px solid var(--primary);
     outline: none;
     color: var(--foreground);
+    border-radius: 30px;
 }
 .form_styles p {
     margin: 1rem 0 0 0;
@@ -53,44 +57,40 @@
 .form_styles a {
     color: var(--default-color-blue);
 }
-.form_styles select {
-    background: var(--primary);
-    cursor: pointer;
-    padding: 0.5rem;
-    margin: 0.3rem 0.5rem;
-    outline: none;
-    border: transparent;
-}
 .info {
     flex-flow: column;
-    align-items: flex-start;
+    align-items: center;
     display: flex;
+    margin: 0 auto;
+    width: auto;
 }
 .info h1 {
     font-size: clamp(1.3rem, 0.5rem + 1vw, 2rem);
-    margin: 1rem 0 0 0;
+    margin: 1rem 0;
 }
 .logo {
     display: flex;
     justify-content: flex-start;
     align-items: center;
+    flex-flow: column;
 }
 .logo figcaption {
     font-size: clamp(1.5rem, 0.5rem + 1vw, 3rem);
     font-weight: 900;
     opacity: 0.5;
-    margin: 0 0 0 0.5rem;
+    margin: 1rem;
 }
 .buttons {
-    padding: 2rem 0 0 0;
+    padding: 1rem 0 0 0;
     width: 100%;
     display: flex;
     justify-content: right;
 }
 .buttons button {
-    padding: 10px clamp(30px, 3vw, 50px);
+    width: 100%;
+    padding: 15px;
     background: var(--primary);
-    border-radius: 5px;
+    border-radius: 30px;
     border: transparent;
     font-size: 1rem;
     cursor: pointer;
@@ -104,7 +104,7 @@
     align-items: flex-start;
     width: 100%;
     height: 35px;
-    margin: 0 0 2rem 0;
+    margin: 0 0 0.5rem 0;
     position: relative;
 }
 .checkbox p {
