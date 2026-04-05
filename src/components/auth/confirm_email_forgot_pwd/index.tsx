@@ -33,7 +33,7 @@ export default function Confirm_email_forgot_pwd() {
 
     const SendCode = async (e: string | null) => {
         setLoading(true);
-        const responds = await Fetch_to(api_link.checkcode_2, { email: e });
+        const responds = await Fetch_to(api_link.checkcode, { email: e });
         if (responds.success) {
             setStatus(false);
             setMessage("Code sent successfully. Expires in 3 minutes.");
@@ -47,7 +47,7 @@ export default function Confirm_email_forgot_pwd() {
 
     const ConfirmCode = async () => {
         setLoading(true);
-        const responds = await Fetch_to(api_link.checkcode_2, { email: form.email, code: form.code });
+        const responds = await Fetch_to(api_link.checkcode, { email: form.email, code: form.code });
         localStorage.setItem("code", form.code);
         if (responds.success) {
             router.push("/auth/update-password");
@@ -88,7 +88,7 @@ export default function Confirm_email_forgot_pwd() {
                         autoComplete="code"
                         onChange={handleChange}
                         placeholder="Enter Code"
-                        style={status ? {borderBottom: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
+                        style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
                         required
                         />
                         {message && (

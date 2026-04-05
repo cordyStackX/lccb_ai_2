@@ -164,7 +164,7 @@ export default function Profile({ showProfile, setShowProfile, email, name, role
                             onClick={ async() => {
                                 Progress(true);
                                 localStorage.setItem("email", email);
-                                const responds = await Fetch_to(api_link.checkcode_2, { email: email });
+                                const responds = await Fetch_to(api_link.checkcode, { email: email });
                                 if(!responds.success) {
                                     alert(responds.message); 
                                     Progress(false);

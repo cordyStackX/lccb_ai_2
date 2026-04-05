@@ -4,10 +4,9 @@ import { cooldownMap, CodeStore } from "@/lib/code_store";
 
 const COOLDOWN_MS = 60 * 3000; // 3 minute
 
-
 export async function POST(req: NextRequest) {
 
-    const { email, code } = await req.json();
+    const { email, code, key } = await req.json();
 
     if (!email) {
         console.error(" ==> User Email not exist");
@@ -44,8 +43,14 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        CodeStore.delete(cleanEmail);
-        cooldownMap.delete(cleanEmail); 
+        if (key === "signin" || key === "register" || key === "forgot_password") {
+            return NextResponse.json({ success: true }, { status: 200 });
+        }
+
+        if (key === "confirm_code") {
+            CodeStore.delete(cleanEmail);
+            cooldownMap.delete(cleanEmail);
+        }
 
         // Code correct
         return NextResponse.json({ success: true }, { status: 200 });

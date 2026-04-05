@@ -62,7 +62,7 @@ export default function SignUp() {
             localStorage.setItem("year", form.year);
             localStorage.setItem("role", form.role);
             localStorage.setItem("assign_by", form.assign_by);
-            const responds = await Fetch_to(api_link.checkcode_2, { email: form.email });
+            const responds = await Fetch_to(api_link.checkcode, { email: form.email, key: "register" });
             if(!responds.success) {
                 setMessage(responds.message || "Somethings Went Wrong");
                 setLoading(false); 
@@ -97,7 +97,6 @@ export default function SignUp() {
                                 />
                                 <figcaption>LACO AI</figcaption>
                             </figure>
-                            <h1>Registered Your Account</h1>
                         </section>
                         <input 
                         type="email" 
@@ -106,8 +105,8 @@ export default function SignUp() {
                         autoComplete="email"
                         value={form.email}
                         onChange={handleChange}
-                        placeholder="Enter Your Email"
-                        style={status ? {borderBottom: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
+                        placeholder="Email"
+                        style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
                         required
                         />
                         <input 
@@ -117,8 +116,8 @@ export default function SignUp() {
                         autoComplete="name"
                         value={form.name}
                         onChange={handleChange}
-                        placeholder="Enter Your Full Name"
-                        style={status ? {borderBottom: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
+                        placeholder="Full Name"
+                        style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
                         required
                         />
                         {ifMinors ? (
@@ -130,7 +129,7 @@ export default function SignUp() {
                             value={form.assign_by}
                             onChange={handleChange}
                             placeholder="Enter Your Teacher Email"
-                            style={status ? {borderBottom: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
+                            style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
                             required
                             />
                         ) : null}
@@ -169,10 +168,10 @@ export default function SignUp() {
                         {ifTeaher ? (
                             <p className="neutral">For Teacher{"'"}s you need to contact the admin to activate your account</p>
                         ) : null}
-                        <p>Already have an Account? <Link href={"/auth/signin"} onClick={() => {Progress(true);}}>Sign In</Link></p>
                         <section className={`${styles.buttons} `}>
-                            <button>Next</button>
+                            <button>Register</button>
                         </section>
+                        <p>Already have an Account? <Link href={"/auth/signin"} onClick={() => {Progress(true);}}>Sign In</Link></p>
                     </form>
                 )}
             </div>

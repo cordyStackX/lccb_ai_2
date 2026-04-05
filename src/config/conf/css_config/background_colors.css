@@ -7,7 +7,7 @@
 }
 
 .auth_page {
-    background: linear-gradient(0deg, var(--primary), var(--default-color-white-2));
+    background: var(--default-color-white);
     color: var(--foreground);
 }
 

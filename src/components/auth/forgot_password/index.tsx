@@ -40,7 +40,7 @@ export default function Forgot_password() {
         const responds = await Fetch_to(api_link.fotgot_password.checkEmail, { email: form.email });
         if (responds.success) {
             localStorage.setItem("email", form.email);
-           const responds = await Fetch_to(api_link.checkcode_2, { email: form.email });
+           const responds = await Fetch_to(api_link.checkcode, { email: form.email, key: "forgot_password" });
             if(!responds.success) {
                 setMessage(responds.message || "Somethings Went Wrong");
                 setLoading(false); 
@@ -85,7 +85,7 @@ export default function Forgot_password() {
                         value={form.email}
                         onChange={handleChange}
                         placeholder="Enter Your Email"
-                        style={status ? {borderBottom: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
+                        style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
                         required
                         />
                         {message && (
