@@ -60,7 +60,14 @@ export default function Sidebar({ nav } : SidebarProps) {
                     color: `${ nav_status === "dashboard" ? "var(--default-color-black)" : "" }`    
                 }}
                 onClick={() => {router.push("/admin/dashboard");}}
-                >Dashboard</button>
+                >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2"/>
+                    <rect x="14" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2"/>
+                    <rect x="3" y="14" width="7" height="7" stroke="currentColor" strokeWidth="2"/>
+                    <rect x="14" y="14" width="7" height="7" stroke="currentColor" strokeWidth="2"/>
+                    </svg> 
+                Dashboard</button>
                 <button
                 disabled={nav_status === "manage_user" ? true : false}
                 style={{ 
@@ -68,7 +75,7 @@ export default function Sidebar({ nav } : SidebarProps) {
                     color: `${ nav_status === "manage_user" ? "var(--default-color-black)" : "" }`    
                 }}
                 onClick={() => {router.push("/admin/manageuser");}}
-                >Manage User</button>
+                > Manage User</button>
                 <button
                 disabled={nav_status === "chat_bot" ? true : false}
                 style={{ 

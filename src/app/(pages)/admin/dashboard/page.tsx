@@ -1,5 +1,5 @@
 "use client";
-import { Dashboard, Sidebar } from "@/components/admin";
+import { Dashboard, Sidebar} from "@/components/admin";
 import { useEffect, useState } from "react";
 import { Fetch_to } from "@/utilities";
 import { useRouter } from "next/navigation";

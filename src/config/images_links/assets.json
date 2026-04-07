@@ -6,5 +6,6 @@
     "lccb" : "/lccb_logo.png",
     "face" : "/face.png",
     "pdf_icon" : "/pdf.png",
-    "profile" : "/profile.png"
+    "profile" : "/profile.png",
+    "admin_user_icons" : "/user.png"
 }

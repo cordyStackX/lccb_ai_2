@@ -41,10 +41,6 @@ export async function POST(req: NextRequest) {
             last_ai_response: last_ai_response,
         });
 
-        await supabaseServer
-        .from("API_logs")
-        .insert({ request: email });
-
         if (response.success) {
             return NextResponse.json({ success: true, message: response }, { status: 200 });
         } else {

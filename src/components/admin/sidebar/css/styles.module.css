@@ -27,6 +27,12 @@
     background: transparent;
     border: transparent;
     border-radius: 10px;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+}
+.options svg {
+    margin: 0 10px;
 }
 .options button:hover {
     background-color: var(--fx-color-button);
