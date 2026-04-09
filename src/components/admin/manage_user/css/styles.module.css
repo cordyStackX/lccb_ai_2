@@ -71,6 +71,33 @@
     color: var(--foreground);
     border-radius: 8px;
 }
+
+.pagination {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 0;
+}
+
+.pageInfo {
+    color: var(--foreground);
+    font-weight: 600;
+}
+
+.pageButton {
+    cursor: pointer;
+    padding: 0.5rem 0.9rem;
+    background: var(--default-color-white);
+    border: 2px solid var(--default-color-gray);
+    color: var(--foreground);
+    border-radius: 8px;
+}
+
+.pageButton:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
 .header_cons {
     color: var(--foreground);
     width: 100%;

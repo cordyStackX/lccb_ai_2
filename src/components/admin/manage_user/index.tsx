@@ -12,50 +12,51 @@ interface ManageUserDataProps {
     id?: number;
     status?: string;
     year?: string;
-    role?: string
+    role?: string;
 }
 
-interface ApiLogs {
-    request?: string
+interface System_logs {
+    request?: string;
+    email?: string;
+    api_request?: string;
 }
+
+const PAGE_SIZE = 30;
 
 export default function ManageUser() {
     const [data, setData] = useState<ManageUserDataProps[]>([]);
     const [refresh, setRefresh] = useState("");
     const [search, setSearch] = useState("");
-    const [apiLogs, setApiLogs] = useState<ApiLogs[]>([]);
+    const [system_logs, setSystem_logs] = useState<System_logs[]>([]);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
     useEffect(() => {
         const RetrieveUserData = async () => {
-            const response = await Fetch_to(api_link.admin.retrieve_user);
+            const response = await Fetch_to(api_link.admin.retrieve_user, {
+                page,
+                limit: PAGE_SIZE,
+                search,
+            });
             if (response.success) {
                 setData(response.data.message);
+                setTotalPages(response.data.totalPages ?? 1);
             }
         };
         RetrieveUserData();
          const RetrieveUserDataLogs = async () => {
             const response = await Fetch_to(api_link.admin.system_logs);
             if (response.success) {
-                setApiLogs(response.data.message);
+                setSystem_logs(response.data.message);
             }
         };
         RetrieveUserDataLogs();
-    }, [refresh]);
-
-    const filtered = data.filter((item) => {
-    const term = search.toLowerCase();
-
-    return (
-        item.f_name?.toLowerCase().includes(term) ||
-        item.email?.toLowerCase().includes(term) ||
-        item.year?.toLowerCase().includes(term) ||
-        item.status?.toLowerCase().includes(term)
-        );
-    });
+    }, [refresh, page, search]);
 
     const getApiCount = (email?: string) => {
         if (!email) return 0;
-        return apiLogs.filter((log) => log.request === email).length;
+        const match = system_logs.find((log) => log.request === email);
+        return match?.api_request ?? 0;
     };
 
 
@@ -82,7 +83,10 @@ export default function ManageUser() {
                 id="search"
                 placeholder="Search"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                    setSearch(e.target.value);
+                    setPage(1);
+                }}
                 />
                 <button onClick={() => {setRefresh(`${!refresh}`);}}>Refresh</button>
             </section>
@@ -99,8 +103,8 @@ export default function ManageUser() {
                     </tr>
                 </thead>
                 <tbody>
-                    {filtered && filtered.length > 0 ? (
-                        filtered.map((data, index) => (
+                    {data && data.length > 0 ? (
+                        data.map((data, index) => (
                             <tr key={index}>
                                 <td> {data.f_name} </td>
                                 <td> {data.year} </td>
@@ -154,6 +158,23 @@ export default function ManageUser() {
                     )}
                 </tbody>
             </table>
+            <div className={styles.pagination}>
+                <button
+                    className={styles.pageButton}
+                    onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                    disabled={page <= 1}
+                >
+                    Previous
+                </button>
+                <span className={styles.pageInfo}>Page {page} of {totalPages}</span>
+                <button
+                    className={styles.pageButton}
+                    onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+                    disabled={page >= totalPages}
+                >
+                    Next
+                </button>
+            </div>
         </section>
     );
 
