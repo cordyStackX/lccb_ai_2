@@ -39,10 +39,7 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          if (response && response.status < 400) {
-            return response;
-          }
-          return caches.match(OFFLINE_URL, { ignoreSearch: true });
+          return response;
         })
         .catch(() => caches.match(OFFLINE_URL, { ignoreSearch: true }))
     );

@@ -7,8 +7,8 @@ export async function GET() {
     try {
 
         const { error } = await supabaseServer
-        .from("*")     
-        .select("*")
+        .from("system_logs")
+        .select("id")
         .limit(1);
 
         if (error) throw error;

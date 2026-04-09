@@ -16,7 +16,7 @@ export default function Create_Password() {
     const router = useRouter();
 
     const [form, setForm] = useState({
-        email: "", password: "", c_password: "", name: "", year: "", role: "", code: ""
+        email: "", password: "", c_password: "", name: "", year: "", role: ""
     });
     const [status, setStatus] = useState(false);
     const [message, setMessage] = useState("");
@@ -36,10 +36,7 @@ export default function Create_Password() {
             const saveName = localStorage.getItem("name");
             const saveYear = localStorage.getItem("year");
             const saveRole = localStorage.getItem("role");
-            const code = localStorage.getItem("code");
-            const response = await Fetch_to(api_link.checkcode, { email: saveEmail, code: code });
-            if (!response.success) return router.push("/auth/signin");
-            setForm(prev => ({ ...prev, email: saveEmail || "", name: saveName || "", year: saveYear || "", role: saveRole || "", code: code || ""}));
+            setForm(prev => ({ ...prev, email: saveEmail || "", name: saveName || "", year: saveYear || "", role: saveRole || "" }));
         };
         checkCode();
     }, []);
@@ -47,10 +44,15 @@ export default function Create_Password() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
+        const response_code = await Fetch_to(api_link.checkcode, { email: form.email, key: "confirm_code" });
+        if (!response_code.success) {
+            setLoading(false); 
+            setMessage(response_code.message || "Somethings Went Wrong");
+            return;
+        }
         const responds = await Fetch_to(api_link.signup.createAccount, form);
         if (responds.success) {
             localStorage.clear();
-            await Fetch_to(api_link.checkcode, { email: form.email, code: form.code, key: "confirm_code" });
             router.push("/auth/signin");
         } else {
             setStatus(true);

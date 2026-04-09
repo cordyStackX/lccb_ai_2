@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
 
     if (isJanFirstUtc) {
         const { error: deleteError } = await supabaseServer
-            .from("API_logs")
+            .from("system_logs")
             .delete()
             .neq("id", 0);
 
@@ -23,9 +23,10 @@ export async function POST(req: NextRequest) {
     }
     
     const { data, error } = await supabaseServer
-        .from("API_logs")
+        .from("system_logs")
         .select("*");
 
+    console.log(data);
     if (error) {
         console.error("Supabase Query Error: ", error);
         return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });

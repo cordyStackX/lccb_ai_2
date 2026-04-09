@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import nodemailer from "nodemailer";
-import { cooldownMap, CodeStore } from "@/lib/code_store";
+import { attemptMap, cooldownMap, CodeStore } from "@/lib/code_store";
 
 const COOLDOWN_MS = 60 * 3000; // 3 minute
 
@@ -10,16 +10,77 @@ export async function POST(req: NextRequest) {
 
     if (!email) {
         console.error(" ==> User Email not exist");
-        return NextResponse.json({ success: false, error: "Email Not Exist" }, { status: 404 });
+        return NextResponse.json({ success: false, error: "Credential is Invalid" }, { status: 404 });
     }
     
     const cleanEmail = email.trim().toLowerCase();
 
+    if (key === "confirm_code") {
+        const stored = CodeStore.get(cleanEmail);
+        if (!stored?.confirm_code) return NextResponse.json({ success: false, error: "Request Terminated" }, { status: 429 });
+        CodeStore.delete(cleanEmail);
+        attemptMap.delete(cleanEmail);
+        cooldownMap.delete(cleanEmail);
+        return NextResponse.json({ success: true }, { status: 200 });
+    }
+
     const expiresAt = Date.now() + 60 * 3000; // 3 minutes
+
+    const nextAttempt = (attemptMap.get(cleanEmail) ?? 0);
+
+    const sendCodeEmail = async (recipient: string, confirmationCode: string) => {
+        const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: process.env.GMAIL_USERNAME,
+                pass: process.env.GMAIL_APP_PASSWORD,
+            },
+        });
+
+        const isAdmin = recipient.endsWith("@admin.com");
+        const targetEmail = isAdmin ? process.env.GMAIL_USERNAME : recipient;
+
+        if (!targetEmail) {
+            throw new Error("GMAIL_USERNAME is not configured");
+        }
+
+        const mailOption = {
+            from: process.env.GMAIL_USERNAME,
+            to: targetEmail,
+            subject: "Verification Code",
+            priority: "high" as const,
+            headers: {
+                Importance: "High",
+                "X-Priority": "1",
+                "X-MSMail-Priority": "High",
+            },
+            html: `
+                <p>Hello ${isAdmin ? "Admin" : recipient},</p>
+                <h3>Your Code:</h3>
+                <h1 style="
+                color: #fff;
+                font-weight: bold;
+                background-color: #043988;
+                padding: 10px;
+                border-radius: 10px;
+                ">${confirmationCode}</h1>
+            `,
+        };
+
+        await transporter.sendMail(mailOption);
+    };
 
     //Check if their is existing code
     if (code) {
         const stored = CodeStore.get(cleanEmail);
+
+        if (nextAttempt >= 5) {
+            CodeStore.delete(cleanEmail);
+            return NextResponse.json(
+                { success: false, error: "Too many attempts. Please try again later" },
+                { status: 429 }
+            );
+        }
 
         if (!stored) {
             return NextResponse.json(
@@ -30,6 +91,7 @@ export async function POST(req: NextRequest) {
 
         if (Date.now() > stored.expiresAt) {
             CodeStore.delete(cleanEmail);
+            attemptMap.delete(cleanEmail);
             return NextResponse.json(
                 { success: false, error: "Code expired" },
                 { status: 409 }
@@ -37,20 +99,20 @@ export async function POST(req: NextRequest) {
         }
 
         if (stored.code !== code) {
+            attemptMap.set(cleanEmail, nextAttempt + 1);
+
             return NextResponse.json(
                 { success: false, error: "Invalid code" },
                 { status: 409 }
             );
         }
 
-        if (key === "signin" || key === "register" || key === "forgot_password") {
-            return NextResponse.json({ success: true }, { status: 200 });
-        }
 
-        if (key === "confirm_code") {
-            CodeStore.delete(cleanEmail);
-            cooldownMap.delete(cleanEmail);
-        }
+        CodeStore.set(cleanEmail, {
+            code: code,
+            expiresAt,
+            confirm_code: code
+        });
 
         // Code correct
         return NextResponse.json({ success: true }, { status: 200 });
@@ -79,100 +141,24 @@ export async function POST(req: NextRequest) {
 
     CodeStore.set(cleanEmail, {
         code: confirmationCode,
-        expiresAt
+        expiresAt,
+        confirm_code: ""
     });
 
-    const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-            user: process.env.GMAIL_USERNAME,
-            pass: process.env.GMAIL_APP_PASSWORD
-        }
-    });
+    try {
+        await sendCodeEmail(cleanEmail, confirmationCode);
+        attemptMap.delete(cleanEmail);
+        return NextResponse.json(
+            { success: true },
+            { status: 200 }
+        );
+    } catch (err) {
+        console.error(" ==> Email Failed: ", err);
 
-    if (cleanEmail.endsWith("@admin.com")) {
-        const mailOption = {
-            from: process.env.GMAIL_USERNAME,
-            to: process.env.GMAIL_USERNAME,
-            subject: "Verification Code",
-            priority: "high" as const,
-            headers: {
-                Importance: "High",
-                "X-Priority": "1",
-                "X-MSMail-Priority": "High"
-            },
-            html: `
-                <p>Hello Admin, ${process.env.GMAIL_USERNAME}</p>
-                <h3>Your Code:</h3>
-                <h1 style="
-                color: #fff;
-                font-weight: bold;
-                background-color: #043988;
-                padding: 10px;
-                border-radius: 10px;
-                ">${confirmationCode}</h1>
-            `
-        };
-
-        try {
-
-            await transporter.sendMail(mailOption);
-
-            return NextResponse.json(
-                { success: true, message: confirmationCode },
-                { status: 200 }
-            );
-
-        } catch (err) {
-            console.error(" ==> Email Failed: ", err);
-
-            return NextResponse.json(
-                { success: false, error: "Failed to send code" },
-                { status: 500 }
-            );
-        }
-    } else {
-
-        const mailOption = {
-            from: process.env.GMAIL_USERNAME,
-            to: cleanEmail,
-            subject: "Verification Code",
-            priority: "high" as const,
-            headers: {
-                Importance: "High",
-                "X-Priority": "1",
-                "X-MSMail-Priority": "High"
-            },
-            html: `
-                <p>Hello, ${cleanEmail}</p>
-                <h3>Your Code:</h3>
-                <h1 style="
-                color: #fff;
-                font-weight: bold;
-                background-color: #043988;
-                padding: 10px;
-                border-radius: 10px;
-                ">${confirmationCode}</h1>
-            `
-        };
-
-        try {
-
-            await transporter.sendMail(mailOption);
-
-            return NextResponse.json(
-                { success: true },
-                { status: 200 }
-            );
-
-        } catch (err) {
-            console.error(" ==> Email Failed: ", err);
-
-            return NextResponse.json(
-                { success: false, error: "Failed to send code" },
-                { status: 500 }
-            );
-        }
+        return NextResponse.json(
+            { success: false, error: "Failed to send code" },
+            { status: 500 }
+        );
     }
 
     

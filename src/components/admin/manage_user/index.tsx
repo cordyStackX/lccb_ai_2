@@ -34,7 +34,7 @@ export default function ManageUser() {
         };
         RetrieveUserData();
          const RetrieveUserDataLogs = async () => {
-            const response = await Fetch_to(api_link.admin.retrieve_API_logs);
+            const response = await Fetch_to(api_link.admin.system_logs);
             if (response.success) {
                 setApiLogs(response.data.message);
             }
@@ -61,7 +61,21 @@ export default function ManageUser() {
 
     return(
         <section className={styles.container}>
+           <header className={styles.header_cons}>
+                <span>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="10" cy="8" r="4" stroke="currentColor" strokeWidth="2"/>
+                    <path d="M2 20c0-4 4-6 8-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    <path d="M14 14l6-6 2 2-6 6-3 1 1-3z" stroke="currentColor" strokeWidth="2"/>
+                    </svg>
+                    <h1>Manage User</h1>
+                </span>
+            </header>
             <section className={styles.search}>
+                {/* <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2"/>
+                <path d="M20 20l-3-3" stroke="currentColor" strokeWidth="2" stroke-linecap="round"/>
+                </svg> */}
                 <input 
                 type="text"
                 name="search"
@@ -70,7 +84,7 @@ export default function ManageUser() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 />
-
+                <button onClick={() => {setRefresh(`${!refresh}`);}}>Refresh</button>
             </section>
             <table className={styles.tables}>
                 <thead>
@@ -124,9 +138,9 @@ export default function ManageUser() {
                                         }
                                     }}
                                     >
-                                        <option value="active">Active 🟢</option>
-                                        <option value="suspend">Suspend 🟡</option>
-                                        <option value="delete">Delete 🔴</option>
+                                        <option value="active">🟢 Active</option>
+                                        <option value="suspend">🟡 Suspend</option>
+                                        <option value="delete">🔴 Delete</option>
                                     </select>
                                 </td>
                             </tr>

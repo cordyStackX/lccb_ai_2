@@ -45,9 +45,16 @@ export default function Confirm_email_signin() {
 
     const ConfirmCode = async () => {
         setLoading(true);
-        const responds = await Fetch_to(api_link.checkcode, { email: form.email, code: form.code, key: "confirm_code" });
+        const responds = await Fetch_to(api_link.checkcode, { email: form.email, code: form.code });
         if (responds.success) {
             localStorage.clear();
+            const response = await Fetch_to(api_link.checkcode, { email: form.email, code: form.code, key: "confirm_code" });
+            if (!response.success) {
+                setMessage(response.message);
+                setStatus(true);
+                setLoading(false);
+                return;
+            }
             await Fetch_to(api_link.jwt.auth, { email: form.email });
             if (form.email.endsWith("@admin.com")) return router.push("/admin/dashboard");
             router.push("/chat");

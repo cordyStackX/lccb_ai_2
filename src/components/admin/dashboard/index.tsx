@@ -26,13 +26,11 @@ interface ManageUserDataProps {
     year?: string;
 }
 
-interface PDF_record {
-    created_at?: string;
-}
-
-interface API_logs {
+interface System_logs {
     request?: string;
     created_at?: string;
+    uploaded_pdf: number;
+    api_request: number;
 }
 
 interface WeeklyPoint {
@@ -42,18 +40,16 @@ interface WeeklyPoint {
 
 export default function Dashboard() {
     const [data, setData] = useState<ManageUserDataProps[]>([]);
-    const [pdf_record, setPdf_record] = useState<PDF_record[]>([]);
-    const [api_logs, setApi_logs] = useState<API_logs[]>([]);
+    const [system_logs, setSystem_logs] = useState<System_logs[]>([]);
 
     useEffect(() => {
         const RetrieveUserData = async () => {
             const response = await Fetch_to(api_link.admin.retrieve_user);
-            const response2 = await Fetch_to(api_link.admin.retrieve_pdf_record);
-            const response3 = await Fetch_to(api_link.admin.retrieve_API_logs);
+            const response2 = await Fetch_to(api_link.admin.system_logs);
             if (response.success) {
                 setData(response.data.message);
-                setPdf_record(response2.data.message);
-                setApi_logs(response3.data.message);
+                setSystem_logs(response2.data.message);
+                console.log(response2.data.message);
             }
         };
         RetrieveUserData();
@@ -90,21 +86,14 @@ export default function Dashboard() {
         }
     });
 
-    pdf_record.forEach(pdf => {
-        if (pdf.created_at) {
-            const day = getDayOfWeek(pdf.created_at);
-            const month = getMonth(pdf.created_at);
-            weeklyPDF_record[day]++;
-            monthlyPDF_record[month]++;
-        }
-    });
-    
-    api_logs.forEach(api => {
-        if (api.created_at) {
-            const day = getDayOfWeek(api.created_at);
-            const month = getMonth(api.created_at);
-            weeklyAPI_logs[day]++;
-            monthlyAPI_logs[month]++;
+    system_logs.forEach((entry) => {
+        if (entry.created_at) {
+            const day = getDayOfWeek(entry.created_at);
+            const month = getMonth(entry.created_at);
+            weeklyPDF_record[day] += entry.uploaded_pdf ?? 0;
+            monthlyPDF_record[month] += entry.uploaded_pdf ?? 0;
+            weeklyAPI_logs[day] += entry.api_request ?? 0;
+            monthlyAPI_logs[month] += entry.api_request ?? 0;
         }
     });
 
@@ -149,7 +138,8 @@ export default function Dashboard() {
 
     const getApiCount = (email?: string) => {
         if (!email) return 0;
-        return api_logs.filter((log) => log.request === email).length;
+        const match = system_logs.find((log) => log.request === email);
+        return match?.api_request ?? 0;
     };
 
     const topApiUsers = [...data]
@@ -162,12 +152,17 @@ export default function Dashboard() {
         .sort((a, b) => b.count - a.count)
         .slice(0, 20);
 
+    const systemSummary = system_logs[0];
+    const uploadedPdfCount = Number(systemSummary?.uploaded_pdf ?? 0);
+    const apiRequestCount = Number(systemSummary?.api_request ?? 0);
+
     const usagePieData = [
-        { name: "PDF Uploads", value: pdf_record.length },
-        { name: "API Logs", value: api_logs.length },
+        { name: "PDF Uploads", value: uploadedPdfCount },
+        { name: "User Logs", value: apiRequestCount },
         { name: "Registered Accounts", value: data.length },
+        { name: "Chatbot Logs", value: apiRequestCount },
     ];
-    const pieColors = ["#2563eb", "#f59e0b", "#16c784"];
+    const pieColors = ["#2563eb", "#f59e0b", "#16c784", "#ff0800"];
 
     const renderCryptoChart = (title: string, chartData: WeeklyPoint[], chartId: string, trendLabel: string) => {
         const firstValue = chartData[0]?.value ?? 0;
@@ -273,11 +268,11 @@ export default function Dashboard() {
                                 </svg>
                             </span>
                             
-                            <p> {pdf_record.length} </p>
+                            <p> {uploadedPdfCount} </p>
                         </span>
                     </div>
                     <div>
-                        <h3>AI API Requested</h3>
+                        <h3>User API Requested</h3>
                         
                         <span className={styles.icons}>
                             <span>
@@ -289,7 +284,23 @@ export default function Dashboard() {
                                 </svg>
                             </span>
                             
-                            <p> {api_logs.length} </p>
+                            <p> {apiRequestCount} </p>
+                        </span>
+                    </div>
+                    <div>
+                        <h3>Chatbot API Requested</h3>
+                        
+                        <span className={styles.icons}>
+                            <span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="3" y="5" width="18" height="18" rx="4" stroke="currentColor" strokeWidth="2"/>
+                                <circle cx="9" cy="11" r="2" fill="currentColor"/>
+                                <circle cx="15" cy="11" r="2" fill="currentColor"/>
+                                <path d="M12 2v3M9 2h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                </svg>
+                            </span>
+                            
+                            <p> {apiRequestCount} </p>
                         </span>
                     </div>
                 </div>
@@ -318,7 +329,7 @@ export default function Dashboard() {
                                             nameKey="name"
                                             innerRadius={55}
                                             outerRadius={90}
-                                            paddingAngle={3}
+                                            paddingAngle={1}
                                         >
                                             {usagePieData.map((entry, index) => (
                                                 <Cell key={`cell-${entry.name}`} fill={pieColors[index % pieColors.length]} />
@@ -337,7 +348,7 @@ export default function Dashboard() {
                                 </ResponsiveContainer>
                             </div>
                         </div>
-                        <h3 className={styles.reportTitle}>Top 20 users by Laco AI usage</h3>
+                        <h3 className={styles.reportTitle}>Most Top 20 users by Laco AI usage</h3>
                         <table className={styles.rankings}>
                             <thead>
                                 <tr>

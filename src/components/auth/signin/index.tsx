@@ -50,7 +50,7 @@ export default function SignIn() {
         const responds = await Fetch_to(api_link.signin, form);
         if (responds.success) {
             localStorage.setItem("email", form.email);
-            const responds = await Fetch_to(api_link.checkcode, { email: form.email, key: "signin" });
+            const responds = await Fetch_to(api_link.checkcode, { email: form.email });
             if(!responds.success) {
                 setMessage(responds.message || "Somethings Went Wrong");
                 setLoading(false); 
@@ -119,7 +119,7 @@ export default function SignIn() {
                         <section className={`${styles.buttons} `}>
                             <button>Log In</button>
                         </section>
-                        <p>Register an Account? <Link href={"/auth/signup"} onClick={() => {Progress(true);}}>Registered</Link></p>
+                        <p>Register an Account? <Link href={"/auth/register"} onClick={() => {Progress(true);}}>Registered</Link></p>
                         <p><Link href={"/auth/forgot-password"} onClick={() => {Progress(true);}}>Forgot Password?</Link></p>
                     </form>
                 )}

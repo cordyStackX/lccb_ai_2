@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
 
   const { data, error } = await supabaseServer
     .from("pdf_file")
-    .select("id, file, file_name, status")
+    .select("id, file, file_name")
     .eq("email", cleanEmail);
 
   if (error) {

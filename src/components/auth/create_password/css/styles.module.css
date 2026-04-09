@@ -16,7 +16,6 @@
     width: min(500px, 90dvw);
     height: auto;
     border-radius: 10px;
-    background: var(--fx-color);
     padding: clamp(1rem, 10dvw, 3rem);
     overflow: hidden;
     opacity: 0;

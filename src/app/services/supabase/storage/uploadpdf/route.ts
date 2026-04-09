@@ -11,7 +11,6 @@ export async function POST(req: NextRequest) {
     const form = await req.formData();
     const file = form.get("file") as File;
     const email = form.get("email") as string;
-    const status = form.get("status") as string;
 
     const filename = file.name;
 
@@ -52,16 +51,39 @@ export async function POST(req: NextRequest) {
 
         if (data) {
             
-            const { data, error } = await supabaseServer
+            const { error } = await supabaseServer
             .from("pdf_file")
-            .insert([{ file: filePath, email: cleanEmail, file_name: filename, status: status }]);
+            .insert([{ file: filePath, email: cleanEmail, file_name: filename }]);
 
-            if (error) {
+            const { data: record, error: record_err } = await supabaseServer
+            .from("system_logs")
+            .select("uploaded_pdf, created_at")
+            .eq("request", cleanEmail)
+            .gte("created_at", new Date().toISOString().split("T")[0]) // today start
+            .lt("created_at", new Date(Date.now() + 86400000).toISOString().split("T")[0]) // tomorrow start
+            .maybeSingle();
+
+            if (error && record_err) {
                 console.error("Supabase Query Error: ", error);
                 return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
             }
 
-            console.log("Status: ", data);
+            if (record) {
+                const record_add = (record.uploaded_pdf ?? 0) + 1;
+                await supabaseServer
+                .from("system_logs")
+                .update({ uploaded_pdf: record_add })
+                .eq("request", cleanEmail);
+            }
+
+            if (!record) {
+                await supabaseServer
+                .from("system_logs")
+                .insert([{
+                    request: cleanEmail,
+                    uploaded_pdf: 1,
+                }]);
+            }
 
             return NextResponse.json({ success: true, message: "File upload successfully" }, { status: 200 });
 

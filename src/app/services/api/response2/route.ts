@@ -41,6 +41,36 @@ export async function POST(req: NextRequest) {
             last_ai_response: last_ai_response,
         });
 
+        const { data: record, error: record_err } = await supabaseServer
+            .from("system_logs")
+            .select("api_request, created_at")
+            .eq("request", email)
+            .gte("created_at", new Date().toISOString().split("T")[0]) // today start
+            .lt("created_at", new Date(Date.now() + 86400000).toISOString().split("T")[0]) // tomorrow start
+            .maybeSingle();
+
+        if (record_err) {
+            console.error("Supabase Query Error: ", record_err);
+            return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
+        }
+
+        if (record) {
+            const record_add = (record.api_request ?? 0) + 1;
+            await supabaseServer
+            .from("system_logs")
+            .update({ api_request: record_add })
+            .eq("request", email);
+        }
+
+        if (!record) {
+            await supabaseServer
+            .from("system_logs")
+            .insert([{
+                request: email,
+                api_request: 1,
+            }]);
+        }
+
         if (response.success) {
             return NextResponse.json({ success: true, message: response }, { status: 200 });
         } else {
