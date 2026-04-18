@@ -1,7 +1,16 @@
-flask==3.1.2
-flask-cors==5.0.0
+flask==3.1.3
+flask-cors==6.0.0
 openai==1.58.1
 python-dotenv==1.0.1
 PyPDF2==3.0.1
 requests==2.32.3
 supabase
+h11>=0.16.0 # not directly required, pinned by Snyk to avoid a vulnerability
+urllib3>=1.26.19 # not directly required, pinned by Snyk to avoid a vulnerability
+python-semantic-release>=9.8.8 # not directly required, pinned by Snyk to avoid a vulnerability
+anyio>=4.4.0 # not directly required, pinned by Snyk to avoid a vulnerability
+cryptography>=46.0.5 # not directly required, pinned by Snyk to avoid a vulnerability
+werkzeug>=2.3.8 # not directly required, pinned by Snyk to avoid a vulnerability
+wheel>=0.38.0 # not directly required, pinned by Snyk to avoid a vulnerability
+zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
+pygments>=2.20.0 # not directly required, pinned by Snyk to avoid a vulnerability
