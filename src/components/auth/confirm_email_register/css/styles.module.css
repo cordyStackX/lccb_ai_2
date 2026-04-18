@@ -13,7 +13,7 @@
     align-items: center;
 }
 .form_styles {
-    width: min(500px, 100%);
+    width: min(500px, 100dvw);
     height: auto;
     border-radius: 10px;
     padding: clamp(1rem, 10dvw, 3rem);

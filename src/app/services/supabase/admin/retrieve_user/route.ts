@@ -33,7 +33,11 @@ export async function POST(req: NextRequest) {
         const total = count ?? 0;
         const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
-        const sanitizedData = (data ?? []).map(({ password, ...rest }) => rest);
+        const sanitizedData = (data ?? []).map((row) => {
+            const rest = { ...row };
+            delete rest.password;
+            return rest;
+        });
 
         return NextResponse.json(
             {
