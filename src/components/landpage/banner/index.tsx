@@ -40,7 +40,7 @@ export default function Banner() {
                     <span>technologies.</span>
                     </p>
                         <section className={`${styles.buttons}`}>
-                            <button onClick={() => {router.push("/auth/signup"); Progress(true);}} 
+                            <button onClick={() => {router.push("/auth/register"); Progress(true);}} 
                             ref={spand} 
                             
                             style={{'--spand-in' : spandIsInView ? 1 : 0 } as React.CSSProperties} >Ask LACO</button>

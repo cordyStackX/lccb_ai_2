@@ -144,7 +144,7 @@ export default function SignUp() {
                             <option value="Kinder Garten">Kinder Garten</option>
                             <option value="Elementary">Elementary</option>
                             <option value="High School">High School</option>
-                            <option value="Senior High Scool">Senior High School</option>
+                            <option value="Senior High School">Senior High School</option>
                             <option value="College">College</option>
                         </select>
 

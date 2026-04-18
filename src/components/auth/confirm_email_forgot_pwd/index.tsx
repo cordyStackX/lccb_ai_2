@@ -48,7 +48,6 @@ export default function Confirm_email_forgot_pwd() {
     const ConfirmCode = async () => {
         setLoading(true);
         const responds = await Fetch_to(api_link.checkcode, { email: form.email, code: form.code });
-        localStorage.setItem("code", form.code);
         if (responds.success) {
             router.push("/auth/update-password");
         } else {

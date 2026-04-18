@@ -1,16 +1,14 @@
 "use server";
-
 import { NextResponse } from "next/server";
 import { supabaseServer } from "../../../../lib/supabase-server";
 
 export async function GET() {
-    
 
     try {
 
         const { error } = await supabaseServer
-        .from("*")     
-        .select("*")
+        .from("system_logs")
+        .select("id")
         .limit(1);
 
         if (error) throw error;

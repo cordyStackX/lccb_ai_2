@@ -29,9 +29,9 @@ export default function Confirm_email_signup() {
         setForm(prev => ({ ...prev, email: saveEmail || "" }));
     }, []);
 
-    const SendCode = async (e: string | null) => {
+    const SendCode = async () => {
         setLoading(true);
-        const responds = await Fetch_to(api_link.checkcode, { email: e });
+        const responds = await Fetch_to(api_link.checkcode, { email: form.email });
         if (responds.success) {
             setStatus(false);
             setMessage("Code sent successfully. Expires in 3 minutes.");
@@ -46,7 +46,6 @@ export default function Confirm_email_signup() {
     const ConfirmCode = async () => {
         setLoading(true);
         const responds = await Fetch_to(api_link.checkcode, { email: form.email, code: form.code });
-        localStorage.setItem("code", form.code);
         if (responds.success) {
             router.push("/auth/create-password");
         } else {
@@ -92,7 +91,7 @@ export default function Confirm_email_signup() {
                         {message && (
                             <p className={status ?  "error" : "success"}>{message}</p>
                         )}
-                        <p>Didn{"'"}t Recieve? <a onClick={() => {SendCode(form.email);}} style={{ cursor: "pointer" }}>Resend Code</a></p>
+                        <p>Didn{"'"}t Recieve? <a onClick={() => {SendCode();}} style={{ cursor: "pointer" }}>Resend Code</a></p>
                         <section className={`${styles.buttons} `}>
                             <button type="button" onClick={() => {router.back();}} style={{backgroundColor: "var(--secondary)"}}>Back</button>
                             <button>Confirm</button>

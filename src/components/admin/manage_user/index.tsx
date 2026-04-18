@@ -12,55 +12,82 @@ interface ManageUserDataProps {
     id?: number;
     status?: string;
     year?: string;
-    role?: string
+    role?: string;
 }
 
-interface ApiLogs {
-    request?: string
+interface System_logs {
+    request?: string;
+    email?: string;
+    api_request?: string;
+    uploaded_pdf?: string;
 }
+
+const PAGE_SIZE = 30;
 
 export default function ManageUser() {
     const [data, setData] = useState<ManageUserDataProps[]>([]);
-    const [refresh, setRefresh] = useState("");
+    const [refresh, setRefresh] = useState(false);
     const [search, setSearch] = useState("");
-    const [apiLogs, setApiLogs] = useState<ApiLogs[]>([]);
+    const [system_logs, setSystem_logs] = useState<System_logs[]>([]);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
     useEffect(() => {
         const RetrieveUserData = async () => {
-            const response = await Fetch_to(api_link.admin.retrieve_user);
+            const response = await Fetch_to(api_link.admin.retrieve_user, {
+                page,
+                limit: PAGE_SIZE,
+                search,
+            });
             if (response.success) {
                 setData(response.data.message);
+                setTotalPages(response.data.totalPages ?? 1);
             }
         };
         RetrieveUserData();
          const RetrieveUserDataLogs = async () => {
-            const response = await Fetch_to(api_link.admin.retrieve_API_logs);
+            const response = await Fetch_to(api_link.admin.system_logs);
             if (response.success) {
-                setApiLogs(response.data.message);
+                setSystem_logs(response.data.message);
             }
+            setRefresh(false);
         };
         RetrieveUserDataLogs();
-    }, [refresh]);
-
-    const filtered = data.filter((item) => {
-    const term = search.toLowerCase();
-
-    return (
-        item.f_name?.toLowerCase().includes(term) ||
-        item.email?.toLowerCase().includes(term) ||
-        item.year?.toLowerCase().includes(term) ||
-        item.status?.toLowerCase().includes(term)
-        );
-    });
+    }, [refresh, page, search]);
 
     const getApiCount = (email?: string) => {
         if (!email) return 0;
-        return apiLogs.filter((log) => log.request === email).length;
+        return system_logs.reduce((total, log) => {
+            if (log.request === email) {
+                return total + Number(log.api_request ?? 0);
+            }
+            return total;
+        }, 0);
+    };
+
+    const getUploadedCount = (email?: string) => {
+        if (!email) return 0;
+        return system_logs.reduce((total, log) => {
+            if (log.request === email) {
+                return total + Number(log.uploaded_pdf ?? 0);
+            }
+            return total;
+        }, 0);
     };
 
 
     return(
         <section className={styles.container}>
+           <header className={styles.header_cons}>
+                <span>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="10" cy="8" r="4" stroke="currentColor" strokeWidth="2"/>
+                    <path d="M2 20c0-4 4-6 8-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    <path d="M14 14l6-6 2 2-6 6-3 1 1-3z" stroke="currentColor" strokeWidth="2"/>
+                    </svg>
+                    <h1>Manage User</h1>
+                </span>
+            </header>
             <section className={styles.search}>
                 <input 
                 type="text"
@@ -68,9 +95,12 @@ export default function ManageUser() {
                 id="search"
                 placeholder="Search"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                    setSearch(e.target.value);
+                    setPage(1);
+                }}
                 />
-
+                <button disabled={refresh} style={{ color: refresh ? 'var(--default-color-gray)' : '' }} onClick={() => {setRefresh(!refresh);}}>Refresh</button>
             </section>
             <table className={styles.tables}>
                 <thead>
@@ -81,12 +111,13 @@ export default function ManageUser() {
                         <th>Role</th>
                         <th>Created_at</th>
                         <th>API Request</th>
+                        <th>Uploaded PDF</th>
                         <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {filtered && filtered.length > 0 ? (
-                        filtered.map((data, index) => (
+                    {data && data.length > 0 ? (
+                        data.map((data, index) => (
                             <tr key={index}>
                                 <td> {data.f_name} </td>
                                 <td> {data.year} </td>
@@ -94,39 +125,38 @@ export default function ManageUser() {
                                 <td> {data.role} </td>
                                 <td> {data.created_at ? new Date(data.created_at).toLocaleDateString("en-US") : " - "} </td>
                                 <td>{getApiCount(data.email)}</td>
+                                <td>{getUploadedCount(data.email)}</td>
                                 <td>
                                     <select 
                                     value={data.status}
                                     onChange={ async(e) => {
                                         const newStatus = e.target.value;
                                         if (newStatus === "delete") {
-                                            const refresh = Math.floor(10 + Math.random() * 90).toString();
                                             const alert2 = await SweetAlert2("Delete?", `Are you sure want to delete this ${data.email}`, "warning", true, "Yes", true, "No");
                                             if (!alert2.isConfirmed) return;
                                             SweetAlert2("Deleting", "Please wait..", "info", false, "", false, "", true);
                                             const response = await Fetch_to(api_link.admin.delete_user, { email: data.email });
                                             Swal.close();
                                             if (response) {
-                                                setRefresh(`${refresh}`);
+                                                setRefresh(!refresh);
                                             } else {
                                                 SweetAlert2("Error", `${response}`, "error", true, "Confirm", false, "", false);
                                             }
                                         } else {
-                                            const refresh = Math.floor(10 + Math.random() * 90).toString();
                                             SweetAlert2("Updating", "Please wait..", "info", false, "", false, "", true);
                                             const response = await Fetch_to(api_link.admin.update_user_status, { id: data.id, status: newStatus });
                                             Swal.close();
                                             if (response.success) {
-                                                setRefresh(`${refresh}`);
+                                                setRefresh(!refresh);
                                             } else {
                                                 SweetAlert2("Error", `${response.message}`, "error", true, "Confirm", false, "", false);
                                             }
                                         }
                                     }}
                                     >
-                                        <option value="active">Active 🟢</option>
-                                        <option value="suspend">Suspend 🟡</option>
-                                        <option value="delete">Delete 🔴</option>
+                                        <option value="active">🟢 Active</option>
+                                        <option value="suspend">🟡 Suspend</option>
+                                        <option value="delete">🔴 Delete</option>
                                     </select>
                                 </td>
                             </tr>
@@ -140,6 +170,23 @@ export default function ManageUser() {
                     )}
                 </tbody>
             </table>
+            <div className={styles.pagination}>
+                <button
+                    className={styles.pageButton}
+                    onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                    disabled={page <= 1}
+                >
+                    Previous
+                </button>
+                <span className={styles.pageInfo}>Page {page} of {totalPages}</span>
+                <button
+                    className={styles.pageButton}
+                    onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+                    disabled={page >= totalPages}
+                >
+                    Next
+                </button>
+            </div>
         </section>
     );
 

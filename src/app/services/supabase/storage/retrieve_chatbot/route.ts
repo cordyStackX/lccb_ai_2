@@ -18,8 +18,8 @@ export async function POST(req: NextRequest) {
     }
 
   const { data, error } = await supabaseServer
-    .from("pdf_file")
-    .select("id, file, file_name")
+    .from("chatbot_pdf_file")
+    .select("id, file, file_name, summary")
     .eq("email", cleanEmail);
 
   if (error) {
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const bucketName = "pdfs";
+  const bucketName = "chatbot_pdfs";
 
   const toRelativePath = (value: string) => {
     let path = value.trim();

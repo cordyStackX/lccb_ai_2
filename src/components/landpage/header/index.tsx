@@ -22,7 +22,7 @@ export default function Header() {
                     <h2>LACO AI</h2>
                 </section>
                 <section className={`${styles.buttons}`}>
-                    <button onClick={() => {router.push("/auth/signup");}}>Ask LACO</button>
+                    <button onClick={() => {router.push("/auth/register");}}>Ask LACO</button>
                 </section>
             </div>
         </header>

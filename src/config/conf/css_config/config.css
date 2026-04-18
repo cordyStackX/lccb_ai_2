@@ -2,18 +2,18 @@
 	--background_linear_1: #017d93;
 	--background_linear_2: #3fa5b7;
 	--foreground: #181818;
-	--primary: #123a9b;
+	--primary: #213b94;
 	--secondary: #3fa5b7;
 	/* Alternative Colors */
 	--default-color-white: #e9e9e9;
 	--default-color-white-2: #d7d7d7;
-	--default-color-gray: #a2a2a2;
-	--default-color-black: #212121;
+	--default-color-gray: #c5c5c5;
+	--default-color-black: #3c3c3c;
 	--default-color-blue: #0565B9;
 	--default-color-red: #E94B3C;
 	--default-color-green: #4CAF50; 
 	--default-color-yellow: #ff9100; 
-	--fx-color: rgba(233, 233, 233, 0.9);
+	--fx-color: rgba(49, 110, 235, 0.501);
 	--fx-color-button: rgba(233, 233, 233, 0.4);
 
 	/* Color Modes */

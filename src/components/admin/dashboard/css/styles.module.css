@@ -5,14 +5,43 @@
     overflow-y: scroll;
     padding: 0 2rem;
 }
+.header_cons {
+    color: var(--foreground);
+    width: 100%;
+    height: 80px;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    padding: 3rem 0;
+}
+.header_cons svg {
+    width: 40px;
+    height: 40px;
+    margin: 0 1rem;
+}
+.header_cons span {
+    display: flex;
+}
 .status {
     width: 100%;
     height: auto;
-    margin: 2rem 0;
-    background-color: var(--default-color-white-2);
-    box-shadow: 0 0 0.5rem 0.1rem var(--default-color-black);
     padding: 2rem 1.5rem;
     border-radius: 5px;
+    background-color: var(--default-color-gray);
+}
+
+.statusHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.statusHeader p {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--default-color-black);
+    opacity: 0.8;
 }
 .container h2 {
     color: var(--default-color-black);
@@ -20,43 +49,193 @@
 .info {
     width: 100%;
     height: auto;
-    justify-content: space-around;
+    justify-content: space-between;
     display: flex;
     align-items: center;
-    padding: 1rem;
+    padding: 1rem 0;
     margin-top: 0.5rem;
 }
 .info div {
-    width: 30%;
+    width: 24%;
     height: 150px;
-    background-color: var(--primary);
     padding: 1.3rem;
-    border-radius: 5px;
+    border-radius: 8px;
+    color: var(--foreground);
+    background-color: var(--default-color-white);
+    box-shadow: 1px 5px 5px 1px var(--default-color-black);
 }
 .info p {
     font-size: 2.3rem;
     margin: 1rem;
 }
+.icons {
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    padding: 1rem;
+}
+.icons span {
+    padding: 0.8rem;
+    background-color: var(--background_linear_1);
+    border-radius: 50%;
+}
+.icons svg {
+    width: 35px;
+    height: 30px;
+    color: var(--default-color-white);
+}
 .graph_container {
-    width: 100%;
+    width: 50%;
     height: auto;
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-flow: column;
+}
+
+.reportTitle {
+    width: min(780px, 100%);
+    margin: 1.2rem 1rem;
+    color: var(--default-color-black);
+    font-size: 1.1rem;
+    letter-spacing: 0.02rem;
 }
 .graph {
-    width: 34%;
+    width: min(780px, 100%);
     height: auto;
-    margin: 2rem 1rem;
-    background-color: var(--default-color-white-2);
-    box-shadow: 0 0 0.5rem 0.1rem var(--default-color-black);
+    margin: 0.8rem 0;
+    background: var(--default-color-white);
+    box-shadow: 0 0 0.5rem 0.1rem var(--default-color-gray);
     padding: 2rem;
-    border-radius: 5px;
+    border-radius: 10px;
     position: relative;
+    border: 1px solid rgba(148, 163, 184, 0.2);
 }
 .info2 {
     width: 100%;
     height: auto;
-    margin: 0.5rem 0;
+    margin: 0;
+    padding: 1rem 0.3rem;
+}
+
+.chartHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.graph h2 {
+    color: var(--foreground);
+}
+
+.chartShell {
+    width: 100%;
+    height: 270px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.32);
+    padding: 0.4rem;
+}
+
+.trendUp,
+.trendDown {
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 999px;
+    padding: 0.4rem 0.75rem;
+    letter-spacing: 0.015rem;
+}
+
+.trendUp {
+    color: var(--primary);
+    background-color: rgba(22, 199, 196, 0.15);
+    border: 1px solid rgba(22, 119, 199, 0.42);
+}
+
+.trendDown {
+    color: #f87171;
+    background-color: rgba(234, 57, 67, 0.16);
+    border: 1px solid rgba(234, 57, 67, 0.45);
+}
+.analytics_data {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: 100%;
+    height: auto;
+}
+.records {
+    width: 50%;
+    height: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-flow: column;
     padding: 1rem;
+}
+
+.pieCard {
+    background-color: var(--default-color-white);
+    border-radius: 12px;
+    padding: 1.2rem;
+    margin: 0 0 1.2rem;
+    box-shadow: 0px 0px 5px 1px var(--default-color-gray);
+    width: 100%;
+}
+
+.pieCard h3 {
+    margin: 0 0 0.8rem;
+    color: var(--default-color-black);
+}
+
+.pieShell {
+    width: 100%;
+    height: 260px;
+}
+.rankings {
+    width: 100%;
+    height: auto;
+    text-align: center;
+    margin: 1rem 0;
+    background-color: var(--default-color-white);
+    color: var(--foreground);
+    border-radius: 8px;
+}
+.rankings th {
+    padding: 1rem;
+    text-align: center;
+    border-bottom: 1px solid var(--default-color-gray);
+    background-color: var(--default-color-white);
+    position: sticky;
+    top: 5px;
+}
+.rankings td {
+    padding: 1rem;
+}
+@media screen and (max-width: 900px) {
+    .statusHeader {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .reportTitle {
+        width: 100%;
+        margin: 0.8rem 0 0.1rem;
+    }
+
+    .graph {
+        width: 100%;
+        margin: 1.2rem 0;
+        padding: 1.2rem;
+    }
+
+    .chartHeader {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .records,
+    .graph_container {
+        width: 100%;
+    }
 }

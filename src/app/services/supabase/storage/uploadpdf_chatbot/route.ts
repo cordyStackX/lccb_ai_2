@@ -20,11 +20,11 @@ export async function POST(req: NextRequest) {
 
     if (!cleanEmail) return NextResponse.json({ success: false, error: "Email not found" }, { status: 404 });
 
-    const bucketName = "pdfs";
+    const bucketName = "chatbot_pdfs";
     const filePath = `uploads/${Date.now()}_${file.name}`;
 
     const { data, error } = await supabaseServer
-    .from("pdf_file")
+    .from("chatbot_pdf_file")
     .select("id")
     .eq("email", cleanEmail)
     .eq("file_name", filename);
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
         if (data) {
             
             const { error } = await supabaseServer
-            .from("pdf_file")
+            .from("chatbot_pdf_file")
             .insert([{ file: filePath, email: cleanEmail, file_name: filename }]);
 
             const { data: record, error: record_err } = await supabaseServer

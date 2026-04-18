@@ -15,7 +15,7 @@ export default function Update_Password() {
     const router = useRouter();
 
     const [form, setForm] = useState({
-        email: "", password: "", c_password: "", code: ""
+        email: "", password: "", c_password: ""
     });
     const [status, setStatus] = useState(false);
     const [message, setMessage] = useState("");
@@ -32,10 +32,7 @@ export default function Update_Password() {
     useEffect(() => {
         const checkCode = async () => {
             const saveEmail = localStorage.getItem("email");
-            const code = localStorage.getItem("code");
-            const response = await Fetch_to(api_link.checkcode, { email: saveEmail, code: code });
-            if (!response.success) return router.push("/auth/signin");
-            setForm(prev => ({ ...prev, email: saveEmail || "", code: code || ""}));
+            setForm(prev => ({ ...prev, email: saveEmail || ""}));
         };
         checkCode();
     }, []);
@@ -47,7 +44,7 @@ export default function Update_Password() {
         if (responds.success) {
             localStorage.clear();
             await Fetch_to(api_link.jwt.deauth);
-            await Fetch_to(api_link.checkcode, { email: form.email, code: form.code, key: "confirm_code" });
+            await Fetch_to(api_link.checkcode, { email: form.email, key: "confirm_code" });
             router.push("/auth/signin");
         } else {
             setStatus(true);
