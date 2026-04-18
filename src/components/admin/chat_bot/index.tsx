@@ -1,3 +1,4 @@
+"use client";
 import styles from "./css/styles.module.css";
 import { useEffect, useRef, useState } from "react";
 import { SweetAlert2, Fetch_toFile, Fetch_to } from "@/utilities";
@@ -11,12 +12,15 @@ interface PdfFile {
     summary?: string;
 }
 
+const PAGE_SIZE = 30;
+
 export default function Chat_bot() {
     const fileRef = useRef<HTMLInputElement>(null);
     const [data, setData] = useState<PdfFile[]>([]);
     const [refresh, setRefresh] = useState(false);
     const [search, setSearch] = useState("");
     const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
     const UploadPdf = () => {
         fileRef.current?.click();
@@ -24,20 +28,25 @@ export default function Chat_bot() {
 
     useEffect(() => {
         const retrieve_pdf = async () => {
-            const response = await Fetch_to(api_link.storage.retrieve_chatbot , { email: "admin@admin.com" });
+            const response = await Fetch_to(api_link.storage.retrieve_chatbot, {
+                email: "admin@admin.com",
+                page,
+                limit: PAGE_SIZE,
+                search,
+            });
             if (response.success) {
                 console.log(response.data.message);
                 setData(response.data.message);
+                setTotalPages(response.data.totalPages ?? 1);
             }
             setRefresh(false);
         };
         retrieve_pdf();
-    }, [refresh]);
+    }, [refresh, page, search]);
 
     const HandleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-        const status = "NoSpeak";
 
         SweetAlert2("Uploading", "Please wait..", "info", false, "", false, "", true);
 
@@ -64,6 +73,27 @@ export default function Chat_bot() {
             }
         }
 
+    };
+
+    const DownloadFile = async (pdf: PdfFile) => {
+        if (!pdf.file) return;
+        SweetAlert2("Downloading", "Please wait..", "info", false, "", false, "", true);
+        const response = await Fetch_to(api_link.storage.downloadpdf_chatbot, { filePath: pdf.file });
+        Swal.close();
+
+        if (response.success && response.data?.url) {
+            const anchor = document.createElement("a");
+            anchor.href = response.data.url as string;
+            anchor.download = pdf.file_name || "chatbot.pdf";
+            anchor.rel = "noopener noreferrer";
+            anchor.target = "_blank";
+            document.body.appendChild(anchor);
+            anchor.click();
+            anchor.remove();
+            return;
+        }
+
+        SweetAlert2("Error", `${response.message || "Download failed"}`, "error", true, "Confirm", false, "", false);
     };
 
 
@@ -105,7 +135,7 @@ export default function Chat_bot() {
             <section className={styles.status}>
                 <span>
                     <h2>Your Documents</h2>
-                    <button onClick={UploadPdf}>Upload PDF File</button>
+                    <button className={styles.button_upload} onClick={UploadPdf}>Upload PDF File</button>
                 </span>
                 <div>
                     <table>
@@ -122,8 +152,15 @@ export default function Chat_bot() {
                                     <tr key={index}>
                                         <td> {pdf.file_name} </td>
                                         <td> {pdf.summary} </td>
-                                        <td>
-                                            <button onClick={ async () => {
+                                        <td >
+                                            <button className={styles.button_download} onClick={() => DownloadFile(pdf)}>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                                <polyline points="7 10 12 15 17 10"/>
+                                                <line x1="12" y1="15" x2="12" y2="3"/>
+                                                </svg>
+                                            </button>
+                                            <button className={styles.button_delete} onClick={ async () => {
                                                 SweetAlert2("Deleting", "Please wait..", "info", false, "", false, "", true);
                                                 const response = await Fetch_to(api_link.storage.deletepdf, { id: pdf.id, filePath: pdf.file });
                                                 Swal.close();
@@ -132,17 +169,14 @@ export default function Chat_bot() {
                                                 } else {
                                                     SweetAlert2("Error", `${response}`, "error", true, "Confirm", false, "", false);
                                                 }
-                                            }}>Download</button>
-                                            <button style={{ backgroundColor: "var(--default-color-red)" }} onClick={ async () => {
-                                                SweetAlert2("Deleting", "Please wait..", "info", false, "", false, "", true);
-                                                const response = await Fetch_to(api_link.storage.deletepdf, { id: pdf.id, filePath: pdf.file });
-                                                Swal.close();
-                                                if (response) {
-                                                    setRefresh(!refresh);
-                                                } else {
-                                                    SweetAlert2("Error", `${response}`, "error", true, "Confirm", false, "", false);
-                                                }
-                                            }}>Delete</button>
+                                            }}>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                                                <path d="M3 6h18"/>
+                                                <path d="M8 6V4h8v2"/>
+                                                <path d="M19 6l-1 14H6L5 6"/>
+                                                <path d="M10 11v6M14 11v6"/>
+                                                </svg>
+                                            </button>
                                         </td>
                                     </tr>
                                 ))
@@ -157,6 +191,23 @@ export default function Chat_bot() {
                     </table>
                 </div>
             </section>
+            <div className={styles.pagination}>
+                <button
+                    className={styles.pageButton}
+                    onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                    disabled={page <= 1}
+                >
+                    Previous
+                </button>
+                <span className={styles.pageInfo}>Page {page} of {totalPages}</span>
+                <button
+                    className={styles.pageButton}
+                    onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+                    disabled={page >= totalPages}
+                >
+                    Next
+                </button>
+            </div>
         </section>
     );
 

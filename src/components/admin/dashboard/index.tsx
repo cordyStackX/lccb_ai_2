@@ -191,6 +191,13 @@ export default function Dashboard() {
         { uploadedPdfCount: 0, apiRequestCount: 0 }
     );
 
+    const adminApiRequestCount = system_logs.reduce((total, log) => {
+        if (log.request === "admin@admin.com") {
+            return total + Number(log.api_request ?? 0);
+        }
+        return total;
+    }, 0);
+
     const usagePieData = [
         { name: "PDF Uploads", value: uploadedPdfCount },
         { name: "User Logs", value: apiRequestCount },
@@ -335,7 +342,7 @@ export default function Dashboard() {
                                 </svg>
                             </span>
                             
-                            <p> {apiRequestCount} </p>
+                            <p> {adminApiRequestCount} </p>
                         </span>
                     </div>
                 </div>

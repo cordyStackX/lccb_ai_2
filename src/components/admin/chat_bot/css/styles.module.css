@@ -24,16 +24,51 @@
     height: auto;
     padding: 1rem;
 }
-.status button {
+.button_upload {
     padding: 0.8rem;
     border-radius: 8px;
-    color: var(--default-color-white);
-    background-color: var(--primary);
+    color: var(--default-color-black);
     cursor: pointer;
     border: 2px solid var(--default-color-gray);
+    background: transparent;
     transition: transform 1s ease;
+    margin: 0 0.5rem;
 }
-.status button:active {
+.button_upload:active {
+    transform: scale(0.8);
+}
+.button_download {
+    padding: 0.5rem;
+    border-radius: 8px;
+    color: var(--default-color-black);
+    cursor: pointer;
+    border: 2px solid var(--default-color-gray);
+    background: transparent;
+    transition: transform 1s ease;
+    margin: 0 0.5rem;
+}
+.button_download:hover {
+    background-color: var(--primary);
+    color: var(--default-color-white);
+}
+.button_download:active {
+    transform: scale(0.8);
+}
+.button_delete {
+    padding: 0.5rem;
+    border-radius: 8px;
+    color: var(--default-color-black);
+    cursor: pointer;
+    border: 2px solid var(--default-color-gray);
+    background: transparent;
+    transition: transform 1s ease;
+    margin: 0 0.5rem;
+}
+.button_delete:hover {
+    background-color: var(--default-color-red);
+    color: var(--default-color-black);
+}
+.button_delete:active {
     transform: scale(0.8);
 }
 .status table {
@@ -43,7 +78,7 @@
     overflow: hidden;
     box-shadow: 0 0 6px 3px var(--default-color-gray);
     border-collapse: collapse;
-    margin: 20px 0 0 0;
+    margin: 5px 0 0 0;
 }
 .status th {
     border-bottom: 2px solid var(--default-color-gray);
@@ -109,4 +144,30 @@
     border: 2px solid var(--default-color-gray);
     color: var(--foreground);
     border-radius: 8px;
+}
+.pagination {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 0;
+}
+
+.pageInfo {
+    color: var(--foreground);
+    font-weight: 600;
+}
+
+.pageButton {
+    cursor: pointer;
+    padding: 0.5rem 0.9rem;
+    background: var(--default-color-white);
+    border: 2px solid var(--default-color-gray);
+    color: var(--foreground);
+    border-radius: 8px;
+}
+
+.pageButton:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
 }

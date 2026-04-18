@@ -1,11 +1,12 @@
 import styling from "./not-found.module.css";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function NotFound() {
 
     return(
         <div className={styling.container}>
-            <img 
+            <Image 
             src="/Error.gif" 
             alt="Error"
             width={200} 

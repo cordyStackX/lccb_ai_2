@@ -93,7 +93,7 @@ export default function Sidebars({ isOpen, emailRes, refresh, setCurrentPdf, nam
                 </section>
                 <section className={styles.user_info}>
                     <figure className="display_flex_center" onClick={() => {setProfile(!profile);}}>
-                        <img src={image_src.logo1} alt="User Pic" width={60} height={60}/>
+                        <Image src={image_src.logo1} alt="User Pic" width={60} height={60}/>
                         <figcaption>{emailRes ? emailRes : " --- "}</figcaption>
                     </figure>
                 </section>
