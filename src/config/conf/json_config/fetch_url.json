@@ -23,7 +23,9 @@
 		"retrieve" : "/services/supabase/storage/retrieve",
 		"updatepdf" : "/services/supabase/storage/updatepdf",
 		"deletepdf" : "/services/supabase/storage/deletepdf",
-		"uploadimg" : "/services/supabase/storage/uploadimg"
+		"uploadimg" : "/services/supabase/storage/uploadimg",
+		"uploadpdf_chatbot" : "/services/supabase/storage/uploadpdf_chatbot",
+		"retrieve_chatbot" : "/services/supabase/storage/retrieve_chatbot"
 	},
 	"admin" : {
 		"retrieve_user" : "/services/supabase/admin/retrieve_user",

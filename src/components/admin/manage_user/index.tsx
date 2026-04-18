@@ -19,13 +19,14 @@ interface System_logs {
     request?: string;
     email?: string;
     api_request?: string;
+    uploaded_pdf?: string;
 }
 
 const PAGE_SIZE = 30;
 
 export default function ManageUser() {
     const [data, setData] = useState<ManageUserDataProps[]>([]);
-    const [refresh, setRefresh] = useState("");
+    const [refresh, setRefresh] = useState(false);
     const [search, setSearch] = useState("");
     const [system_logs, setSystem_logs] = useState<System_logs[]>([]);
     const [page, setPage] = useState(1);
@@ -49,14 +50,29 @@ export default function ManageUser() {
             if (response.success) {
                 setSystem_logs(response.data.message);
             }
+            setRefresh(false);
         };
         RetrieveUserDataLogs();
     }, [refresh, page, search]);
 
     const getApiCount = (email?: string) => {
         if (!email) return 0;
-        const match = system_logs.find((log) => log.request === email);
-        return match?.api_request ?? 0;
+        return system_logs.reduce((total, log) => {
+            if (log.request === email) {
+                return total + Number(log.api_request ?? 0);
+            }
+            return total;
+        }, 0);
+    };
+
+    const getUploadedCount = (email?: string) => {
+        if (!email) return 0;
+        return system_logs.reduce((total, log) => {
+            if (log.request === email) {
+                return total + Number(log.uploaded_pdf ?? 0);
+            }
+            return total;
+        }, 0);
     };
 
 
@@ -73,10 +89,6 @@ export default function ManageUser() {
                 </span>
             </header>
             <section className={styles.search}>
-                {/* <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2"/>
-                <path d="M20 20l-3-3" stroke="currentColor" strokeWidth="2" stroke-linecap="round"/>
-                </svg> */}
                 <input 
                 type="text"
                 name="search"
@@ -88,7 +100,7 @@ export default function ManageUser() {
                     setPage(1);
                 }}
                 />
-                <button onClick={() => {setRefresh(`${!refresh}`);}}>Refresh</button>
+                <button disabled={refresh} style={{ color: refresh ? 'var(--default-color-gray)' : '' }} onClick={() => {setRefresh(!refresh);}}>Refresh</button>
             </section>
             <table className={styles.tables}>
                 <thead>
@@ -99,6 +111,7 @@ export default function ManageUser() {
                         <th>Role</th>
                         <th>Created_at</th>
                         <th>API Request</th>
+                        <th>Uploaded PDF</th>
                         <th>Status</th>
                     </tr>
                 </thead>
@@ -112,30 +125,29 @@ export default function ManageUser() {
                                 <td> {data.role} </td>
                                 <td> {data.created_at ? new Date(data.created_at).toLocaleDateString("en-US") : " - "} </td>
                                 <td>{getApiCount(data.email)}</td>
+                                <td>{getUploadedCount(data.email)}</td>
                                 <td>
                                     <select 
                                     value={data.status}
                                     onChange={ async(e) => {
                                         const newStatus = e.target.value;
                                         if (newStatus === "delete") {
-                                            const refresh = Math.floor(10 + Math.random() * 90).toString();
                                             const alert2 = await SweetAlert2("Delete?", `Are you sure want to delete this ${data.email}`, "warning", true, "Yes", true, "No");
                                             if (!alert2.isConfirmed) return;
                                             SweetAlert2("Deleting", "Please wait..", "info", false, "", false, "", true);
                                             const response = await Fetch_to(api_link.admin.delete_user, { email: data.email });
                                             Swal.close();
                                             if (response) {
-                                                setRefresh(`${refresh}`);
+                                                setRefresh(!refresh);
                                             } else {
                                                 SweetAlert2("Error", `${response}`, "error", true, "Confirm", false, "", false);
                                             }
                                         } else {
-                                            const refresh = Math.floor(10 + Math.random() * 90).toString();
                                             SweetAlert2("Updating", "Please wait..", "info", false, "", false, "", true);
                                             const response = await Fetch_to(api_link.admin.update_user_status, { id: data.id, status: newStatus });
                                             Swal.close();
                                             if (response.success) {
-                                                setRefresh(`${refresh}`);
+                                                setRefresh(!refresh);
                                             } else {
                                                 SweetAlert2("Error", `${response.message}`, "error", true, "Confirm", false, "", false);
                                             }

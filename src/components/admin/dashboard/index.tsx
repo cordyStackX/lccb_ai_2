@@ -65,6 +65,24 @@ export default function Dashboard() {
         return new Date(dateString).getMonth(); // 0 Jan, 1 Feb, ...
     }
 
+    function isInCurrentWeek(dateString: string) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const startOfWeek = new Date(now);
+        startOfWeek.setHours(0, 0, 0, 0);
+        startOfWeek.setDate(now.getDate() - now.getDay());
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+        endOfWeek.setHours(23, 59, 59, 999);
+        return date >= startOfWeek && date <= endOfWeek;
+    }
+
+    function isInCurrentYear(dateString: string) {
+        const date = new Date(dateString);
+        const now = new Date();
+        return date.getFullYear() === now.getFullYear();
+    }
+
     const weeklyUsers = [0,0,0,0,0,0,0];
 
     const weeklyPDF_record = [0,0,0,0,0,0,0];
@@ -81,8 +99,12 @@ export default function Dashboard() {
         if (user.created_at) {
             const day = getDayOfWeek(user.created_at);
             const month = getMonth(user.created_at);
-            weeklyUsers[day]++;
-            monthlyUsers[month]++;
+            if (isInCurrentWeek(user.created_at)) {
+                weeklyUsers[day]++;
+            }
+            if (isInCurrentYear(user.created_at)) {
+                monthlyUsers[month]++;
+            }
         }
     });
 
@@ -90,10 +112,14 @@ export default function Dashboard() {
         if (entry.created_at) {
             const day = getDayOfWeek(entry.created_at);
             const month = getMonth(entry.created_at);
-            weeklyPDF_record[day] += entry.uploaded_pdf ?? 0;
-            monthlyPDF_record[month] += entry.uploaded_pdf ?? 0;
-            weeklyAPI_logs[day] += entry.api_request ?? 0;
-            monthlyAPI_logs[month] += entry.api_request ?? 0;
+            if (isInCurrentWeek(entry.created_at)) {
+                weeklyPDF_record[day] += entry.uploaded_pdf ?? 0;
+                weeklyAPI_logs[day] += entry.api_request ?? 0;
+            }
+            if (isInCurrentYear(entry.created_at)) {
+                monthlyPDF_record[month] += entry.uploaded_pdf ?? 0;
+                monthlyAPI_logs[month] += entry.api_request ?? 0;
+            }
         }
     });
 
@@ -138,8 +164,12 @@ export default function Dashboard() {
 
     const getApiCount = (email?: string) => {
         if (!email) return 0;
-        const match = system_logs.find((log) => log.request === email);
-        return match?.api_request ?? 0;
+        return system_logs.reduce((total, log) => {
+            if (log.request === email) {
+                return total + Number(log.api_request ?? 0);
+            }
+            return total;
+        }, 0);
     };
 
     const topApiUsers = [...data]
@@ -152,15 +182,20 @@ export default function Dashboard() {
         .sort((a, b) => b.count - a.count)
         .slice(0, 20);
 
-    const systemSummary = system_logs[0];
-    const uploadedPdfCount = Number(systemSummary?.uploaded_pdf ?? 0);
-    const apiRequestCount = Number(systemSummary?.api_request ?? 0);
+    const { uploadedPdfCount, apiRequestCount } = system_logs.reduce(
+        (totals, log) => {
+            totals.uploadedPdfCount += Number(log.uploaded_pdf ?? 0);
+            totals.apiRequestCount += Number(log.api_request ?? 0);
+            return totals;
+        },
+        { uploadedPdfCount: 0, apiRequestCount: 0 }
+    );
 
     const usagePieData = [
         { name: "PDF Uploads", value: uploadedPdfCount },
         { name: "User Logs", value: apiRequestCount },
         { name: "Registered Accounts", value: data.length },
-        { name: "Chatbot Logs", value: apiRequestCount },
+        { name: "Chatbot", value: apiRequestCount },
     ];
     const pieColors = ["#2563eb", "#f59e0b", "#16c784", "#ff0800"];
 
@@ -307,9 +342,9 @@ export default function Dashboard() {
                 <section className={styles.analytics_data}>
                     <div className={styles.graph_container}>
                         <h3 className={styles.reportTitle}>Weekly Reports</h3>
-                        {renderCryptoChart("Registered Accounts Weekly", UserSet, "activeAccountsTrend", "Weekly")}
-                        {renderCryptoChart("Number of PDF Weekly", Pdf_set, "pdfTrend", "Weekly")}
-                        {renderCryptoChart("AI API Requested Weekly", Api_logs, "apiTrend", "Weekly")}
+                        {renderCryptoChart("Registered Accounts this Week", UserSet, "activeAccountsTrend", "Weekly")}
+                        {renderCryptoChart("Number of PDF this Week", Pdf_set, "pdfTrend", "Weekly")}
+                        {renderCryptoChart("AI API Requested this Week", Api_logs, "apiTrend", "Weekly")}
 
                         <h3 className={styles.reportTitle}>Monthly Reports</h3>
                         {renderCryptoChart("Registered Accounts Monthly", UserMonthSet, "activeAccountsMonthTrend", "Monthly")}

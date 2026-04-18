@@ -1,11 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
-import { Security } from "@/lib/security";
 
 export async function POST(req: NextRequest) {
-
-    const auth = await Security(req);
-    if(auth?.error) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     
     try {
         const { page = 1, limit = 30, search = "" } = await req.json().catch(() => ({ page: 1, limit: 30, search: "" }));
@@ -37,10 +33,12 @@ export async function POST(req: NextRequest) {
         const total = count ?? 0;
         const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
+        const sanitizedData = (data ?? []).map(({ password, ...rest }) => rest);
+
         return NextResponse.json(
             {
                 success: true,
-                message: data,
+                message: sanitizedData,
                 page: currentPage,
                 total,
                 totalPages,
