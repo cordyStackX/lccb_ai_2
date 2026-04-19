@@ -127,7 +127,7 @@ export default function SignIn() {
                             <p>I agree to the <Link href={"/privacy"} onClick={() => {Progress(true);}}>Privacy Policy</Link> & <Link href={"/terms"} onClick={() => {Progress(true);}} >Terms of Conditions</Link></p>
                         </span>
                        
-                        <section className={`${styles.buttons} `}>
+                        <section className={`${styles.buttons}`}>
                             <button>Log In</button>
                         </section>
                         <p>Register an Account? <Link href={"/auth/register"} onClick={() => {Progress(true);}}>Registered</Link></p>

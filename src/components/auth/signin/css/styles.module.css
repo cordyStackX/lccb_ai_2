@@ -124,11 +124,11 @@
     margin: 0 auto;
 }
 .checkbox p {
-    margin: 17px 0 0 10px;
+    margin: 15px 0 0 5px;
 }
 .checkbox input {
     width: 20px;
     height: 20px;
     cursor: pointer;
-    margin: 0;
+    margin: 15px 0;
 }
