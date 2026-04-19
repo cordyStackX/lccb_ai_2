@@ -199,7 +199,7 @@ export default function Main({ emailRes, currentPdf }: MainProps) {
                     
                )}
               
-            <form className={`${styles.ask} `} onSubmit={handleSubmit} style={{ position: status ? "fixed" : "initial" }}>
+            <form className={`${styles.ask} `} onSubmit={handleSubmit} style={{ position: status ? "fixed" : "relative" }}>
                 <textarea
                 id="chat"
                 name="ask"
