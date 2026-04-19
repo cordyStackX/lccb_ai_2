@@ -7,7 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "LACO PWA Web Development App",
     id: "/",
     scope: "/",
-    start_url: "/auth/signup",
+    start_url: "/auth/register",
     display: "standalone",
     orientation: "portrait",
     background_color: "#1A54B8",
