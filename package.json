@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"dev": "next dev",
-		"build": "next build 2>/dev/null",
+		"build": "next build",
 		"start": "next start",
 		"lint": "eslint"
 	},
@@ -18,7 +18,7 @@
 		"jsonwebtoken": "^9.0.3",
 		"jspdf": "^4.2.1",
 		"mysql2": "^3.22.1",
-		"next": "16.2.4",
+		"next": "^15.5.10",
 		"nodemailer": "^8.0.5",
 		"nprogress": "^0.2.0",
 		"react": "19.2.5",

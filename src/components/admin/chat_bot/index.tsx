@@ -82,15 +82,26 @@ export default function Chat_bot() {
         Swal.close();
 
         if (response.success && response.data?.url) {
-            const anchor = document.createElement("a");
-            anchor.href = response.data.url as string;
-            anchor.download = pdf.file_name || "chatbot.pdf";
-            anchor.rel = "noopener noreferrer";
-            anchor.target = "_blank";
-            document.body.appendChild(anchor);
-            anchor.click();
-            anchor.remove();
-            return;
+            try {
+                const fileResponse = await fetch(response.data.url as string, { method: "GET" });
+                if (!fileResponse.ok) {
+                    throw new Error("Failed to fetch file");
+                }
+
+                const blob = await fileResponse.blob();
+                const blobUrl = URL.createObjectURL(blob);
+                const anchor = document.createElement("a");
+                anchor.href = blobUrl;
+                anchor.download = pdf.file_name || "chatbot.pdf";
+                document.body.appendChild(anchor);
+                anchor.click();
+                anchor.remove();
+                URL.revokeObjectURL(blobUrl);
+                return;
+            } catch (error) {
+                SweetAlert2("Error", `${error}`, "error", true, "Confirm", false, "", false);
+                return;
+            }
         }
 
         SweetAlert2("Error", `${response.message || "Download failed"}`, "error", true, "Confirm", false, "", false);
