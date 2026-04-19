@@ -1,117 +1,107 @@
 "use client";
 import styles from "./css/styles.module.css";
 import { useEffect, useState, useRef } from "react";
+import { Fetch_to } from "@/utilities";
 import Markdown from "react-markdown";
-import { ThreeDots } from "react-loader-spinner";
-import { Fetch_to, Fetch_toFile, SweetAlert2 } from "@/utilities";
 import api_link from "@/config/conf/json_config/fetch_url.json";
-import Swal from "sweetalert2";
+import { ThreeDots } from "react-loader-spinner";
 import Image from "next/image";
 import image_src from "@/config/images_links/assets.json";
 
-type MainProps = {
-    emailRes: string;
-    refresh: boolean;
-    currentPdf: number | undefined;
-    setRefresh: (val: boolean) => void;
-}
 
-export default function Main({ emailRes, refresh, setRefresh, currentPdf }: MainProps) {
+export default function Chat_bot() {
     const [messages, setMessages] = useState<
-        { ask: string; respond: string }[]
-    >([]);
-    const [chatres, setChatres] = useState({
-        ask: "", respond2: ""
-    });
-    const [status, setStatus] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [email, setEmail] = useState("");
-    const [pdf_id, setPdf_id] = useState<number | undefined>();
-    const fileRef = useRef<HTMLInputElement>(null);
-    const chatEndRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        if (chatEndRef.current) {
-            chatEndRef.current.scrollIntoView({ behavior: "smooth" });
-        }
-    }, [messages]);
-
-    useEffect(() => {
-        setEmail(emailRes);
-        setPdf_id(currentPdf);
-    }, [emailRes, currentPdf]);
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setChatres({ ...chatres, [e.target.name]: e.target.value });
-    };
-
-    const handleSubmit = async (e?: React.FormEvent<HTMLFormElement>) => {
-        e?.preventDefault();
-        if (!chatres.ask.trim()) return;
-
-        setStatus(true);
-        setLoading(true);
-
-        const userMessage = { ask: chatres.ask, respond: "" }; 
-        setMessages((prev) => [...prev, userMessage]);
-
-        const prompt = chatres.ask; 
-        setChatres({ ask: "", respond2: "" });
-
-        const response = await Fetch_to(api_link.responses, { prompt, email, pdf_id });
-
-        setMessages((prev) => {
-            const updated = [...prev];
-            updated[updated.length - 1] = {
-                ask: prompt,
-                respond: response.success
-                    ? response.data.message.data.markdown
-                    : response.message,
-            };
-            return updated;
+            { ask: string; respond: string }[]
+        >([]);
+        const [chatres, setChatres] = useState({
+            ask: "", respond2: ""
         });
-
-        setLoading(false);
-    };
-
-    const UploadPdf = () => {
-        fileRef.current?.click();
-    };
-
-    const HandleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        SweetAlert2("Uploading", "Please wait..", "info", false, "", false, "", true);
-
-        if (file.type !== "application/pdf") {
-            alert("Please select a PDF file.");
-            return;
-        }
-
-        console.log("PDF selected:", file);
-
-        const response = await Fetch_toFile(api_link.storage.uploadPdf, file, { email: emailRes });
-        Swal.close();
-
-        if (response.success) {
-            SweetAlert2("Success", "Successfully uploaded", "success", true, "Okay", false, "", false);
-            if (fileRef.current) {
-                fileRef.current.value = "";
+        const [status, setStatus] = useState(false);
+        const [loading, setLoading] = useState(false);
+        const chatEndRef = useRef<HTMLDivElement>(null);
+        const [animatedText, setAnimatedText] = useState("");
+        const [isAnimating, setIsAnimating] = useState(false);
+    
+        useEffect(() => {
+            if (chatEndRef.current) {
+                chatEndRef.current.scrollIntoView();
             }
-            setRefresh(!refresh);
-        } else {
-            SweetAlert2("Error", `${response.message}`, "error", true, "Confirm", false, "", false);
-            if (fileRef.current) {
-                fileRef.current.value = "";
-            }
-        }
-
-    };
+        }, [messages]);
+    
+        // Typewriter animation effect
+        useEffect(() => {
+            if (messages.length === 0) return;
+            
+            const lastMessage = messages[messages.length - 1];
+            if (!lastMessage.respond || loading) return;
+    
+            setIsAnimating(true);
+            setLoading(true);
+            setAnimatedText("");
+            
+            let currentIndex = 0;
+            const fullText = lastMessage.respond;
+            
+            const intervalId = setInterval(() => {
+                if (currentIndex < fullText.length) {
+                    setAnimatedText(fullText.substring(0, currentIndex + 1));
+                    currentIndex++;
+                } else {
+                    setIsAnimating(false);
+                    setLoading(false);
+                    clearInterval(intervalId);
+                }
+            }, 10); // Faster speed for better UX
+    
+            return () => clearInterval(intervalId);
+        }, [messages]);
+    
+        const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+            setChatres({ ...chatres, [e.target.name]: e.target.value });
+        };
+    
+        const handleSubmit = async (e?: React.FormEvent<HTMLFormElement>) => {
+            e?.preventDefault();
+            if (!chatres.ask.trim()) return;
+    
+            setStatus(true);
+            setLoading(true);
+    
+            const userMessage = { ask: chatres.ask, respond: "" }; 
+            setMessages((prev) => [...prev, userMessage]);
+    
+            const prompt = chatres.ask; 
+            setChatres({ ask: "", respond2: "" });
+    
+            const lastUserResponse = messages.length > 0
+                ? messages[messages.length - 1].ask
+                : "";
+            const lastAIResponse = messages.length > 0
+                ? messages[messages.length - 1].respond
+                : "";
+    
+            const response = await Fetch_to(api_link.responses2, {
+                prompt,
+                last_user_response: lastUserResponse,
+                last_ai_response: lastAIResponse,
+            });
+    
+            setMessages((prev) => {
+                const updated = [...prev];
+                updated[updated.length - 1] = {
+                    ask: prompt,
+                    respond: response.success
+                        ? response.data.message.data.markdown
+                        : response.message,
+                };
+                return updated;
+            });
+            setLoading(false);
+        };
 
     return(
-        <section className={`${styles.container} `}>
-               {status ?(
+        <section className={`${styles.container}`} >
+            {status ? (
                 <section className={styles.chat}>
                     <div>
                         {messages.map((msg, index) => (
@@ -123,7 +113,7 @@ export default function Main({ emailRes, refresh, setRefresh, currentPdf }: Main
                                 </div>
                                 <div ref={chatEndRef} className={`${styles.ai_response} ${msg.respond ? styles.fadeIn : ""}`}>
                                     {msg.respond ? (
-                                        <div className={`display_flex_center ${styles.plushie_talk}`}>
+                                        <div className={` ${styles.plushie_talk}`}>
                                             <Image 
                                             src={image_src.plushie}
                                             alt="plushie"
@@ -131,9 +121,15 @@ export default function Main({ emailRes, refresh, setRefresh, currentPdf }: Main
                                             height={50}
                                             />
                                             <div>
-                                                <Markdown>{msg.respond}</Markdown>
+                                                {index === messages.length - 1 && isAnimating ? (
+                                                    <pre className={styles.plainText}>
+                                                        {animatedText}
+                                                        <span className={styles.cursor}>▋</span>
+                                                    </pre>
+                                                ) : (
+                                                    <Markdown>{msg.respond}</Markdown>
+                                                )}
                                             </div>
-
                                         </div>
                                     ) : index === messages.length - 1 && loading ? (
                                         <div className={` ${styles.plushie_talk}`}>
@@ -143,12 +139,12 @@ export default function Main({ emailRes, refresh, setRefresh, currentPdf }: Main
                                             width={45}
                                             height={50}
                                             />
-                                            <div className={`${styles.spinner_wrapper}`}>
+                                            <div className={`${styles.spinner_wrapper} `}>
                                                 <ThreeDots
                                                 visible={true}
                                                 height="30"
                                                 width="50"
-                                                color="#cd9b13"
+                                                color="#fff"
                                                 radius="9"
                                                 ariaLabel="three-dots-loading"
                                                 wrapperStyle={{}}
@@ -163,23 +159,17 @@ export default function Main({ emailRes, refresh, setRefresh, currentPdf }: Main
                         ))}
                     </div>
                 </section>
-               ) : (
-                    
-                    <h1>Upload your PDF file and Choose your documents</h1>
-                    
-               )}
-               {/* Hidden Input */}
-            <>
-                <input
-                ref={fileRef}
-                type="file"
-                accept="application/pdf"
-                style={{ display: "none" }}
-                onChange={HandleFile}
-                />
-            </>
-            <form className={`${styles.ask} `} onSubmit={handleSubmit} style={{ position: status ? "fixed" : "initial" }}>
-                <span onClick={UploadPdf}>+</span>
+            ) : (
+                <section className={styles.introduction}>
+                    <h1>Welcome to LACO AI</h1>
+                    <p style={{ textAlign: "center" }}>
+                        Ask anything about LACO AI.
+                    </p>
+                </section>
+            )}
+            
+
+            <form className={`${styles.ask}`} onSubmit={handleSubmit}>
                 <textarea
                 id="chat"
                 name="ask"
@@ -201,7 +191,12 @@ export default function Main({ emailRes, refresh, setRefresh, currentPdf }: Main
                 autoComplete="off"
                 spellCheck={false}
                 />
-                <button disabled={loading} style={{ opacity: `${loading ? "0.5" : "1" }` }}>Ask</button>
+                <button disabled={loading} style={{ opacity: `${loading ? "0.5" : "1" }` }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M12 19V5" />
+                        <path d="M5 12l7-7 7 7" />
+                    </svg>
+                </button>
             </form>
         </section>
     );

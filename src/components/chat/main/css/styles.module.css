@@ -51,17 +51,27 @@
     justify-content: flex-start;
     align-items: flex-start;
     padding: 0 0 2rem 0;
-    line-height: 2.5rem;
+    line-height: 2.1rem;
     backdrop-filter: blur(100px);
+    width: min(700px, 95%);
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+.plainText {
+    background-color: transparent;
 }
 .ai_response pre {
-    width: 100%;
+    width: min(700px, 95%);
     background: var(--default-color-black);       
-    color: var(--default-color-black);            
+    color: var(--default-color-white);            
     padding: 1rem;
     border-radius: 10px;
     overflow-x: auto;
     font-family: monospace;
+    max-width: 100%;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
 }
 .ai_response code {
     background: none;    
@@ -69,7 +79,9 @@
     border-radius: 5px;
     font-weight: bolder;
     font-size: 1rem;
-    color: var(--default-color-red);
+    color: var(--default-color-white);
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .ai_response ol,
@@ -115,6 +127,7 @@
     align-items: flex-start;
     display: flex;
     width: min(100%, 670px);
+    position: relative;
 }
 .plushie_talk div {
     margin: 0 0.2rem;
@@ -122,8 +135,11 @@
     padding: 1rem 1.5rem;
     border-radius: 10px;
     color: var(--default-color-white);
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
-.plushie_talk_img {
+.plushie_talk img {
     bottom: 0;
     position: absolute;
 }
@@ -143,7 +159,7 @@
     color: var(--foreground);
 }
 .ask button {
-    padding: 0.8rem 0.5rem;
+    padding: 0.5rem;
     border-radius: 5px;
     font-weight: bold;
     border: transparent;

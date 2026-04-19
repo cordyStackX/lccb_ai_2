@@ -1,65 +1,77 @@
 .container {
-    width: 100%;
-    height: 100dvh;
-    position: relative;
-    overflow: hidden;
-    color: var(--foreground);
+    width: min(95%, 900px);
+    height: 100vh;
+    flex-flow: column;
+    border-radius: 15px;
+    padding:  1rem;
+    transition: all 500ms ease;
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-flow: column;
+    margin: 0 auto;
 }
+
 .container h1 {
-    text-align: center;
-    padding: 1rem;
+    color: var(--default-color-black);
 }
+
 .chat {
     width: 100%;
-    height: 80vh;
+    height: auto;
     overflow-y: auto; 
+    overflow-x: hidden;
     align-items: flex-start;
     flex: 1;
     gap: 1rem;
-    margin: 70px;
+    margin: 25px;
 }
 .response {
-    width: min(800px, 90dvw);
+    width: 100%;
     height: auto;
-    margin: 2rem;
+    margin: 0;
     margin: 0 auto; 
 }
 .user_respones {
     width: 100%;
     height: auto;
     justify-content: right;
-    margin: 2rem 0;
+    padding: 0 1rem;
     display: flex;
-    align-items: center;
+    
 }
 .user_respones div {
-    width: 500px;
-    padding: 1rem 1.5rem;
+    width: min(50%, 600px);
+    padding: 1rem;
     background: var(--default-color-blue);
     border-radius: 10px;
     color: var(--default-color-white);
 }
 .ai_response {
+    width: 100%;
+    height: 90%;
     display: block;
     flex-direction: column; 
     justify-content: flex-start;
     align-items: flex-start;
-    padding: 2rem 1rem;
+    padding: 2rem 0.5rem;
     line-height: 2.5rem;
-    backdrop-filter: blur(100px);
+    color: var(--default-color-black);
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+
 }
 .ai_response pre {
     width: 100%;
     background: var(--default-color-black);       
-    color: var(--default-color-black);            
+    color: var(--default-color-white);            
     padding: 1rem;
     border-radius: 10px;
     overflow-x: auto;
     font-family: monospace;
+    max-width: 100%;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
 }
 .ai_response code {
     background: none;    
@@ -68,6 +80,8 @@
     font-weight: bolder;
     font-size: 1rem;
     color: var(--default-color-red);
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .ai_response ol,
@@ -91,40 +105,48 @@
 .spinner_wrapper {
     justify-content: left;
     padding: 1rem 0;
-    display: flex;
 }
 
 .ask {
-    width: min(800px, 90dvw);
+    width: min(900px, 90dvw);
     height: auto;
-    border-radius: 50px;
     overflow: hidden;
-    padding: 0 1.2rem;
-    margin: 1.3rem 3rem;
+    border-radius: 5px;
+    padding: 0.3rem 1.2rem;
+    margin: 1.3rem 1rem;
     background: var(--default-color-white-2);
     box-shadow: 0 0 2px 1px var(--foreground);
     bottom: 0;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: flex-start;
+    position: relative;
 }
 .plushie_talk {
     justify-content: flex-start;
     align-items: flex-start;
     display: flex;
+    width: min(100%, 670px);
+    position: relative;
 }
 .plushie_talk div {
-    margin: 0 1rem;
+    margin: 0 0.2rem;
     background: var(--primary);
-    padding: 1rem;
+    padding: 1rem 1.5rem;
     border-radius: 10px;
     color: var(--default-color-white);
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+.plushie_talk img {
+    position: absolute;
+    bottom: -30px;
 }
 .expandableInput {
-    width: 100%;
-    min-height: 20px;
+    width: 90%;
+    min-height: 50px;
     max-height: 150px;
-    padding: 1.2rem 0 0 1rem;
+    padding: 1rem 0 0 1rem;
     border: none;
     outline: none;
     background: transparent;
@@ -134,16 +156,22 @@
     text-align: start;
     font-weight: bold;
     color: var(--foreground);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 .ask button {
-    padding: 0.8rem 0.5rem;
-    border-radius: 50%;
+    padding: 0.5rem;
+    border-radius: 8px;
     font-weight: bold;
     border: transparent;
     color: var(--default-color-white);
     background: var(--primary);
     cursor: pointer;
+    position: absolute;
     transition: all 500ms ease;
+    right: 15px;
+    bottom: 10px;
 }
 .ask button:hover {
     box-shadow: 0 0 5px 1px var(--foreground);   
@@ -164,4 +192,11 @@
 }
 .ask span:active {
     transform: scale(0.5);
+}
+.introduction {
+    color: var(--foreground);
+    text-align: center;
+}
+.introduction h1 {
+    margin: 1rem 0;
 }

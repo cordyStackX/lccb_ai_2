@@ -137,13 +137,13 @@ export default function Main({ emailRes, currentPdf }: MainProps) {
                                             className={styles.plushie_talk_img}
                                             />
                                             <div>
-                                                <Markdown>
-                                                    {index === messages.length - 1 && isAnimating 
-                                                        ? animatedText 
-                                                        : msg.respond}
-                                                </Markdown>
-                                                {index === messages.length - 1 && isAnimating && (
-                                                    <span className={styles.cursor}>▋</span>
+                                                {index === messages.length - 1 && isAnimating ? (
+                                                    <pre className={styles.plainText}>
+                                                        {animatedText}
+                                                        <span className={styles.cursor}>▋</span>
+                                                    </pre>
+                                                ) : (
+                                                    <Markdown>{msg.respond}</Markdown>
                                                 )}
                                                 {!(index === messages.length - 1 && isAnimating) && (
                                                     <button 
@@ -158,13 +158,12 @@ export default function Main({ emailRes, currentPdf }: MainProps) {
 
                                         </div>
                                     ) : index === messages.length - 1 && loading ? (
-                                        <div className={` ${styles.plushie_talk}`}>
+                                        <div className={styles.plushie_talk}>
                                             <Image 
                                             src={image_src.plushie}
                                             alt="plushie"
                                             width={45}
                                             height={50}
-                                            className={styles.plushie_talk_img}
                                             />
                                             <div className={`${styles.spinner_wrapper}`}>
                                                 <ThreeDots
@@ -222,7 +221,12 @@ export default function Main({ emailRes, currentPdf }: MainProps) {
                 autoComplete="off"
                 spellCheck={false}
                 />
-                <button disabled={loading} title="Send your message" style={{ opacity: `${loading ? "0.5" : "1" }` }}>Ask</button>
+                <button disabled={loading} title="Send your message" style={{ opacity: `${loading ? "0.5" : "1" }` }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M12 19V5" />
+                        <path d="M5 12l7-7 7 7" />
+                    </svg>
+                </button>
             </form>
         </section>
     );

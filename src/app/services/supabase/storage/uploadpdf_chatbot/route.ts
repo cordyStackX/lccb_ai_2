@@ -1,7 +1,8 @@
 import { NextResponse, NextRequest } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
 import { Security } from "@/lib/security";
-
+import { Fetch_to } from "@/utilities";
+import api_links from "@/config/conf/json_config/Api_links.json";
 
 export async function POST(req: NextRequest) {
 
@@ -51,9 +52,31 @@ export async function POST(req: NextRequest) {
 
         if (data) {
             
-            const { error } = await supabaseServer
+            await supabaseServer
             .from("chatbot_pdf_file")
             .insert([{ file: filePath, email: cleanEmail, file_name: filename }]);
+
+            const apiUrl = process.env.RENDER_API || api_links.python_links;
+
+            const apikey = process.env.API_KEY;
+
+            const response1 = await Fetch_to(`${apiUrl}download-file`, { token: apikey, filePath: filePath });
+            
+            if (!response1.success) return NextResponse.json({ success: false, error: "3rd party failed to read the data" }, { status: 409 });
+
+            const response = await Fetch_to(`${apiUrl}generate_md_summary`, {
+                prompt: "Summarize the Documents make sure all topics are included with the limit of 5 paragraphs",
+                token: apikey,
+                email: email,
+                filePath: filePath
+            });
+
+            if (!response.success) return NextResponse.json({ success: false, error: "Failed to create summary please Upload the PDF again" }, { status: 409 });
+
+            await supabaseServer
+            .from("chatbot_pdf_file")
+            .update([{ summary: response.data.markdown }])
+            .eq("file", filePath);
 
             const { data: record, error: record_err } = await supabaseServer
             .from("system_logs")
