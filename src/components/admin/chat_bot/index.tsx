@@ -93,7 +93,6 @@ export default function Chat_bot() {
                 const anchor = document.createElement("a");
                 anchor.href = blobUrl;
                 anchor.download = pdf.file_name || "chatbot.pdf";
-                document.body.appendChild(anchor);
                 anchor.click();
                 anchor.remove();
                 URL.revokeObjectURL(blobUrl);
