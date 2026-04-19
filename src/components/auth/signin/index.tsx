@@ -23,6 +23,7 @@ export default function SignIn() {
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     usePreventExit(isDirty);
 
@@ -97,17 +98,27 @@ export default function SignIn() {
                         style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
                         required
                         />
-                         <input 
-                        type="password" 
-                        name="password" 
-                        id="password" 
-                        autoComplete="password"
-                        value={form.password}
-                        onChange={handleChange}
-                        placeholder="Password"
-                        style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
-                        required
-                        />
+                        <div className={styles.password_field}>
+                            <input 
+                            type={showPassword ? "text" : "password"}
+                            name="password" 
+                            id="password" 
+                            autoComplete="password"
+                            value={form.password}
+                            onChange={handleChange}
+                            placeholder="Password"
+                            style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
+                            required
+                            />
+                            <button
+                                type="button"
+                                className={styles.password_toggle}
+                                aria-pressed={showPassword}
+                                onClick={() => setShowPassword((prev) => !prev)}
+                            >
+                                {showPassword ? "Hide" : "Show"}
+                            </button>
+                        </div>
                         {message && (
                             <p className={status ?  "error" : "success"}>{message}</p>
                         )}

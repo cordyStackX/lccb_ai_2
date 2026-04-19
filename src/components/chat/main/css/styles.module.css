@@ -113,14 +113,14 @@
     height: auto;
     overflow: hidden;
     border-radius: 5px;
-    padding: 0.5rem 1.2rem;
-    margin: 1.3rem 3rem;
+    padding: 0.3rem 1.2rem;
+    margin: 1.3rem 1rem;
     background: var(--default-color-white-2);
     box-shadow: 0 0 2px 1px var(--foreground);
     bottom: 0;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: flex-start;
+    position: relative;
 }
 .plushie_talk {
     justify-content: flex-start;
@@ -144,10 +144,10 @@
     position: absolute;
 }
 .expandableInput {
-    width: 100%;
-    min-height: 20px;
+    width: 90%;
+    min-height: 50px;
     max-height: 150px;
-    padding: 1.2rem 0 0 1rem;
+    padding: 1rem 0 0 1rem;
     border: none;
     outline: none;
     background: transparent;
@@ -157,16 +157,22 @@
     text-align: start;
     font-weight: bold;
     color: var(--foreground);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 .ask button {
     padding: 0.5rem;
-    border-radius: 5px;
+    border-radius: 8px;
     font-weight: bold;
     border: transparent;
     color: var(--default-color-white);
     background: var(--primary);
     cursor: pointer;
+    position: absolute;
     transition: all 500ms ease;
+    right: 15px;
+    bottom: 10px;
 }
 .ask button:hover {
     box-shadow: 0 0 5px 1px var(--foreground);   
@@ -188,7 +194,6 @@
 .ask span:active {
     transform: scale(0.5);
 }
-
 .cursor {
     display: inline-block;
     animation: blink 1s infinite;

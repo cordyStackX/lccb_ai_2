@@ -21,13 +21,11 @@ export default function Create_Password() {
     const [status, setStatus] = useState(false);
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
-    const [isDirty, setIsDirty] = useState(false);
 
-    usePreventExit(isDirty);
+    usePreventExit(true);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
-        setIsDirty(true); 
     };
 
      useEffect(() => {

@@ -102,22 +102,17 @@
 }
 .checkbox {
     display: flex;
-    justify-content: flex-start;
-    align-items: flex-start;
     width: 100%;
-    height: 35px;
-    position: relative;
+    height: 60px;
+    padding: 0;
+    margin: 0 auto;
 }
 .checkbox p {
-    position: absolute;
-    top: 0;
-    left: 2.3rem;
+    margin: 17px 0 0 10px;
 }
 .checkbox input {
-    width: 15px;
+    width: 20px;
     height: 20px;
-    margin: 0 10px;
     cursor: pointer;
-    position: absolute;
     bottom: 0;
 }
