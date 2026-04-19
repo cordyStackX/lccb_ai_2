@@ -46,7 +46,7 @@ jobs:
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r python_txt_file/requirements.txt
+          pip install -r python/python_txt_file/requirements.txt
           pip install flake8 pytest
         working-directory: ./
 
