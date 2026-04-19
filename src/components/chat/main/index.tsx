@@ -188,7 +188,7 @@ export default function Main({ emailRes, currentPdf }: MainProps) {
                 </section>
                ) : (
                     
-                    <section>
+                    <section style={{ padding: "10px" }} >
                         <h1>Welcome to LACO AI</h1>
                         <p style={{ textAlign: "center" }}>
                             Upload a PDF document and start asking questions about <br/> 

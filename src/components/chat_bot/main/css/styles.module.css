@@ -40,7 +40,7 @@
     
 }
 .user_respones div {
-    width: min(50%, 600px);
+    width: min(70%, 500px);
     padding: 1rem;
     background: var(--default-color-blue);
     border-radius: 10px;
