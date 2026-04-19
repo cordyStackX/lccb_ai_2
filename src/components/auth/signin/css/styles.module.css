@@ -71,7 +71,7 @@
     transform: translateY(-50%);
     border: none;
     background: transparent;
-    color: var(--default-color-blue);
+    color: var(--primary);
     font-size: 0.9rem;
     cursor: pointer;
 }
