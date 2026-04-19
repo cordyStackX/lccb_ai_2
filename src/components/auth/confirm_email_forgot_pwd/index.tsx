@@ -8,7 +8,8 @@ import api_link from "@/config/conf/json_config/fetch_url.json";
 import {
     Fetch_to,
     Progress,
-    React_Spinners
+    React_Spinners,
+    usePreventExit
 } from "@/utilities";
 
 export default function Confirm_email_forgot_pwd() {
@@ -20,7 +21,9 @@ export default function Confirm_email_forgot_pwd() {
     const [status, setStatus] = useState(false);
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
-    
+
+    usePreventExit(true);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };

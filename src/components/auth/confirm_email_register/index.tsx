@@ -7,7 +7,8 @@ import { useState, useEffect } from "react";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import {
     Fetch_to,
-    React_Spinners
+    React_Spinners,
+    usePreventExit
 } from "@/utilities";
 
 export default function Confirm_email_signup() {
@@ -20,6 +21,8 @@ export default function Confirm_email_signup() {
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
     
+    usePreventExit(true);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
