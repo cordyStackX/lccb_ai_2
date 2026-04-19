@@ -106,7 +106,7 @@ export default function Create_Password() {
                         {message && (
                             <p className={status ?  "error" : "success"}>{message}</p>
                         )}
-                         <span className={`display_flex_center ${styles.checkbox}`}>
+                         <span className={styles.checkbox}>
                             <input type="checkbox" required />
                             <p>I agree to the <Link href={"/privacy"}>Privacy Policy</Link> & <Link href={"/terms"}>Terms of Conditions</Link></p>
                         </span>
