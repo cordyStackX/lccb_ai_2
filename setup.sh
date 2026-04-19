@@ -38,7 +38,7 @@ python3 -m pip install --upgrade pip
 
 # Install Python packages
 echo -e "${YELLOW}==> Installing Python packages...${RESET}"
-pip install -r python_txt_file/requirements.txt
+pip install -r python/python_txt_file/requirements.txt
 
 echo -e "${BLUE}<==> Building Next.js app... <==>${RESET}"
 echo -e "${YELLOW}==> Running lint...${RESET}"
