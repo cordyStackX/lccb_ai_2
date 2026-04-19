@@ -39,7 +39,7 @@
     align-items: center;
 }
 .user_respones div {
-    width: 500px;
+    width: min(500px, 70%);
     padding: 1rem 1.5rem;
     background: var(--default-color-blue);
     border-radius: 10px;

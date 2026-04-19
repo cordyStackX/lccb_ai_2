@@ -8,7 +8,7 @@ import api_link from "@/config/conf/json_config/fetch_url.json";
 import {
     Fetch_to,
     React_Spinners,
-    usePreventExit
+    useConfirmExit
 } from "@/utilities";
 
 export default function Confirm_email_signup() {
@@ -20,12 +20,14 @@ export default function Confirm_email_signup() {
     const [status, setStatus] = useState(false);
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
-    
-    usePreventExit(true);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
+
+    const confirmExit = useConfirmExit({
+        onConfirm: () => router.back()
+    });
 
     useEffect(() => {
         const saveEmail = localStorage.getItem("email");
@@ -96,7 +98,7 @@ export default function Confirm_email_signup() {
                         )}
                         <p>Didn{"'"}t Recieve? <a onClick={() => {SendCode();}} style={{ cursor: "pointer" }}>Resend Code</a></p>
                         <section className={`${styles.buttons} `}>
-                            <button type="button" onClick={() => {router.back();}} style={{backgroundColor: "var(--secondary)"}}>Back</button>
+                            <button type="button" onClick={() => { if(confirmExit()) return router.back(); }} style={{backgroundColor: "var(--secondary)"}}>Back</button>
                             <button>Confirm</button>
                         </section>
                     </form>

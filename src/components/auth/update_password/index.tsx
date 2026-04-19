@@ -8,7 +8,8 @@ import api_link from "@/config/conf/json_config/fetch_url.json";
 import {
     Fetch_to,
     usePreventExit,
-    React_Spinners
+    React_Spinners,
+    useConfirmExit
 } from "@/utilities";
 
 export default function Update_Password() {
@@ -23,6 +24,10 @@ export default function Update_Password() {
     const [isDirty, setIsDirty] = useState(false);
 
     usePreventExit(isDirty);
+
+    const confirmExit = useConfirmExit({
+        onConfirm: () => {router.push("/auth/signin");}
+    });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -101,7 +106,7 @@ export default function Update_Password() {
                             <p className={status ?  "error" : "success"}>{message}</p>
                         )}
                         <section className={`${styles.buttons} `}>
-                            <button type="button" onClick={() => {router.back();}} style={{backgroundColor: "var(--secondary)"}}>Back</button>
+                            <button type="button" onClick={() => { if(confirmExit()) return router.push("/auth/signin"); }} style={{backgroundColor: "var(--secondary)"}}>Back</button>
                             <button>Update</button>
                         </section>
                     </form>

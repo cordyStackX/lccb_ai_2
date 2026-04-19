@@ -9,7 +9,8 @@ import api_link from "@/config/conf/json_config/fetch_url.json";
 import {
     Fetch_to,
     usePreventExit,
-    React_Spinners
+    React_Spinners,
+    useConfirmExit
 } from "@/utilities";
 
 export default function Create_Password() {
@@ -23,6 +24,10 @@ export default function Create_Password() {
     const [loading, setLoading] = useState(false);
 
     usePreventExit(true);
+
+    const confirmExit = useConfirmExit({
+        onConfirm: () => router.push("/auth/register")
+    });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -111,7 +116,7 @@ export default function Create_Password() {
                             <p>I agree to the <Link href={"/privacy"}>Privacy Policy</Link> & <Link href={"/terms"}>Terms of Conditions</Link></p>
                         </span>
                         <section className={`${styles.buttons} `}>
-                            <button type="button" onClick={() => {router.back();}} style={{backgroundColor: "var(--secondary)"}}>Back</button>
+                            <button type="button" onClick={() => { if(confirmExit()) return router.push("/auth/register");  }} style={{backgroundColor: "var(--secondary)"}}>Back</button>
                             <button>Activate</button>
                         </section>
                     </form>

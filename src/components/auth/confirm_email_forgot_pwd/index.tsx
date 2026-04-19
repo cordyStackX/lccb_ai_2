@@ -9,7 +9,7 @@ import {
     Fetch_to,
     Progress,
     React_Spinners,
-    usePreventExit
+    useConfirmExit
 } from "@/utilities";
 
 export default function Confirm_email_forgot_pwd() {
@@ -22,8 +22,6 @@ export default function Confirm_email_forgot_pwd() {
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
 
-    usePreventExit(true);
-
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
@@ -33,6 +31,10 @@ export default function Confirm_email_forgot_pwd() {
         setForm(prev => ({ ...prev, email: saveEmail || "" }));
         Progress(false);
     }, []);
+
+    const confirmExit = useConfirmExit({
+        onConfirm: () => router.push("/auth/signin")
+    });
 
     const SendCode = async (e: string | null) => {
         setLoading(true);
@@ -98,7 +100,7 @@ export default function Confirm_email_forgot_pwd() {
                         )}
                         <p>Didn{"'"}t Recieve? <a onClick={() => {SendCode(form.email);}} style={{ cursor: "pointer" }}>Resend Code</a></p>
                         <section className={`${styles.buttons} `}>
-                            <button type="button" onClick={() => {router.back();}} style={{backgroundColor: "var(--secondary)"}}>Back</button>
+                            <button type="button" onClick={() => { if(confirmExit()) return router.push("/auth/signin"); }} style={{backgroundColor: "var(--secondary)"}}>Back</button>
                             <button>Confirm</button>
                         </section>
                     </form>
