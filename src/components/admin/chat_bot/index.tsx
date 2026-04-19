@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { SweetAlert2, Fetch_toFile, Fetch_to } from "@/utilities";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import Swal from "sweetalert2";
+import Markdown from "react-markdown";
 
 interface PdfFile {
     id?: number;
@@ -160,8 +161,12 @@ export default function Chat_bot() {
                             {data && data.length > 0 ? (
                                 data.map((pdf, index) => (
                                     <tr key={index}>
-                                        <td> {pdf.file_name} </td>
-                                        <td> {pdf.summary} </td>
+                                        <td className={styles.file_name} > {pdf.file_name} </td>
+                                        <td className={styles.summary} >
+                                            <div className={styles.summaryContent}>
+                                                <Markdown>{pdf.summary || ""}</Markdown>
+                                            </div>
+                                        </td>
                                         <td >
                                             <button className={styles.button_download} onClick={() => DownloadFile(pdf)}>
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -172,7 +177,7 @@ export default function Chat_bot() {
                                             </button>
                                             <button className={styles.button_delete} onClick={ async () => {
                                                 SweetAlert2("Deleting", "Please wait..", "info", false, "", false, "", true);
-                                                const response = await Fetch_to(api_link.storage.deletepdf, { id: pdf.id, filePath: pdf.file });
+                                                const response = await Fetch_to(api_link.storage.deletepdf_chatbot, { id: pdf.id, filePath: pdf.file });
                                                 Swal.close();
                                                 if (response) {
                                                     setRefresh(!refresh);
