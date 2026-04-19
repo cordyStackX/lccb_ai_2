@@ -1,6 +1,6 @@
 .container {
     width: 100%;
-    height: 100vh;
+    height: 100dvh;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -113,8 +113,8 @@
     left: 2.3rem;
 }
 .checkbox input {
-    width: 15px;
-    height: 20px;
+    width: clamp(12px, 3vw, 20px);
+    height: clamp(12px, 3vw, 20px);
     margin: 0 10px;
     cursor: pointer;
     position: absolute;
