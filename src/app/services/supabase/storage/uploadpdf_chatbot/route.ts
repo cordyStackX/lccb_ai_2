@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     const auth = await Security(req);
     if(auth?.error) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     
-    const form = await req.formData();
+    const form = (await req.formData()) as unknown as globalThis.FormData;
     const file = form.get("file") as File;
     const email = form.get("email") as string;
 
