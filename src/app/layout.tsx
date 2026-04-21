@@ -1,16 +1,16 @@
 import { MetadataUtils } from "@/utilities";
-import { Poppins } from "next/font/google";
+import { Inter } from "next/font/google";
 import type { Viewport } from "next";
 import PWARegister from "@/components/pwa_register";
 import "./globals.css";
 
-const poppinsSans = Poppins({
+const interSans = Inter({
   variable: "--font-geist-sans",
   weight: ["100", "300", "400", "500", "700", "900"],
   subsets: ["latin"],
 });
 
-const poppinsMono = Poppins({
+const interMono = Inter({
   variable: "--font-geist-mono",
   weight: ["100", "300", "400", "500", "700"],
   subsets: ["latin"],
@@ -31,7 +31,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${poppinsSans.variable} ${poppinsMono.variable} ${poppinsSans.className}`}>
+      <body className={`${interSans.variable} ${interMono.variable} ${interSans.className}`}>
         <PWARegister />
         {children}
       </body>
