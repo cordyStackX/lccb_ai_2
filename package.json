@@ -10,7 +10,6 @@
 	},
 	"dependencies": {
 		"@react-three/drei": "^10.7.7",
-		"@react-three/fiber": "^9.6.0",
 		"@supabase/supabase-js": "^2.103.3",
 		"bcrypt": "^6.0.0",
 		"hamburger-react": "^2.5.2",
