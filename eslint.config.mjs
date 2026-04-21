@@ -23,7 +23,7 @@ export default [
       parser: tsParser,
       parserOptions: {
         ecmaFeatures: { jsx: true },
-        project: "./tsconfig.json",
+        project: "./tsconfig.eslint.json",
       },
       globals: {
         ...globals.browser,
@@ -108,6 +108,12 @@ export default [
   },
 
   {
-    ignores: ["**/.next/**", "**/node_modules/**", "**/.venv/**", "**/python/**"],
+    ignores: [
+      "**/.next/**",
+      "**/node_modules/**",
+      "**/.venv/**",
+      "**/python/**",
+      "**/mobile/**",
+    ],
   },
 ];
