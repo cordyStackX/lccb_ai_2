@@ -5,6 +5,7 @@ import { SweetAlert2, Fetch_toFile, Fetch_to } from "@/utilities";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import Swal from "sweetalert2";
 import Markdown from "react-markdown";
+import { useRouter } from "next/navigation";
 
 interface PdfFile {
     id?: number;
@@ -16,6 +17,7 @@ interface PdfFile {
 const PAGE_SIZE = 30;
 
 export default function Chat_bot() {
+    const router = useRouter();
     const fileRef = useRef<HTMLInputElement>(null);
     const [data, setData] = useState<PdfFile[]>([]);
     const [refresh, setRefresh] = useState(false);
@@ -146,6 +148,7 @@ export default function Chat_bot() {
             <section className={styles.status}>
                 <span>
                     <h2>Your Documents</h2>
+                    <button className={styles.button_upload} onClick={() => {router.push("/chat_bot");}}>Open Chatbot</button>
                     <button className={styles.button_upload} onClick={UploadPdf}>Upload PDF File</button>
                 </span>
                 <div>

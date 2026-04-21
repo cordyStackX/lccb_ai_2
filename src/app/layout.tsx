@@ -1,16 +1,16 @@
 import { MetadataUtils } from "@/utilities";
-import { Roboto, Roboto_Mono } from "next/font/google";
+import { Poppins } from "next/font/google";
 import type { Viewport } from "next";
 import PWARegister from "@/components/pwa_register";
 import "./globals.css";
 
-const robotoSans = Roboto({
+const poppinsSans = Poppins({
   variable: "--font-geist-sans",
   weight: ["100", "300", "400", "500", "700", "900"],
   subsets: ["latin"],
 });
 
-const robotoMono = Roboto_Mono({
+const poppinsMono = Poppins({
   variable: "--font-geist-mono",
   weight: ["100", "300", "400", "500", "700"],
   subsets: ["latin"],
@@ -31,7 +31,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${robotoSans.variable} ${robotoMono.variable} ${robotoSans.className}`}>
+      <body className={`${poppinsSans.variable} ${poppinsMono.variable} ${poppinsSans.className}`}>
         <PWARegister />
         {children}
       </body>
