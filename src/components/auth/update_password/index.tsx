@@ -22,6 +22,8 @@ export default function Update_Password() {
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showPassword2, setShowPassword2] = useState(false);
 
     usePreventExit(isDirty);
 
@@ -80,28 +82,48 @@ export default function Update_Password() {
                             </figure>
                             <h1>Create your new password</h1>
                         </section>
-                        <input 
-                        type="password" 
-                        name="password" 
-                        id="password" 
-                        autoComplete="password"
-                        value={form.password}
-                        onChange={handleChange}
-                        placeholder="Create your New password"
-                        style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
-                        required
-                        />
-                        <input 
-                        type="password" 
-                        name="c_password" 
-                        id="c_password" 
-                        autoComplete="password"
-                        value={form.c_password}
-                        onChange={handleChange}
-                        placeholder="Confirm Your New Password"
-                        style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
-                        required
-                        />
+                        <div className={styles.password_field}>
+                            <input 
+                            type={showPassword ? "text" : "password"}
+                            name="password" 
+                            id="password" 
+                            autoComplete="password"
+                            value={form.password}
+                            onChange={handleChange}
+                            placeholder="Create your New password"
+                            style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
+                            required
+                            />
+                            <button
+                                type="button"
+                                className={styles.password_toggle}
+                                aria-pressed={showPassword}
+                                onClick={() => setShowPassword((prev) => !prev)}
+                            >
+                                {showPassword ? "Hide" : "Show"}
+                            </button>
+                        </div>
+                        <div className={styles.password_field}>
+                            <input 
+                            type={showPassword2 ? "text" : "password"}
+                            name="c_password" 
+                            id="c_password" 
+                            autoComplete="password"
+                            value={form.c_password}
+                            onChange={handleChange}
+                            placeholder="Confirm Your New Password"
+                            style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
+                            required
+                            />
+                            <button
+                                type="button"
+                                className={styles.password_toggle}
+                                aria-pressed={showPassword2}
+                                onClick={() => setShowPassword2((prev) => !prev)}
+                            >
+                                {showPassword2 ? "Hide" : "Show"}
+                            </button>
+                        </div>
                         {message && (
                             <p className={status ?  "error" : "success"}>{message}</p>
                         )}

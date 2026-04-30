@@ -98,67 +98,117 @@ export default function SignUp() {
                                 <figcaption>LACO AI</figcaption>
                             </figure>
                         </section>
-                        <input 
-                        type="email" 
-                        name="email" 
-                        id="email" 
-                        autoComplete="email"
-                        value={form.email}
-                        onChange={handleChange}
-                        placeholder="Email"
-                        style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
-                        required
-                        />
-                        <input 
-                        type="text" 
-                        name="name" 
-                        id="name" 
-                        autoComplete="name"
-                        value={form.name}
-                        onChange={handleChange}
-                        placeholder="Full Name"
-                        style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
-                        required
-                        />
-                        {ifMinors ? (
+                        <div className={styles.text_contain}>
+                            <h1>Register</h1>
+                            <p>Please Register to continue</p>
+                        </div>
+                        <div className={styles.input_holder}>
+                            <span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <rect x="3" y="5" width="18" height="14" rx="2"/>
+                                <path d="M3 7l9 6 9-6"/>
+                                </svg>
+                            </span>
                             <input 
-                            type="text" 
-                            name="assign_by" 
-                            id="assign_by" 
-                            autoComplete="assign_by"
-                            value={form.assign_by}
+                            type="email" 
+                            name="email" 
+                            id="email" 
+                            autoComplete="email"
+                            value={form.email}
                             onChange={handleChange}
-                            placeholder="Enter Your Teacher Email"
+                            placeholder="Email"
                             style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
                             required
                             />
+                        </div>
+                        <div className={styles.input_holder}>
+                            <span>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="2"/>
+                                <circle cx="9" cy="10" r="2" stroke="currentColor" strokeWidth="2"/>
+                                <path d="M6 16c1.5-2 4.5-2 6 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                <path d="M13 9h5M13 12h5M13 15h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                </svg>
+                            </span>
+                            <input 
+                            type="text" 
+                            name="name" 
+                            id="name" 
+                            autoComplete="name"
+                            value={form.name}
+                            onChange={handleChange}
+                            placeholder="Full Name"
+                            style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
+                            required
+                            />
+                        </div>
+                        
+                        {ifMinors ? (
+                            <div className={styles.input_holder}>
+                                <span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <rect x="3" y="5" width="18" height="14" rx="2"/>
+                                    <path d="M3 7l9 6 9-6"/>
+                                    </svg>
+                                </span>
+                                <input 
+                                type="text" 
+                                name="assign_by" 
+                                id="assign_by" 
+                                autoComplete="assign_by"
+                                value={form.assign_by}
+                                onChange={handleChange}
+                                placeholder="Enter Your Teacher Email"
+                                style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
+                                required
+                                />
+                            </div>
                         ) : null}
-                        <select 
-                        id="year"
-                        name="year"
-                        value={form.year}
-                        onChange={handleChange}
-                        required
-                        >
-                            <option value="">Select Year Level</option>
-                            <option value="Kinder Garten">Kinder Garten</option>
-                            <option value="Elementary">Elementary</option>
-                            <option value="High School">High School</option>
-                            <option value="Senior High School">Senior High School</option>
-                            <option value="College">College</option>
-                        </select>
+                        <div className={styles.input_holder}>
+                            <span>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M2 9l10-4 10 4-10 4-10-4z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+                                <path d="M6 11v4c0 1.5 2.7 3 6 3s6-1.5 6-3v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                <path d="M22 9v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                </svg>
+                            </span>
+                            <select 
+                            id="year"
+                            name="year"
+                            value={form.year}
+                            onChange={handleChange}
+                            required
+                            >
+                                <option value="">Select Year Level</option>
+                                <option value="Kinder Garten">Kinder Garten</option>
+                                <option value="Elementary">Elementary</option>
+                                <option value="High School">High School</option>
+                                <option value="Senior High School">Senior High School</option>
+                                <option value="College">College</option>
+                            </select>
+                        </div>
+                        
 
-                        <select 
-                        id="role"
-                        name="role"
-                        value={form.role}
-                        onChange={handleChange}
-                        required
-                        >
-                            <option value="">Select Your Role</option>
-                            <option value="Student">Student</option>
-                            <option value="Teacher">Teacher</option>
-                        </select>
+                        <div className={styles.input_holder}>
+                            <span>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="10" cy="8" r="3" stroke="currentColor" strokeWidth="2"/>
+                                <path d="M4 20c0-3.3 3-6 6-6s6 2.7 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                <path d="M16 8h5M18.5 5.5v5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                </svg>
+                            </span>
+                            <select 
+                            id="role"
+                            name="role"
+                            value={form.role}
+                            onChange={handleChange}
+                            required
+                            >
+                                <option value="">Select Your Role</option>
+                                <option value="Student">Student</option>
+                                <option value="Teacher">Teacher</option>
+                            </select>
+                        </div>
                         {message && (
                             <p className={status ?  "error" : "success"}>{message}</p>
                         )}
