@@ -44,7 +44,7 @@
     border: 2px solid var(--primary);
     outline: none;
     color: var(--foreground);
-    border-radius: 30px;
+    border-radius: 15px;
     text-align: center;
 }
 .form_styles p {
@@ -86,11 +86,12 @@
     width: 50%;
     padding: 15px;
     background: var(--primary);
-    border-radius: 30px;
+    border-radius: 15px;
     margin: 10px;
     border: transparent;
     font-size: 1rem;
     cursor: pointer;
+    color: var(--default-color-white);
 }
 .buttons button:active {
     opacity: 0.3;

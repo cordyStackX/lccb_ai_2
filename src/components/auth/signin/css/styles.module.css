@@ -42,13 +42,13 @@
     height: auto;
     margin: 1rem 0;
     font-size: clamp(1rem, 0.5rem + 1vw, 1.1rem);
-    padding: 15px 30px;
+    padding: 15px 0 15px 50px;
     background: transparent;
     border: transparent;
     border: 2px solid var(--primary);
     outline: none;
     color: var(--foreground);
-    border-radius: 30px;
+    border-radius: 15px;
 }
 .form_styles p {
     margin: 1rem 0 0 0;
@@ -57,12 +57,28 @@
 .form_styles a {
     color: var(--default-color-blue);
 }
+.text_contain {
+    width: 100%;
+    height: auto;
+    margin: 15px 0;
+}
+.text_contain h1 {
+    color: var(--default-color-black);
+    font-size: clamp(1.5rem, 0.5rem + 2vw, 2rem);
+}
 .password_field {
     position: relative;
     width: 100%;
 }
 .password_field input {
     padding-right: 5.5rem;
+}
+.password_field span {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--default-color-gray);
 }
 .password_toggle {
     position: absolute;
@@ -74,6 +90,18 @@
     color: var(--primary);
     font-size: 0.9rem;
     cursor: pointer;
+}
+.input_holder {
+    width: 100%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.input_holder span {
+    position: absolute;
+    left: 15px;
+    color: var(--default-color-gray);
 }
 .info {
     flex-flow: column;
@@ -108,10 +136,11 @@
     width: 100%;
     padding: 15px;
     background: var(--primary);
-    border-radius: 30px;
+    border-radius: 15px;
     border: transparent;
     font-size: 1rem;
     cursor: pointer;
+    color: var(--default-color-white);
 }
 .buttons button:active {
     opacity: 0.3;

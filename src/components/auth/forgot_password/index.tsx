@@ -77,17 +77,26 @@ export default function Forgot_password() {
                             </figure>
                             <h1>Forgot Password</h1>
                         </section>
-                        <input 
-                        type="email" 
-                        name="email" 
-                        id="email" 
-                        autoComplete="email"
-                        value={form.email}
-                        onChange={handleChange}
-                        placeholder="Enter Your Email"
-                        style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
-                        required
-                        />
+                        <div className={styles.input_holder}>
+                            <span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <rect x="3" y="5" width="18" height="14" rx="2"/>
+                                <path d="M3 7l9 6 9-6"/>
+                                </svg>
+                            </span>
+                            <input 
+                            type="email" 
+                            name="email" 
+                            id="email" 
+                            autoComplete="email"
+                            value={form.email}
+                            onChange={handleChange}
+                            placeholder="Enter Your Email"
+                            style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
+                            required
+                            />
+                        </div>
+                        
                         {message && (
                             <p className={status ?  "error" : "success"}>{message}</p>
                         )}
