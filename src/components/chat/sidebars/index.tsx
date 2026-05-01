@@ -197,11 +197,6 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, globalRefres
             <div className={`${styles.wrapper}`}>
                 <section className={styles.options}>
                     <button onClick={UploadPdf} title="Upload your pdf" >
-                        <svg className={styles.options_svg} width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 16V4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                        <path d="M8 8L12 4L16 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M4 20H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                        </svg>
                         Upload New PDF
                     </button>
                     <input 

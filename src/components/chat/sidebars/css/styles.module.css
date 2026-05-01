@@ -40,15 +40,12 @@
     font-size: 0.9rem;
     margin: 5rem 0 0 0;
     position: relative;
+    color: var(--default-color-white);
 }
 .options button:active {
     opacity: 0.5;
 }
-.options_svg {
-    position: absolute;
-    left: 50px;
-    bottom: 25%;
-}
+
 .search_pdf {
     width: 100%;
     height: 50px;

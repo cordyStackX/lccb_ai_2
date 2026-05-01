@@ -104,6 +104,7 @@
     background-color: var(--primary);
     border: transparent;
     border-radius: 5px;
+    color: var(--default-color-white);
 }
 .deleteaccount {
     width: 100%;
