@@ -22,13 +22,17 @@ type PdfFile = {
 }
 
 export default function Sidebars({ isOpen, emailRes, setCurrentPdf, globalRefresh }: SidebarsProps) {
+    const pageSize = 10;
     const [profile, setProfile] = useState(false);
     const [data, setData] = useState<PdfFile[]>([]);
     const [selectedPdfId, setSelectedPdfId] = useState<number | undefined>();
     const fileRef = useRef<HTMLInputElement>(null);
-    const [refresh, setRefresh] = useState(Boolean);
+    const [refresh, setRefresh] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [showNoData, setShowNoData] = useState(false);
+    const [offset, setOffset] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [contextMenu, setContextMenu] = useState<{ visible: boolean; x: number; y: number; pdfId?: number; file?: string }>({
         visible: false,
         x: 0,
@@ -46,21 +50,43 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, globalRefres
         return () => document.removeEventListener("click", handleClick);
     }, []);
 
-    useEffect(() => {
-        const retrieve_pdf = async () => {
-            const response = await Fetch_to(api_link.storage.retrieve, { email: emailRes });
-            if (response.success) {
-                setData(response.data.message);
-            } else {
-                setTimeout(() => {
-                    setShowNoData(true);
-                }, 5000);
+    const fetchPdfs = async (reset = false) => {
+        if (isLoading || (!hasMore && !reset) || !emailRes) return;
+        setIsLoading(true);
+
+        const nextOffset = reset ? 0 : offset;
+        const response = await Fetch_to(api_link.storage.retrieve, {
+            email: emailRes,
+            limit: pageSize,
+            offset: nextOffset,
+        });
+
+        if (response.success) {
+            const items = response.data.message || [];
+            setData((prev) => (reset ? items : [...prev, ...items]));
+            setOffset(nextOffset + items.length);
+            setHasMore(response.data.hasMore ?? items.length === pageSize);
+            if (reset) {
+                setShowNoData(items.length === 0);
             }
-        };
-        retrieve_pdf();
-        
+        } else if (reset) {
+            setShowNoData(true);
+        }
+
+        setIsLoading(false);
+    };
+
+    useEffect(() => {
+        setData([]);
+        setOffset(0);
+        setHasMore(true);
+        setShowNoData(false);
+        fetchPdfs(true);
+    }, [emailRes, refresh, globalRefresh]);
+
+    useEffect(() => {
         setCurrentPdf(selectedPdfId);
-    }, [emailRes, refresh, selectedPdfId, globalRefresh]);
+    }, [selectedPdfId, setCurrentPdf]);
 
     // Filter PDFs based on search query
     const filteredPdfs = data.filter(pdf => 
@@ -100,6 +126,13 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, globalRefres
             }
         }
 
+    };
+
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        const target = e.currentTarget;
+        if (target.scrollTop + target.clientHeight >= target.scrollHeight - 20) {
+            fetchPdfs();
+        }
     };
 
     const handleContextMenu = (e: React.MouseEvent, pdfId?: number, file?: string) => {
@@ -182,7 +215,7 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, globalRefres
                     
                     <div className={styles.pdf_base}>
                         <h3>PDF Documents</h3>
-                        <div className={styles.pdf_container}>
+                        <div className={styles.pdf_container} onScroll={handleScroll}>
                             {data && data.length > 0 ? (
                                 filteredPdfs.length > 0 ? (
                                     filteredPdfs.map((pdf, index) => (
@@ -230,6 +263,9 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, globalRefres
                                     )}
                                 </div>
                                 
+                            )}
+                            {isLoading && data.length > 0 && (
+                                <React_Spinners status="Loading more..." />
                             )}
                         </div>
                     </div>

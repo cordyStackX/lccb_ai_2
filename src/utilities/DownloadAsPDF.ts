@@ -1,5 +1,23 @@
 import jsPDF from "jspdf";
 
+function stripMarkdown(input: string): string {
+    return input
+        .replace(/```[\s\S]*?```/g, "")
+        .replace(/`([^`]+)`/g, "$1")
+        .replace(/^#{1,6}\s+/gm, "")
+        .replace(/\*\*(.*?)\*\*/g, "$1")
+        .replace(/\*(.*?)\*/g, "$1")
+        .replace(/__(.*?)__/g, "$1")
+        .replace(/_(.*?)_/g, "$1")
+        .replace(/!\[([^\]]*)\]\([^\)]*\)/g, "$1")
+        .replace(/\[([^\]]+)\]\([^\)]*\)/g, "$1")
+        .replace(/^\s*[-*+]\s+/gm, "")
+        .replace(/^\s*\d+\.\s+/gm, "")
+        .replace(/^\s*>\s?/gm, "")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim();
+}
+
 export default function DownloadAsPDF(content: string, index: number) {
         const pdf = new jsPDF({
             orientation: "portrait",
@@ -29,7 +47,8 @@ export default function DownloadAsPDF(content: string, index: number) {
         pdf.setFont("helvetica", "normal");
 
         // Split content into lines and handle page breaks
-        const lines = pdf.splitTextToSize(content, maxLineWidth);
+        const plainText = stripMarkdown(content);
+        const lines = pdf.splitTextToSize(plainText, maxLineWidth);
         
         lines.forEach((line: string) => {
             // Check if we need a new page

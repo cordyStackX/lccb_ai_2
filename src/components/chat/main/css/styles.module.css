@@ -47,7 +47,7 @@
     justify-content: flex-start;
     align-items: flex-start;
     padding: 0 0 2rem 0;
-    line-height: 2.1rem;
+    line-height: 2.5rem;
     backdrop-filter: blur(100px);
     width: min(700px, 95%);
     max-width: 100%;
@@ -59,7 +59,7 @@
 }
 .ai_response pre {
     width: min(700px, 95%);
-    background: var(--default-color-black);       
+    background: var(--fx-color);       
     color: var(--default-color-white);            
     padding: 1rem;
     border-radius: 10px;

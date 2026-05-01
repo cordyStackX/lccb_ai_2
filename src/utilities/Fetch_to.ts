@@ -35,6 +35,6 @@ export default async function Fetch_to(
 
 		if (attempt < retries) await new Promise(res => setTimeout(res, delay));
 	}
-
-		return { success: false, message: `Check Your Internet Connections` };
+		alert("No Internet Connections, Check your internet connections :(");
+		return { success: false, message: `Server Connections Shutdown` };
 }

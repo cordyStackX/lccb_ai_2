@@ -55,7 +55,7 @@ export default function ChatPage() {
             <Header isOpen={isOpen} setOpen={setOpen} setShowProfile={setShowProfile} name={name} email={email} profilePic={profilePic} />
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center"}}>
                 <Sidebars isOpen={isOpen} emailRes={email} setCurrentPdf={setCurrentPdf} globalRefresh={globalRefresh} />
-                <Main emailRes={email} currentPdf={currentPdf} setGlobalRefresh={setGlobalRefresh} />
+                <Main emailRes={email} currentPdf={currentPdf} setGlobalRefresh={setGlobalRefresh} f_name={name} />
                 <Profile showProfile={showProfile} setShowProfile={setShowProfile} email={email} name={name} role={role} year={year} profilePic={profilePic} setGlobalRefresh={setGlobalRefresh} />
             </div> 
         </main>
