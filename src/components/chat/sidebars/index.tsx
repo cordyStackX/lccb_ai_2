@@ -86,7 +86,7 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, globalRefres
 
     useEffect(() => {
         setCurrentPdf(selectedPdfId);
-    }, [selectedPdfId, setCurrentPdf]);
+    }, [selectedPdfId, setCurrentPdf, globalRefresh]);
 
     // Filter PDFs based on search query
     const filteredPdfs = data.filter(pdf => 
