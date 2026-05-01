@@ -7,8 +7,10 @@ export async function POST(req: NextRequest) {
     const auth = await Security(req);
     if(auth?.error) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
 
-    const { email } = await req.json();
+    const { email, limit, offset } = await req.json();
     const cleanEmail = email?.trim().toLowerCase();
+    const pageSize = Number.isFinite(Number(limit)) ? Math.max(1, Number(limit)) : 10;
+    const pageOffset = Number.isFinite(Number(offset)) ? Math.max(0, Number(offset)) : 0;
 
     if (!cleanEmail) {
       return NextResponse.json(
@@ -20,7 +22,9 @@ export async function POST(req: NextRequest) {
   const { data, error } = await supabaseServer
     .from("pdf_file")
     .select("id, file, file_name")
-    .eq("email", cleanEmail);
+    .eq("email", cleanEmail)
+    .order("id", { ascending: false })
+    .range(pageOffset, pageOffset + pageSize - 1);
 
   if (error) {
     console.error("Supabase Query Error:", error);
@@ -32,8 +36,8 @@ export async function POST(req: NextRequest) {
 
   if (!data || data.length === 0) {
     return NextResponse.json(
-      { success: true, error: [{ id: 0, file_name: "No PDF Found" }] },
-      { status: 400 }
+      { success: true, message: [], hasMore: false },
+      { status: 200 }
     );
   }
 
@@ -121,7 +125,7 @@ export async function POST(req: NextRequest) {
 
 
   return NextResponse.json(
-    { success: true, message: filesWithSize },
+    { success: true, message: filesWithSize, hasMore: data.length === pageSize },
     { status: 200 }
   );
 }

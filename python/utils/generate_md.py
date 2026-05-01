@@ -14,6 +14,7 @@ def generate_md():
         last_ai_response = str(data.get("last_ai_response", "")).strip()
         email = data.get("email")
         file_id = data.get("pdf_id")  # new: PDF id
+        f_name = data.get("f_name")
 
         # Validate token
         if received_token != EXPECTED_API_KEY:
@@ -24,6 +25,8 @@ def generate_md():
             return jsonify({"success": False, "error": "file_id is required"}), 400
         if not email:
             return jsonify({"success": False, "error": "Email not found"}), 400
+        if not f_name:
+            return jsonify({"success": False, "error": "Name not found"}), 400
 
         # --- Get file name from Supabase ---
         row = supabase.table("pdf_file").select("file_name").eq("id", file_id).single().execute()
@@ -142,6 +145,7 @@ Respond with ONLY comma-separated numbers (e.g., \"1,3,4\"). If all chunks seem 
         systemRole = system_role.format(
             role=role,
             year=year,
+            name=f_name
         )
 
         # --- Call OpenAI with relevant context ---

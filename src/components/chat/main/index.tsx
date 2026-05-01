@@ -12,10 +12,11 @@ import Swal from "sweetalert2";
 type MainProps = {
     emailRes: string;
     currentPdf: number | undefined;
+    f_name: string;
     setGlobalRefresh: Dispatch<SetStateAction<boolean>>;
 }
 
-export default function Main({ emailRes, currentPdf, setGlobalRefresh }: MainProps) {
+export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }: MainProps) {
     const [messages, setMessages] = useState<
         { ask: string; respond: string }[]
     >([]);
@@ -142,9 +143,10 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh }: MainPro
             : "";
 
         const response = await Fetch_to(api_link.responses, {
-            prompt,
-            email,
-            pdf_id,
+            prompt: prompt,
+            email: email,
+            pdf_id: pdf_id,
+            f_name: f_name,
             last_user_response: lastUserResponse,
             last_ai_response: lastAIResponse,
         });
