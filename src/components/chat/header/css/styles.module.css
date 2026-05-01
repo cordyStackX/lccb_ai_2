@@ -10,7 +10,7 @@
     justify-content: space-between;
     display: flex;
     align-items: center;
-    border-bottom: 1px solid var(--foreground);
+    box-shadow: 0 0 2px 1px var(--default-color-gray);
 }
 .container h1 {
     margin: 0 3rem;
@@ -43,69 +43,95 @@
 }
 .user_info_menu {
     position: fixed;
-    right: 0;
+    right: 10px;
     top: 65px;
-    width: min(100%, 400px);
+    width: min(100%, 310px);
     height: auto;
     background-color: var(--default-color-white);
     display: none;
-    justify-content: center;
+    justify-content: left;
     align-items: center;
-    padding: 3rem 1rem 0 0;
-    box-shadow: 0 0 3px 1px var(--foreground);
+    flex-flow: column;
+    padding: 2rem 1rem 0 1rem;
+    box-shadow: 0 0 2px 1px var(--default-color-gray);
+    border-radius: 8px;
+    overflow: hidden;
 }
 .user_info_menu_open {
     display: flex;
 }
 .profile_info_img {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: left;
+    align-items: left;
     width: 100%;
+    margin: 0 0 1rem 0;
 }
 .profile_info_img span {
     border-radius: 100%;
     background-color: var(--primary);
-    margin: 1rem;
+    margin: 0 1rem 0 0;
     overflow: hidden;
-    width: 120px;
-    height: 120px;
+    width: 50px;
+    height: 50px;
     display: flex;
     justify-content: center;
     align-items: center;
-    border: 2px solid var(--primary);
 }
 .profile_info_img p {
-    width: 200px;
+    width: 190px;
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
+    color: var(--default-color-black);
 }
-.setting {
-    position: absolute;
-    top: 0;
-    left: 0;
+.profile_info_img div {
+    display: flex;
+    flex-flow: column;
+    justify-content: space-between;
+}
+.profile_info_img figcaption {
+    font-weight: bold;
+}
+.my_profile {
+    width: 100%;
     padding: 1rem 2rem;
-    border: none;
+    text-align: left;
+    border: transparent;
+    border-top: 1px solid var(--fx-color-button);
     background: transparent;
     color: var(--foreground);
     cursor: pointer;
+    margin: 1rem 0 0 0;
+    transition: all 0.5s ease;
+    position: relative;
 }
-.setting:hover {
-    background-color: var(--primary);
-    color: var(--default-color-white);
+.my_profile:hover {
+    background-color: var(--fx-color);
+}
+.my_profile svg {
+    position: absolute;
+    left: 0;
+    top: 25%;
 }
 .signout {
-    position: absolute;
-    top: 0;
-    right: 0;
+    width: 100%;
     padding: 1rem 2rem;
-    border: none;
+    border: transparent;
+    border-top: 1px solid var(--fx-color-button);
     background: transparent;
+    text-align: left;
     color: var(--foreground);
     cursor: pointer;
+    position: relative;
+    transition: all 0.5s ease;
 }
 .signout:hover {
     background-color: var(--default-color-red);
     color: var(--default-color-white);
+}
+.signout svg {
+    position: absolute;
+    left: 0;
+    top: 25%;
 }

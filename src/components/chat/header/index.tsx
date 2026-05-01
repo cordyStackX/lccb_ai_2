@@ -8,7 +8,7 @@ import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 
-interface HeaderProps {
+type HeaderProps = {
     isOpen: boolean;
     setOpen: Dispatch<SetStateAction<boolean>>;
     setShowProfile: Dispatch<SetStateAction<boolean>>;
@@ -75,7 +75,7 @@ export default function Header({ isOpen, setOpen, setShowProfile, name, email, p
             <section className={`${styles.user_info_menu} ${profile ? styles.user_info_menu_open : ''}`}>
                 <figure className={styles.profile_info_img}>
                     <span>
-                        <Image src={profilePic ? profilePic : image_src.profile} alt="User Pic" width={120} height={120} unoptimized/>
+                        <Image src={profilePic ? profilePic : image_src.profile} alt="User Pic" width={50} height={50} unoptimized/>
                     </span>
                     <div>
                         <figcaption> {name} </figcaption>
@@ -83,8 +83,22 @@ export default function Header({ isOpen, setOpen, setShowProfile, name, email, p
                     </div>
                 </figure>
                
-                <button className={styles.setting} title="My Profile" onClick={() => {setShowProfile(true);}}>My Profile</button>
-                <button className={styles.signout} title="Sign Out" onClick={handle_logout}>Sign Out</button>
+                <button className={styles.my_profile} title="My Profile" onClick={() => {setShowProfile(true);}}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="10" cy="8" r="4" stroke="currentColor" strokeWidth="2"/>
+                    <path d="M2 20c0-4 4-6 8-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    <path d="M14 14l6-6 2 2-6 6-3 1 1-3z" stroke="currentColor" strokeWidth="2"/>
+                    </svg>
+                    My Profile
+                </button>
+                <button className={styles.signout} title="Sign Out" onClick={handle_logout}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M10 17V7a2 2 0 0 1 2-2h7v14h-7a2 2 0 0 1-2-2z"/>
+                    <path d="M15 12H3m0 0l3-3m-3 3l3 3"/>
+                    </svg>
+                    Sign Out
+                </button>
             </section>
 
         </header>

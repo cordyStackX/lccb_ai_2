@@ -12,7 +12,8 @@ import api_link from "@/config/conf/json_config/fetch_url.json";
 
 export default function ChatPage() {
     const router = useRouter();
-    const [isOpen, setOpen] = useState(true);
+    const [isOpen, setOpen] = useState(false);
+    const [globalRefresh, setGlobalRefresh] = useState(false);
     const [email, setEmail] = useState("");
     const [name, setName] = useState("");
     const [role, setRole] = useState("");
@@ -26,25 +27,36 @@ export default function ChatPage() {
             const response = await Fetch_to(api_link.jwt.verify);
             if (!response.success) return router.push("/");
             const result = response.data.message.final_data.data[0];
-            const result2 = response.data.message.final_data.profile_links[0];
-            console.log(result);
             setEmail(result.email);
             setName(result.f_name);
             setRole(result.role);
             setYear(result.year);
-            if (!result2) return;
-            setProfilePic(result2.file_link);
         }
         check();
     }, []);
+
+    useEffect(() => {
+        async function check() {
+            const response2 = await Fetch_to(api_link.storage.fetchimg, { email: email });
+            if (response2.success) {
+                let result = response2.data.message[0].file_link;
+                if (result < 0) return setProfilePic("");
+                setProfilePic(result);
+                console.log("Image Public link: ", response2.data.message[0].file_link);
+            } else {
+                setProfilePic("");
+            }
+        }
+        check();
+    }, [email, globalRefresh]);
 
     return(
         <main className="chat_page">
             <Header isOpen={isOpen} setOpen={setOpen} setShowProfile={setShowProfile} name={name} email={email} profilePic={profilePic} />
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center"}}>
-                <Sidebars isOpen={isOpen} emailRes={email} setCurrentPdf={setCurrentPdf} />
-                <Main emailRes={email} currentPdf={currentPdf}/>
-                <Profile showProfile={showProfile} setShowProfile={setShowProfile} email={email} name={name} role={role} year={year} profilePic={profilePic} />
+                <Sidebars isOpen={isOpen} emailRes={email} setCurrentPdf={setCurrentPdf} globalRefresh={globalRefresh} />
+                <Main emailRes={email} currentPdf={currentPdf} setGlobalRefresh={setGlobalRefresh} />
+                <Profile showProfile={showProfile} setShowProfile={setShowProfile} email={email} name={name} role={role} year={year} profilePic={profilePic} setGlobalRefresh={setGlobalRefresh} />
             </div> 
         </main>
     );

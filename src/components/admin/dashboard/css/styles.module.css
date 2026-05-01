@@ -27,7 +27,7 @@
     height: auto;
     padding: 2rem 1.5rem;
     border-radius: 5px;
-    background-color: var(--default-color-gray);
+    background-color: var(--fx-color);
 }
 
 .statusHeader {

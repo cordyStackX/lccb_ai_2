@@ -4,19 +4,18 @@
     height: 100dvh;
     z-index: 99;
     display: none;
-    justify-content: right;
+    justify-content: center;
     align-items: center;
 }
 .container_open {
     display: flex;
 }
 .profile_container {
-    width: min(400px, 90%);
-    height: min(750px, 90vh);
+    width: min(400px, 100%);
+    height: min(750px, 100vh);
     background-color: var(--default-color-white);
-    box-shadow: 0 0 5px 2px var(--foreground);
+    box-shadow: 0 0 5px 2px var(--default-color-gray);
     overflow: auto;
-    margin-right: 1rem;
     border-radius: 5px;
     z-index: 9999;
     position: relative;

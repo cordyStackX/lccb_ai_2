@@ -1,19 +1,21 @@
 "use client";
 import styles from "./css/styles.module.css";
-import { useEffect, useState, useRef } from "react";
+import { Dispatch, SetStateAction, useEffect, useState, useRef } from "react";
 import Markdown from "react-markdown";
 import { ThreeDots } from "react-loader-spinner";
-import { Fetch_to, DownloadAsPDF } from "@/utilities";
+import { Fetch_to, DownloadAsPDF, SweetAlert2, Fetch_toFile } from "@/utilities";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import Image from "next/image";
 import image_src from "@/config/images_links/assets.json";
+import Swal from "sweetalert2";
 
 type MainProps = {
     emailRes: string;
     currentPdf: number | undefined;
+    setGlobalRefresh: Dispatch<SetStateAction<boolean>>;
 }
 
-export default function Main({ emailRes, currentPdf }: MainProps) {
+export default function Main({ emailRes, currentPdf, setGlobalRefresh }: MainProps) {
     const [messages, setMessages] = useState<
         { ask: string; respond: string }[]
     >([]);
@@ -27,6 +29,8 @@ export default function Main({ emailRes, currentPdf }: MainProps) {
     const chatEndRef = useRef<HTMLDivElement>(null);
     const [animatedText, setAnimatedText] = useState("");
     const [isAnimating, setIsAnimating] = useState(false);
+    const fileRef = useRef<HTMLInputElement>(null);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     useEffect(() => {
         if (chatEndRef.current) {
@@ -38,6 +42,12 @@ export default function Main({ emailRes, currentPdf }: MainProps) {
         setEmail(emailRes);
         setPdf_id(currentPdf);
     }, [emailRes, currentPdf]);
+
+    useEffect(() => {
+        if (!textareaRef.current) return;
+        textareaRef.current.style.height = "auto";
+        textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }, [chatres.ask]);
 
     // Typewriter animation effect
     useEffect(() => {
@@ -71,6 +81,43 @@ export default function Main({ emailRes, currentPdf }: MainProps) {
         setChatres({ ...chatres, [e.target.name]: e.target.value });
     };
 
+    const UploadPdf = () => {
+        fileRef.current?.click();
+    };
+
+    const HandleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        SweetAlert2("Uploading", "Please wait..", "info", false, "", false, "", true);
+
+        if (file.type !== "application/pdf") {
+            alert("Please select a PDF file.");
+            return;
+        }
+
+        console.log("PDF selected:", file);
+
+        const response = await Fetch_toFile(api_link.storage.uploadPdf, file, { email: emailRes });
+        Swal.close();
+
+        setGlobalRefresh(true);
+
+        if (response.success) {
+            SweetAlert2("Success", "Successfully uploaded", "success", true, "Okay", false, "", false);
+            if (fileRef.current) {
+                fileRef.current.value = "";
+            }
+            
+        } else {
+            SweetAlert2("Error", `${response.message}`, "error", true, "Confirm", false, "", false);
+            if (fileRef.current) {
+                fileRef.current.value = "";
+            }
+        }
+
+    };
+
     const handleSubmit = async (e?: React.FormEvent<HTMLFormElement>) => {
         e?.preventDefault();
         if (!chatres.ask.trim()) return;
@@ -83,6 +130,9 @@ export default function Main({ emailRes, currentPdf }: MainProps) {
 
         const prompt = chatres.ask; 
         setChatres({ ask: "", respond2: "" });
+        if (textareaRef.current) {
+            textareaRef.current.style.height = "auto";
+        }
 
         const lastUserResponse = messages.length > 0
             ? messages[messages.length - 1].ask
@@ -188,27 +238,58 @@ export default function Main({ emailRes, currentPdf }: MainProps) {
                 </section>
                ) : (
                     
-                    <section style={{ padding: "10px" }} >
+                    <section className={styles.welcome_intro} style={{ padding: "10px" }} >
+                        <Image 
+                        src={image_src.lccb}
+                        alt="logo"
+                        title="logo"
+                        width={80}
+                        height={80}
+                        />
                         <h1>Welcome to LACO AI</h1>
+                        <svg className={styles.welcome_intro_svg1} width="40" height="3" xmlns="http://www.w3.org/2000/svg">
+                        <line x1="0" y1="5" x2="100" y2="5"  strokeWidth="5"/>
+                        </svg>
                         <p style={{ textAlign: "center" }}>
-                            Upload a PDF document and start asking questions about <br/> 
-                            its content. I{"'"}ll help you understand and analyze your <br />
-                            documents. 
+                            Upload a PDF document to begin analysis. <br /> 
+                            Ask questions to recieve explainations <br />
+                            and insights 
                         </p>
+                        {/* Hidden Input */}
+                        <>
+                            <input
+                            ref={fileRef}
+                            type="file"
+                            accept="application/pdf"
+                            style={{ display: "none" }}
+                            onChange={HandleFile}
+                            />
+                        </>
+                        <button onClick={UploadPdf}>
+                            <svg className={styles.welcome_intro_svg2} width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 16V4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                            <path d="M8 8L12 4L16 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M4 20H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                            </svg>
+                            Upload PDF Document
+                        </button>
                     </section>
                     
                )}
               
             <form className={`${styles.ask} `} onSubmit={handleSubmit} style={{ position: status ? "fixed" : "relative" }}>
+                <svg className={styles.message_icons} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+                </svg>
                 <textarea
+                ref={textareaRef}
                 id="chat"
                 name="ask"
-                placeholder="Ask anything"
+                placeholder="Ask questions about your document..."
                 value={chatres.ask}
                 onChange={(e) => {
                     handleChange(e);
-                    e.target.style.height = "auto";
-                    e.target.style.height = e.target.scrollHeight + "px";
                 }}
                 onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey && !loading) {

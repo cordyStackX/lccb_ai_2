@@ -10,6 +10,7 @@ import Swal from "sweetalert2";
 interface Index {
     showProfile: boolean
     setShowProfile: Dispatch<SetStateAction<boolean>>
+    setGlobalRefresh: Dispatch<SetStateAction<boolean>>
     email: string
     name: string
     role: string
@@ -17,7 +18,7 @@ interface Index {
     profilePic: string
 }
 
-export default function Profile({ showProfile, setShowProfile, email, name, role, year, profilePic }: Index) {
+export default function Profile({ showProfile, setShowProfile, email, name, role, year, profilePic, setGlobalRefresh }: Index) {
     const router = useRouter();
     const profilePicRef = useRef<HTMLInputElement>(null);
     const [form, setForm] = useState({
@@ -95,9 +96,9 @@ export default function Profile({ showProfile, setShowProfile, email, name, role
         Swal.close();
 
         if (response.success) {
-            await Fetch_to(api_link.jwt.deauth);
-            const alert2 = await SweetAlert2("Updated", "Complete", "success", true, "Go to Signin Page", false, "");
-            if (alert2.isConfirmed) { router.push("/auth/signin"); }
+            // await Fetch_to(api_link.jwt.deauth);
+            const alert2 = await SweetAlert2("Updated", "Complete", "success", true, "Okay", false, "");
+            if (alert2.isConfirmed) { setGlobalRefresh(true); }
 
             setSelectedFile(null); // Clear selected file after successful upload
             if (profilePicRef.current) {

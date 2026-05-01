@@ -27,7 +27,8 @@
 		"uploadpdf_chatbot" : "/services/supabase/storage/uploadpdf_chatbot",
 		"retrieve_chatbot" : "/services/supabase/storage/retrieve_chatbot",
 		"downloadpdf_chatbot" : "/services/supabase/storage/downloadpdf_chatbot",
-		"deletepdf_chatbot" : "/services/supabase/storage/deletepdf_chatbot"
+		"deletepdf_chatbot" : "/services/supabase/storage/deletepdf_chatbot",
+		"fetchimg" : "/services/supabase/storage/fetchimg"
 	},
 	"admin" : {
 		"retrieve_user" : "/services/supabase/admin/retrieve_user",

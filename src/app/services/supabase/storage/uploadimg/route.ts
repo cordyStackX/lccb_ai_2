@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
 import { Security } from "@/lib/security";
+import { imageSize } from "image-size";
 
 
 export async function POST(req: NextRequest) {
@@ -12,13 +13,22 @@ export async function POST(req: NextRequest) {
     const file = form.get("file") as File;
     const email = form.get("email") as string;
 
-    const filename = file.name;
-
     const cleanEmail = email.trim().toLowerCase();
 
     if (!file) return NextResponse.json({ success: false, error: "Image Not Detected" }, { status: 404 });
 
     if (!cleanEmail) return NextResponse.json({ success: false, error: "Email not found" }, { status: 404 });
+
+    const filename = file.name;
+    const fileBuffer = Buffer.from(await file.arrayBuffer());
+    const { width, height } = imageSize(fileBuffer);
+
+    if (!width || !height || width < 256 || height < 256) {
+        return NextResponse.json(
+            { success: false, error: "Image must be at least 256x256 pixels" },
+            { status: 400 }
+        );
+    }
 
     const bucketName = "profile_pics";
     const filePath = `uploads/${cleanEmail}_${file.name}`;
