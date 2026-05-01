@@ -18,23 +18,17 @@ export async function POST(req: NextRequest) {
     .eq("email", email)
     .limit(1);
 
-    const { data: profile_links, error: profile_links_error } = await supabaseServer
-    .from("profile_pic")
-    .select("file_link")
-    .eq("email", email)
-    .limit(1);
-
-    if (error || profile_links_error) {
+    if (error) {
         console.error("Supabase Query Error: ", error);
         return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
     }
 
-    const final_data = {data, profile_links};
+    const final_data = {data};
 
     const token = jwt.sign(
         { final_data },
         process.env.JWT_SECRET || "",
-        { expiresIn: "120h" }
+        { expiresIn: "30d" }
     );
 
     const cookieStore = await cookies();
@@ -45,7 +39,7 @@ export async function POST(req: NextRequest) {
         secure: true,
         sameSite: "strict",
         path: "/",
-        maxAge: 86400,
+        maxAge: 60 * 60 * 24 * 30,
     });
 
     console.log(" ==> User is Successfully Log In");

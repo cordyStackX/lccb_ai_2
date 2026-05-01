@@ -6,7 +6,7 @@
     transition: all 800ms ease;
     overflow: hidden;
     opacity: 0;
-    border-right: 1px solid var(--foreground);
+    border-right: 1px solid var(--default-color-gray);
     color: var(--foreground);
 }
 .open {
@@ -39,9 +39,15 @@
     text-align: center;
     font-size: 0.9rem;
     margin: 5rem 0 0 0;
+    position: relative;
 }
 .options button:active {
     opacity: 0.5;
+}
+.options_svg {
+    position: absolute;
+    left: 50px;
+    bottom: 25%;
 }
 .search_pdf {
     width: 100%;
@@ -93,6 +99,9 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 0.3rem;
+    border-radius: 8px;
+    margin: 5px 0;
 }
 .pdf_icon {
     margin: 0 0.5rem;

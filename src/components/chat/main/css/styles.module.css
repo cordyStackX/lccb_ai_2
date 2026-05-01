@@ -9,10 +9,6 @@
     align-items: center;
     flex-flow: column;
 }
-.container h1 {
-    text-align: center;
-    padding: 1rem;
-}
 .chat {
     width: 100%;
     height: 75vh;
@@ -108,20 +104,6 @@
     display: flex;
 }
 
-.ask {
-    width: min(900px, 90dvw);
-    height: auto;
-    overflow: hidden;
-    border-radius: 5px;
-    padding: 0.3rem 1.2rem;
-    margin: 1.3rem 1rem;
-    background: var(--default-color-white-2);
-    box-shadow: 0 0 2px 1px var(--foreground);
-    bottom: 0;
-    display: flex;
-    justify-content: flex-start;
-    position: relative;
-}
 .plushie_talk {
     justify-content: flex-start;
     align-items: flex-start;
@@ -143,8 +125,23 @@
     bottom: 0;
     position: absolute;
 }
+
+.ask {
+    width: min(900px, 90dvw);
+    height: auto;
+    overflow: hidden;
+    border-radius: 5px;
+    padding: 0.5rem 2rem 0.5rem 2rem;
+    margin: 2rem 1rem;
+    background: var(--default-color-white-2);
+    box-shadow: 0 0 2px 1px var(--default-color-gray);
+    bottom: 0;
+    display: flex;
+    justify-content: flex-start;
+    position: relative;
+}
 .expandableInput {
-    width: 90%;
+    width: 95%;
     min-height: 50px;
     max-height: 150px;
     padding: 1rem 0 0 1rem;
@@ -152,8 +149,8 @@
     outline: none;
     background: transparent;
     resize: none;
-    font-size: 16px;
-    overflow-y: hidden;
+    font-size: clamp(0.4rem, 0.5rem + 1vw, 1rem);
+    overflow-y: auto;
     text-align: start;
     font-weight: bold;
     color: var(--foreground);
@@ -161,6 +158,7 @@
     justify-content: center;
     align-items: center;
 }
+
 .ask button {
     padding: 0.5rem;
     border-radius: 8px;
@@ -172,7 +170,7 @@
     position: absolute;
     transition: all 500ms ease;
     right: 15px;
-    bottom: 10px;
+    bottom: 12px;
 }
 .ask button:hover {
     box-shadow: 0 0 5px 1px var(--foreground);   
@@ -193,6 +191,12 @@
 }
 .ask span:active {
     transform: scale(0.5);
+}
+.message_icons {
+    position: absolute;
+    left: 12px;
+    bottom: 35%;
+    color: var(--default-color-gray);
 }
 .cursor {
     display: inline-block;
@@ -234,4 +238,44 @@
 
 .downloadBtn:active {
     transform: translateY(0);
+}
+
+.welcome_intro {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-flow: column;
+}
+.welcome_intro_svg1 {
+    background-color: var(--primary);
+    margin: 20px 0;
+}
+.welcome_intro h1 {
+    text-align: center;
+    margin: 1rem 0 0 0;
+    color: var(--primary);
+    font-size: clamp(1.5rem, 1rem + 1vw, 2rem);
+}
+.welcome_intro p {
+    font-size: clamp(0.9rem, 0.5rem + 1vw, 1.1rem);
+}
+.welcome_intro button {
+    position: relative;
+    padding: 0.8rem 1rem 0.8rem 3rem;
+    margin: 20px 0 0 0;
+    background-color: var(--primary);
+    border-radius: 8px;
+    box-shadow: 0 0 2px 1px var(--default-color-gray);
+    border: transparent;
+    cursor: pointer;
+    transition: all 1s ease;
+}
+.welcome_intro button:hover {
+    opacity: 0.7;
+}
+.welcome_intro_svg2 {
+    position: absolute;
+    left: 15px;
+    top: 22%;
+    color: var(--default-color-white);
 }

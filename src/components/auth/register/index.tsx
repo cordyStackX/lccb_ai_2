@@ -177,6 +177,7 @@ export default function SignUp() {
                             name="year"
                             value={form.year}
                             onChange={handleChange}
+                            style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
                             required
                             >
                                 <option value="">Select Year Level</option>
@@ -202,6 +203,7 @@ export default function SignUp() {
                             name="role"
                             value={form.role}
                             onChange={handleChange}
+                            style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
                             required
                             >
                                 <option value="">Select Your Role</option>

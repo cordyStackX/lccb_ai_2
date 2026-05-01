@@ -7,19 +7,21 @@ import { Fetch_to, React_Spinners, SweetAlert2, Fetch_toFile } from "@/utilities
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import Image from "next/image";
 
-interface SidebarsProps {
+type SidebarsProps = {
     isOpen: boolean;
     emailRes: string;
-    setCurrentPdf: (val: number | undefined) => void;}
+    setCurrentPdf: (val: number | undefined) => void;
+    globalRefresh: boolean;
+}
 
-interface PdfFile {
+type PdfFile = {
     id?: number;
     file_name?: string;
     file_size_mb?: string;
     file?: string;
 }
 
-export default function Sidebars({ isOpen, emailRes, setCurrentPdf }: SidebarsProps) {
+export default function Sidebars({ isOpen, emailRes, setCurrentPdf, globalRefresh }: SidebarsProps) {
     const [profile, setProfile] = useState(false);
     const [data, setData] = useState<PdfFile[]>([]);
     const [selectedPdfId, setSelectedPdfId] = useState<number | undefined>();
@@ -58,7 +60,7 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf }: SidebarsPr
         retrieve_pdf();
         
         setCurrentPdf(selectedPdfId);
-    }, [emailRes, refresh, selectedPdfId]);
+    }, [emailRes, refresh, selectedPdfId, globalRefresh]);
 
     // Filter PDFs based on search query
     const filteredPdfs = data.filter(pdf => 
@@ -161,7 +163,14 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf }: SidebarsPr
             </>
             <div className={`${styles.wrapper}`}>
                 <section className={styles.options}>
-                    <button onClick={UploadPdf} title="Upload your pdf" >Upload New PDF</button>
+                    <button onClick={UploadPdf} title="Upload your pdf" >
+                        <svg className={styles.options_svg} width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 16V4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                        <path d="M8 8L12 4L16 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M4 20H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                        </svg>
+                        Upload New PDF
+                    </button>
                     <input 
                         type="text" 
                         placeholder="Search PDF" 
@@ -180,7 +189,7 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf }: SidebarsPr
                                         <span
                                         key={index}
                                         onContextMenu={(e) => handleContextMenu(e, pdf.id, pdf.file)}
-                                        // style={{ border: pdf.id === selectedPdfId ? "2px solid #000" : "" }}
+                                        style={{ backgroundColor: pdf.id === selectedPdfId ? "var(--fx-color)" : ""}}
                                         >
                                             <Image
                                             src={image_src.pdf_icon}
@@ -196,7 +205,12 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf }: SidebarsPr
                                             >  {pdf.file_name} <br /> {pdf.file_size_mb} MB </button>
                                         <span
                                         style={{ display: pdf.id === selectedPdfId ? "block" : "none" }}
-                                        >⬤</span>
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                            fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M20 6L9 17l-5-5"/>
+                                            </svg>
+                                        </span>
                                         </span>
                                     
                                     ))
@@ -231,7 +245,7 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf }: SidebarsPr
                         position: "fixed",
                         top: contextMenu.y,
                         left: contextMenu.x,
-                        backgroundColor: "var(--background)",
+                        backgroundColor: "var(--default-color-white)",
                         border: "1px solid var(--foreground)",
                         borderRadius: "4px",
                         boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
@@ -247,7 +261,7 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf }: SidebarsPr
                             width: "100%",
                             padding: "8px 16px",
                             border: "none",
-                            background: "transparent",
+                            background: "var(--default-color-white)",
                             color: "var(--foreground)",
                             textAlign: "left",
                             cursor: "pointer",

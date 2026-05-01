@@ -118,6 +118,10 @@
     height: auto;
     margin: 15px 0;
 }
+.text_contain h1 {
+    color: var(--default-color-black);
+    font-size: clamp(1.5rem, 0.5rem + 2vw, 2rem);
+}
 .input_holder {
     width: 100%;
     position: relative;

@@ -49,6 +49,14 @@ export default function Create_Password() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
+
+        if (form.password !== form.c_password) {
+            setLoading(false);
+            setMessage("Password not match");
+            setStatus(true);
+            return;
+        }
+
         const response_code = await Fetch_to(api_link.checkcode, { email: form.email, key: "confirm_code" });
         if (!response_code.success) {
             setLoading(false); 
@@ -57,8 +65,17 @@ export default function Create_Password() {
         }
         const responds = await Fetch_to(api_link.signup.createAccount, form);
         if (responds.success) {
-            localStorage.clear();
-            router.push("/auth/signin");
+            const autosignin_response = await Fetch_to(api_link.signin, {email: form.email, password: form.password});
+
+            if (autosignin_response.success) {
+                localStorage.clear();
+                await Fetch_to(api_link.jwt.auth, { email: form.email });
+                router.push("/chat");
+            } else {
+                alert(responds.message);
+                router.push("/auth/signin");
+            }
+
         } else {
             setStatus(true);
             setLoading(false);
