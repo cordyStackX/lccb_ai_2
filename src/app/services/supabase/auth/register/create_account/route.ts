@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
         
         const cleanEmail = email.trim().toLowerCase();
 
-        const cleanAssign_by = "admin".trim().toLowerCase();
+        const cleanAssign_by = "admin";
 
         const response_code = await Fetch_to(api_link.checkcode, { email: email, key: "confirm_code" });
         if (!response_code.success) return NextResponse.json({ success: false, error: response_code.message }, { status: 405 });
