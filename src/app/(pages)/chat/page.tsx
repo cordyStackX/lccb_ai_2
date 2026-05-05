@@ -31,6 +31,13 @@ export default function ChatPage() {
             setName(result.f_name);
             setRole(result.role);
             setYear(result.year);
+            
+            if (result.status === "suspend") {
+                alert("Account SUSPENDED please contact admin");
+                router.push("/auth/signin");
+                return await Fetch_to(api_link.jwt.deauth);
+            }
+
         }
         check();
     }, []);

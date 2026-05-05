@@ -31,7 +31,8 @@ export async function POST(req: NextRequest) {
 
         const cleanAssign_by = "admin";
 
-        const response_code = await Fetch_to(api_link.checkcode, { email: email, key: "confirm_code" });
+        const checkCodeUrl = new URL(api_link.checkcode, req.nextUrl.origin).toString();
+        const response_code = await Fetch_to(checkCodeUrl, { email: email, key: "confirm_code" });
         if (!response_code.success) return NextResponse.json({ success: false, error: response_code.message }, { status: 405 });
 
         if (cleanEmail === cleanAssign_by) return NextResponse.json({ success: false, error: "Email you provided is in conflict"}, { status: 409 });

@@ -1,14 +1,17 @@
 
 .success {
     color: var(--default-color-green);
+    text-align: center;
 }
 
 .error {
     color: var(--default-color-red);
     font-size: clamp(0.8rem, 0.5rem + 1vw, 1.1rem);
+    text-align: center;
 }
 
 .neutral {
     color: var(--default-color-yellow);
     font-size: clamp(0.8rem, 0.5rem + 1vw, 1.1rem);
+    text-align: center;
 }

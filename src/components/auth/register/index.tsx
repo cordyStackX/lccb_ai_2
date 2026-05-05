@@ -193,12 +193,12 @@ export default function SignUp() {
                             <p className={status ?  "error" : "success"}>{message}</p>
                         )}
                         {ifTeaher ? (
-                            <p className="neutral">For Teacher{"'"}s you need to contact the admin to activate your account</p>
+                            <p className="neutral">For Security purposes Teacher{"'"}s, need to contact the admin to activate your account <br /> {process.env.NEXT_PUBLIC_GMAIL_USERNAME} </p>
                         ) : null}
                         <section className={`${styles.buttons} `}>
                             <button>Register</button>
                         </section>
-                        <p>Already have an Account? <Link href={"/auth/signin"} onClick={() => {Progress(true);}}>Sign In</Link></p>
+                        <p >Already have an Account? <Link href={"/auth/signin"} onClick={() => {Progress(true);}}>Sign In</Link></p>
                     </form>
                 )}
             </div>

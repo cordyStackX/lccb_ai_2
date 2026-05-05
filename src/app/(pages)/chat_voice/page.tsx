@@ -27,7 +27,11 @@ export default function Chat_voice() {
     //         setName(result.f_name);
     //         setRole(result.role);
     //         setYear(result.year);
-    //         if(result.year === "Kinder Garten" || result.year === "Elementary") return router.push("/chat_voice");
+    //         if (result.status === "Suspended") {
+                //     alert("Account SUSPENDED please contact admin");
+                //     router.push("/auth/signin");
+                //     return await Fetch_to(api_link.jwt.deauth);
+                // }
     //     }
     //     check();
     // }, []);
