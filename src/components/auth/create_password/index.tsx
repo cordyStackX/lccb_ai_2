@@ -50,19 +50,6 @@ export default function Create_Password() {
         e.preventDefault();
         setLoading(true);
 
-        if (form.password !== form.c_password) {
-            setLoading(false);
-            setMessage("Password not match");
-            setStatus(true);
-            return;
-        }
-
-        const response_code = await Fetch_to(api_link.checkcode, { email: form.email, key: "confirm_code" });
-        if (!response_code.success) {
-            setLoading(false); 
-            setMessage(response_code.message || "Somethings Went Wrong");
-            return;
-        }
         const responds = await Fetch_to(api_link.signup.createAccount, form);
         if (responds.success) {
             const autosignin_response = await Fetch_to(api_link.signin, {email: form.email, password: form.password});

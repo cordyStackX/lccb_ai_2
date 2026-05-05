@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
 
     const { email } = await req.json();
 
-    const cleanEmail = email.trim().toLowerCase();
+    const cleanEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
 
     if (!cleanEmail) return NextResponse.json({ success: false, error: "Email not found" }, { status: 404 });
 
@@ -28,14 +28,14 @@ export async function POST(req: NextRequest) {
     .select("file_name")
     .eq("email", cleanEmail);
 
-     if (profile_error) {
-        console.error("Supabase Query Error: ", error);
+      if (profile_error) {
+          console.error("Supabase Query Error: ", profile_error);
         return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
     }
 
     console.log(data);
 
-    if(data && profile) {
+    if (data && profile) {
 
         for (let i = 0; i < data.length; i++) {
             const path = data[i].file;
@@ -52,18 +52,20 @@ export async function POST(req: NextRequest) {
             console.log("Deleted:", path);
         }
 
-        const profile_pic_dir = `uploads/${email}_${profile[0].file_name}`;
+        if (profile.length > 0 && profile[0]?.file_name) {
+            const profile_pic_dir = `uploads/${cleanEmail}_${profile[0].file_name}`;
 
-        const { error: profile_Error } = await supabaseServer.storage
-            .from("profile_pics")
-            .remove([profile_pic_dir]);
+            const { error: profile_Error } = await supabaseServer.storage
+                .from("profile_pics")
+                .remove([profile_pic_dir]);
 
-        if (profile_Error) {
-            console.error("Supabase Storage Error:", profile_Error);
-            return NextResponse.json({ success: false, error: "Failed to delete file" }, { status: 500 });
+            if (profile_Error) {
+                console.error("Supabase Storage Error:", profile_Error);
+                return NextResponse.json({ success: false, error: "Failed to delete file" }, { status: 500 });
+            }
+
+            console.log("Deleted:", profile_pic_dir);
         }
-
-        console.log("Deleted:", profile_pic_dir);
 
         const { data: account, error: setError } = await supabaseServer
         .from("auth")
@@ -71,7 +73,7 @@ export async function POST(req: NextRequest) {
         .eq("email", cleanEmail);
 
         if (setError) {
-            console.error("Supabase Query Error: ", error);
+            console.error("Supabase Query Error: ", setError);
             return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
         }
 

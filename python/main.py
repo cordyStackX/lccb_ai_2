@@ -1,5 +1,5 @@
 import os
-from utils import app, download_file, generate_md, generate_md_chatbot, generate_md_summary
+from utils import app, download_file, generate_md, generate_md_chatbot, generate_md_summary, generate_voice_md
 
 # -----------------------------------------
 # ROUTE: Generate Markdown
@@ -20,6 +20,11 @@ def generate_md_chat_bot_route():
 @app.route("/generate_md_summary", methods=["POST"])
 def generate_md_summary_route():
     return generate_md_summary()
+
+
+@app.route("/generate-voice-md", methods=["POST"])
+def generate_voice_md_route():
+    return generate_voice_md()
 
 
 # -----------------------------------------

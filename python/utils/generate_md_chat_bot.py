@@ -11,6 +11,7 @@ def generate_md_chatbot():
         last_user_response = str(data.get("last_user_response", "")).strip()
         last_ai_response = str(data.get("last_ai_response", "")).strip()
         email = data.get("email")
+        f_name = data.get("f_name")
         # No pdf_id needed; use all summaries
 
         # Validate token
@@ -104,6 +105,7 @@ def generate_md_chatbot():
         systemRole = system_role.format(
             role=role,
             year=year,
+            name=f_name
         )
 
         # --- Call OpenAI with relevant context ---
