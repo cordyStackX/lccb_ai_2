@@ -3,7 +3,7 @@ import { Spin as Hamburger } from "hamburger-react";
 import { Dispatch, SetStateAction, useState } from "react";
 import Image from "next/image";
 import image_src from "@/config/images_links/assets.json";
-import { Fetch_to, SweetAlert2, Progress } from "@/utilities";
+import { Fetch_to, SweetAlert2 } from "@/utilities";
 import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
 import api_link from "@/config/conf/json_config/fetch_url.json";
@@ -90,15 +90,6 @@ export default function Header({ isOpen, setOpen, setShowProfile, name, email, p
                     <path d="M14 14l6-6 2 2-6 6-3 1 1-3z" stroke="currentColor" strokeWidth="2"/>
                     </svg>
                     My Profile
-                </button>
-                <button className={styles.voice_mode} title="Voice Mode" onClick={() => {router.push("chat_voice"); Progress(true);}}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="9" y="2" width="6" height="12" rx="3" stroke="currentColor" strokeWidth="2"/>
-                    <path d="M5 10C5 13.3137 7.68629 16 11 16H13C16.3137 16 19 13.3137 19 10" stroke="currentColor" strokeWidth="2"/>
-                    <line x1="12" y1="16" x2="12" y2="22" stroke="currentColor" strokeWidth="2"/>
-                    <line x1="8" y1="22" x2="16" y2="22" stroke="currentColor" strokeWidth="2"/>
-                    </svg>
-                    Voice Mode
                 </button>
                 <button className={styles.signout} title="Sign Out" onClick={handle_logout}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"

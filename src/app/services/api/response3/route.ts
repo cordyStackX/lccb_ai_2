@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
     try {
 
-        const response = await Fetch_to(`${apiUrl}generate-md`, {
+        const response = await Fetch_to(`${apiUrl}generate-voice-md`, {
             prompt: prompt,
             token: apikey,
             email: email,

@@ -1,7 +1,6 @@
 "use client";
 import styles from "./css/styles.module.css";
 import { useEffect, useState, useRef } from "react";
-import { Fetch_to } from "@/utilities";
 import Markdown from "react-markdown";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import { ThreeDots } from "react-loader-spinner";
@@ -19,8 +18,6 @@ export default function Chat_bot() {
         const [status, setStatus] = useState(false);
         const [loading, setLoading] = useState(false);
         const chatEndRef = useRef<HTMLDivElement>(null);
-        const [animatedText, setAnimatedText] = useState("");
-        const [isAnimating, setIsAnimating] = useState(false);
     
         useEffect(() => {
             if (chatEndRef.current) {
@@ -28,33 +25,6 @@ export default function Chat_bot() {
             }
         }, [messages]);
     
-        // Typewriter animation effect
-        useEffect(() => {
-            if (messages.length === 0) return;
-            
-            const lastMessage = messages[messages.length - 1];
-            if (!lastMessage.respond || loading) return;
-    
-            setIsAnimating(true);
-            setLoading(true);
-            setAnimatedText("");
-            
-            let currentIndex = 0;
-            const fullText = lastMessage.respond;
-            
-            const intervalId = setInterval(() => {
-                if (currentIndex < fullText.length) {
-                    setAnimatedText(fullText.substring(0, currentIndex + 1));
-                    currentIndex++;
-                } else {
-                    setIsAnimating(false);
-                    setLoading(false);
-                    clearInterval(intervalId);
-                }
-            }, 10); // Faster speed for better UX
-    
-            return () => clearInterval(intervalId);
-        }, [messages]);
     
         const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
             setChatres({ ...chatres, [e.target.name]: e.target.value });
@@ -80,23 +50,82 @@ export default function Chat_bot() {
                 ? messages[messages.length - 1].respond
                 : "";
     
-            const response = await Fetch_to(api_link.responses2, {
-                prompt,
-                last_user_response: lastUserResponse,
-                last_ai_response: lastAIResponse,
-            });
-    
-            setMessages((prev) => {
-                const updated = [...prev];
-                updated[updated.length - 1] = {
-                    ask: prompt,
-                    respond: response.success
-                        ? response.data.message.data.markdown
-                        : response.message,
-                };
-                return updated;
-            });
-            setLoading(false);
+            try {
+                const response = await fetch(api_link.responses2_stream, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        prompt,
+                        last_user_response: lastUserResponse,
+                        last_ai_response: lastAIResponse,
+                    }),
+                });
+
+                if (!response.ok || !response.body) {
+                    const errorData = await response.json().catch(() => null);
+                    throw new Error(errorData?.error || "Stream request failed");
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = "";
+
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const parts = buffer.split("\n\n");
+                    buffer = parts.pop() || "";
+
+                    for (const part of parts) {
+                        if (!part.startsWith("data:")) continue;
+                        const payloadText = part.replace(/^data:\s?/, "").trim();
+
+                        let payload: { text?: string; done?: boolean; error?: string } | null = null;
+                        try {
+                            payload = JSON.parse(payloadText);
+                        } catch {
+                            payload = null;
+                        }
+
+                        if (!payload) continue;
+
+                        if (payload.error) {
+                            throw new Error(payload.error);
+                        }
+
+                        if (payload.done) {
+                            break;
+                        }
+
+                        if (payload.text) {
+                            setMessages((prev) => {
+                                const updated = [...prev];
+                                const lastIndex = updated.length - 1;
+                                const lastItem = updated[lastIndex];
+                                updated[lastIndex] = {
+                                    ...lastItem,
+                                    respond: `${lastItem.respond}${payload?.text || ""}`,
+                                };
+                                return updated;
+                            });
+                        }
+                    }
+                }
+            } catch (error) {
+                const message = error instanceof Error ? error.message : "Streaming failed";
+                setMessages((prev) => {
+                    const updated = [...prev];
+                    updated[updated.length - 1] = {
+                        ask: prompt,
+                        respond: message,
+                    };
+                    return updated;
+                });
+            } finally {
+                setLoading(false);
+            }
         };
 
     return(
@@ -121,14 +150,7 @@ export default function Chat_bot() {
                                             height={50}
                                             />
                                             <div>
-                                                {index === messages.length - 1 && isAnimating ? (
-                                                    <pre className={styles.plainText}>
-                                                        {animatedText}
-                                                        <span className={styles.cursor}>▋</span>
-                                                    </pre>
-                                                ) : (
-                                                    <Markdown>{msg.respond}</Markdown>
-                                                )}
+                                                <Markdown>{msg.respond}</Markdown>
                                             </div>
                                         </div>
                                     ) : index === messages.length - 1 && loading ? (

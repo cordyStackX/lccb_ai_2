@@ -7,7 +7,7 @@ import {
 } from "@/components/chat";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Fetch_to } from "@/utilities";
+import { Fetch_to, useConfirmExit } from "@/utilities";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 
 export default function ChatPage() {
@@ -41,6 +41,10 @@ export default function ChatPage() {
         }
         check();
     }, []);
+
+    useConfirmExit({
+        onConfirm: () => router.back()
+    });
 
     useEffect(() => {
         async function check() {

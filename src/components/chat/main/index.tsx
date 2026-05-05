@@ -3,7 +3,8 @@ import styles from "./css/styles.module.css";
 import { Dispatch, SetStateAction, useEffect, useState, useRef } from "react";
 import Markdown from "react-markdown";
 import { ThreeDots } from "react-loader-spinner";
-import { Fetch_to, DownloadAsPDF, SweetAlert2, Fetch_toFile } from "@/utilities";
+import { DownloadAsPDF, SweetAlert2, Fetch_toFile, useSpeechToText } from "@/utilities";
+import { handleChatSubmit } from "@/modules";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import Image from "next/image";
 import image_src from "@/config/images_links/assets.json";
@@ -28,10 +29,13 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
     const [email, setEmail] = useState("");
     const [pdf_id, setPdf_id] = useState<number | undefined>();
     const chatEndRef = useRef<HTMLDivElement>(null);
-    const [animatedText, setAnimatedText] = useState("");
-    const [isAnimating, setIsAnimating] = useState(false);
+    const canSend = chatres.ask.trim().length > 0;
+    const [streamFadeMs, setStreamFadeMs] = useState(180);
+    const [streamTick, setStreamTick] = useState(0);
+    const lastChunkAtRef = useRef<number | null>(null);
     const fileRef = useRef<HTMLInputElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const { isSupported, isListening, transcript, start, stop } = useSpeechToText();
 
     useEffect(() => {
         if (chatEndRef.current) {
@@ -50,36 +54,14 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
         textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }, [chatres.ask]);
 
-    // Typewriter animation effect
     useEffect(() => {
-        if (messages.length === 0) return;
-        
-        const lastMessage = messages[messages.length - 1];
-        if (!lastMessage.respond || loading) return;
-
-        setIsAnimating(true);
-        setLoading(true);
-        setAnimatedText("");
-        
-        let currentIndex = 0;
-        const fullText = lastMessage.respond;
-        
-        const intervalId = setInterval(() => {
-            if (currentIndex < fullText.length) {
-                setAnimatedText(fullText.substring(0, currentIndex + 1));
-                currentIndex++;
-            } else {
-                setIsAnimating(false);
-                setLoading(false);
-                clearInterval(intervalId);
-            }
-        }, 10); // Faster speed for better UX
-
-        return () => clearInterval(intervalId);
-    }, [messages]);
+        if (!transcript) return;
+        setChatres((prev) => ({ ...prev, ask: transcript }));
+    }, [transcript]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setChatres({ ...chatres, [e.target.name]: e.target.value });
+        const value = e.target.value;
+        setChatres({ ...chatres, [e.target.name]: value });
     };
 
     const UploadPdf = () => {
@@ -120,48 +102,25 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
     };
 
     const handleSubmit = async (e?: React.FormEvent<HTMLFormElement>) => {
-        e?.preventDefault();
-        if (!chatres.ask.trim()) return;
-
-        setStatus(true);
-        setLoading(true);
-
-        const userMessage = { ask: chatres.ask, respond: "" }; 
-        setMessages((prev) => [...prev, userMessage]);
-
-        const prompt = chatres.ask; 
-        setChatres({ ask: "", respond2: "" });
-        if (textareaRef.current) {
-            textareaRef.current.style.height = "auto";
-        }
-
-        const lastUserResponse = messages.length > 0
-            ? messages[messages.length - 1].ask
-            : "";
-        const lastAIResponse = messages.length > 0
-            ? messages[messages.length - 1].respond
-            : "";
-
-        const response = await Fetch_to(api_link.responses, {
-            prompt: prompt,
-            email: email,
-            pdf_id: pdf_id,
-            f_name: f_name,
-            last_user_response: lastUserResponse,
-            last_ai_response: lastAIResponse,
+        await handleChatSubmit({
+            event: e,
+            chatInput: chatres.ask,
+            setChatres,
+            setStatus,
+            setLoading,
+            setMessages,
+            setStreamFadeMs,
+            setStreamTick,
+            lastChunkAtRef,
+            textareaRef,
+            apiUrl: api_link.responses_stream,
+            payloadBase: {
+                email,
+                pdf_id,
+                f_name,
+            },
+            messages,
         });
-
-        setMessages((prev) => {
-            const updated = [...prev];
-            updated[updated.length - 1] = {
-                ask: prompt,
-                respond: response.success
-                    ? response.data.message.data.markdown
-                    : response.message,
-            };
-            return updated;
-        });
-        setLoading(false);
     };
 
     
@@ -189,15 +148,14 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
                                             className={styles.plushie_talk_img}
                                             />
                                             <div>
-                                                {index === messages.length - 1 && isAnimating ? (
-                                                    <pre className={styles.plainText}>
-                                                        {animatedText}
-                                                        <span className={styles.cursor}>▋</span>
-                                                    </pre>
-                                                ) : (
+                                                <div
+                                                    key={index === messages.length - 1 ? `stream-${streamTick}` : `static-${index}`}
+                                                    className={index === messages.length - 1 && loading ? styles.streamFade : undefined}
+                                                    style={index === messages.length - 1 && loading ? { animationDuration: `${streamFadeMs}ms` } : undefined}
+                                                >
                                                     <Markdown>{msg.respond}</Markdown>
-                                                )}
-                                                {!(index === messages.length - 1 && isAnimating) && (
+                                                </div>
+                                                {!(index === messages.length - 1 && loading) && (
                                                     <button 
                                                         onClick={() => DownloadAsPDF(msg.respond, index)}
                                                         className={styles.downloadBtn}
@@ -304,12 +262,35 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
                 autoComplete="off"
                 spellCheck={false}
                 />
-                <button disabled={loading} title="Send your message" style={{ opacity: `${loading ? "0.5" : "1" }` }}>
+                
+                <button
+                    type="submit"
+                    disabled={!canSend || loading}
+                    title="Send your message"
+                    style={{ opacity: `${!canSend || loading ? "0.5" : "1" }` }}
+                >
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M12 19V5" />
                         <path d="M5 12l7-7 7 7" />
                     </svg>
                 </button>
+                {!canSend && (
+                    <button
+                        className={styles.micButton}
+                        type="button"
+                        title={isSupported ? (isListening ? "Stop voice input" : "Start voice input") : "Speech input not supported"}
+                        disabled={!isSupported}
+                        onClick={() => (isListening ? stop() : start())}
+                        style={{ opacity: isSupported ? "1" : "0.5" }}
+                    >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="9" y="2" width="6" height="12" rx="3" stroke="currentColor" strokeWidth="2"/>
+                            <path d="M5 10C5 13.3137 7.68629 16 11 16H13C16.3137 16 19 13.3137 19 10" stroke="currentColor" strokeWidth="2"/>
+                            <line x1="12" y1="16" x2="12" y2="22" stroke="currentColor" strokeWidth="2"/>
+                            <line x1="8" y1="22" x2="16" y2="22" stroke="currentColor" strokeWidth="2"/>
+                        </svg>
+                    </button>
+                )}
             </form>
         </section>
     );
