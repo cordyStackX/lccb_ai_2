@@ -31,8 +31,6 @@ export default function ChatPage() {
             setName(result.f_name);
             setRole(result.role);
             setYear(result.year);
-            if (result.role === "Teacher") return;
-            if(result.year === "Kinder Garten" || result.year === "Elementary") return router.push("/chat_voice");
         }
         check();
     }, []);
