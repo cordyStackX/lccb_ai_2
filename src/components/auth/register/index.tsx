@@ -38,7 +38,6 @@ export default function SignUp() {
         }
         Progress(false);
         if (form.role == "Teacher") {
-            setIfMinors(false);
             setIfTeacher(true);
         } else {
             setIfTeacher(false);
