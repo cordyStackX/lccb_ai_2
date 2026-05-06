@@ -93,7 +93,7 @@ Which chunks (by number) are most relevant to answer this question?
 Respond with ONLY comma-separated numbers (e.g., \"1,3,4\"). If all chunks seem relevant, say \"ALL\"."""
 
         relevance_response = client.chat.completions.create(
-            model="gpt-4.1-mini",
+            model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "You are a document analyst. Identify relevant document sections."},
                 {"role": "user", "content": relevance_prompt},
@@ -146,13 +146,13 @@ Respond with ONLY comma-separated numbers (e.g., \"1,3,4\"). If all chunks seem 
 
         # --- Call OpenAI with relevant context ---
         response = client.chat.completions.create(
-            model="gpt-4o-2024-05-13",
+            model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": systemRole},
                 {"role": "user", "content": final_prompt},
             ],
             temperature=0.7,
-            max_tokens=2000,
+            max_tokens=1000,
         )
 
         md = response.choices[0].message.content or ""

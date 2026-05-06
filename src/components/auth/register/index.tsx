@@ -23,24 +23,21 @@ export default function SignUp() {
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
-    const [ifMinors, setIfMinors] = useState(false);
+    const [ifMinors, setIfMinors] = useState(true);
     const [ifTeaher, setIfTeacher] = useState(false);
 
     usePreventExit(isDirty);
 
     useEffect(() => {
-        if (form.role == "Student" && form.year == "Kinder Garten" ) {
-            setIfMinors(true);
-        } else if (form.role == "Student" && form.year == "Elementary") {
-            setIfMinors(true);
-        } else if (form.role == "Student" && form.year == "High School") {
-            setIfMinors(true);
-        } else {
+        if (form.year == "Kinder Garten" ) {
             setIfMinors(false);
+        } else if (form.year == "Elementary") {
+            setIfMinors(false);
+        } else {
+            setIfMinors(true);
         }
         Progress(false);
         if (form.role == "Teacher") {
-            setIfMinors(false);
             setIfTeacher(true);
         } else {
             setIfTeacher(false);
@@ -143,27 +140,6 @@ export default function SignUp() {
                             />
                         </div>
                         
-                        {ifMinors ? (
-                            <div className={styles.input_holder}>
-                                <span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <rect x="3" y="5" width="18" height="14" rx="2"/>
-                                    <path d="M3 7l9 6 9-6"/>
-                                    </svg>
-                                </span>
-                                <input 
-                                type="text" 
-                                name="assign_by" 
-                                id="assign_by" 
-                                autoComplete="assign_by"
-                                value={form.assign_by}
-                                onChange={handleChange}
-                                placeholder="Enter Your Teacher Email"
-                                style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
-                                required
-                                />
-                            </div>
-                        ) : null}
                         <div className={styles.input_holder}>
                             <span>
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -207,23 +183,22 @@ export default function SignUp() {
                             required
                             >
                                 <option value="">Select Your Role</option>
-                                <option value="Student">Student</option>
+                                {ifMinors ? (
+                                    <option value="Student">Student</option>
+                                ) : null}
                                 <option value="Teacher">Teacher</option>
                             </select>
                         </div>
                         {message && (
                             <p className={status ?  "error" : "success"}>{message}</p>
                         )}
-                        {ifMinors ? (
-                            <p className="neutral">For Year of Kinder, Elementary, and High School you need to ask your Teacher Advisors Email</p>
-                        ) : null}
                         {ifTeaher ? (
-                            <p className="neutral">For Teacher{"'"}s you need to contact the admin to activate your account</p>
+                            <p className="neutral">For Security purposes Teacher{"'"}s, need to contact the admin to activate your account <br /> {process.env.NEXT_PUBLIC_GMAIL_USERNAME} </p>
                         ) : null}
                         <section className={`${styles.buttons} `}>
                             <button>Register</button>
                         </section>
-                        <p>Already have an Account? <Link href={"/auth/signin"} onClick={() => {Progress(true);}}>Sign In</Link></p>
+                        <p >Already have an Account? <Link href={"/auth/signin"} onClick={() => {Progress(true);}}>Sign In</Link></p>
                     </form>
                 )}
             </div>

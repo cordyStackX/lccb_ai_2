@@ -4,12 +4,16 @@ import { supabaseServer } from "@/lib/supabase-server";
 export async function POST(req: NextRequest) {
     
     try {
-        const { page = 1, limit = 30, search = "" } = await req.json().catch(() => ({ page: 1, limit: 30, search: "" }));
+        const { page = 1, limit = 30, search = "", year = "", role = "" } = await req
+            .json()
+            .catch(() => ({ page: 1, limit: 30, search: "", year: "", role: "" }));
         const currentPage = Math.max(1, Number(page) || 1);
         const pageSize = Math.min(100, Math.max(1, Number(limit) || 30));
         const rangeFrom = (currentPage - 1) * pageSize;
         const rangeTo = rangeFrom + pageSize - 1;
         const term = String(search || "").trim();
+        const yearFilter = String(year || "").trim();
+        const roleFilter = String(role || "").trim();
 
         let query = supabaseServer
             .from("auth")
@@ -21,6 +25,14 @@ export async function POST(req: NextRequest) {
             query = query.or(
                 `f_name.ilike.%${safeTerm}%,email.ilike.%${safeTerm}%,year.ilike.%${safeTerm}%,status.ilike.%${safeTerm}%,role.ilike.%${safeTerm}%`
             );
+        }
+
+        if (yearFilter) {
+            query = query.eq("year", yearFilter);
+        }
+
+        if (roleFilter) {
+            query = query.eq("role", roleFilter);
         }
 
         const { data, count, error } = await query.range(rangeFrom, rangeTo);

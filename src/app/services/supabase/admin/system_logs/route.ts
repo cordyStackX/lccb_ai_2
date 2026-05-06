@@ -26,7 +26,6 @@ export async function POST(req: NextRequest) {
         .from("system_logs")
         .select("*");
 
-    console.log(data);
     if (error) {
         console.error("Supabase Query Error: ", error);
         return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });

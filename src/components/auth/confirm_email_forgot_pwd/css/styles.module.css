@@ -90,6 +90,7 @@
     margin: 10px;
     border: transparent;
     font-size: 1rem;
+    border-radius: 15px;
     cursor: pointer;
     color: var(--default-color-white);
 }

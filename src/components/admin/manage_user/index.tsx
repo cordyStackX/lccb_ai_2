@@ -1,6 +1,6 @@
 "use client";
 import styles from "./css/styles.module.css";
-import { Fetch_to, SweetAlert2 } from "@/utilities";
+import { Fetch_to, SweetAlert2, React_Spinners } from "@/utilities";
 import { useEffect, useState } from "react";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import Swal from "sweetalert2";
@@ -31,18 +31,25 @@ export default function ManageUser() {
     const [system_logs, setSystem_logs] = useState<System_logs[]>([]);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [yearFilter, setYearFilter] = useState("");
+    const [roleFilter, setRoleFilter] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         const RetrieveUserData = async () => {
+            setIsLoading(true);
             const response = await Fetch_to(api_link.admin.retrieve_user, {
                 page,
                 limit: PAGE_SIZE,
                 search,
+                year: yearFilter,
+                role: roleFilter,
             });
             if (response.success) {
                 setData(response.data.message);
                 setTotalPages(response.data.totalPages ?? 1);
             }
+            setIsLoading(false);
         };
         RetrieveUserData();
          const RetrieveUserDataLogs = async () => {
@@ -53,7 +60,7 @@ export default function ManageUser() {
             setRefresh(false);
         };
         RetrieveUserDataLogs();
-    }, [refresh, page, search]);
+    }, [refresh, page, search, yearFilter, roleFilter]);
 
     const getApiCount = (email?: string) => {
         if (!email) return 0;
@@ -100,6 +107,31 @@ export default function ManageUser() {
                     setPage(1);
                 }}
                 />
+                <select
+                value={yearFilter}
+                onChange={(e) => {
+                    setYearFilter(e.target.value);
+                    setPage(1);
+                }}
+                >
+                    <option value="">All Years</option>
+                    <option value="Kinder Garten">Kinder Garten</option>
+                    <option value="Elementary">Elementary</option>
+                    <option value="High School">High School</option>
+                    <option value="Senior High School">Senior High School</option>
+                    <option value="College">College</option>
+                </select>
+                <select
+                value={roleFilter}
+                onChange={(e) => {
+                    setRoleFilter(e.target.value);
+                    setPage(1);
+                }}
+                >
+                    <option value="">All Roles</option>
+                    <option value="Student">Student</option>
+                    <option value="Teacher">Teacher</option>
+                </select>
                 <button disabled={refresh} style={{ color: refresh ? 'var(--default-color-gray)' : '' }} onClick={() => {setRefresh(!refresh);}}>Refresh</button>
             </section>
             <table className={styles.tables}>
@@ -116,7 +148,13 @@ export default function ManageUser() {
                     </tr>
                 </thead>
                 <tbody>
-                    {data && data.length > 0 ? (
+                    {isLoading ? (
+                        <tr>
+                            <td colSpan={8} style={{ textAlign: "center" }}>
+                                <React_Spinners status="Loading users..." />
+                            </td>
+                        </tr>
+                    ) : data && data.length > 0 ? (
                         data.map((data, index) => (
                             <tr key={index}>
                                 <td> {data.f_name} </td>

@@ -1,7 +1,7 @@
 "use client";
 import styles from "./css/styles.module.css";
 import { useEffect, useRef, useState } from "react";
-import { SweetAlert2, Fetch_toFile, Fetch_to } from "@/utilities";
+import { SweetAlert2, Fetch_toFile, Fetch_to, React_Spinners } from "@/utilities";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import Swal from "sweetalert2";
 import Markdown from "react-markdown";
@@ -24,6 +24,7 @@ export default function Chat_bot() {
     const [search, setSearch] = useState("");
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [isLoading, setIsLoading] = useState(false);
 
     const UploadPdf = () => {
         fileRef.current?.click();
@@ -31,6 +32,7 @@ export default function Chat_bot() {
 
     useEffect(() => {
         const retrieve_pdf = async () => {
+            setIsLoading(true);
             const response = await Fetch_to(api_link.storage.retrieve_chatbot, {
                 email: "admin@admin.com",
                 page,
@@ -42,6 +44,7 @@ export default function Chat_bot() {
                 setData(response.data.message);
                 setTotalPages(response.data.totalPages ?? 1);
             }
+            setIsLoading(false);
             setRefresh(false);
         };
         retrieve_pdf();
@@ -161,7 +164,13 @@ export default function Chat_bot() {
                             </tr>
                         </thead>
                         <tbody>
-                            {data && data.length > 0 ? (
+                            {isLoading ? (
+                                <tr>
+                                    <td colSpan={3} style={{ textAlign: "center" }}>
+                                        <React_Spinners status="Loading documents..." />
+                                    </td>
+                                </tr>
+                            ) : data && data.length > 0 ? (
                                 data.map((pdf, index) => (
                                     <tr key={index}>
                                         <td className={styles.file_name} > {pdf.file_name} </td>

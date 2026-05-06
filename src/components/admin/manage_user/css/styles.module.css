@@ -40,7 +40,7 @@
     text-align: center;
 }
 .search {
-    width: 30%;
+    width: 50%;
     padding: 1rem;
     display: flex;
     justify-content: center;
@@ -56,6 +56,17 @@
     color: var(--default-color-black);
     font-size: 1rem;
     border-radius: 8px;
+}
+.search select {
+    margin: 0 15px;
+    background: transparent;
+    border: 2px solid var(--default-color-gray);
+    outline: none;
+    color: var(--default-color-black);
+    font-size: 1rem;
+    border-radius: 8px;
+    padding: 0 10px;
+    cursor: pointer;
 }
 .search button {
     cursor: pointer;

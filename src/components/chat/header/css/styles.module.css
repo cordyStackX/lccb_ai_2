@@ -114,6 +114,26 @@
     left: 0;
     top: 25%;
 }
+.voice_mode {
+    width: 100%;
+    padding: 1rem 2rem;
+    text-align: left;
+    border: transparent;
+    border-top: 1px solid var(--fx-color-button);
+    background: transparent;
+    color: var(--foreground);
+    cursor: pointer;
+    transition: all 0.5s ease;
+    position: relative;
+}
+.voice_mode:hover {
+    background-color: var(--fx-color);
+}
+.voice_mode svg {
+    position: absolute;
+    left: 0;
+    top: 25%;
+}
 .signout {
     width: 100%;
     padding: 1rem 2rem;

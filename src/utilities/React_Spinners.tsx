@@ -17,7 +17,7 @@ export default function React_Spinners({status} : StatusType) {
             wrapperStyle={{}}
             wrapperClass=""
             />
-            <h3 className="blinkTwice" >{status}</h3>
+            <h3 style={{ textAlign: "center" }} className="blinkTwice" >{status}</h3>
         </div>
     );
 }

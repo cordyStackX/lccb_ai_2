@@ -7,7 +7,7 @@ import {
 } from "@/components/chat";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Fetch_to } from "@/utilities";
+import { Fetch_to, useConfirmExit } from "@/utilities";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 
 export default function ChatPage() {
@@ -31,9 +31,20 @@ export default function ChatPage() {
             setName(result.f_name);
             setRole(result.role);
             setYear(result.year);
+            
+            if (result.status === "suspend") {
+                alert("Account SUSPENDED please contact admin");
+                router.push("/auth/signin");
+                return await Fetch_to(api_link.jwt.deauth);
+            }
+
         }
         check();
     }, []);
+
+    useConfirmExit({
+        onConfirm: () => router.back()
+    });
 
     useEffect(() => {
         async function check() {
