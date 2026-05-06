@@ -27,6 +27,7 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
     const [status, setStatus] = useState(false);
     const [loading, setLoading] = useState(false);
     const [fx_effects, setFx_effects] = useState(false);
+    const [fx_effects2, setFx_effects2] = useState(false);
     const [email, setEmail] = useState("");
     const [pdf_id, setPdf_id] = useState<number | undefined>();
     const chatEndRef = useRef<HTMLDivElement>(null);
@@ -237,17 +238,20 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
             audio.onended = () => {
                 stopAudioVisualization();
                 URL.revokeObjectURL(url);
+                setFx_effects2(false);
                 onComplete?.();
             };
             audio.onerror = () => {
                 stopAudioVisualization();
                 URL.revokeObjectURL(url);
+                setFx_effects2(false);
                 onComplete?.();
             };
             
             audio.onplay = () => {
                 startAudioVisualization(audio);
                 setVoiceStatus("");
+                setFx_effects2(false);
             };
             
             audio.onpause = () => {
@@ -291,6 +295,7 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
         setStatus(true);
         setLoading(true);
         setFx_effects(true);
+        setFx_effects2(true);
 
         setVoiceStatus("Recording your Voice");
 
@@ -382,6 +387,7 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
                     setVoiceStatus("Something Went Wrong");
 
                     setFx_effects(false);
+                    setFx_effects2(false);
 
                     setMessages((prev) => {
                         const updated = [...prev];
@@ -531,8 +537,8 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
                         src={image_src.lccb}
                         alt="logo"
                         title="logo"
-                        width={80}
-                        height={80}
+                        width={110}
+                        height={120}
                         />
                         <h1>Welcome to LACO AI</h1>
                         <svg className={styles.welcome_intro_svg1} width="40" height="3" xmlns="http://www.w3.org/2000/svg">
@@ -565,17 +571,27 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
                     
                )}
 
-            <section className={fx_effects ? styles.fx_effects : styles.fx_effects_close}>
-                <div style={{ 
-                    transform: `scale(${scale})`,
-                    transition: "transform 0.1s ease-out"
-                }} >
-                </div>
-                <h3 className="gradientTextAnimation" style={{
-                    position: "absolute",
-                    bottom: "15%"
-                 }}>{voiceStatus}</h3>
+            <section className={fx_effects2 ? styles.fx_effects : styles.fx_effects_close}>
+                
             </section>
+            
+            {fx_effects ? (
+            <div className={styles.laco_voice} style={{ 
+                transform: `scale(${scale})`,
+                transition: "transform 0.1s ease-out"
+            }} >
+            </div>
+            
+            ): null}
+            {fx_effects ? (
+                <h3 className="gradientTextAnimation" style={{
+                    position: "fixed",
+                    bottom: "15%"
+                }}>{voiceStatus}</h3>
+            ): null}
+            
+
+           
               
             <form className={`${styles.ask} `} onSubmit={handleSubmit} style={{ position: status ? "fixed" : "relative" }}>
                 <svg className={styles.message_icons} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"

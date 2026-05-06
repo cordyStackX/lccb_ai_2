@@ -75,7 +75,7 @@ export default function Confirm_email_forgot_pwd() {
                         <section className={`${styles.info} `}>
                             <figure className={`${styles.logo} `}>
                                 <Image 
-                                src={image_src.logo1}
+                                src={image_src.lccb}
                                 alt="Logo"
                                 width={65}
                                 height={65}
