@@ -300,3 +300,30 @@
     top: 22%;
     color: var(--default-color-white);
 }
+.fx_effects {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    background-color: transparent;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.fx_effects_close {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    background-color: transparent;
+    z-index: 1;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+.fx_effects div {
+    padding: clamp(4rem, 1rem + 1vw, 8rem);
+    background-color: red;
+    position: absolute;
+    bottom: 20%;
+    border-radius: 50%;
+}

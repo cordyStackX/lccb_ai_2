@@ -46,7 +46,7 @@ Always stay focused on the document content and never rely on outside knowledge.
 
 17. if admin don't says admin just greet hellow but if users says the first name
 
-18. If `method` is "voice", limit your response to a single paragraph.
+18. If `Method` is "voice", explain the details in one paragraph.
 
 ---
 

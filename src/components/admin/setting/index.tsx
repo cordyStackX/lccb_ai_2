@@ -3,7 +3,8 @@ import styles from "./css/styles.module.css";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import api_link from "@/config/conf/json_config/fetch_url.json";
-import { Fetch_to } from "@/utilities";
+import { Fetch_to, SweetAlert2 } from "@/utilities";
+import Swal from "sweetalert2";
 
 export default function Setting() {
     const router = useRouter();
@@ -14,14 +15,14 @@ export default function Setting() {
         // Fetch current suspension state
         const fetchSuspensionState = async () => {
             try {
-                const response = await fetch(api_link.admin.get_suspension_state, {
-                    method: "GET",
-                    headers: { "Content-Type": "application/json" },
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    setSuspensionState(data.state || "off");
+                
+                const response = await Fetch_to(api_link.admin.get_suspension_state);
+                
+                if (response.success) {
+                    setSuspensionState(response.data.message[0].state || "off");
+                    
                 }
+
             } catch (e) {
                 console.error("Failed to fetch suspension state:", e);
             } finally {
@@ -42,23 +43,24 @@ export default function Setting() {
     const handleSuspensionChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
         const newState = e.target.value;
         setSuspensionState(newState);
+
+        const alert2 = await SweetAlert2("Update?", `Are you sure want to ${newState} all Routes`, "warning", true, "Yes", true, "No");
+        if (!alert2.isConfirmed) return;
         
         try {
-            const response = await fetch(api_link.admin.set_suspension_state, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ state: newState }),
-            });
+            SweetAlert2("Updating", "Please wait..", "info", false, "", false, "", true);
+            const response = await Fetch_to(api_link.admin.set_suspension_state, { state: newState });
             
-            if (!response.ok) {
-                alert("Failed to update suspension state");
+            if (!response.success) {
+                Swal.close();
+                SweetAlert2("Error", `${response.message}`, "error", true, "Confirm", false, "", false);
                 setSuspensionState(suspensionState); // Revert on failure
             } else {
-                alert(`API connections ${newState === "suspend" ? "suspended" : "restored"}`);
+                Swal.close();
             }
         } catch (e) {
             console.error("Error updating suspension state:", e);
-            alert("Error updating suspension state");
+            SweetAlert2("Error", `${e}`, "error", true, "Confirm", false, "", false);
             setSuspensionState(suspensionState); // Revert on error
         }
     };
@@ -79,7 +81,7 @@ export default function Setting() {
                     <div className={`${styles.setting_set} display_flex_center`}>
                         <p>Suspend all API connections</p> 
                         <select value={suspensionState} onChange={handleSuspensionChange} disabled={loading}>
-                            <option value="off">off</option>
+                            <option value="open">open</option>
                             <option value="suspend">suspend</option>
                         </select>
                     </div>

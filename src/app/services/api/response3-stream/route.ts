@@ -3,7 +3,6 @@ import { Fetch_to } from "@/utilities";
 import api_links from "@/config/conf/json_config/Api_links.json";
 import { supabaseServer } from "@/lib/supabase-server";
 import { Security } from "@/lib/security";
-import setting from "@/config/global_config/setting.json";
 
 export async function POST(req: NextRequest) {
     const auth = await Security(req);
@@ -11,10 +10,21 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
+    const { data: stateRows, error: stateError } = await supabaseServer
+        .from("setting")
+        .select("state")
+        .eq("target", "suspend");
+
+    if (stateError) {
+        console.error("Supabase Query Error: ", stateError);
+        return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
+    }
+
     // Check if voice API is suspended
-    if (setting.suspend_voice_route === "suspend") {
+    const suspendedState = Array.isArray(stateRows) && stateRows.length > 0 ? stateRows[0]?.state : null;
+    if (suspendedState === "suspend") {
         return NextResponse.json(
-            { success: false, error: "Voice API is temporarily suspended for maintenance" },
+            { success: false, error: "🤖 Voice API is temporarily suspended for maintenance ⚠️" },
             { status: 503 }
         );
     }

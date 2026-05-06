@@ -1,11 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import api_links from "@/config/conf/json_config/Api_links.json";
 import { Security } from "@/lib/security";
+import { supabaseServer } from "@/lib/supabase-server";
 
 export async function POST(req: NextRequest) {
     const auth = await Security(req);
     if (auth?.error) {
         return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { data: stateRows, error: stateError } = await supabaseServer
+        .from("setting")
+        .select("state")
+        .eq("target", "suspend");
+
+    if (stateError) {
+        console.error("Supabase Query Error: ", stateError);
+        return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
+    }
+
+    // Check if voice API is suspended
+    const suspendedState = Array.isArray(stateRows) && stateRows.length > 0 ? stateRows[0]?.state : null;
+    if (suspendedState === "suspend") {
+        return NextResponse.json(
+            { success: false, error: "🤖 Voice API is temporarily suspended for maintenance ⚠️" },
+            { status: 503 }
+        );
     }
 
     const apikey = process.env.API_KEY;
