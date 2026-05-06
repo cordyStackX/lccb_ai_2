@@ -49,6 +49,7 @@ export async function POST(req: NextRequest) {
             pdf_id: pdf_id,
             last_user_response: last_user_response,
             last_ai_response: last_ai_response,
+            method: "text"
         }),
     });
 

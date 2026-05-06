@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Fetch_to } from "@/utilities";
 import api_links from "@/config/conf/json_config/Api_links.json";
 import { supabaseServer } from "@/lib/supabase-server";
+import { Security } from "@/lib/security";
 import setting from "@/config/global_config/setting.json";
 
 export async function POST(req: NextRequest) {
+    const auth = await Security(req);
+    if (auth?.error) {
+        return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
 
     // Check if voice API is suspended
     if (setting.suspend_voice_route === "suspend") {
@@ -13,30 +19,58 @@ export async function POST(req: NextRequest) {
         );
     }
 
-    const { prompt, last_user_response, last_ai_response } = await req.json();
-
     const apikey = process.env.API_KEY;
     if (!apikey) {
         return NextResponse.json({ success: false, error: "API is not Valid" }, { status: 401 });
     }
 
     const apiUrl = process.env.RENDER_API || api_links.python_links;
-    if (!prompt) {
-        return NextResponse.json({ success: false, error: "Prompt is required" }, { status: 401 });
+
+    const form = await req.formData();
+    const audio = form.get("audio");
+    const language = form.get("language");
+    const email = form.get("email");
+    const pdfId = form.get("pdf_id");
+    const fName = form.get("f_name");
+    const lastUserResponse = form.get("last_user_response");
+    const lastAiResponse = form.get("last_ai_response");
+
+    const download = await Fetch_to(`${apiUrl}download-file`, { token: apikey, pdf_id: pdfId });
+    
+    if (!download.success) {
+        return NextResponse.json({ success: false, error: "3rd party failed to read the data" }, { status: 409 });
     }
 
-    const email = "admin@admin.com";
+    if (!audio || !(audio instanceof File)) {
+        return NextResponse.json({ success: false, error: "Audio file is required" }, { status: 400 });
+    }
 
-    const upstream = await fetch(`${apiUrl}generate-md-chatbot-stream`, {
+    const upstreamForm = new FormData();
+    upstreamForm.append("audio", audio);
+    upstreamForm.append("token", apikey);
+    if (typeof language === "string" && language) {
+        upstreamForm.append("language", language);
+    }
+    if (typeof email === "string" && email) {
+        upstreamForm.append("email", email);
+    }
+    if (typeof pdfId === "string" && pdfId) {
+        upstreamForm.append("pdf_id", pdfId);
+    }
+    if (typeof fName === "string" && fName) {
+        upstreamForm.append("f_name", fName);
+    }
+    if (typeof lastUserResponse === "string" && lastUserResponse) {
+        upstreamForm.append("last_user_response", lastUserResponse);
+    }
+    if (typeof lastAiResponse === "string" && lastAiResponse) {
+        upstreamForm.append("last_ai_response", lastAiResponse);
+    }
+    
+
+    const upstream = await fetch(`${apiUrl}generate-voice-md-stream-pdf`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            prompt: prompt,
-            token: apikey,
-            email: email,
-            last_user_response: last_user_response,
-            last_ai_response: last_ai_response,
-        }),
+        body: upstreamForm,
     });
 
     if (!upstream.ok || !upstream.body) {
@@ -47,10 +81,12 @@ export async function POST(req: NextRequest) {
         );
     }
 
+    const emailFallback = "admin@admin.com";
+    const requestEmail = typeof email === "string" && email ? email : emailFallback;
     const { data: record, error: record_err } = await supabaseServer
         .from("system_logs")
         .select("api_request, created_at")
-        .eq("request", email)
+        .eq("request", requestEmail)
         .gte("created_at", new Date().toISOString().split("T")[0])
         .lt("created_at", new Date(Date.now() + 86400000).toISOString().split("T")[0])
         .maybeSingle();
@@ -65,7 +101,7 @@ export async function POST(req: NextRequest) {
         await supabaseServer
             .from("system_logs")
             .update({ api_request: record_add })
-            .eq("request", email);
+            .eq("request", requestEmail);
     }
 
     if (!record) {
@@ -73,7 +109,7 @@ export async function POST(req: NextRequest) {
             .from("system_logs")
             .insert([
                 {
-                    request: email,
+                    request: requestEmail,
                     api_request: 1,
                 },
             ]);

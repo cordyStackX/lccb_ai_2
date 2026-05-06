@@ -1,5 +1,5 @@
 import os
-from utils import app, download_file, generate_md, generate_md_stream, generate_md_chatbot, generate_md_chatbot_stream, generate_md_summary, generate_voice_md, generate_voice_md_stream
+from utils import app, download_file, generate_md, generate_md_stream, generate_md_chatbot, generate_md_chatbot_stream, generate_md_summary, generate_tts, generate_voice_md, generate_voice_md_stream, generate_voice_md_stream_pdf
 
 # -----------------------------------------
 # ROUTE: Generate Markdown
@@ -32,6 +32,11 @@ def generate_md_summary_route():
     return generate_md_summary()
 
 
+@app.route("/generate-tts", methods=["POST"])
+def generate_tts_route():
+    return generate_tts()
+
+
 @app.route("/generate-voice-md", methods=["POST"])
 def generate_voice_md_route():
     return generate_voice_md()
@@ -40,6 +45,11 @@ def generate_voice_md_route():
 @app.route("/generate-voice-md-stream", methods=["POST"])
 def generate_voice_md_stream_route():
     return generate_voice_md_stream()
+
+
+@app.route("/generate-voice-md-stream-pdf", methods=["POST"])
+def generate_voice_md_stream_pdf_route():
+    return generate_voice_md_stream_pdf()
 
 
 # -----------------------------------------

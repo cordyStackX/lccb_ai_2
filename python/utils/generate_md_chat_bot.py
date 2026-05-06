@@ -64,13 +64,13 @@ def _build_chatbot_context(data):
             )
 
             chunk_response = client.chat.completions.create(
-                model="gpt-4.1-mini",
+                model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": system_role},
                     {"role": "user", "content": chunk_prompt},
                 ],
                 temperature=0.4,
-                max_tokens=800,
+                max_tokens=500,
             )
             chunk_md = (chunk_response.choices[0].message.content or "").strip()
             if chunk_md:
@@ -100,6 +100,7 @@ def _build_chatbot_context(data):
         role=role,
         year=year,
         name=f_name,
+        method="text"
     )
 
     return {"final_prompt": final_prompt, "system_role": systemRole}, None
@@ -113,13 +114,13 @@ def generate_md_chatbot():
             return error
 
         response = client.chat.completions.create(
-            model="gpt-4o-2024-05-13",
+            model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": context["system_role"]},
                 {"role": "user", "content": context["final_prompt"]},
             ],
             temperature=0.7,
-            max_tokens=2000,
+            max_tokens=1000,
         )
 
         md = response.choices[0].message.content or ""
@@ -141,13 +142,13 @@ def generate_md_chatbot_stream():
         def event_stream():
             try:
                 stream = client.chat.completions.create(
-                    model="gpt-4o-2024-05-13",
+                    model="gpt-4o-mini",
                     messages=[
                         {"role": "system", "content": context["system_role"]},
                         {"role": "user", "content": context["final_prompt"]},
                     ],
                     temperature=0.7,
-                    max_tokens=2000,
+                    max_tokens=1000,
                     stream=True,
                 )
 

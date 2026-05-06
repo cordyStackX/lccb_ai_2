@@ -3,8 +3,8 @@ import styles from "./css/styles.module.css";
 import { Dispatch, SetStateAction, useEffect, useState, useRef } from "react";
 import Markdown from "react-markdown";
 import { ThreeDots } from "react-loader-spinner";
-import { DownloadAsPDF, SweetAlert2, Fetch_toFile, useSpeechToText } from "@/utilities";
-import { handleChatSubmit } from "@/modules";
+import { DownloadAsPDF, SweetAlert2, Fetch_toFile } from "@/utilities";
+import { handleChatSubmit, streamVoiceToText } from "@/modules";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import Image from "next/image";
 import image_src from "@/config/images_links/assets.json";
@@ -35,13 +35,31 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
     const lastChunkAtRef = useRef<number | null>(null);
     const fileRef = useRef<HTMLInputElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
-    const { isSupported, isListening, transcript, start, stop } = useSpeechToText();
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const audioChunksRef = useRef<Blob[]>([]);
+    const voiceMessageIndexRef = useRef<number | null>(null);
+    const voiceResponseRef = useRef("");
+    const recordingTimeoutRef = useRef<number | null>(null);
+    const voiceAutoPlayRef = useRef(false);
+    const ttsAudioRef = useRef<HTMLAudioElement | null>(null);
+    // const [ttsReplayUrl, setTtsReplayUrl] = useState<string | null>(null);
+    // const [ttsReplayIndex, setTtsReplayIndex] = useState<number | null>(null);
+    const [isRecording, setIsRecording] = useState(false);
+    const [isMediaSupported, setIsMediaSupported] = useState(false);
 
     useEffect(() => {
         if (chatEndRef.current) {
             chatEndRef.current.scrollIntoView();
         }
     }, [messages]);
+
+    useEffect(() => {
+        const supported = typeof window !== "undefined"
+            && typeof MediaRecorder !== "undefined"
+            && typeof navigator !== "undefined"
+            && Boolean(navigator.mediaDevices?.getUserMedia);
+        setIsMediaSupported(supported);
+    }, []);
 
     useEffect(() => {
         setEmail(emailRes);
@@ -54,10 +72,6 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
         textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }, [chatres.ask]);
 
-    useEffect(() => {
-        if (!transcript) return;
-        setChatres((prev) => ({ ...prev, ask: transcript }));
-    }, [transcript]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const value = e.target.value;
@@ -123,6 +137,211 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
         });
     };
 
+    const playTts = async (text: string) => {
+        const cleaned = text.trim();
+        if (!cleaned) return;
+
+        try {
+            const res = await fetch(api_link.tts, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    text: cleaned,
+                    voice: "alloy",
+                }),
+            });
+
+            if (!res.ok) return;
+
+            const buffer = await res.arrayBuffer();
+            const blob = new Blob([buffer], { type: "audio/mpeg" });
+            const url = URL.createObjectURL(blob);
+
+            if (ttsAudioRef.current) {
+                ttsAudioRef.current.pause();
+                URL.revokeObjectURL(ttsAudioRef.current.src);
+            }
+
+            const audio = new Audio(url);
+            ttsAudioRef.current = audio;
+            // setTtsReplayUrl(url);
+            // setTtsReplayIndex(voiceMessageIndexRef.current);
+
+            audio.onended = () => {
+                URL.revokeObjectURL(url);
+            };
+            audio.onerror = () => {
+                URL.revokeObjectURL(url);
+            };
+
+            await audio.play();
+        } catch {
+            return;
+        }
+    };
+
+    // const replayTts = () => {
+    //     if (!ttsReplayUrl) return;
+
+    //     if (ttsAudioRef.current) {
+    //         ttsAudioRef.current.pause();
+    //     }
+
+    //     const audio = new Audio(ttsReplayUrl);
+    //     ttsAudioRef.current = audio;
+    //     void audio.play();
+    // };
+
+    const startRecording = async () => {
+        if (!isMediaSupported) return;
+        if (!email || !pdf_id || !f_name) {
+            SweetAlert2(
+                "Missing context",
+                "Upload a PDF and make sure your account is loaded before using voice input.",
+                "warning",
+                true,
+                "OK",
+                false,
+                "",
+                false
+            );
+            return;
+        }
+
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const recorder = new MediaRecorder(stream);
+        audioChunksRef.current = [];
+        voiceResponseRef.current = "";
+        voiceAutoPlayRef.current = true;
+
+        recorder.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+                audioChunksRef.current.push(event.data);
+            }
+        };
+
+        recorder.onstop = () => {
+            if (recordingTimeoutRef.current) {
+                clearTimeout(recordingTimeoutRef.current);
+                recordingTimeoutRef.current = null;
+            }
+            stream.getTracks().forEach((track) => track.stop());
+            const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+            if (audioBlob.size === 0) return;
+
+            setStatus(true);
+            setLoading(true);
+            setChatres({ ask: "", respond2: "" });
+            if (textareaRef.current) {
+                textareaRef.current.style.height = "auto";
+            }
+
+            setMessages((prev) => {
+                const next = [...prev, { ask: "Transcribing audio...", respond: "" }];
+                voiceMessageIndexRef.current = next.length - 1;
+                return next;
+            });
+
+            const lastMessage = messages[messages.length - 1];
+            const lastUserResponse = lastMessage?.ask || "";
+            const lastAIResponse = lastMessage?.respond || "";
+
+            streamVoiceToText({
+                apiUrl: api_link.voice_stream,
+                audioBlob,
+                email,
+                pdfId: pdf_id,
+                fName: f_name,
+                lastUserResponse,
+                lastAiResponse: lastAIResponse,
+                onPrompt: (prompt) => {
+                    voiceResponseRef.current = "";
+                    setMessages((prev) => {
+                        const updated = [...prev];
+                        const index = voiceMessageIndexRef.current;
+                        if (index === null || index >= updated.length) {
+                            updated.push({ ask: `Transcription: ${prompt}`, respond: "" });
+                            voiceMessageIndexRef.current = updated.length - 1;
+                            return updated;
+                        }
+                        updated[index] = { ...updated[index], ask: `Transcription: ${prompt}` };
+                        return updated;
+                    });
+                },
+                onText: (text) => {
+                    voiceResponseRef.current += text;
+                    
+                    setMessages((prev) => {
+                        const updated = [...prev];
+                        const index = voiceMessageIndexRef.current;
+                        if (index === null || index >= updated.length) {
+                            voiceMessageIndexRef.current = updated.length - 1;
+                            return updated;
+                        }
+                        const current = updated[index];
+                        updated[index] = {
+                            ...current,
+                            respond: `${current.respond}${text}`,
+                        };
+                        return updated;
+                    });
+
+                },
+                onError: (message) => {
+                    setMessages((prev) => {
+                        const updated = [...prev];
+                        const index = voiceMessageIndexRef.current;
+                        if (index === null || index >= updated.length) {
+                            voiceMessageIndexRef.current = updated.length - 1;
+                            return updated;
+                        }
+                        updated[index] = {
+                            ...updated[index],
+                            respond: message,
+                        };
+                        return updated;
+                    });
+                    voiceMessageIndexRef.current = null;
+                },
+                onDone: () => {
+                    voiceMessageIndexRef.current = null;
+                    if (voiceAutoPlayRef.current) {
+                        void playTts(voiceResponseRef.current);
+                    }
+                    voiceAutoPlayRef.current = false;
+                    setLoading(false);
+                },
+            });
+        };
+
+        mediaRecorderRef.current = recorder;
+        recorder.start();
+        // auto-stop after 10 seconds
+        try {
+            recordingTimeoutRef.current = window.setTimeout(() => {
+                if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+                    mediaRecorderRef.current.stop();
+                    setIsRecording(false);
+                }
+            }, 10000);
+        } catch (e) {
+            console.log("Error: ", e);
+            // ignore in non-browser environments
+        }
+        setIsRecording(true);
+    };
+
+    const stopRecording = () => {
+        if (!mediaRecorderRef.current) return;
+        if (mediaRecorderRef.current.state === "inactive") return;
+        if (recordingTimeoutRef.current) {
+            clearTimeout(recordingTimeoutRef.current);
+            recordingTimeoutRef.current = null;
+        }
+        mediaRecorderRef.current.stop();
+        setIsRecording(false);
+    };
+
     
 
     return(
@@ -156,13 +375,24 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
                                                     <Markdown>{msg.respond}</Markdown>
                                                 </div>
                                                 {!(index === messages.length - 1 && loading) && (
-                                                    <button 
-                                                        onClick={() => DownloadAsPDF(msg.respond, index)}
-                                                        className={styles.downloadBtn}
-                                                        title="Download as PDF"
-                                                    >
-                                                        📥 Download PDF
-                                                    </button>
+                                                    <>
+                                                        <button 
+                                                            onClick={() => DownloadAsPDF(msg.respond, index)}
+                                                            className={styles.downloadBtn}
+                                                            title="Download as PDF"
+                                                        >
+                                                            📥 Download PDF
+                                                        </button>
+                                                        {/* {ttsReplayUrl && ttsReplayIndex === index && (
+                                                            <button
+                                                                onClick={replayTts}
+                                                                className={styles.downloadBtn}
+                                                                title="Replay audio"
+                                                            >
+                                                                Replay Audio
+                                                            </button>
+                                                        )} */}
+                                                    </>
                                                 )}
                                             </div>
 
@@ -278,10 +508,10 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
                     <button
                         className={styles.micButton}
                         type="button"
-                        title={isSupported ? (isListening ? "Stop voice input" : "Start voice input") : "Speech input not supported"}
-                        disabled={!isSupported}
-                        onClick={() => (isListening ? stop() : start())}
-                        style={{ opacity: isSupported ? "1" : "0.5" }}
+                        title={isRecording ? "Stop recording" : "Start recording"}
+                        disabled={!isMediaSupported}
+                        onClick={() => (isRecording ? stopRecording() : startRecording())}
+                        style={{ opacity: isMediaSupported ? "1" : "0.5" }}
                     >
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <rect x="9" y="2" width="6" height="12" rx="3" stroke="currentColor" strokeWidth="2"/>
