@@ -18,7 +18,7 @@ def generate_tts():
 
         # Use a smaller/faster TTS model and return WAV to avoid MP3 overhead
         # Trim very long text to reduce cost and latency
-        max_chars = 600
+        max_chars = 1200
         truncated = False
         if len(text) > max_chars:
             text = text[:max_chars]

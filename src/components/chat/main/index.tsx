@@ -26,12 +26,15 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
     });
     const [status, setStatus] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [fx_effects, setFx_effects] = useState(false);
+    const [fx_effects2, setFx_effects2] = useState(false);
     const [email, setEmail] = useState("");
     const [pdf_id, setPdf_id] = useState<number | undefined>();
     const chatEndRef = useRef<HTMLDivElement>(null);
     const canSend = chatres.ask.trim().length > 0;
     const [streamFadeMs, setStreamFadeMs] = useState(180);
     const [streamTick, setStreamTick] = useState(0);
+    const [voiceStatus, setVoiceStatus] = useState("");
     const lastChunkAtRef = useRef<number | null>(null);
     const fileRef = useRef<HTMLInputElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -46,6 +49,11 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
     // const [ttsReplayIndex, setTtsReplayIndex] = useState<number | null>(null);
     const [isRecording, setIsRecording] = useState(false);
     const [isMediaSupported, setIsMediaSupported] = useState(false);
+    const [scale, setScale] = useState(1);
+    const audioContextRef = useRef<AudioContext | null>(null);
+    const analyserRef = useRef<AnalyserNode | null>(null);
+    const dataArrayRef = useRef<Uint8Array | null>(null);
+    const animationFrameRef = useRef<number | null>(null);
 
     useEffect(() => {
         if (chatEndRef.current) {
@@ -71,6 +79,16 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
         textareaRef.current.style.height = "auto";
         textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }, [chatres.ask]);
+
+    useEffect(() => {
+        return () => {
+            // Cleanup on unmount
+            stopAudioVisualization();
+            if (audioContextRef.current) {
+                audioContextRef.current.close();
+            }
+        };
+    }, []);
 
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -137,9 +155,58 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
         });
     };
 
-    const playTts = async (text: string) => {
+    const startAudioVisualization = (audioElement: HTMLAudioElement) => {
+        if (!audioContextRef.current) {
+            const AudioContextConstructor = window.AudioContext || ((window as unknown) as Record<string, typeof AudioContext>).webkitAudioContext;
+            audioContextRef.current = new AudioContextConstructor();
+        }
+
+        const audioContext = audioContextRef.current;
+        
+        if (!analyserRef.current) {
+            analyserRef.current = audioContext.createAnalyser();
+            analyserRef.current.fftSize = 256;
+            const bufferLength = analyserRef.current.frequencyBinCount;
+            dataArrayRef.current = new Uint8Array(bufferLength);
+        }
+
+        const source = audioContext.createMediaElementSource(audioElement);
+        source.connect(analyserRef.current);
+        analyserRef.current.connect(audioContext.destination);
+
+        const analyzeAudio = () => {
+            if (!analyserRef.current || !dataArrayRef.current) return;
+
+            // @ts-expect-error - getByteFrequencyData accepts ArrayBufferLike from Uint8Array
+            analyserRef.current.getByteFrequencyData(dataArrayRef.current);
+            
+            // Calculate average frequency to get beat/amplitude
+            const average = dataArrayRef.current.reduce((a, b) => a + b) / dataArrayRef.current.length;
+            const normalizedAverage = Math.min(average / 256, 1); // Normalize to 0-1
+            const scaleValue = 1 + normalizedAverage * 0.5; // Scale from 1 to 1.5
+            
+            setScale(scaleValue);
+
+            animationFrameRef.current = requestAnimationFrame(analyzeAudio);
+        };
+
+        analyzeAudio();
+    };
+
+    const stopAudioVisualization = () => {
+        if (animationFrameRef.current) {
+            cancelAnimationFrame(animationFrameRef.current);
+            animationFrameRef.current = null;
+        }
+        setScale(1);
+    };
+
+    const playTts = async (text: string, onComplete?: () => void) => {
         const cleaned = text.trim();
-        if (!cleaned) return;
+        if (!cleaned) {
+            onComplete?.();
+            return;
+        }
 
         try {
             const res = await fetch(api_link.tts, {
@@ -151,7 +218,10 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
                 }),
             });
 
-            if (!res.ok) return;
+            if (!res.ok) {
+                onComplete?.();
+                return;
+            }
 
             const buffer = await res.arrayBuffer();
             const blob = new Blob([buffer], { type: "audio/mpeg" });
@@ -164,18 +234,33 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
 
             const audio = new Audio(url);
             ttsAudioRef.current = audio;
-            // setTtsReplayUrl(url);
-            // setTtsReplayIndex(voiceMessageIndexRef.current);
 
             audio.onended = () => {
+                stopAudioVisualization();
                 URL.revokeObjectURL(url);
+                setFx_effects2(false);
+                onComplete?.();
             };
             audio.onerror = () => {
+                stopAudioVisualization();
                 URL.revokeObjectURL(url);
+                setFx_effects2(false);
+                onComplete?.();
+            };
+            
+            audio.onplay = () => {
+                startAudioVisualization(audio);
+                setVoiceStatus("");
+                setFx_effects2(false);
+            };
+            
+            audio.onpause = () => {
+                stopAudioVisualization();
             };
 
             await audio.play();
         } catch {
+            onComplete?.();
             return;
         }
     };
@@ -193,7 +278,7 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
     // };
 
     const startRecording = async () => {
-        if (!isMediaSupported) return;
+        if (!isMediaSupported) return alert("Browser Media is not supported :(");
         if (!email || !pdf_id || !f_name) {
             SweetAlert2(
                 "Missing context",
@@ -207,6 +292,12 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
             );
             return;
         }
+        setStatus(true);
+        setLoading(true);
+        setFx_effects(true);
+        setFx_effects2(true);
+
+        setVoiceStatus("Recording your Voice");
 
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         const recorder = new MediaRecorder(stream);
@@ -246,6 +337,8 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
             const lastUserResponse = lastMessage?.ask || "";
             const lastAIResponse = lastMessage?.respond || "";
 
+            setVoiceStatus("Transcribing Response");
+
             streamVoiceToText({
                 apiUrl: api_link.voice_stream,
                 audioBlob,
@@ -270,6 +363,8 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
                 },
                 onText: (text) => {
                     voiceResponseRef.current += text;
+
+                    setVoiceStatus("Generating LLM text Responses");
                     
                     setMessages((prev) => {
                         const updated = [...prev];
@@ -288,6 +383,12 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
 
                 },
                 onError: (message) => {
+
+                    setVoiceStatus("Something Went Wrong");
+
+                    setFx_effects(false);
+                    setFx_effects2(false);
+
                     setMessages((prev) => {
                         const updated = [...prev];
                         const index = voiceMessageIndexRef.current;
@@ -297,19 +398,22 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
                         }
                         updated[index] = {
                             ...updated[index],
-                            respond: message,
+                            respond: message + " 🤖 Voice API is temporarily suspended for maintenance ⚠️",
                         };
                         return updated;
                     });
+                    setLoading(false);
                     voiceMessageIndexRef.current = null;
                 },
                 onDone: () => {
                     voiceMessageIndexRef.current = null;
                     if (voiceAutoPlayRef.current) {
-                        void playTts(voiceResponseRef.current);
+                        setVoiceStatus("Generating TSS Voice Responses");
+                        void playTts(voiceResponseRef.current, () => {setLoading(false); setFx_effects(false);});
+                    } else {
+                        setLoading(false);
                     }
                     voiceAutoPlayRef.current = false;
-                    setLoading(false);
                 },
             });
         };
@@ -433,8 +537,8 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
                         src={image_src.lccb}
                         alt="logo"
                         title="logo"
-                        width={80}
-                        height={80}
+                        width={110}
+                        height={120}
                         />
                         <h1>Welcome to LACO AI</h1>
                         <svg className={styles.welcome_intro_svg1} width="40" height="3" xmlns="http://www.w3.org/2000/svg">
@@ -466,6 +570,28 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
                     </section>
                     
                )}
+
+            <section className={fx_effects2 ? styles.fx_effects : styles.fx_effects_close}>
+                
+            </section>
+            
+            {fx_effects ? (
+            <div className={styles.laco_voice} style={{ 
+                transform: `scale(${scale})`,
+                transition: "transform 0.1s ease-out"
+            }} >
+            </div>
+            
+            ): null}
+            {fx_effects ? (
+                <h3 className="gradientTextAnimation" style={{
+                    position: "fixed",
+                    bottom: "15%"
+                }}>{voiceStatus}</h3>
+            ): null}
+            
+
+           
               
             <form className={`${styles.ask} `} onSubmit={handleSubmit} style={{ position: status ? "fixed" : "relative" }}>
                 <svg className={styles.message_icons} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
@@ -509,9 +635,9 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
                         className={styles.micButton}
                         type="button"
                         title={isRecording ? "Stop recording" : "Start recording"}
-                        disabled={!isMediaSupported}
+                        disabled={!isMediaSupported && !loading}
                         onClick={() => (isRecording ? stopRecording() : startRecording())}
-                        style={{ opacity: isMediaSupported ? "1" : "0.5" }}
+                        style={{ opacity: isMediaSupported && !loading ? "1" : "0.5" }}
                     >
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <rect x="9" y="2" width="6" height="12" rx="3" stroke="currentColor" strokeWidth="2"/>

@@ -38,7 +38,7 @@
 		"update_user_status" : "/services/supabase/admin/update_user_status",
 		"retrieve_pdf_record" : "/services/supabase/admin/retrieve_pdf_record",
 		"system_logs" : "/services/supabase/admin/system_logs",
-		"get_suspension_state" : "/services/supabase/admin/suspension-state",
+		"get_suspension_state" : "/services/supabase/admin/get-suspension-state",
 		"set_suspension_state" : "/services/supabase/admin/suspension-state"
 	}
 }

@@ -32,6 +32,35 @@ body {
   100% { opacity: 0.5; }
 }
 
+/* Gradient text animation */
+.gradientTextAnimation {
+  background: linear-gradient(
+    90deg,
+    #808080 0%,
+    #c0c0c0 25%,
+    #232323 50%,
+    #c0c0c0 75%,
+    #808080 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientShift 1s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% center;
+  }
+  50% {
+    background-position: 50% center;
+  }
+  100% {
+    background-position: 100% center;
+  }
+}
+
 /* Glow effect */
 #nprogress .bar {
   background: #1A54B8;
