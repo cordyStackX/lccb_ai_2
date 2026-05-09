@@ -586,7 +586,7 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
             {fx_effects ? (
                 <h3 className="gradientTextAnimation" style={{
                     position: "fixed",
-                    bottom: "15%"
+                    bottom: "130px"
                 }}>{voiceStatus}</h3>
             ): null}
             
