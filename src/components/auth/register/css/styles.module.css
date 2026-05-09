@@ -1,12 +1,13 @@
 .container {
     width: 100%;
-    height: 100dvh;
+    height: max(750px, 100dvh);
     display: flex;
     justify-content: center;
     align-items: center;
 }
 .wrapper {
     width: var(--max-width);
+    height: 100%;
     margin: 10px auto;
     display: flex;
     justify-content: center;

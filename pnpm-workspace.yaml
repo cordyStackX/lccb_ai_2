@@ -1,5 +1,5 @@
-ignoredBuiltDependencies:
-  - bcrypt
-  - sharp
-  - unrs-resolver
-nodeLinker: hoisted
+allowBuilds:
+  bcrypt: false
+  core-js: false
+  sharp: false
+  unrs-resolver: false
