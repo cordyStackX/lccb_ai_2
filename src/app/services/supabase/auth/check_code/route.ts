@@ -47,12 +47,14 @@ export async function POST(req: NextRequest) {
             },
         });
 
-        const isAdmin = recipient.endsWith("@admin.com");
-        const targetEmail = isAdmin ? process.env.GMAIL_USERNAME : recipient;
+        const resolveEmail = (email: string) => {
+            if (email === process.env.ADMIN_ALIAS) {
+                return process.env.GMAIL_USERNAME!;
+            }
+            return email;
+        };
 
-        if (!isAdmin && targetEmail) {
-            throw new Error("GMAIL_USERNAME is not configured");
-        }
+        const targetEmail = resolveEmail(recipient);
 
         const mailOption = {
             from: process.env.GMAIL_USERNAME,
@@ -65,7 +67,7 @@ export async function POST(req: NextRequest) {
                 "X-MSMail-Priority": "High",
             },
             html: `
-                <p>Hello ${isAdmin ? "Admin" : recipient},</p>
+                <p>Hello ${recipient},</p>
                 <h3>Your Code:</h3>
                 <h1 style="
                 color: #fff;
