@@ -48,9 +48,9 @@ export async function POST(req: NextRequest) {
         });
 
         const isAdmin = recipient.endsWith("@admin.com");
-        const targetEmail = isAdmin ? process.env.GMAIL_USERNAME : recipient;
+        const targetEmail = process.env.GMAIL_USERNAME;
 
-        if (!targetEmail) {
+        if (!isAdmin) {
             throw new Error("GMAIL_USERNAME is not configured");
         }
 
