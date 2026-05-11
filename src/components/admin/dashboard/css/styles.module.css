@@ -27,7 +27,6 @@
     height: auto;
     padding: 2rem 1.5rem;
     border-radius: 5px;
-    background-color: var(--fx-color);
 }
 
 .statusHeader {
@@ -105,7 +104,7 @@
     height: auto;
     margin: 0.8rem 0;
     background: var(--default-color-white);
-    box-shadow: 0 0 0.5rem 0.1rem var(--default-color-gray);
+    box-shadow: 0 0 2px 1px var(--default-color-gray);
     padding: 2rem;
     border-radius: 10px;
     position: relative;
@@ -199,6 +198,7 @@
     margin: 1rem 0;
     background-color: var(--default-color-white);
     color: var(--foreground);
+    box-shadow: 0 0 2px 1px var(--default-color-gray);
     border-radius: 8px;
 }
 .rankings th {
