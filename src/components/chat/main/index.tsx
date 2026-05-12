@@ -279,6 +279,7 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
 
     const startRecording = async () => {
         if (!isMediaSupported) return alert("Browser Media is not supported :(");
+        if (loading) return;
         if (!email || !pdf_id || !f_name) {
             SweetAlert2(
                 "Missing context",
@@ -435,16 +436,16 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
         setIsRecording(true);
     };
 
-    const stopRecording = () => {
-        if (!mediaRecorderRef.current) return;
-        if (mediaRecorderRef.current.state === "inactive") return;
-        if (recordingTimeoutRef.current) {
-            clearTimeout(recordingTimeoutRef.current);
-            recordingTimeoutRef.current = null;
-        }
-        mediaRecorderRef.current.stop();
-        setIsRecording(false);
-    };
+    // const stopRecording = () => {
+    //     if (!mediaRecorderRef.current) return;
+    //     if (mediaRecorderRef.current.state === "inactive") return;
+    //     if (recordingTimeoutRef.current) {
+    //         clearTimeout(recordingTimeoutRef.current);
+    //         recordingTimeoutRef.current = null;
+    //     }
+    //     mediaRecorderRef.current.stop();
+    //     setIsRecording(false);
+    // };
 
     
 
@@ -636,7 +637,7 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
                         type="button"
                         title={isRecording ? "Stop recording" : "Start recording"}
                         disabled={!isMediaSupported && !loading}
-                        onClick={() => (isRecording ? stopRecording() : startRecording())}
+                        onClick={() => (startRecording())}
                         style={{ opacity: isMediaSupported && !loading ? "1" : "0.5" }}
                     >
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
