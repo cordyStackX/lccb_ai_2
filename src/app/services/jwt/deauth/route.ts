@@ -11,7 +11,7 @@ export async function POST() {
         name: "token", 
         value: "",        
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: process.env.PRODUCTION === "production",
         sameSite: "strict",
         path: "/",        
         maxAge: 0, 

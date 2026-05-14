@@ -28,8 +28,8 @@ export default function Confirm_email_signin({ mobile, email }: HeaderProps) {
     const [showSignin, setShowSignin] = useState(false);
 
     useEffect(() => {
-        if (mobile) return setShowSignin(false);
         setForm(prev => ({ ...prev, email: email }));
+        if (mobile) return setShowSignin(false);
         setShowSignin(true);
     }, [mobile]);
 
@@ -65,8 +65,8 @@ export default function Confirm_email_signin({ mobile, email }: HeaderProps) {
         setLoading(true);
         const responds = await Fetch_to(api_link.checkcode, { email: form.email, code: form.code });
         if (responds.success) {
+            if (!showSignin) return (window as Window & { ReactNativeWebView?: { postMessage: (message: string) => void } }).ReactNativeWebView?.postMessage(`${form.code}`);
             localStorage.clear();
-            if (showSignin) return (window as Window & { ReactNativeWebView?: { postMessage: (message: string) => void } }).ReactNativeWebView?.postMessage(`${form.code}`);
             const response = await Fetch_to(api_link.checkcode, { email: form.email, code: form.code, key: "confirm_code" });
             if (!response.success) {
                 setMessage(response.message);
