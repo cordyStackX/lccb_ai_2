@@ -11,7 +11,10 @@ export default function SignInPage() {
     useEffect(() => {
         async function check() {
             const response = await Fetch_to(api_link.jwt.verify);
-            if (response.success) return router.push("/chat");
+            if(!response.success) return;
+            const response_admin = response.data.message.final_data.data[0].email;
+            if (response.success && response_admin === "admin@admin.com") return router.push("/admin/dashboard");
+            return router.push("/chat");
         }
         check();
     }, []);

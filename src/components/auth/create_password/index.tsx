@@ -13,7 +13,11 @@ import {
     useConfirmExit
 } from "@/utilities";
 
-export default function Create_Password() {
+type HeaderProps = {
+    mobile: boolean;
+}
+
+export default function Create_Password({ mobile }: HeaderProps) {
     const router = useRouter();
 
     const [form, setForm] = useState({
@@ -24,8 +28,14 @@ export default function Create_Password() {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showPassword2, setShowPassword2] = useState(false);
+    const [showSignin, setShowSignin] = useState(false);
 
     usePreventExit(true);
+
+    useEffect(() => {
+        if (mobile) return setShowSignin(false);
+        setShowSignin(true);
+    }, [mobile]);
 
     const confirmExit = useConfirmExit({
         onConfirm: () => router.push("/auth/register")
@@ -57,6 +67,7 @@ export default function Create_Password() {
             if (autosignin_response.success) {
                 localStorage.clear();
                 await Fetch_to(api_link.jwt.auth, { email: form.email });
+                if (showSignin) return (window as Window & { ReactNativeWebView?: { postMessage: (message: string) => void } }).ReactNativeWebView?.postMessage("closeWebView");
                 router.push("/chat");
             } else {
                 alert(responds.message);
@@ -143,7 +154,7 @@ export default function Create_Password() {
                         </span>
                         <section className={`${styles.buttons} `}>
                             <button type="button" onClick={() => { if(confirmExit()) return router.push("/auth/register");  }} style={{backgroundColor: "var(--secondary)"}}>Back</button>
-                            <button>Activate</button>
+                            <button>Register</button>
                         </section>
                     </form>
                 )}
