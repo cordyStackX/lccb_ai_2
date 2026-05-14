@@ -44,5 +44,5 @@ export async function POST(req: NextRequest) {
 
     console.log(" ==> User is Successfully Log In");
 
-    return NextResponse.json({ success: true }, { status: 200 });
+    return NextResponse.json({ success: true, token }, { status: 200 });
 }
