@@ -29,7 +29,7 @@ export default function Confirm_email_signin({ mobile, email }: HeaderProps) {
 
     useEffect(() => {
         if (mobile) return setShowSignin(false);
-        console.log(email);
+        setForm(prev => ({ ...prev, email: email }));
         setShowSignin(true);
     }, [mobile]);
 
@@ -38,8 +38,8 @@ export default function Confirm_email_signin({ mobile, email }: HeaderProps) {
     };
 
    useEffect(() => {
+        if (mobile) return;
         const saveEmail = localStorage.getItem("email");
-        
         setForm(prev => ({ ...prev, email: saveEmail || "" }));
     }, []);
 
