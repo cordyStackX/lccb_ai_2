@@ -18,7 +18,7 @@ function ConfirmEmailSigninContent() {
 
     return(
         <main className="auth_page">
-            <Confirm_email_signin mobile={inMobile} />
+            <Confirm_email_signin mobile={inMobile} email={`${mobile}`} />
         </main>
     );
 }

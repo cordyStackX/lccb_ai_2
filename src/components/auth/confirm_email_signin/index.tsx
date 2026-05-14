@@ -13,9 +13,10 @@ import {
 
 type HeaderProps = {
     mobile: boolean;
+    email: string;
 }
 
-export default function Confirm_email_signin({ mobile }: HeaderProps) {
+export default function Confirm_email_signin({ mobile, email }: HeaderProps) {
     const router = useRouter();
 
     const [form, setForm] = useState({
@@ -28,6 +29,7 @@ export default function Confirm_email_signin({ mobile }: HeaderProps) {
 
     useEffect(() => {
         if (mobile) return setShowSignin(false);
+        console.log(email);
         setShowSignin(true);
     }, [mobile]);
 
@@ -37,6 +39,7 @@ export default function Confirm_email_signin({ mobile }: HeaderProps) {
 
    useEffect(() => {
         const saveEmail = localStorage.getItem("email");
+        
         setForm(prev => ({ ...prev, email: saveEmail || "" }));
     }, []);
 
