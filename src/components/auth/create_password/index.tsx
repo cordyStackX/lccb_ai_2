@@ -66,8 +66,8 @@ export default function Create_Password({ mobile }: HeaderProps) {
 
             if (autosignin_response.success) {
                 localStorage.clear();
-                await Fetch_to(api_link.jwt.auth, { email: form.email });
                 if (showSignin) return (window as Window & { ReactNativeWebView?: { postMessage: (message: string) => void } }).ReactNativeWebView?.postMessage("closeWebView");
+                await Fetch_to(api_link.jwt.auth, { email: form.email });
                 router.push("/chat");
             } else {
                 alert(responds.message);
