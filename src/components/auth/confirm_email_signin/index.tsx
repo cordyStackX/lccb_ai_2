@@ -11,7 +11,11 @@ import {
     useConfirmExit
 } from "@/utilities";
 
-export default function Confirm_email_signin() {
+type HeaderProps = {
+    mobile: boolean;
+}
+
+export default function Confirm_email_signin({ mobile }: HeaderProps) {
     const router = useRouter();
 
     const [form, setForm] = useState({
@@ -20,6 +24,12 @@ export default function Confirm_email_signin() {
     const [status, setStatus] = useState(false);
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
+    const [showSignin, setShowSignin] = useState(false);
+
+    useEffect(() => {
+        if (mobile) return setShowSignin(false);
+        setShowSignin(true);
+    }, [mobile]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -58,6 +68,7 @@ export default function Confirm_email_signin() {
                 setMessage(response.message);
                 setStatus(true);
                 setLoading(false);
+                if (showSignin) return (window as Window & { ReactNativeWebView?: { postMessage: (message: string) => void } }).ReactNativeWebView?.postMessage("closeWebView");
                 return;
             }
             await Fetch_to(api_link.jwt.auth, { email: form.email });
