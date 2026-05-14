@@ -13,7 +13,11 @@ import {
     Progress
 } from "@/utilities";
 
-export default function SignUp() {
+type HeaderProps = {
+    mobile: boolean;
+}
+
+export default function SignUp({ mobile }: HeaderProps) {
     const router = useRouter();
 
     const [form, setForm] = useState({
@@ -25,8 +29,14 @@ export default function SignUp() {
     const [isDirty, setIsDirty] = useState(false);
     const [ifMinors, setIfMinors] = useState(true);
     const [ifTeaher, setIfTeacher] = useState(false);
+    const [showSignin, setShowSignin] = useState(false);
 
     usePreventExit(isDirty);
+
+    useEffect(() => {
+        if (mobile) return setShowSignin(false);
+        setShowSignin(true);
+    }, [mobile]);
 
     useEffect(() => {
         if (form.year == "Kinder Garten" ) {
@@ -198,7 +208,9 @@ export default function SignUp() {
                         <section className={`${styles.buttons} `}>
                             <button>Register</button>
                         </section>
-                        <p >Already have an Account? <Link href={"/auth/signin"} onClick={() => {Progress(true);}}>Sign In</Link></p>
+                        {showSignin ? (
+                            <p >Already have an Account? <Link href={"/auth/signin"} onClick={() => {Progress(true);}}>Sign In</Link></p>
+                        ) : null}
                     </form>
                 )}
             </div>
