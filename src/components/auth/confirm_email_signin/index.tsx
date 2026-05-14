@@ -37,7 +37,7 @@ export default function Confirm_email_signin({ mobile }: HeaderProps) {
 
    useEffect(() => {
         const saveEmail = localStorage.getItem("email");
-        setForm(prev => ({ ...prev, email: saveEmail || "" }));
+        setForm(prev => ({ ...prev, email: saveEmail || `${mobile}` }));
     }, []);
 
     const confirmExit = useConfirmExit({
