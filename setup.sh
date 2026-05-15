@@ -40,6 +40,13 @@ python3 -m pip install --upgrade pip
 echo -e "${YELLOW}==> Installing Python packages...${RESET}"
 pip install -r python/python_txt_file/requirements.txt
 
+# Check required environment files before Next.js build
+echo -e "${YELLOW}==> Checking required .env files...${RESET}"
+if [ ! -f ".env.productions" ]; then
+	echo -e "${YELLOW}Missing required .env file: .env.productions${RESET}"
+	exit 1
+fi
+
 echo -e "${BLUE}<==> Building Next.js app... <==>${RESET}"
 echo -e "${YELLOW}==> Running lint...${RESET}"
 pnpm run lint
