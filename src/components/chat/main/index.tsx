@@ -76,7 +76,7 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
         setPdf_id(currentPdf);
         if (inMobile) {
             setChatres((prev) => ({ ...prev, ask: "Describe the contents of this image in detail." }));
-            handleImageSubmit();
+            handleSubmit();
         }
     }, [emailRes, currentPdf, inMobile]);
 
