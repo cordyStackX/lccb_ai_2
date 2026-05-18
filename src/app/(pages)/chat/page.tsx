@@ -15,6 +15,7 @@ function ChatContent() {
     const searchParams = useSearchParams();
     const mobile = searchParams.get('mobile');
     const [inMobile, setInMobile] = useState(false);
+    const [inMobileHead, setInMobileHead] = useState(false);
     const [isOpen, setOpen] = useState(false);
     const [globalRefresh, setGlobalRefresh] = useState(false);
     const [email, setEmail] = useState("");
@@ -35,11 +36,17 @@ function ChatContent() {
             setName(result.f_name);
             setRole(result.role);
             setYear(result.year);
-            if (mobile) setInMobile(true);
             if (result.status === "suspend") {
                 alert("Account SUSPENDED please contact admin");
                 router.push("/auth/signin");
                 return await Fetch_to(api_link.jwt.deauth);
+            }
+            if (mobile === "open-chat") {
+                setInMobile(false);
+                setInMobileHead(true);
+            } else if (mobile === "true") {
+                setInMobile(true);
+                setInMobileHead(true);
             }
 
         }
@@ -67,7 +74,7 @@ function ChatContent() {
 
     return(
         <main className="chat_page">
-            <Header isOpen={isOpen} setOpen={setOpen} setShowProfile={setShowProfile} name={name} email={email} profilePic={profilePic} inMobile={inMobile} />
+            <Header isOpen={isOpen} setOpen={setOpen} setShowProfile={setShowProfile} name={name} email={email} profilePic={profilePic} inMobile={inMobileHead} />
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center"}}>
                 <Sidebars isOpen={isOpen} emailRes={email} setCurrentPdf={setCurrentPdf} setCurrentImg={setCurrentImg} globalRefresh={globalRefresh} />
                 <Main emailRes={email} currentPdf={currentPdf} currentImg={currentImg} setGlobalRefresh={setGlobalRefresh} f_name={name} inMobile={inMobile} />

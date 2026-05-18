@@ -3,6 +3,7 @@ import {  NextResponse, NextRequest } from "next/server";
 import jwt from "jsonwebtoken";
 import { supabaseServer } from "@/lib/supabase-server";
 import { cookies } from "next/headers";
+import api_link from "@/config/conf/json_config/Api_links.json";
 
 type RetryState = {
     count: number;
@@ -37,6 +38,8 @@ function isAllowedRequestOrigin(req: NextRequest): boolean {
         process.env.APP_URL,
         process.env.NEXT_PUBLIC_APP_URL,
         "http://localhost:3000",
+        "https://localhost:3000",
+        api_link.share_ip_link,
         req.nextUrl.origin,
     ].filter(Boolean) as string[]);
 

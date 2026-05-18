@@ -125,7 +125,68 @@
     bottom: 0;
     position: absolute;
 }
+.form_fx_effects {
+    width: min(920px, 93dvw);
+    height: 82px;
 
+    position: fixed;
+    bottom: -6px;
+
+    overflow: hidden;
+    border-radius: 12px;
+
+    padding: 0.5rem 2rem;
+    margin: 2rem 1rem;
+
+    display: flex;
+    justify-content: flex-start;
+
+    isolation: isolate;
+}
+
+/* rotating gradient layer */
+.form_fx_effects::before {
+    content: "";
+
+    position: absolute;
+
+    inset: -250%;
+
+    background: conic-gradient(
+        from 0deg,
+        transparent,
+        var(--fx-color-bg-effects),
+        transparent,
+        var(--fx-color-bg-effects),
+        transparent 
+    );
+
+    animation: rotateGradient 2s linear infinite;
+
+    z-index: -2;
+}
+
+/* optional dark overlay */
+.form_fx_effects::after {
+    content: "";
+
+    position: absolute;
+    inset: 2px;
+
+    border-radius: inherit;
+
+    z-index: -1;
+}
+
+@keyframes rotateGradient {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
 .ask {
     width: min(900px, 90dvw);
     height: auto;
@@ -141,7 +202,7 @@
     position: relative;
 }
 .expandableInput {
-    width: 95%;
+    width: 92%;
     min-height: 50px;
     max-height: 150px;
     padding: 1rem 0 0 1rem;

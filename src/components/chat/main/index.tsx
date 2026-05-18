@@ -58,6 +58,12 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
     const animationFrameRef = useRef<number | null>(null);
 
     useEffect(() => {
+        if (inMobile === false) return;
+        setLoading(true);
+        SweetAlert2("Analysing", "Checking Your Image", "process", false, "", false, "", true);
+    }, [inMobile]);
+
+    useEffect(() => {
         if (chatEndRef.current) {
             chatEndRef.current.scrollIntoView();
         }
@@ -70,6 +76,16 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
             && Boolean(navigator.mediaDevices?.getUserMedia);
         setIsMediaSupported(supported);
     }, []);
+
+    useEffect(() => {
+        if (inMobile === false) return;
+        if (inMobile && currentImg) {
+            const autoPrompt = "Describe the contents of this image in detail.";
+            setChatres((prev) => ({ ...prev, ask: autoPrompt }));
+            void handleImageSubmit(undefined, autoPrompt);
+            Swal.close()
+        }
+    }, [currentImg, inMobile]);
 
     useEffect(() => {
         setEmail(emailRes);
@@ -91,14 +107,6 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
             }
         };
     }, []);
-
-    useEffect(() => {
-        if (inMobile && currentImg) {
-            const autoPrompt = "Describe the contents of this image in detail.";
-            setChatres((prev) => ({ ...prev, ask: autoPrompt }));
-            void handleImageSubmit(undefined, autoPrompt);
-        }
-    }, [currentImg, inMobile]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const value = e.target.value;
@@ -154,60 +162,81 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
         setStatus(true);
         setLoading(true);
 
-        const userMessage = { ask: promptText, respond: "" };
-        setMessages((prev) => [...prev, userMessage]);
+        setMessages((prev) => {
+            // Use the latest state for context
+            const lastMessage = prev[prev.length - 1];
+            const lastUserResponse = lastMessage?.ask || "";
+            const lastAIResponse = lastMessage?.respond || "";
+            // Add the new user message
+            return [
+                ...prev,
+                { ask: promptText, respond: "" }
+            ];
+        });
 
-        const prompt = promptText;
         setChatres({ ask: "", respond2: "" });
         if (textareaRef.current) {
             textareaRef.current.style.height = "auto";
         }
 
-        const lastMessage = messages[messages.length - 1];
-        const lastUserResponse = lastMessage?.ask || "";
-        const lastAIResponse = lastMessage?.respond || "";
-
-        try {
-            const response = await fetch(api_link.response_image_stream, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    prompt: prompt,
-                    image_url: currentImg,
-                    last_markdown: lastAIResponse,
-                    user_reply: lastUserResponse,
-                    email,
-                }),
+        // Use a callback to ensure correct context for API call and message update
+        setTimeout(async () => {
+            let lastUserResponse = "";
+            let lastAIResponse = "";
+            let msgIndex = 0;
+            setMessages((prev) => {
+                msgIndex = prev.length - 1;
+                if (msgIndex > 0) {
+                    lastUserResponse = prev[msgIndex - 1]?.ask || "";
+                    lastAIResponse = prev[msgIndex - 1]?.respond || "";
+                }
+                return prev;
             });
 
-            const data = await response.json().catch(() => null);
-            if (!response.ok || !data?.success) {
-                throw new Error(data?.error || "Image request failed");
+            try {
+                const response = await fetch(api_link.response_image_stream, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        prompt: promptText,
+                        image_url: currentImg,
+                        last_markdown: lastAIResponse,
+                        user_reply: lastUserResponse,
+                        email,
+                    }),
+                });
+
+                const data = await response.json().catch(() => null);
+                if (!response.ok || !data?.success) {
+                    throw new Error(data?.error || "Image request failed");
+                }
+
+                setMessages((prev) => {
+                    const updated = [...prev];
+                    if (msgIndex >= 0 && msgIndex < updated.length) {
+                        updated[msgIndex] = {
+                            ...updated[msgIndex],
+                            respond: data?.markdown || "",
+                        };
+                    }
+                    return updated;
+                });
+            } catch (error) {
+                const message = error instanceof Error ? error.message : "Image request failed";
+                setMessages((prev) => {
+                    const updated = [...prev];
+                    if (msgIndex >= 0 && msgIndex < updated.length) {
+                        updated[msgIndex] = {
+                            ask: promptText,
+                            respond: message,
+                        };
+                    }
+                    return updated;
+                });
+            } finally {
+                setLoading(false);
             }
-
-            setMessages((prev) => {
-                const updated = [...prev];
-                const lastIndex = updated.length - 1;
-                const lastItem = updated[lastIndex];
-                updated[lastIndex] = {
-                    ...lastItem,
-                    respond: data?.markdown || "",
-                };
-                return updated;
-            });
-        } catch (error) {
-            const message = error instanceof Error ? error.message : "Image request failed";
-            setMessages((prev) => {
-                const updated = [...prev];
-                updated[updated.length - 1] = {
-                    ask: prompt,
-                    respond: message,
-                };
-                return updated;
-            });
-        } finally {
-            setLoading(false);
-        }
+        }, 0);
     };
 
     const handleSubmit = async (e?: React.FormEvent<HTMLFormElement>) => {
@@ -655,17 +684,12 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
                     
                )}
 
-            <section className={fx_effects2 ? styles.fx_effects : styles.fx_effects_close}>
-                
-            </section>
-            
+            <section className={fx_effects2 ? styles.fx_effects : styles.fx_effects_close} />
             {fx_effects ? (
-            <div className={styles.laco_voice} style={{ 
-                transform: `scale(${scale})`,
-                transition: "transform 0.1s ease-out"
-            }} >
-            </div>
-            
+                <div className={styles.laco_voice} style={{ 
+                    transform: `scale(${scale})`,
+                    transition: "transform 0.1s ease-out"
+                }} />
             ): null}
             {fx_effects ? (
                 <h3 className="gradientTextAnimation" style={{
@@ -674,9 +698,9 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
                 }}>{voiceStatus}</h3>
             ): null}
             
-
-           
-              
+            {loading ? (
+                <div className={styles.form_fx_effects} style={{ display: status ? "flex" : "none" }} />
+            ): null}
             <form className={`${styles.ask} `} onSubmit={handleSubmit} style={{ position: status ? "fixed" : "relative" }}>
                 <svg className={styles.message_icons} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                 fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

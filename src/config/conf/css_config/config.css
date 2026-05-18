@@ -16,6 +16,7 @@
 	--fx-color: rgba(49, 110, 235, 0.3);
 	--fx-color-button: rgba(136, 136, 136, 0.7);
 	--fx-color-bg: rgba(136, 136, 136, 0.3);
+	--fx-color-bg-effects: rgba(0, 38, 255, 0.582);
 
 	/* Color Modes */
 	/* --adaptive-color-2: var(--background_linear_1);
