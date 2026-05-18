@@ -70,7 +70,7 @@ function ChatContent() {
             <Header isOpen={isOpen} setOpen={setOpen} setShowProfile={setShowProfile} name={name} email={email} profilePic={profilePic} inMobile={inMobile} />
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center"}}>
                 <Sidebars isOpen={isOpen} emailRes={email} setCurrentPdf={setCurrentPdf} setCurrentImg={setCurrentImg} globalRefresh={globalRefresh} />
-                <Main emailRes={email} currentPdf={currentPdf} currentImg={currentImg} setGlobalRefresh={setGlobalRefresh} f_name={name} />
+                <Main emailRes={email} currentPdf={currentPdf} currentImg={currentImg} setGlobalRefresh={setGlobalRefresh} f_name={name} inMobile={inMobile} />
                 <Profile showProfile={showProfile} setShowProfile={setShowProfile} email={email} name={name} role={role} year={year} profilePic={profilePic} setGlobalRefresh={setGlobalRefresh} />
             </div> 
         </main>

@@ -14,11 +14,12 @@ type MainProps = {
     emailRes: string;
     currentPdf: number | undefined;
     currentImg: string | undefined;
+    inMobile: boolean;
     f_name: string;
     setGlobalRefresh: Dispatch<SetStateAction<boolean>>;
 }
 
-export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, currentImg}: MainProps) {
+export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, currentImg, inMobile}: MainProps) {
     const [messages, setMessages] = useState<
         { ask: string; respond: string }[]
     >([]);
@@ -73,7 +74,11 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
     useEffect(() => {
         setEmail(emailRes);
         setPdf_id(currentPdf);
-    }, [emailRes, currentPdf]);
+        if (inMobile) {
+            setChatres((prev) => ({ ...prev, ask: "Describe the contents of this image in detail." }));
+            handleImageSubmit();
+        }
+    }, [emailRes, currentPdf, inMobile]);
 
     useEffect(() => {
         if (!textareaRef.current) return;
