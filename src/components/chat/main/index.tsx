@@ -74,11 +74,7 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
     useEffect(() => {
         setEmail(emailRes);
         setPdf_id(currentPdf);
-        if (inMobile) {
-            setChatres((prev) => ({ ...prev, ask: "Describe the contents of this image in detail." }));
-            handleSubmit();
-        }
-    }, [emailRes, currentPdf, inMobile]);
+    }, [emailRes, currentPdf]);
 
     useEffect(() => {
         if (!textareaRef.current) return;
@@ -96,6 +92,12 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
         };
     }, []);
 
+    useEffect(() => {
+        if (inMobile) {
+            setChatres((prev) => ({ ...prev, ask: "Describe the contents of this image in detail." }));
+            handleSubmit();
+        }
+    }, [currentImg]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const value = e.target.value;
