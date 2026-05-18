@@ -6,15 +6,15 @@ import {
     Profile
 } from "@/components/chat";
 import { useEffect, useState, Suspense } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Fetch_to, useConfirmExit } from "@/utilities";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 
 function ChatContent() {
     const router = useRouter();
-    // const searchParams = useSearchParams();
-    // const mobile = searchParams.get('mobile');
-    // const [inMobile, setInMobile] = useState(false);
+    const searchParams = useSearchParams();
+    const mobile = searchParams.get('mobile');
+    const [inMobile, setInMobile] = useState(false);
     const [isOpen, setOpen] = useState(false);
     const [globalRefresh, setGlobalRefresh] = useState(false);
     const [email, setEmail] = useState("");
@@ -35,7 +35,7 @@ function ChatContent() {
             setName(result.f_name);
             setRole(result.role);
             setYear(result.year);
-            
+            if (mobile) setInMobile(true);
             if (result.status === "suspend") {
                 alert("Account SUSPENDED please contact admin");
                 router.push("/auth/signin");
@@ -67,7 +67,7 @@ function ChatContent() {
 
     return(
         <main className="chat_page">
-            <Header isOpen={isOpen} setOpen={setOpen} setShowProfile={setShowProfile} name={name} email={email} profilePic={profilePic} />
+            <Header isOpen={isOpen} setOpen={setOpen} setShowProfile={setShowProfile} name={name} email={email} profilePic={profilePic} inMobile={inMobile} />
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center"}}>
                 <Sidebars isOpen={isOpen} emailRes={email} setCurrentPdf={setCurrentPdf} setCurrentImg={setCurrentImg} globalRefresh={globalRefresh} />
                 <Main emailRes={email} currentPdf={currentPdf} currentImg={currentImg} setGlobalRefresh={setGlobalRefresh} f_name={name} />

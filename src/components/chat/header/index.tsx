@@ -13,14 +13,16 @@ type HeaderProps = {
     setOpen: Dispatch<SetStateAction<boolean>>;
     setShowProfile: Dispatch<SetStateAction<boolean>>;
     name: string;
+    inMobile: boolean;
     email: string;
     profilePic: string
 }
 
 
-export default function Header({ isOpen, setOpen, setShowProfile, name, email, profilePic }: HeaderProps) {
+export default function Header({ isOpen, setOpen, setShowProfile, name, email, profilePic, inMobile }: HeaderProps) {
     const router = useRouter();
     const [profile, setProfile] = useState(false);
+    const [showLogout, setShowLogout] = useState(false);
 
     const handle_logout = async () => {
 
@@ -48,6 +50,14 @@ export default function Header({ isOpen, setOpen, setShowProfile, name, email, p
         document.addEventListener("click", handleClick);
         return () => document.removeEventListener("click", handleClick);
     }, []);
+
+    useEffect(() => {
+        if (inMobile) {
+            setShowLogout(false);
+        } else {
+            setShowLogout(true);
+        }
+    }, [inMobile]);
 
     return(
         <header className={`${styles.container}`}>
@@ -104,14 +114,16 @@ export default function Header({ isOpen, setOpen, setShowProfile, name, email, p
                     </svg>
                     My Profile
                 </button>
-                <button className={styles.signout} title="Sign Out" onClick={handle_logout}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M10 17V7a2 2 0 0 1 2-2h7v14h-7a2 2 0 0 1-2-2z"/>
-                    <path d="M15 12H3m0 0l3-3m-3 3l3 3"/>
-                    </svg>
-                    Sign Out
-                </button>
+                {showLogout ? (
+                    <button className={styles.signout} title="Sign Out" onClick={handle_logout}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M10 17V7a2 2 0 0 1 2-2h7v14h-7a2 2 0 0 1-2-2z"/>
+                        <path d="M15 12H3m0 0l3-3m-3 3l3 3"/>
+                        </svg>
+                        Sign Out
+                    </button>
+                ): null}
             </section>
 
         </header>
