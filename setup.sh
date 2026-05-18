@@ -6,7 +6,14 @@ BLUE="\033[34m"
 YELLOW="\033[33m"
 RESET="\033[0m"
 
+
 echo -e "${BLUE}<==> Starting FULL production setup... <==>${RESET}"
+
+# =========================
+# PROMPT FOR DOMAIN & EMAIL
+# =========================
+read -rp "Enter your domain name (e.g. example.com): " DOMAIN_NAME
+read -rp "Enter your email for SSL certificate registration: " EMAIL_ADDR
 
 # =========================
 # UPDATE SYSTEM
@@ -85,22 +92,23 @@ sudo apt install systemctl -y
 
 sudo rm -f /etc/nginx/sites-enabled/default
 
+
 sudo tee /etc/nginx/sites-available/app > /dev/null <<EOF
 server {
-    listen 80;
-    server_name laco_ai.com;
+  listen 80;
+  server_name $DOMAIN_NAME;
 
-    location /api/ {
-        proxy_pass http://127.0.0.1:8000/;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-    }
+  location /api/ {
+    proxy_pass http://127.0.0.1:8000/;
+    proxy_set_header Host \$host;
+    proxy_set_header X-Real-IP \$remote_addr;
+  }
 
-    location / {
-        proxy_pass http://127.0.0.1:3000;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-    }
+  location / {
+    proxy_pass http://127.0.0.1:3000;
+    proxy_set_header Host \$host;
+    proxy_set_header X-Real-IP \$remote_addr;
+  }
 }
 EOF
 
@@ -127,13 +135,14 @@ disown
 # =========================
 # HTTPS SETUP (CERTBOT)
 # =========================
+
 echo -e "${YELLOW}==> Enabling HTTPS (Certbot)...${RESET}"
 
 sudo certbot --nginx \
-  -d lccb_ai.com \
+  -d "$DOMAIN_NAME" \
   --non-interactive \
   --agree-tos \
-  -m cordystackx@gmail.com \
+  -m "$EMAIL_ADDR" \
   --redirect
 
 # =========================
@@ -147,4 +156,4 @@ sudo systemctl start certbot.timer
 # DONE
 # =========================
 echo -e "${BLUE}<==> SERVER READY 🚀 HTTPS + Nginx + API + Next.js <==>${RESET}"
-echo -e "${GREEN}https://yourdomain.com${RESET}"
+echo -e "${GREEN}https://$DOMAIN_NAME${RESET}"
