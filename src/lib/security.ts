@@ -58,17 +58,29 @@ function cleanupRetryMap(now: number) {
 
 export async function Security(req: NextRequest) {
 
-    if (!isAllowedRequestOrigin(req)) {
-        return { error: NextResponse.json({ error: "CSRF blocked" }, { status: 410 }) };
+    const isWeb = req.headers.get("origin") || req.headers.get("referer");
+
+    if (isWeb && !isAllowedRequestOrigin(req)) {
+        return {
+            error: NextResponse.json({ error: "CSRF blocked" }, { status: 410 }),
+        };
     }
 
   
     try {
-        const token = (await cookies()).get("token")?.value;
+        const authHeader = req.headers.get("authorization");
+        const bearerToken = authHeader?.startsWith("Bearer ")
+            ? authHeader.replace("Bearer ", "")
+            : null;
+
+        const cookieToken = (await cookies()).get("token")?.value;
+
+        const token = bearerToken || cookieToken;
+
         if (!token) {
-        return {
-            error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
-        };
+            return {
+                error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
+            };
         }
 
         const ip = normalizeIp(req);

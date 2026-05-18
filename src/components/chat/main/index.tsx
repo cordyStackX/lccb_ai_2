@@ -13,11 +13,12 @@ import Swal from "sweetalert2";
 type MainProps = {
     emailRes: string;
     currentPdf: number | undefined;
+    currentImg: string | undefined;
     f_name: string;
     setGlobalRefresh: Dispatch<SetStateAction<boolean>>;
 }
 
-export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }: MainProps) {
+export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, currentImg}: MainProps) {
     const [messages, setMessages] = useState<
         { ask: string; respond: string }[]
     >([]);
@@ -133,26 +134,96 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
 
     };
 
+    const handleImageSubmit = async (e?: React.FormEvent<HTMLFormElement>) => {
+        e?.preventDefault();
+        if (!chatres.ask.trim()) return;
+        if (!currentImg) return;
+
+        setStatus(true);
+        setLoading(true);
+
+        const userMessage = { ask: chatres.ask, respond: "" };
+        setMessages((prev) => [...prev, userMessage]);
+
+        const prompt = chatres.ask;
+        setChatres({ ask: "", respond2: "" });
+        if (textareaRef.current) {
+            textareaRef.current.style.height = "auto";
+        }
+
+        const lastMessage = messages[messages.length - 1];
+        const lastUserResponse = lastMessage?.ask || "";
+        const lastAIResponse = lastMessage?.respond || "";
+
+        try {
+            const response = await fetch(api_link.response_image_stream, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    prompt: prompt,
+                    image_url: currentImg,
+                    last_markdown: lastAIResponse,
+                    user_reply: lastUserResponse,
+                    email,
+                }),
+            });
+
+            const data = await response.json().catch(() => null);
+            if (!response.ok || !data?.success) {
+                throw new Error(data?.error || "Image request failed");
+            }
+
+            setMessages((prev) => {
+                const updated = [...prev];
+                const lastIndex = updated.length - 1;
+                const lastItem = updated[lastIndex];
+                updated[lastIndex] = {
+                    ...lastItem,
+                    respond: data?.markdown || "",
+                };
+                return updated;
+            });
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "Image request failed";
+            setMessages((prev) => {
+                const updated = [...prev];
+                updated[updated.length - 1] = {
+                    ask: prompt,
+                    respond: message,
+                };
+                return updated;
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleSubmit = async (e?: React.FormEvent<HTMLFormElement>) => {
-        await handleChatSubmit({
-            event: e,
-            chatInput: chatres.ask,
-            setChatres,
-            setStatus,
-            setLoading,
-            setMessages,
-            setStreamFadeMs,
-            setStreamTick,
-            lastChunkAtRef,
-            textareaRef,
-            apiUrl: api_link.responses_stream,
-            payloadBase: {
-                email,
-                pdf_id,
-                f_name,
-            },
-            messages,
-        });
+        if (currentPdf) {
+            await handleChatSubmit({
+                event: e,
+                chatInput: chatres.ask,
+                setChatres,
+                setStatus,
+                setLoading,
+                setMessages,
+                setStreamFadeMs,
+                setStreamTick,
+                lastChunkAtRef,
+                textareaRef,
+                apiUrl: api_link.responses_stream,
+                payloadBase: {
+                    email,
+                    pdf_id,
+                    f_name,
+                },
+                messages,
+            });
+        } else {
+            if (!currentImg) return SweetAlert2("Error", "Upload PDF or Image with Laco by Capture", "error", true, "Confirm", false, "", false);
+            await handleImageSubmit(e);
+            return;
+        }
     };
 
     const startAudioVisualization = (audioElement: HTMLAudioElement) => {
@@ -539,7 +610,7 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name }:
                         alt="logo"
                         title="logo"
                         width={110}
-                        height={120}
+                        height={110}
                         />
                         <h1>Welcome to LACO AI</h1>
                         <svg className={styles.welcome_intro_svg1} width="40" height="3" xmlns="http://www.w3.org/2000/svg">

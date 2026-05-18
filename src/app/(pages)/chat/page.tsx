@@ -5,13 +5,16 @@ import {
     Header,
     Profile
 } from "@/components/chat";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { Fetch_to, useConfirmExit } from "@/utilities";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 
-export default function ChatPage() {
+function ChatContent() {
     const router = useRouter();
+    // const searchParams = useSearchParams();
+    // const mobile = searchParams.get('mobile');
+    // const [inMobile, setInMobile] = useState(false);
     const [isOpen, setOpen] = useState(false);
     const [globalRefresh, setGlobalRefresh] = useState(false);
     const [email, setEmail] = useState("");
@@ -21,6 +24,7 @@ export default function ChatPage() {
     const [profilePic, setProfilePic] = useState("");
     const [showProfile, setShowProfile] = useState(false);
     const [currentPdf, setCurrentPdf] = useState<number | undefined>();
+    const [currentImg, setCurrentImg] = useState<string | undefined>();
 
     useEffect(() => {
         async function check() {
@@ -65,11 +69,19 @@ export default function ChatPage() {
         <main className="chat_page">
             <Header isOpen={isOpen} setOpen={setOpen} setShowProfile={setShowProfile} name={name} email={email} profilePic={profilePic} />
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center"}}>
-                <Sidebars isOpen={isOpen} emailRes={email} setCurrentPdf={setCurrentPdf} globalRefresh={globalRefresh} />
-                <Main emailRes={email} currentPdf={currentPdf} setGlobalRefresh={setGlobalRefresh} f_name={name} />
+                <Sidebars isOpen={isOpen} emailRes={email} setCurrentPdf={setCurrentPdf} setCurrentImg={setCurrentImg} globalRefresh={globalRefresh} />
+                <Main emailRes={email} currentPdf={currentPdf} currentImg={currentImg} setGlobalRefresh={setGlobalRefresh} f_name={name} />
                 <Profile showProfile={showProfile} setShowProfile={setShowProfile} email={email} name={name} role={role} year={year} profilePic={profilePic} setGlobalRefresh={setGlobalRefresh} />
             </div> 
         </main>
     );
 
+}
+
+export default function ChatPage() {
+    return(
+        <Suspense fallback={null} >
+            <ChatContent />
+        </Suspense>
+    );
 }

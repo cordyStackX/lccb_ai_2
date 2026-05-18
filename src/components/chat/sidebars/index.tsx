@@ -11,6 +11,7 @@ type SidebarsProps = {
     isOpen: boolean;
     emailRes: string;
     setCurrentPdf: (val: number | undefined) => void;
+    setCurrentImg: (val: string | undefined) => void;
     globalRefresh: boolean;
 }
 
@@ -21,15 +22,28 @@ type PdfFile = {
     file?: string;
 }
 
-export default function Sidebars({ isOpen, emailRes, setCurrentPdf, globalRefresh }: SidebarsProps) {
+type ImageFile = {
+    id?: number;
+    email?: string;
+    image_link?: string;
+    image_name?: string;
+    size_bytes?: string;
+    size_kb?: string;
+    size_mb?: string;
+}
+
+export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentImg, globalRefresh }: SidebarsProps) {
     const pageSize = 10;
     const [profile, setProfile] = useState(false);
     const [data, setData] = useState<PdfFile[]>([]);
+    const [imageData, setImageData] = useState<ImageFile[]>([]);
     const [selectedPdfId, setSelectedPdfId] = useState<number | undefined>();
+    const [selectedImageId, setSelectedImageId] = useState<number | undefined>();
     const fileRef = useRef<HTMLInputElement>(null);
     const [refresh, setRefresh] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [showNoData, setShowNoData] = useState(false);
+    const [showNoDataImage, setShowNoDataImage] = useState(false);
     const [offset, setOffset] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
@@ -45,8 +59,12 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, globalRefres
 
     // Close context menu on click
     useEffect(() => {
-        const handleClick = () => setContextMenu({ visible: false, x: 0, y: 0 });
+        const handleClick = () => {
+            setContextMenu({ visible: false, x: 0, y: 0 });
+        };
+
         document.addEventListener("click", handleClick);
+
         return () => document.removeEventListener("click", handleClick);
     }, []);
 
@@ -76,12 +94,34 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, globalRefres
         setIsLoading(false);
     };
 
+    const fetchImage = async () => {
+        if (isLoading || !emailRes) return;
+        setIsLoading(true);
+
+        const response = await Fetch_to(api_link.storage.lbc_image_retieve, {
+            email: emailRes
+        });
+
+        if (response.success) {
+            const item = response.data.message;
+
+            setImageData(item ? [item] : []);
+            setCurrentImg(item.image_link);
+            setShowNoDataImage(!item);
+        } else {
+            setShowNoDataImage(true);
+        }
+
+        setIsLoading(false);
+    };
+
     useEffect(() => {
         setData([]);
         setOffset(0);
         setHasMore(true);
         setShowNoData(false);
         fetchPdfs(true);
+        fetchImage();
     }, [emailRes, refresh, globalRefresh]);
 
     useEffect(() => {
@@ -133,17 +173,6 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, globalRefres
         if (target.scrollTop + target.clientHeight >= target.scrollHeight - 20) {
             fetchPdfs();
         }
-    };
-
-    const handleContextMenu = (e: React.MouseEvent, pdfId?: number, file?: string) => {
-        e.preventDefault();
-        setContextMenu({
-            visible: true,
-            x: e.clientX,
-            y: e.clientY,
-            pdfId: pdfId,
-            file: file,
-        });
     };
 
     const handleDeletePdf = async () => {
@@ -207,6 +236,54 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, globalRefres
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 <section className={`${styles.chat_history}`}>
+                    <div className={styles.image_base}>
+                        <h3>Image Captures</h3>
+                        <div className={styles.image_container}>
+                            {imageData && imageData.length > 0 ? (
+                                imageData.map((image, index) => (
+                                    <span
+                                    key={index}
+                                    // onContextMenu={(e) => handleContextMenu(e, image.id, image.file)}
+                                    style={{ backgroundColor: image.id === selectedImageId ? "var(--fx-color)" : ""}}
+                                    >
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                        <path d="M9 4L7.5 6H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-3.5L15 4H9z"
+                                                stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+                                        <circle cx="12" cy="13" r="4" stroke="currentColor" strokeWidth="2"/>
+                                        </svg>
+                                        <button key={index}
+                                        onClick={() => setSelectedImageId(image.id)}
+                                        title={image.image_name}
+                                        style={{ fontWeight: image.id === selectedImageId ? "bold" : "" }}
+                                        >  {image.image_name} <br /> {image.size_mb} MB </button>
+                                    <span
+                                    style={{ display: image.id === selectedImageId ? "block" : "none" }}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M20 6L9 17l-5-5"/>
+                                        </svg>
+                                    </span>
+                                    </span>
+                                
+                                ))
+                            ) : (
+                                <div>
+                                    {showNoDataImage ? (
+                                        <p style={{ textAlign: "center", padding: "1rem", color: "var(--foreground)", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
+                                            No IMAGE Found
+                                        </p>
+                                    ) : (
+                                        <p style={{ textAlign: "center", marginTop: "30px" }} className="gradientTextAnimation" >Loading...</p>
+                                    )}
+                                </div>
+                                
+                            )}
+                            {isLoading && data.length > 0 && (
+                                <p>Loading...</p>
+                            )}
+                        </div>
+                    </div>
                     
                     <div className={styles.pdf_base}>
                         <h3>PDF Documents</h3>
@@ -216,7 +293,7 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, globalRefres
                                     filteredPdfs.map((pdf, index) => (
                                         <span
                                         key={index}
-                                        onContextMenu={(e) => handleContextMenu(e, pdf.id, pdf.file)}
+                                        // onContextMenu={(e) => handleClick(e, pdf.id, pdf.file)}
                                         style={{ backgroundColor: pdf.id === selectedPdfId ? "var(--fx-color)" : ""}}
                                         >
                                             <Image
@@ -237,6 +314,24 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, globalRefres
                                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                             fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                             <path d="M20 6L9 17l-5-5"/>
+                                            </svg>
+                                        </span>
+                                        <span onClick={(e) => {
+                                            e.stopPropagation();
+                                            setTimeout(() => {
+                                                setContextMenu({
+                                                    visible: true,
+                                                    x: e.clientX,
+                                                    y: e.clientY,
+                                                    pdfId: pdf.id,
+                                                    file: pdf.file,
+                                                });
+                                            }, 0);
+                                        }} className={styles.pdf_options} >
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                            <circle cx="5" cy="12" r="2" fill="currentColor"/>
+                                            <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                                            <circle cx="19" cy="12" r="2" fill="currentColor"/>
                                             </svg>
                                         </span>
                                         </span>
@@ -286,6 +381,24 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, globalRefres
                     onClick={(e) => e.stopPropagation()}
                 >
                     <button
+                        onClick={() => {setSelectedPdfId(undefined);}}
+                        style={{
+                            display: "block",
+                            width: "100%",
+                            padding: "8px 16px",
+                            border: "none",
+                            background: "var(--default-color-white)",
+                            color: "var(--foreground)",
+                            textAlign: "left",
+                            cursor: "pointer",
+                            fontSize: "14px",
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(4, 0, 255, 0.5)")}
+                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                    >
+                        ⚪ UnSelect PDF
+                    </button>
+                    <button
                         onClick={handleDeletePdf}
                         style={{
                             display: "block",
@@ -298,7 +411,7 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, globalRefres
                             cursor: "pointer",
                             fontSize: "14px",
                         }}
-                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(255, 0, 0, 0.1)")}
+                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(255, 0, 0, 0.5)")}
                         onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
                     >
                         🗑️ Delete PDF

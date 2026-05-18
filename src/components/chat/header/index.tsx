@@ -1,6 +1,6 @@
 import styles from "./css/styles.module.css";
 import { Spin as Hamburger } from "hamburger-react";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useState, useEffect } from "react";
 import Image from "next/image";
 import image_src from "@/config/images_links/assets.json";
 import { Fetch_to, SweetAlert2 } from "@/utilities";
@@ -40,13 +40,26 @@ export default function Header({ isOpen, setOpen, setShowProfile, name, email, p
         } 
     };
 
+    useEffect(() => {
+        const handleClick = () => {
+            setProfile(false);
+        };
+
+        document.addEventListener("click", handleClick);
+        return () => document.removeEventListener("click", handleClick);
+    }, []);
+
     return(
         <header className={`${styles.container}`}>
             
             <Hamburger toggled={isOpen} toggle={setOpen}  />
             
             <h1>LACO AI</h1>
-            <span className={styles.profile} onClick={() => setProfile(!profile)}>
+            <span className={styles.profile} onClick={() => {
+                setTimeout(() => {
+                    setProfile(!profile);
+                }, 0);
+            }}>
                 <span>
                     <Image
                     src={profilePic ? profilePic : image_src.profile}

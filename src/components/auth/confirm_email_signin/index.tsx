@@ -65,8 +65,11 @@ export default function Confirm_email_signin({ mobile, email }: HeaderProps) {
         setLoading(true);
         const responds = await Fetch_to(api_link.checkcode, { email: form.email, code: form.code });
         if (responds.success) {
-            if (!showSignin) return (window as Window & { ReactNativeWebView?: { postMessage: (message: string) => void } }).ReactNativeWebView?.postMessage(`${form.code}`);
             localStorage.clear();
+            if (!showSignin) {
+                await Fetch_to(api_link.jwt.auth, { email: form.email });
+                return (window as Window & { ReactNativeWebView?: { postMessage: (message: string) => void } }).ReactNativeWebView?.postMessage(`${form.code}`);
+            }
             const response = await Fetch_to(api_link.checkcode, { email: form.email, code: form.code, key: "confirm_code" });
             if (!response.success) {
                 setMessage(response.message);
