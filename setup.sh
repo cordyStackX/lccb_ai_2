@@ -88,7 +88,7 @@ sudo rm -f /etc/nginx/sites-enabled/default
 sudo tee /etc/nginx/sites-available/app > /dev/null <<EOF
 server {
     listen 80;
-    server_name yourdomain.com;
+    server_name laco_ai.com;
 
     location /api/ {
         proxy_pass http://127.0.0.1:8000/;
@@ -130,10 +130,10 @@ disown
 echo -e "${YELLOW}==> Enabling HTTPS (Certbot)...${RESET}"
 
 sudo certbot --nginx \
-  -d yourdomain.com \
+  -d lccb_ai.com \
   --non-interactive \
   --agree-tos \
-  -m youremail@example.com \
+  -m cordystackx@gmail.com \
   --redirect
 
 # =========================
