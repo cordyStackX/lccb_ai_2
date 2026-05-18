@@ -6,57 +6,139 @@ BLUE="\033[34m"
 YELLOW="\033[33m"
 RESET="\033[0m"
 
-echo -e "${BLUE}<==> Starting installation... <==>${RESET}"
+echo -e "${BLUE}<==> Starting FULL production setup... <==>${RESET}"
 
-# Update package lists
-echo -e "${YELLOW}==> Updating package lists...${RESET}"
-sudo apt-get update
+# =========================
+# UPDATE SYSTEM
+# =========================
+echo -e "${YELLOW}==> Updating packages...${RESET}"
+sudo apt-get update -y
+
+# =========================
+# NODE INSTALL
+# =========================
+echo -e "${YELLOW}==> Installing Node.js...${RESET}"
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install -y nodejs
 
-# Install essential packages (optional if already present in Codespaces)
-echo -e "${YELLOW}==> Installing Essential Packages...${RESET}"
+# =========================
+# BASE PACKAGES
+# =========================
+echo -e "${YELLOW}==> Installing base packages...${RESET}"
+sudo apt-get install -y python3 python3-pip nginx certbot python3-certbot-nginx
 
-sudo apt-get install -y nodejs python3 python3-pip
+# =========================
+# PNPM
+# =========================
+echo -e "${YELLOW}==> Installing PNPM...${RESET}"
+sudo npm install -g pnpm
 
-# Verify installations
-
-echo -e "${GREEN}==> Checking Node.js version:${RESET}"
+# =========================
+# VERIFY
+# =========================
+echo -e "${GREEN}Node:${RESET}"
 node -v
 npm -v
-npx -v
 
-echo -e "${YELLOW}==> Installing PNPM packages...${RESET}"
-sudo npm install -g pnpm
-pnpm install
-
-echo -e "${GREEN}==> Python version:${RESET}"
+echo -e "${GREEN}Python:${RESET}"
 python3 -V
 
-# Upgrade pip
-echo -e "${YELLOW}==> Upgrading pip...${RESET}"
+# =========================
+# PYTHON DEPENDENCIES
+# =========================
+echo -e "${YELLOW}==> Installing Python requirements...${RESET}"
 python3 -m pip install --upgrade pip
-
-# Install Python packages
-echo -e "${YELLOW}==> Installing Python packages...${RESET}"
 pip install -r python/python_txt_file/requirements.txt
 
-# Check required environment files before Next.js build
-echo -e "${YELLOW}==> Checking required .env files...${RESET}"
+# =========================
+# NODE DEPENDENCIES
+# =========================
+echo -e "${YELLOW}==> Installing Node dependencies...${RESET}"
+pnpm install --frozen-lockfile
+
+# =========================
+# ENV CHECK
+# =========================
+echo -e "${YELLOW}==> Checking env file...${RESET}"
 if [ ! -f ".env.productions" ]; then
-	echo -e "${YELLOW}Missing required .env file: .env.productions${RESET}"
-	exit 1
+    echo -e "${YELLOW}Missing .env.productions file${RESET}"
+    exit 1
 fi
 
-echo -e "${BLUE}<==> Building Next.js app... <==>${RESET}"
-echo -e "${YELLOW}==> Running lint...${RESET}"
+# =========================
+# BUILD NEXT.JS
+# =========================
+echo -e "${BLUE}==> Building Next.js... <==${RESET}"
 pnpm run lint
-echo -e "${YELLOW}==> Running build...${RESET}"
 pnpm run build
 
-# Start FastAPI in background
-echo -e "${GREEN}==> Starting FastAPI server...${RESET}"
-nohup python3 python/main.py >> /tmp/fastapi.log 2>&1 & disown
+# =========================
+# NGINX SETUP
+# =========================
+echo -e "${YELLOW}==> Configuring Nginx...${RESET}"
 
-# Start Next.js server (this will block)
-echo -e "${GREEN}==> Starting Next.js at http://localhost:3000...${RESET}"
-pnpm run start
+sudo rm -f /etc/nginx/sites-enabled/default
+
+sudo tee /etc/nginx/sites-available/app > /dev/null <<EOF
+server {
+    listen 80;
+    server_name yourdomain.com;
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000/;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+    }
+}
+EOF
+
+sudo ln -sf /etc/nginx/sites-available/app /etc/nginx/sites-enabled/app
+
+sudo nginx -t
+sudo systemctl restart nginx
+
+# =========================
+# START BACKENDS
+# =========================
+echo -e "${GREEN}==> Starting FastAPI...${RESET}"
+nohup uvicorn python.main:app \
+  --host 127.0.0.1 \
+  --port 8000 \
+  --workers 2 \
+  >> /tmp/fastapi.log 2>&1 &
+disown
+
+echo -e "${GREEN}==> Starting Next.js...${RESET}"
+nohup pnpm run start >> /tmp/next.log 2>&1 &
+disown
+
+# =========================
+# HTTPS SETUP (CERTBOT)
+# =========================
+echo -e "${YELLOW}==> Enabling HTTPS (Certbot)...${RESET}"
+
+sudo certbot --nginx \
+  -d yourdomain.com \
+  --non-interactive \
+  --agree-tos \
+  -m youremail@example.com \
+  --redirect
+
+# =========================
+# AUTO RENEW
+# =========================
+echo -e "${YELLOW}==> Enabling auto-renew...${RESET}"
+sudo systemctl enable certbot.timer
+sudo systemctl start certbot.timer
+
+# =========================
+# DONE
+# =========================
+echo -e "${BLUE}<==> SERVER READY 🚀 HTTPS + Nginx + API + Next.js <==>${RESET}"
+echo -e "${GREEN}https://yourdomain.com${RESET}"
