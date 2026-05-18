@@ -12,7 +12,8 @@ echo -e "${BLUE}<==> Starting FULL production setup... <==>${RESET}"
 # UPDATE SYSTEM
 # =========================
 echo -e "${YELLOW}==> Updating packages...${RESET}"
-sudo apt-get update -y
+apt-get install sudo -y
+sudo apt-get update && apt-get upgrade -y
 
 # =========================
 # NODE INSTALL
@@ -48,6 +49,8 @@ python3 -V
 # =========================
 echo -e "${YELLOW}==> Installing Python requirements...${RESET}"
 python3 -m pip install --upgrade pip
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r python/python_txt_file/requirements.txt
 
 # =========================
