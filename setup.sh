@@ -48,9 +48,9 @@ python3 -V
 # PYTHON DEPENDENCIES
 # =========================
 echo -e "${YELLOW}==> Installing Python requirements...${RESET}"
-python3 -m pip install --upgrade pip
 python3 -m venv .venv
 source .venv/bin/activate
+python3 -m pip install --upgrade pip
 pip install -r python/python_txt_file/requirements.txt
 
 # =========================
