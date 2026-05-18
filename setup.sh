@@ -132,25 +132,24 @@ echo -e "${GREEN}==> Starting Next.js...${RESET}"
 nohup pnpm run start >> /tmp/next.log 2>&1 &
 disown
 
-# =========================
-# HTTPS SETUP (CERTBOT)
-# =========================
-
-echo -e "${YELLOW}==> Enabling HTTPS (Certbot)...${RESET}"
-
-sudo certbot --nginx \
-  -d "$DOMAIN_NAME" \
-  --non-interactive \
-  --agree-tos \
-  -m "$EMAIL_ADDR" \
-  --redirect
 
 # =========================
-# AUTO RENEW
+# HTTPS SETUP (CERTBOT) - SKIPPED FOR TESTING
 # =========================
-echo -e "${YELLOW}==> Enabling auto-renew...${RESET}"
-sudo systemctl enable certbot.timer
-sudo systemctl start certbot.timer
+# echo -e "${YELLOW}==> Enabling HTTPS (Certbot)...${RESET}"
+# sudo certbot --nginx \
+#   -d "$DOMAIN_NAME" \
+#   --non-interactive \
+#   --agree-tos \
+#   -m "$EMAIL_ADDR" \
+#   --redirect
+
+# =========================
+# AUTO RENEW - SKIPPED FOR TESTING
+# =========================
+# echo -e "${YELLOW}==> Enabling auto-renew...${RESET}"
+# sudo systemctl enable certbot.timer
+# sudo systemctl start certbot.timer
 
 # =========================
 # DONE
