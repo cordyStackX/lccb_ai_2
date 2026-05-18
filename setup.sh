@@ -48,6 +48,7 @@ python3 -V
 # PYTHON DEPENDENCIES
 # =========================
 echo -e "${YELLOW}==> Installing Python requirements...${RESET}"
+apt install python3.13-venv
 python3 -m venv .venv
 source .venv/bin/activate
 python3 -m pip install --upgrade pip
