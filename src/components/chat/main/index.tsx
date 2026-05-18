@@ -93,11 +93,12 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
     }, []);
 
     useEffect(() => {
-        if (inMobile) {
-            setChatres((prev) => ({ ...prev, ask: "Describe the contents of this image in detail." }));
-            handleSubmit();
+        if (inMobile && currentImg) {
+            const autoPrompt = "Describe the contents of this image in detail.";
+            setChatres((prev) => ({ ...prev, ask: autoPrompt }));
+            void handleImageSubmit(undefined, autoPrompt);
         }
-    }, [currentImg]);
+    }, [currentImg, inMobile]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const value = e.target.value;
@@ -141,18 +142,22 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
 
     };
 
-    const handleImageSubmit = async (e?: React.FormEvent<HTMLFormElement>) => {
+    const handleImageSubmit = async (
+        e?: React.FormEvent<HTMLFormElement>,
+        overridePrompt?: string
+    ) => {
         e?.preventDefault();
-        if (!chatres.ask.trim()) return;
+        const promptText = (overridePrompt ?? chatres.ask).trim();
+        if (!promptText) return;
         if (!currentImg) return;
 
         setStatus(true);
         setLoading(true);
 
-        const userMessage = { ask: chatres.ask, respond: "" };
+        const userMessage = { ask: promptText, respond: "" };
         setMessages((prev) => [...prev, userMessage]);
 
-        const prompt = chatres.ask;
+        const prompt = promptText;
         setChatres({ ask: "", respond2: "" });
         if (textareaRef.current) {
             textareaRef.current.style.height = "auto";
