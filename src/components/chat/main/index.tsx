@@ -83,7 +83,7 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
             const autoPrompt = "Describe the contents of this image in detail.";
             setChatres((prev) => ({ ...prev, ask: autoPrompt }));
             void handleImageSubmit(undefined, autoPrompt);
-            Swal.close()
+            Swal.close();
         }
     }, [currentImg, inMobile]);
 
@@ -163,11 +163,6 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
         setLoading(true);
 
         setMessages((prev) => {
-            // Use the latest state for context
-            const lastMessage = prev[prev.length - 1];
-            const lastUserResponse = lastMessage?.ask || "";
-            const lastAIResponse = lastMessage?.respond || "";
-            // Add the new user message
             return [
                 ...prev,
                 { ask: promptText, respond: "" }
