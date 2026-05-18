@@ -81,6 +81,8 @@ pnpm run build
 # =========================
 echo -e "${YELLOW}==> Configuring Nginx...${RESET}"
 
+sudo apt install systemctl -y
+
 sudo rm -f /etc/nginx/sites-enabled/default
 
 sudo tee /etc/nginx/sites-available/app > /dev/null <<EOF
