@@ -201,7 +201,7 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
                     }),
                 });
 
-                const data = await response.json().catch(() => null);
+                const data = await response.json();
                 if (!response.ok || !data?.success) {
                     throw new Error(data?.error || "Image request failed");
                 }

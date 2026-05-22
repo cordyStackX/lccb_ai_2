@@ -109,6 +109,7 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentIm
             setCurrentImg(item.image_link);
             setShowNoDataImage(!item);
         } else {
+            SweetAlert2("Error", response.message, "error", true, "Okay", false, "", false);
             setShowNoDataImage(true);
         }
 
