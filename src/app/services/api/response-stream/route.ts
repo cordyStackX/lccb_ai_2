@@ -5,6 +5,7 @@ import { supabaseServer } from "@/lib/supabase-server";
 import { Security } from "@/lib/security";
 
 export async function POST(req: NextRequest) {
+    try {
     const auth = await Security(req);
     if (auth?.error) {
         return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
@@ -101,4 +102,8 @@ export async function POST(req: NextRequest) {
             Connection: "keep-alive",
         },
     });
+    } catch (error) {
+        console.error("response-stream POST Error:", error);
+        return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
+    }
 }

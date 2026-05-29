@@ -22,7 +22,7 @@
     padding: 0 0 1rem 0;
 }
 .response {
-    width: min(800px, 90dvw);
+    width: min(800px, 100dvw);
     height: auto;
     margin: 1rem auto;
 }
@@ -36,7 +36,7 @@
 }
 .user_respones div {
     width: min(500px, 70%);
-    padding: 1rem 1.5rem;
+    padding: 1rem;
     background: var(--default-color-blue);
     border-radius: 10px;
     color: var(--default-color-white);
@@ -49,7 +49,7 @@
     padding: 0 0 1rem 0;
     line-height: 2.5rem;
     backdrop-filter: blur(100px);
-    width: min(700px, 95%);
+    width: 100%;
     max-width: 100%;
     overflow-wrap: anywhere;
     word-break: break-word;
@@ -58,7 +58,7 @@
     background-color: transparent;
 }
 .ai_response pre {
-    width: min(700px, 95%);
+    width: min(700px, 100%);
     background: var(--fx-color);       
     color: var(--default-color-white);            
     padding: 1rem;
@@ -96,33 +96,35 @@
     margin-bottom: 0.5rem; 
 }
 .ai_response a {
-    color: var(--adaptive-color-2); 
+    color: #1e90ff; /* blue */
+    text-decoration: underline;
 }
 .spinner_wrapper {
     justify-content: left;
-    padding: 1rem 0;
+    padding: 2rem 0;
     display: flex;
+}
+.spinner_wrapper p {
+    margin-left: 2rem;
 }
 
 .plushie_talk {
     justify-content: flex-start;
     align-items: flex-start;
     display: flex;
-    width: min(100%, 670px);
+    width: inherit;
     position: relative;
 }
 .plushie_talk div {
     margin: 0 0.2rem;
-    background: var(--primary);
     padding: 0.8rem;
-    border-radius: 10px;
-    color: var(--default-color-white);
-    max-width: 100%;
+    width: inherit;
+    color: var(--default-color-black);
     overflow-wrap: anywhere;
     word-break: break-word;
 }
 .plushie_talk img {
-    bottom: 0;
+    bottom: 25px;
     position: absolute;
 }
 .form_fx_effects {
@@ -294,12 +296,18 @@
         transform: translateY(0);
     }
 }
-
-.downloadBtn {
-    margin-top: 1rem;
-    padding: 0.6rem 1.2rem;
-    background: var(--default-color-blue);
-    color: var(--default-color-white);
+.buttons_links {
+    position: relative;
+    width: 100%;
+    height: auto;
+    display: flex;
+    justify-content: right;
+}
+.buttons_links button {
+    right: 0;
+    padding: 0.6rem;
+    color: var(--default-color-black);
+    background: none;
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -311,13 +319,13 @@
     gap: 0.5rem;
 }
 
-.downloadBtn:hover {
+.buttons_links button:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     opacity: 0.9;
 }
 
-.downloadBtn:active {
+.buttons_links button:active {
     transform: translateY(0);
 }
 

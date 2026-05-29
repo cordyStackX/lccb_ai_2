@@ -46,19 +46,20 @@ export default function Sidebar({ nav } : SidebarProps) {
                 src={image_src.admin}
                 alt="admin"
                 title="admin"
-                width={90}
-                height={90}
-                />    
-                <figcaption>Admin</figcaption>
-                <p>{process.env.NEXT_PUBLIC_GMAIL_USERNAME}</p>
+                width={70}
+                height={70}
+                />
+                <span>
+                    <figcaption>Admin</figcaption>
+                    <p>{process.env.NEXT_PUBLIC_GMAIL_USERNAME}</p>
+                </span>
             </figure>
             <section className={`${styles.options}`}>
                 <button 
                 disabled={nav_status === "dashboard" ? true : false}
                 style={{ 
-                    backgroundColor: `${ nav_status === "dashboard" ? "var(--fx-color)" : "" }`,
-                    color: `${ nav_status === "dashboard" ? "var(--default-color-white)" : "" }`,
-                    boxShadow: `${ nav_status === "dashboard" ? "0 0 10px 1px var(--primary)" : "" }`    
+                    backgroundColor: `${ nav_status === "dashboard" ? "var(--fx-color-bg-effects)" : "" }`,
+                    color: `${ nav_status === "dashboard" ? "var(--default-color-white)" : "" }`,   
                 }}
                 onClick={() => {router.push("/admin/dashboard");}}
                 >
@@ -72,9 +73,8 @@ export default function Sidebar({ nav } : SidebarProps) {
                 <button
                 disabled={nav_status === "manage_user" ? true : false}
                 style={{ 
-                    backgroundColor: `${ nav_status === "manage_user" ? "var(--fx-color)" : "" }`,
-                    color: `${ nav_status === "manage_user" ? "var(--default-color-white)" : "" }`,
-                    boxShadow: `${ nav_status === "manage_user" ? "0 0 10px 1px var(--primary)" : "" }`    
+                    backgroundColor: `${ nav_status === "manage_user" ? "var(--fx-color-bg-effects)" : "" }`,
+                    color: `${ nav_status === "manage_user" ? "var(--default-color-white)" : "" }`, 
                 }}
                 onClick={() => {router.push("/admin/manageuser");}}
                 > 
@@ -88,9 +88,8 @@ export default function Sidebar({ nav } : SidebarProps) {
                 <button
                 disabled={nav_status === "chat_bot" ? true : false}
                 style={{ 
-                    backgroundColor: `${ nav_status === "chat_bot" ? "var(--fx-color)" : "" }`,
-                    color: `${ nav_status === "chat_bot" ? "var(--default-color-white)" : "" }`,
-                    boxShadow: `${ nav_status === "chat_bot" ? "0 0 10px 1px var(--primary)" : "" }`    
+                    backgroundColor: `${ nav_status === "chat_bot" ? "var(--fx-color-bg-effects)" : "" }`,
+                    color: `${ nav_status === "chat_bot" ? "var(--default-color-white)" : "" }`,   
                 }}
                 onClick={() => {router.push("/admin/chatbot");}}
                 >
@@ -104,9 +103,8 @@ export default function Sidebar({ nav } : SidebarProps) {
                 <button
                 disabled={nav_status === "setting" ? true : false}
                 style={{ 
-                    backgroundColor: `${ nav_status === "setting" ? "var(--fx-color)" : "" }`,
+                    backgroundColor: `${ nav_status === "setting" ? "var(--fx-color-bg-effects)" : "" }`,
                     color: `${ nav_status === "setting" ? "var(--default-color-white)" : "" }`,
-                    boxShadow: `${ nav_status === "setting" ? "0 0 10px 1px var(--primary)" : "" }`    
                 }}
                 onClick={() => {router.push("/admin/setting");}}
                 >
@@ -119,7 +117,13 @@ export default function Sidebar({ nav } : SidebarProps) {
                 Setting</button>
             </section>
             <section className={`${styles.options_2}`}>
-                <button onClick={handle_logout}>Sign Out</button>
+                <button onClick={handle_logout}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M10 17V7a2 2 0 0 1 2-2h7v14h-7a2 2 0 0 1-2-2z"/>
+                    <path d="M15 12H3m0 0l3-3m-3 3l3 3"/>
+                    </svg>
+                    Sign Out</button>
             </section>
         </aside>
     );

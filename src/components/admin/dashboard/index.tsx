@@ -38,18 +38,63 @@ interface WeeklyPoint {
     value: number;
 }
 
+type GraphRange = "day" | "week" | "year";
+
 export default function Dashboard() {
     const [data, setData] = useState<ManageUserDataProps[]>([]);
     const [system_logs, setSystem_logs] = useState<System_logs[]>([]);
+    const [graphRange, setGraphRange] = useState<GraphRange>("week");
+    const [animatedStats, setAnimatedStats] = useState({
+        accounts: 0,
+        uploadedPdf: 0,
+        userApi: 0,
+        chatbotApi: 0,
+    });
 
     useEffect(() => {
         const RetrieveUserData = async () => {
+            const cacheKey = "admin_dashboard_cache_v1";
+            const cacheTtlMs = 1000 * 60 * 3; // 3 minutes
+
+            try {
+                const cachedRaw = localStorage.getItem(cacheKey);
+                if (cachedRaw) {
+                    const cached = JSON.parse(cachedRaw) as {
+                        at: number;
+                        users: ManageUserDataProps[];
+                        logs: System_logs[];
+                    };
+
+                    if (Date.now() - cached.at < cacheTtlMs) {
+                        setData(Array.isArray(cached.users) ? cached.users : []);
+                        setSystem_logs(Array.isArray(cached.logs) ? cached.logs : []);
+                        return;
+                    }
+                }
+            } catch {
+                // Ignore cache parse errors and fetch fresh data.
+            }
+
             const response = await Fetch_to(api_link.admin.retrieve_user);
             const response2 = await Fetch_to(api_link.admin.system_logs);
-            if (response.success) {
-                setData(response.data.message);
-                setSystem_logs(response2.data.message);
-                console.log(response2.data.message);
+            if (response.success && response2.success) {
+                const users = response.data.message ?? [];
+                const logs = response2.data.message ?? [];
+                setData(users);
+                setSystem_logs(logs);
+
+                try {
+                    localStorage.setItem(
+                        cacheKey,
+                        JSON.stringify({
+                            at: Date.now(),
+                            users,
+                            logs,
+                        })
+                    );
+                } catch {
+                    // Ignore storage quota/permission errors.
+                }
             }
         };
         RetrieveUserData();
@@ -83,78 +128,92 @@ export default function Dashboard() {
         return date.getFullYear() === now.getFullYear();
     }
 
-    const weeklyUsers = [0,0,0,0,0,0,0];
+    function isInCurrentDay(dateString: string) {
+        const date = new Date(dateString);
+        const now = new Date();
+        return (
+            date.getFullYear() === now.getFullYear()
+            && date.getMonth() === now.getMonth()
+            && date.getDate() === now.getDate()
+        );
+    }
 
-    const weeklyPDF_record = [0,0,0,0,0,0,0];
+    function getHour(dateString: string) {
+        return new Date(dateString).getHours();
+    }
 
-    const weeklyAPI_logs = [0,0,0,0,0,0,0];
+    const userSeries = graphRange === "day"
+        ? Array.from({ length: 24 }, () => 0)
+        : graphRange === "week"
+            ? Array.from({ length: 7 }, () => 0)
+            : Array.from({ length: 12 }, () => 0);
 
-    const monthlyUsers = [0,0,0,0,0,0,0,0,0,0,0,0];
+    const pdfSeries = [...userSeries];
+    const apiSeries = [...userSeries];
 
-    const monthlyPDF_record = [0,0,0,0,0,0,0,0,0,0,0,0];
-
-    const monthlyAPI_logs = [0,0,0,0,0,0,0,0,0,0,0,0];
-
-    data.forEach(user => {
-        if (user.created_at) {
-            const day = getDayOfWeek(user.created_at);
-            const month = getMonth(user.created_at);
-            if (isInCurrentWeek(user.created_at)) {
-                weeklyUsers[day]++;
-            }
-            if (isInCurrentYear(user.created_at)) {
-                monthlyUsers[month]++;
-            }
+    data.forEach((user) => {
+        if (!user.created_at) return;
+        
+        if (graphRange === "week" && isInCurrentWeek(user.created_at)) {
+            userSeries[getDayOfWeek(user.created_at)] += 1;
+        }
+        if (graphRange === "year" && isInCurrentYear(user.created_at)) {
+            userSeries[getMonth(user.created_at)] += 1;
         }
     });
 
     system_logs.forEach((entry) => {
-        if (entry.created_at) {
+        if (!entry.created_at) return;
+        if (graphRange === "day" && isInCurrentDay(entry.created_at)) {
+            const hour = getHour(entry.created_at);
+            pdfSeries[hour] += entry.uploaded_pdf ?? 0;
+            apiSeries[hour] += entry.api_request ?? 0;
+        }
+        if (graphRange === "week" && isInCurrentWeek(entry.created_at)) {
             const day = getDayOfWeek(entry.created_at);
+            pdfSeries[day] += entry.uploaded_pdf ?? 0;
+            apiSeries[day] += entry.api_request ?? 0;
+        }
+        if (graphRange === "year" && isInCurrentYear(entry.created_at)) {
             const month = getMonth(entry.created_at);
-            if (isInCurrentWeek(entry.created_at)) {
-                weeklyPDF_record[day] += entry.uploaded_pdf ?? 0;
-                weeklyAPI_logs[day] += entry.api_request ?? 0;
-            }
-            if (isInCurrentYear(entry.created_at)) {
-                monthlyPDF_record[month] += entry.uploaded_pdf ?? 0;
-                monthlyAPI_logs[month] += entry.api_request ?? 0;
-            }
+            pdfSeries[month] += entry.uploaded_pdf ?? 0;
+            apiSeries[month] += entry.api_request ?? 0;
         }
     });
 
-    const toWeeklySet = (series: number[]): WeeklyPoint[] => [
-        { name: "Sun", value: series[0] },
-        { name: "Mon", value: series[1] },
-        { name: "Tue", value: series[2] },
-        { name: "Wed", value: series[3] },
-        { name: "Thu", value: series[4] },
-        { name: "Fri", value: series[5] },
-        { name: "Sat", value: series[6] },
-    ];
+    const toPeriodSet = (series: number[]): WeeklyPoint[] => {
+    
+        if (graphRange === "week") {
+            return [
+                { name: "Sun", value: series[0] },
+                { name: "Mon", value: series[1] },
+                { name: "Tue", value: series[2] },
+                { name: "Wed", value: series[3] },
+                { name: "Thu", value: series[4] },
+                { name: "Fri", value: series[5] },
+                { name: "Sat", value: series[6] },
+            ];
+        }
 
-    const toMonthlySet = (series: number[]): WeeklyPoint[] => [
-        { name: "Jan", value: series[0] },
-        { name: "Feb", value: series[1] },
-        { name: "Mar", value: series[2] },
-        { name: "Apr", value: series[3] },
-        { name: "May", value: series[4] },
-        { name: "Jun", value: series[5] },
-        { name: "Jul", value: series[6] },
-        { name: "Aug", value: series[7] },
-        { name: "Sep", value: series[8] },
-        { name: "Oct", value: series[9] },
-        { name: "Nov", value: series[10] },
-        { name: "Dec", value: series[11] },
-    ];
+        return [
+            { name: "Jan", value: series[0] },
+            { name: "Feb", value: series[1] },
+            { name: "Mar", value: series[2] },
+            { name: "Apr", value: series[3] },
+            { name: "May", value: series[4] },
+            { name: "Jun", value: series[5] },
+            { name: "Jul", value: series[6] },
+            { name: "Aug", value: series[7] },
+            { name: "Sep", value: series[8] },
+            { name: "Oct", value: series[9] },
+            { name: "Nov", value: series[10] },
+            { name: "Dec", value: series[11] },
+        ];
+    };
 
-    const UserSet = toWeeklySet(weeklyUsers);
-    const Pdf_set = toWeeklySet(weeklyPDF_record);
-    const Api_logs = toWeeklySet(weeklyAPI_logs);
-
-    const UserMonthSet = toMonthlySet(monthlyUsers);
-    const PdfMonthSet = toMonthlySet(monthlyPDF_record);
-    const ApiMonthSet = toMonthlySet(monthlyAPI_logs);
+    const UserSet = toPeriodSet(userSeries);
+    const Pdf_set = toPeriodSet(pdfSeries);
+    const Api_logs = toPeriodSet(apiSeries);
     const currentDate = new Date().toLocaleDateString("en-US", {
         weekday: "long",
         year: "numeric",
@@ -198,11 +257,44 @@ export default function Dashboard() {
         return total;
     }, 0);
 
+    useEffect(() => {
+        const durationMs = 3000;
+        const start = performance.now();
+        const startValues = { ...animatedStats };
+        const targetValues = {
+            accounts: data.length,
+            uploadedPdf: uploadedPdfCount,
+            userApi: apiRequestCount,
+            chatbotApi: adminApiRequestCount,
+        };
+
+        let rafId = 0;
+
+        const animate = (now: number) => {
+            const progress = Math.min((now - start) / durationMs, 1);
+            const easeOut = 1 - Math.pow(1 - progress, 3);
+
+            setAnimatedStats({
+                accounts: Math.round(startValues.accounts + (targetValues.accounts - startValues.accounts) * easeOut),
+                uploadedPdf: Math.round(startValues.uploadedPdf + (targetValues.uploadedPdf - startValues.uploadedPdf) * easeOut),
+                userApi: Math.round(startValues.userApi + (targetValues.userApi - startValues.userApi) * easeOut),
+                chatbotApi: Math.round(startValues.chatbotApi + (targetValues.chatbotApi - startValues.chatbotApi) * easeOut),
+            });
+
+            if (progress < 1) {
+                rafId = requestAnimationFrame(animate);
+            }
+        };
+
+        rafId = requestAnimationFrame(animate);
+        return () => cancelAnimationFrame(rafId);
+    }, [data.length, uploadedPdfCount, apiRequestCount, adminApiRequestCount]);
+
     const usagePieData = [
         { name: "PDF Uploads", value: uploadedPdfCount },
         { name: "User Logs", value: apiRequestCount },
         { name: "Registered Accounts", value: data.length },
-        { name: "Chatbot", value: apiRequestCount },
+        { name: "Chatbot", value: adminApiRequestCount },
     ];
     const pieColors = ["#2563eb", "#f59e0b", "#16c784", "#ff0800"];
 
@@ -295,7 +387,7 @@ export default function Dashboard() {
                                 </svg>
                             </span>
                             
-                            <p> {data.length} </p>
+                            <p> {animatedStats.accounts} </p>
                         </span>
                         
                     </div>
@@ -310,7 +402,7 @@ export default function Dashboard() {
                                 </svg>
                             </span>
                             
-                            <p> {uploadedPdfCount} </p>
+                            <p> {animatedStats.uploadedPdf} </p>
                         </span>
                     </div>
                     <div>
@@ -326,7 +418,7 @@ export default function Dashboard() {
                                 </svg>
                             </span>
                             
-                            <p> {apiRequestCount} </p>
+                            <p> {animatedStats.userApi} </p>
                         </span>
                     </div>
                     <div>
@@ -342,21 +434,26 @@ export default function Dashboard() {
                                 </svg>
                             </span>
                             
-                            <p> {adminApiRequestCount} </p>
+                            <p> {animatedStats.chatbotApi} </p>
                         </span>
                     </div>
                 </div>
                 <section className={styles.analytics_data}>
                     <div className={styles.graph_container}>
-                        <h3 className={styles.reportTitle}>Weekly Reports</h3>
-                        {renderCryptoChart("Registered Accounts this Week", UserSet, "activeAccountsTrend", "Weekly")}
-                        {renderCryptoChart("Number of PDF this Week", Pdf_set, "pdfTrend", "Weekly")}
-                        {renderCryptoChart("AI API Requested this Week", Api_logs, "apiTrend", "Weekly")}
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                            <h3 className={styles.reportTitle}>Reports</h3>
+                            <select
+                                value={graphRange}
+                                onChange={(e) => setGraphRange(e.target.value as GraphRange)}
+                            >
+                                <option value="week">Week</option>
+                                <option value="year">Year</option>
+                            </select>
+                        </div>
 
-                        <h3 className={styles.reportTitle}>Monthly Reports</h3>
-                        {renderCryptoChart("Registered Accounts Monthly", UserMonthSet, "activeAccountsMonthTrend", "Monthly")}
-                        {renderCryptoChart("Number of PDF Monthly", PdfMonthSet, "pdfMonthTrend", "Monthly")}
-                        {renderCryptoChart("AI API Requested Monthly", ApiMonthSet, "apiMonthTrend", "Monthly")}
+                        {renderCryptoChart(`Registered Accounts`, UserSet, "activeAccountsTrend", graphRange)}
+                        {renderCryptoChart(`Number of PDF`, Pdf_set, "pdfTrend", graphRange)}
+                        {renderCryptoChart(`AI API Requested`, Api_logs, "apiTrend", graphRange)}
                     </div>
                     <div className={styles.records}>
                         <h3 className={styles.reportTitle}>Overall Usage</h3>

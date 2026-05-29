@@ -2,9 +2,8 @@
 import styles from "./css/styles.module.css";
 import { Dispatch, SetStateAction, useEffect, useState, useRef } from "react";
 import Markdown from "react-markdown";
-import { ThreeDots } from "react-loader-spinner";
-import { DownloadAsPDF, SweetAlert2, Fetch_toFile } from "@/utilities";
-import { handleChatSubmit, streamVoiceToText } from "@/modules";
+import { DownloadAsPDF, SweetAlert2, Fetch_toFile, CopyToClipboard } from "@/utilities";
+import { handleChatSubmit, streamVoiceToText, startRecording as startRecordingModule } from "@/modules";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import Image from "next/image";
 import image_src from "@/config/images_links/assets.json";
@@ -30,6 +29,7 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
     const [loading, setLoading] = useState(false);
     const [fx_effects, setFx_effects] = useState(false);
     const [fx_effects2, setFx_effects2] = useState(false);
+    const [copy, setCopy] = useState(false);
     const [email, setEmail] = useState("");
     const [pdf_id, setPdf_id] = useState<number | undefined>();
     const chatEndRef = useRef<HTMLDivElement>(null);
@@ -118,19 +118,18 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
     };
 
     const HandleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+        const files = e.target.files ? Array.from(e.target.files) : [];
+        if (files.length === 0) return;
 
         SweetAlert2("Uploading", "Please wait..", "info", false, "", false, "", true);
 
-        if (file.type !== "application/pdf") {
+        const hasInvalid = files.some((file) => file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf"));
+        if (hasInvalid) {
             alert("Please select a PDF file.");
             return;
         }
 
-        console.log("PDF selected:", file);
-
-        const response = await Fetch_toFile(api_link.storage.uploadPdf, file, { email: emailRes });
+        const response = await Fetch_toFile(api_link.storage.uploadPdf, files, { email: emailRes });
         Swal.close();
 
         setGlobalRefresh(true);
@@ -262,6 +261,18 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
         }
     };
 
+    const handleCopyResponse = async (text: string) => {
+        const copied = await CopyToClipboard(text);
+
+        if (copied) {
+            setCopy(true);
+            setTimeout(() => {
+                setCopy(false);
+            }, 3000);
+            return;
+        }
+    };
+
     const startAudioVisualization = (audioElement: HTMLAudioElement) => {
         if (!audioContextRef.current) {
             const AudioContextConstructor = window.AudioContext || ((window as unknown) as Record<string, typeof AudioContext>).webkitAudioContext;
@@ -384,163 +395,32 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
     //     void audio.play();
     // };
 
-    const startRecording = async () => {
-        if (!isMediaSupported) return alert("Browser Media is not supported :(");
-        if (loading) return;
-        if (!email || !pdf_id || !f_name) {
-            SweetAlert2(
-                "Missing context",
-                "Upload a PDF and make sure your account is loaded before using voice input.",
-                "warning",
-                true,
-                "OK",
-                false,
-                "",
-                false
-            );
-            return;
-        }
-        setStatus(true);
-        setLoading(true);
-        setFx_effects(true);
-        setFx_effects2(true);
-
-        setVoiceStatus("Recording your Voice");
-
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const recorder = new MediaRecorder(stream);
-        audioChunksRef.current = [];
-        voiceResponseRef.current = "";
-        voiceAutoPlayRef.current = true;
-
-        recorder.ondataavailable = (event) => {
-            if (event.data.size > 0) {
-                audioChunksRef.current.push(event.data);
-            }
-        };
-
-        recorder.onstop = () => {
-            if (recordingTimeoutRef.current) {
-                clearTimeout(recordingTimeoutRef.current);
-                recordingTimeoutRef.current = null;
-            }
-            stream.getTracks().forEach((track) => track.stop());
-            const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-            if (audioBlob.size === 0) return;
-
-            setStatus(true);
-            setLoading(true);
-            setChatres({ ask: "", respond2: "" });
-            if (textareaRef.current) {
-                textareaRef.current.style.height = "auto";
-            }
-
-            setMessages((prev) => {
-                const next = [...prev, { ask: "Transcribing audio...", respond: "" }];
-                voiceMessageIndexRef.current = next.length - 1;
-                return next;
-            });
-
-            const lastMessage = messages[messages.length - 1];
-            const lastUserResponse = lastMessage?.ask || "";
-            const lastAIResponse = lastMessage?.respond || "";
-
-            setVoiceStatus("Transcribing Response");
-
-            streamVoiceToText({
-                apiUrl: api_link.voice_stream,
-                audioBlob,
-                email,
-                pdfId: pdf_id,
-                fName: f_name,
-                lastUserResponse,
-                lastAiResponse: lastAIResponse,
-                onPrompt: (prompt) => {
-                    voiceResponseRef.current = "";
-                    setMessages((prev) => {
-                        const updated = [...prev];
-                        const index = voiceMessageIndexRef.current;
-                        if (index === null || index >= updated.length) {
-                            updated.push({ ask: `Transcription: ${prompt}`, respond: "" });
-                            voiceMessageIndexRef.current = updated.length - 1;
-                            return updated;
-                        }
-                        updated[index] = { ...updated[index], ask: `Transcription: ${prompt}` };
-                        return updated;
-                    });
-                },
-                onText: (text) => {
-                    voiceResponseRef.current += text;
-
-                    setVoiceStatus("Generating LLM text Responses");
-                    
-                    setMessages((prev) => {
-                        const updated = [...prev];
-                        const index = voiceMessageIndexRef.current;
-                        if (index === null || index >= updated.length) {
-                            voiceMessageIndexRef.current = updated.length - 1;
-                            return updated;
-                        }
-                        const current = updated[index];
-                        updated[index] = {
-                            ...current,
-                            respond: `${current.respond}${text}`,
-                        };
-                        return updated;
-                    });
-
-                },
-                onError: (message) => {
-
-                    setVoiceStatus("Something Went Wrong");
-
-                    setFx_effects(false);
-                    setFx_effects2(false);
-
-                    setMessages((prev) => {
-                        const updated = [...prev];
-                        const index = voiceMessageIndexRef.current;
-                        if (index === null || index >= updated.length) {
-                            voiceMessageIndexRef.current = updated.length - 1;
-                            return updated;
-                        }
-                        updated[index] = {
-                            ...updated[index],
-                            respond: message + " 🤖 Voice API is temporarily suspended for maintenance ⚠️",
-                        };
-                        return updated;
-                    });
-                    setLoading(false);
-                    voiceMessageIndexRef.current = null;
-                },
-                onDone: () => {
-                    voiceMessageIndexRef.current = null;
-                    if (voiceAutoPlayRef.current) {
-                        setVoiceStatus("Generating TSS Voice Responses");
-                        void playTts(voiceResponseRef.current, () => {setLoading(false); setFx_effects(false);});
-                    } else {
-                        setLoading(false);
-                    }
-                    voiceAutoPlayRef.current = false;
-                },
-            });
-        };
-
-        mediaRecorderRef.current = recorder;
-        recorder.start();
-        // auto-stop after 10 seconds
-        try {
-            recordingTimeoutRef.current = window.setTimeout(() => {
-                if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
-                    mediaRecorderRef.current.stop();
-                    setIsRecording(false);
-                }
-            }, 10000);
-        } catch (e) {
-            console.log("Error: ", e);
-            // ignore in non-browser environments
-        }
-        setIsRecording(true);
+    const startRecording = () => {
+        void startRecordingModule({
+            isMediaSupported,
+            loading,
+            email,
+            pdf_id,
+            f_name,
+            setStatus,
+            setLoading,
+            setFx_effects,
+            setFx_effects2,
+            setVoiceStatus,
+            mediaRecorderRef,
+            audioChunksRef,
+            voiceResponseRef,
+            voiceAutoPlayRef,
+            recordingTimeoutRef,
+            setChatres,
+            textareaRef,
+            setMessages,
+            voiceMessageIndexRef,
+            messages,
+            streamVoiceToText,
+            playTts,
+            setIsRecording,
+        });
     };
 
     // const stopRecording = () => {
@@ -576,7 +456,6 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
                                             alt="plushie"
                                             width={45}
                                             height={50}
-                                            className={styles.plushie_talk_img}
                                             />
                                             <div>
                                                 <div
@@ -587,13 +466,35 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
                                                     <Markdown>{msg.respond}</Markdown>
                                                 </div>
                                                 {!(index === messages.length - 1 && loading) && (
-                                                    <>
+                                                    <div className={styles.buttons_links}>
                                                         <button 
                                                             onClick={() => DownloadAsPDF(msg.respond, index)}
-                                                            className={styles.downloadBtn}
                                                             title="Download as PDF"
                                                         >
-                                                            📥 Download PDF
+                                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">                                                          
+                                                                <path d="M12 3v11" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>       
+                                                                <path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>                                                                    
+                                                                <path d="M5 20h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>       
+                                                            </svg>
+                                                        </button>
+                                                        <button
+                                                            onClick={() => void handleCopyResponse(msg.respond)}
+                                                            title="Copy"
+                                                        >
+                                                            {copy ? (
+                                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"                                
+                                                                xmlns="http://www.w3.org/2000/svg">                                                          
+                                                                    <path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" strokeWidth="2"                    
+                                                                strokeLinecap="round" strokeLinejoin="round"/>                                             
+                                                                </svg>    
+                                                            ) : (
+                                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"                                
+                                                                xmlns="http://www.w3.org/2000/svg">                                                          
+                                                                    <rect x="8" y="8" width="11" height="11" rx="2" stroke="currentColor" strokeWidth="2"/> 
+                                                                    <path d="M5 15V7a2 2 0 0 1 2-2h8" stroke="currentColor" strokeWidth="2"                 
+                                                                strokeLinecap="round"/>                                                                     
+                                                                </svg>  
+                                                            )}
                                                         </button>
                                                         {/* {ttsReplayUrl && ttsReplayIndex === index && (
                                                             <button
@@ -604,10 +505,9 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
                                                                 Replay Audio
                                                             </button>
                                                         )} */}
-                                                    </>
+                                                    </div>
                                                 )}
                                             </div>
-
                                         </div>
                                     ) : index === messages.length - 1 && loading ? (
                                         <div className={styles.plushie_talk}>
@@ -618,16 +518,7 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
                                             height={50}
                                             />
                                             <div className={`${styles.spinner_wrapper}`}>
-                                                <ThreeDots
-                                                visible={true}
-                                                height="30"
-                                                width="50"
-                                                color="#fff"
-                                                radius="9"
-                                                ariaLabel="three-dots-loading"
-                                                wrapperStyle={{}}
-                                                wrapperClass=""
-                                                />
+                                                <p className="gradientTextAnimation">Thinking...</p>
                                             </div>
                                         </div>
                                         
@@ -663,6 +554,7 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
                             ref={fileRef}
                             type="file"
                             accept="application/pdf"
+                            multiple
                             style={{ display: "none" }}
                             onChange={HandleFile}
                             />

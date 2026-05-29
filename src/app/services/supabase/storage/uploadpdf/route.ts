@@ -9,85 +9,135 @@ export async function POST(req: NextRequest) {
     if(auth?.error) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     
     const form = (await req.formData()) as unknown as globalThis.FormData;
-    const file = form.get("file") as File;
-    const email = form.get("email") as string;
-
-    const filename = file.name;
+    // accept multiple files under the key 'file'
+    const entries = form.getAll("file");
+    const email = (form.get("email") as string) || "";
 
     const cleanEmail = email.trim().toLowerCase();
 
-    if (!file) return NextResponse.json({ success: false, error: "PDF Not Detected" }, { status: 404 });
-
+    if (!entries || entries.length === 0) return NextResponse.json({ success: false, error: "No PDF files detected" }, { status: 400 });
     if (!cleanEmail) return NextResponse.json({ success: false, error: "Email not found" }, { status: 404 });
 
     const bucketName = "pdfs";
-    const filePath = `uploads/${Date.now()}_${file.name}`;
+    const uploadedResults: Array<{ originalName: string; storedName?: string; success: boolean; message?: string }> = [];
 
-    const { data, error } = await supabaseServer
-    .from("pdf_file")
-    .select("id")
-    .eq("email", cleanEmail)
-    .eq("file_name", filename);
+    const incomingNames: string[] = [];
+    for (const entry of entries) {
+        if (entry instanceof File) {
+            incomingNames.push(entry.name);
+        }
+    }
 
-    if (data && data.length > 0) return NextResponse.json({ success: false, error: "Pdf file Already exist" }, { status: 409 });
+    // If duplicate names are present inside the same request, reject the whole request.
+    const seen = new Set<string>();
+    const duplicateInBatch = new Set<string>();
+    for (const name of incomingNames) {
+        const key = name.toLowerCase();
+        if (seen.has(key)) duplicateInBatch.add(name);
+        seen.add(key);
+    }
+    if (duplicateInBatch.size > 0) {
+        return NextResponse.json(
+            { success: false, error: `Duplicate PDF names in upload: ${Array.from(duplicateInBatch).join(", ")}` },
+            { status: 409 }
+        );
+    }
 
-    if (error) {
-        console.error("Supabase Query Error: ", error);
+    // If any incoming file_name already exists for this user, reject the whole request.
+    const { data: existingNames, error: existingErr } = await supabaseServer
+        .from("pdf_file")
+        .select("file_name")
+        .eq("email", cleanEmail)
+        .in("file_name", incomingNames);
+
+    if (existingErr) {
+        console.error("Supabase Query Error:", existingErr);
         return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
     }
 
-    if (data) {
+    if (existingNames && existingNames.length > 0) {
+        const names = existingNames
+            .map((item: { file_name?: string }) => item.file_name)
+            .filter(Boolean)
+            .join(", ");
+        return NextResponse.json(
+            { success: false, error: `PDF name already exists: ${names}` },
+            { status: 409 }
+        );
+    }
 
-        const { data, error } = await supabaseServer.storage
-        .from(bucketName)
-        .upload(filePath, file, {
-            contentType: "application/json"
-        });
-
-        if (error) {
-            console.error("Supabase Query Error: ", error);
-            return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
+    for (const entry of entries) {
+        if (!(entry instanceof File)) {
+            uploadedResults.push({ originalName: String(entry), success: false, message: "Invalid file entry" });
+            continue;
         }
 
-        if (data) {
-            
-            const { error } = await supabaseServer
-            .from("pdf_file")
-            .insert([{ file: filePath, email: cleanEmail, file_name: filename }]);
+        const file = entry as File;
+        const origName = file.name;
 
-            const { data: record, error: record_err } = await supabaseServer
+        if (!origName.toLowerCase().endsWith(".pdf") && file.type !== "application/pdf") {
+            uploadedResults.push({ originalName: origName, success: false, message: "Not a PDF" });
+            continue;
+        }
+
+        const candidate = origName;
+
+        // storage path — include timestamp to avoid key collisions
+        const storagePath = `uploads/${Date.now()}_${candidate}`;
+
+        const { error: uploadErr } = await supabaseServer.storage
+            .from(bucketName)
+            .upload(storagePath, file, {
+                contentType: "application/pdf",
+                upsert: false,
+            });
+
+        if (uploadErr) {
+            console.error("Supabase Upload Error:", uploadErr);
+            uploadedResults.push({ originalName: origName, success: false, message: "Failed to upload to storage" });
+            continue;
+        }
+
+        // insert record
+        const { error: insertErr } = await supabaseServer
+            .from("pdf_file")
+            .insert([{ file: storagePath, email: cleanEmail, file_name: candidate }]);
+
+        if (insertErr) {
+            console.error("Supabase Insert Error:", insertErr);
+            uploadedResults.push({ originalName: origName, success: false, message: "Failed to insert DB record" });
+            continue;
+        }
+
+        // update daily upload counter
+        const { data: record, error: record_err } = await supabaseServer
             .from("system_logs")
             .select("uploaded_pdf, created_at")
             .eq("request", cleanEmail)
-            .gte("created_at", new Date().toISOString().split("T")[0]) // today start
-            .lt("created_at", new Date(Date.now() + 86400000).toISOString().split("T")[0]) // tomorrow start
+            .gte("created_at", new Date().toISOString().split("T")[0])
+            .lt("created_at", new Date(Date.now() + 86400000).toISOString().split("T")[0])
             .maybeSingle();
 
-            if (error && record_err) {
-                console.error("Supabase Query Error: ", error);
-                return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
-            }
-
-            if (record) {
-                const record_add = (record.uploaded_pdf ?? 0) + 1;
-                await supabaseServer
+        if (record_err) {
+            console.error("Supabase Query Error: ", record_err);
+        } else if (record) {
+            const record_add = (record.uploaded_pdf ?? 0) + 1;
+            await supabaseServer
                 .from("system_logs")
                 .update({ uploaded_pdf: record_add })
                 .eq("request", cleanEmail);
-            }
-
-            if (!record) {
-                await supabaseServer
+        } else {
+            await supabaseServer
                 .from("system_logs")
                 .insert([{
                     request: cleanEmail,
                     uploaded_pdf: 1,
                 }]);
-            }
-
-            return NextResponse.json({ success: true, message: "File upload successfully" }, { status: 200 });
-
         }
+
+        uploadedResults.push({ originalName: origName, storedName: candidate, success: true });
     }
+
+    return NextResponse.json({ success: true, uploaded: uploadedResults }, { status: 200 });
 
 }

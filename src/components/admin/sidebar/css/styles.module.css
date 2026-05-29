@@ -1,11 +1,18 @@
 .container {
-    width: 260px;
-    height: 100dvh;
-    background-color: var(--primary);
+    width: 270px;
+    height: 700px;
     flex-flow: column;
     display: flex;
     justify-content: center;
     align-items: center;
+    position: sticky;
+    top: 5%;
+    margin-left: 1rem;
+    color: var(--default-color-black);
+    border: 1px solid var(--default-color-gray);
+    border-radius: 8px;
+    padding: 2rem 0;
+    box-shadow: 0px 0px 5px 1px var(--default-color-gray);
 }
 
 .options {
@@ -18,19 +25,20 @@
     padding: 1rem;
 }
 .options button {
-    width: 230px;
-    padding: 0.8rem 1rem;
-    margin: 0.5rem 0;
+    width: 100%;
+    padding: 0.8rem;
+    margin: 0.1rem 0;
     cursor: pointer;
     font-weight: bold;
     text-align: start;
     background: transparent;
     border: transparent;
-    border-radius: 10px;
+    border-radius: 5px;
     display: flex;
     justify-content: left;
     align-items: center;
     font-weight: bolder;
+    color: var(--default-color-black);
 }
 .options svg {
     margin: 0 10px;
@@ -49,25 +57,40 @@
 }
 .options_2 button {
     width: 230px;
-    padding: 0.8rem 1rem;
+    padding: 0.8rem;
     margin: 0.5rem 0;
     cursor: pointer;
     font-weight: bold;
     text-align: start;
-    background: var(--default-color-red);
+    color: var(--default-color-red);
+    background: none;
     border: transparent;
     border-radius: 10px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    transition: 0.5s ease;
+}
+.options_2 button:hover {
+    background-color: var(--default-color-red);
+    color: var(--default-color-white);
+}
+.options_2 svg {
+    margin: 0 1rem;
 }
 .admin {
-    flex-flow: column;
     padding: 2rem 1rem;
     display: flex;
     justify-content: center;
     align-items: center;
 }
+.admin figcaption {
+    margin: 0 1rem;
+}
 .admin p {
-    width: 200px;
+    width: 130px;
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
+    margin: 0.5rem 1rem;
 }

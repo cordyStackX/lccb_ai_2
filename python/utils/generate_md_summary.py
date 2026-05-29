@@ -142,6 +142,8 @@ Respond with ONLY comma-separated numbers (e.g., \"1,3,4\"). If all chunks seem 
         systemRole = system_role.format(
             role=role,
             year=year,
+            name="admin",
+            method="summaries"
         )
 
         # --- Call OpenAI with relevant context ---

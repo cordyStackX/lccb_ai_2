@@ -51,19 +51,21 @@ export default function Chat_bot() {
     }, [refresh, page, search]);
 
     const HandleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+        const files = e.target.files ? Array.from(e.target.files) : [];
+        if (files.length === 0) return;
 
         SweetAlert2("Uploading", "Please wait..", "info", false, "", false, "", true);
 
-        if (file.type !== "application/pdf") {
+        const hasInvalid = files.some((file) => file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf"));
+        if (hasInvalid) {
             alert("Please select a PDF file.");
             return;
         }
 
-        console.log("PDF selected:", file);
+        console.log("PDF selected:", files.map((file) => file.name));
 
-        const response = await Fetch_toFile(api_link.storage.uploadpdf_chatbot , file, { email: "admin@admin.com" });
+
+        const response = await Fetch_toFile(api_link.storage.uploadpdf_chatbot , files, { email: "admin@admin.com" });
         Swal.close();
 
         if (response.success) {
@@ -145,6 +147,7 @@ export default function Chat_bot() {
             ref={fileRef}
             type="file"
             accept="application/pdf"
+            multiple
             style={{ display: "none" }}
             onChange={HandleFile}
             />

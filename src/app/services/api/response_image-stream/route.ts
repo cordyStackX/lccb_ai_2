@@ -4,6 +4,7 @@ import { supabaseServer } from "@/lib/supabase-server";
 import { rateLimit } from "@/lib/rate_limit";
 
 export async function POST(req: NextRequest) {
+try {
 	const rate = rateLimit(req, { windowMs: 1000, max: 5, keyPrefix: "response_image-stream" });
 	if (!rate.allowed) {
 		const retryAfterSeconds = Math.ceil((rate.resetAt - Date.now()) / 1000);
@@ -147,9 +148,8 @@ export async function POST(req: NextRequest) {
 	}
 
 	if (!upstream.ok) {
-		const errorData = await upstream.json().catch(() => null);
 		return NextResponse.json(
-			{ success: false, error: errorData?.error || "Upstream stream error" },
+			{ success: false, error: "Upstream stream error" },
 			{ status: upstream.status || 500 }
 		);
 	}
@@ -189,7 +189,7 @@ export async function POST(req: NextRequest) {
 	const upstreamData = await upstream.json().catch(() => null);
 	if (!upstreamData?.success) {
 		return NextResponse.json(
-			{ success: false, error: upstreamData?.error || "Upstream error" },
+			{ success: false, error: "Upstream error" },
 			{ status: 500 }
 		);
 	}
@@ -199,5 +199,9 @@ export async function POST(req: NextRequest) {
 		preview_url: previewUrl,
 		markdown: upstreamData?.markdown || "",
 	});
+	} catch (error) {
+		console.error("response_image-stream POST Error:", error);
+		return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
+	}
 }
 

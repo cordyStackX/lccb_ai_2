@@ -25,6 +25,6 @@
     width: max(1500px, 100%);
     display: flex;
     justify-content: center;
-    align-items: center;
-    overflow: auto;
+    align-items: flex-start;
+    position: relative;
 }

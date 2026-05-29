@@ -31,7 +31,7 @@ export default function Setting() {
         };
         
         fetchSuspensionState();
-    }, []);
+    }, [loading]);
     
     const ChangePassword = async() => {
         localStorage.setItem("email", "admin@admin.com");
@@ -44,8 +44,8 @@ export default function Setting() {
         const newState = e.target.value;
         setSuspensionState(newState);
 
-        const alert2 = await SweetAlert2("Update?", `Are you sure want to ${newState} all Routes`, "warning", true, "Yes", true, "No");
-        if (!alert2.isConfirmed) return;
+        const alert2 = await SweetAlert2("Update?", `Are you sure want to ${newState} Voice Routes`, "warning", true, "Yes", true, "No");
+        if (!alert2.isConfirmed) return setLoading(!loading);
         
         try {
             SweetAlert2("Updating", "Please wait..", "info", false, "", false, "", true);
@@ -69,17 +69,25 @@ export default function Setting() {
     return(
         <section className={styles.container}>
             <div className={`${styles.wrapper}`}>
-                <h2>System Settings</h2>
+                <span className={styles.title}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="2"/>
+                    <circle cx="9" cy="6" r="2" fill="currentColor"/>
+                    <circle cx="15" cy="12" r="2" fill="currentColor"/>
+                    <circle cx="11" cy="18" r="2" fill="currentColor"/>
+                    </svg> 
+                    <h2>System Settings</h2>
+                </span>
                 
                 <div className={styles.settings}>
                     <h3>General Setting</h3>
-                    <div className={`${styles.update_password} display_flex_center`}>
+                    <div className={`${styles.update_password}`}>
                         <p>Change the admin password</p>
                         <button onClick={ChangePassword}>Change</button>
                     </div>
                     <h3>Emergency Suspensions</h3>
-                    <div className={`${styles.setting_set} display_flex_center`}>
-                        <p>Suspend all API connections</p> 
+                    <div className={`${styles.setting_set}`}>
+                        <p>Suspend Voice API connections</p> 
                         <select value={suspensionState} onChange={handleSuspensionChange} disabled={loading}>
                             <option value="open">open</option>
                             <option value="suspend">suspend</option>

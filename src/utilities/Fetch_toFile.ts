@@ -1,6 +1,6 @@
 export default async function Fetch_toFile(
   dir: string,
-  file: File,
+  file: File | File[],
   fields: Record<string, string | number> = {},
   headers: Record<string, string> = {},
   retries: number = 3,
@@ -11,13 +11,19 @@ export default async function Fetch_toFile(
     return { success: false, message: "Invalid API Directory" };
   }
 
-  if (!file) {
+  if (!file || (Array.isArray(file) && file.length === 0)) {
     return { success: false, message: "No file provided" };
   }
 
   // Build multipart form
   const formData = new FormData();
-  formData.append("file", file);
+  if (Array.isArray(file)) {
+    for (const item of file) {
+      formData.append("file", item);
+    }
+  } else {
+    formData.append("file", file);
+  }
 
   for (const key in fields) {
     formData.append(key, String(fields[key]));

@@ -3,6 +3,7 @@ import api_links from "@/config/conf/json_config/Api_links.json";
 import { supabaseServer } from "@/lib/supabase-server";
 
 export async function POST(req: NextRequest) {
+    try {
 
     const { data: stateRows, error: stateError } = await supabaseServer
         .from("setting")
@@ -97,4 +98,8 @@ export async function POST(req: NextRequest) {
             Connection: "keep-alive",
         },
     });
+    } catch (error) {
+        console.error("response2-stream POST Error:", error);
+        return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
+    }
 }
