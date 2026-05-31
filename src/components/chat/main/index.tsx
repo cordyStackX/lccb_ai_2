@@ -588,61 +588,67 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
             {loading ? (
                 <div className={styles.form_fx_effects} style={{ display: status ? "flex" : "none" }} />
             ): null}
-            <form className={`${styles.ask} `} onSubmit={handleSubmit} style={{ position: status ? "fixed" : "relative" }}>
-                <svg className={styles.message_icons} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
-                </svg>
-                <textarea
-                ref={textareaRef}
-                id="chat"
-                name="ask"
-                placeholder="Ask questions about your document..."
-                value={chatres.ask}
-                onChange={(e) => {
-                    handleChange(e);
-                }}
-                onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey && !loading) {
-                    e.preventDefault();
-                    (e.target as HTMLTextAreaElement).style.height = "auto";
-                    handleSubmit(e as unknown as React.FormEvent<HTMLFormElement>);
-                    }
-                }}
-                className={styles.expandableInput}
-                autoComplete="off"
-                spellCheck={false}
-                />
-                
-                <button
-                    type="submit"
-                    disabled={!canSend || loading}
-                    title="Send your message"
-                    style={{ opacity: `${!canSend || loading ? "0.5" : "1" }` }}
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M12 19V5" />
-                        <path d="M5 12l7-7 7 7" />
+            <div className={styles.form_contain}>
+                <span className={styles.suggestions}>
+                    <button>Create Research Proposal</button>
+                    <button>Identify this study</button>
+                </span>
+                <form className={`${styles.ask} `} onSubmit={handleSubmit} style={{ position: status ? "fixed" : "relative" }}>
+                    <svg className={styles.message_icons} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
                     </svg>
-                </button>
-                {!canSend && (
+                    <textarea
+                    ref={textareaRef}
+                    id="chat"
+                    name="ask"
+                    placeholder="Ask questions about your document..."
+                    value={chatres.ask}
+                    onChange={(e) => {
+                        handleChange(e);
+                    }}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey && !loading) {
+                        e.preventDefault();
+                        (e.target as HTMLTextAreaElement).style.height = "auto";
+                        handleSubmit(e as unknown as React.FormEvent<HTMLFormElement>);
+                        }
+                    }}
+                    className={styles.expandableInput}
+                    autoComplete="off"
+                    spellCheck={false}
+                    />
+                    
                     <button
-                        className={styles.micButton}
-                        type="button"
-                        title={isRecording ? "Stop recording" : "Start recording"}
-                        disabled={!isMediaSupported && !loading}
-                        onClick={() => (startRecording())}
-                        style={{ opacity: isMediaSupported && !loading ? "1" : "0.5" }}
+                        type="submit"
+                        disabled={!canSend || loading}
+                        title="Send your message"
+                        style={{ opacity: `${!canSend || loading ? "0.5" : "1" }` }}
                     >
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="9" y="2" width="6" height="12" rx="3" stroke="currentColor" strokeWidth="2"/>
-                            <path d="M5 10C5 13.3137 7.68629 16 11 16H13C16.3137 16 19 13.3137 19 10" stroke="currentColor" strokeWidth="2"/>
-                            <line x1="12" y1="16" x2="12" y2="22" stroke="currentColor" strokeWidth="2"/>
-                            <line x1="8" y1="22" x2="16" y2="22" stroke="currentColor" strokeWidth="2"/>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M12 19V5" />
+                            <path d="M5 12l7-7 7 7" />
                         </svg>
                     </button>
-                )}
-            </form>
+                    {!canSend && (
+                        <button
+                            className={styles.micButton}
+                            type="button"
+                            title={isRecording ? "Stop recording" : "Start recording"}
+                            disabled={!isMediaSupported && !loading}
+                            onClick={() => (startRecording())}
+                            style={{ opacity: isMediaSupported && !loading ? "1" : "0.5" }}
+                        >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="9" y="2" width="6" height="12" rx="3" stroke="currentColor" strokeWidth="2"/>
+                                <path d="M5 10C5 13.3137 7.68629 16 11 16H13C16.3137 16 19 13.3137 19 10" stroke="currentColor" strokeWidth="2"/>
+                                <line x1="12" y1="16" x2="12" y2="22" stroke="currentColor" strokeWidth="2"/>
+                                <line x1="8" y1="22" x2="16" y2="22" stroke="currentColor" strokeWidth="2"/>
+                            </svg>
+                        </button>
+                    )}
+                </form>
+            </div>
         </section>
     );
 }

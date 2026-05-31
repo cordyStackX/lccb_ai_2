@@ -128,8 +128,8 @@
     position: absolute;
 }
 .form_fx_effects {
-    width: min(920px, 93dvw);
-    height: 82px;
+    width: min(910px, 93dvw);
+    height: 80px;
 
     position: fixed;
     bottom: -6px;
@@ -137,7 +137,7 @@
     overflow: hidden;
     border-radius: 12px;
 
-    padding: 0.5rem 2rem;
+    padding: 0.5rem 1rem;
     margin: 2rem 1rem;
 
     display: flex;
@@ -188,6 +188,22 @@
     to {
         transform: rotate(360deg);
     }
+}
+.form_contain {
+    width: min(900px, 90dvw);
+    height: auto;
+    overflow: hidden;
+    border-radius: 5px;
+    padding: 0.5rem 2rem 0.5rem 2rem;
+    margin: 2rem 1rem;
+    flex-flow: column;
+    bottom: 0;
+    display: flex;
+    justify-content: flex-start;
+    position: relative;
+}
+.suggestions {
+    display: flex;
 }
 .ask {
     width: min(900px, 90dvw);
