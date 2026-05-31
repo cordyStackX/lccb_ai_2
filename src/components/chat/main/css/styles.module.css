@@ -190,20 +190,43 @@
     }
 }
 .form_contain {
-    width: min(900px, 90dvw);
+    width: min(900px, 100dvw);
     height: auto;
     overflow: hidden;
     border-radius: 5px;
-    padding: 0.5rem 2rem 0.5rem 2rem;
+    padding: 0.5rem 0 0 0;
     margin: 2rem 1rem;
     flex-flow: column;
     bottom: 0;
     display: flex;
-    justify-content: flex-start;
+    justify-content: center;
+    align-items: center;
     position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    background-color: var(--fx-color-bg-effects);
+    box-shadow: 0 0 3px 1px var(--default-color-gray);
 }
 .suggestions {
+    width: 900px;
+    height: auto;
     display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 5px;
+    overflow-x: scroll;
+    scrollbar-width: none;
+}
+.suggestions button {
+    padding: 0.3rem 0.8rem;
+    border-radius: 30px;
+    cursor: pointer;
+    margin: 0 0 5px 15px;
+    border: none;
+    background-color: var(--default-color-white);
+    color: var(--foreground);
+    font-size: 0.9rem;
+    font-weight: 700;
 }
 .ask {
     width: min(900px, 90dvw);
@@ -211,7 +234,7 @@
     overflow: hidden;
     border-radius: 5px;
     padding: 0.5rem 2rem 0.5rem 2rem;
-    margin: 2rem 1rem;
+    margin: 0.5rem 0 0 0;
     background: var(--default-color-white-2);
     box-shadow: 0 0 2px 1px var(--default-color-gray);
     bottom: 0;

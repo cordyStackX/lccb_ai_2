@@ -34,6 +34,59 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
     const [pdf_id, setPdf_id] = useState<number | undefined>();
     const chatEndRef = useRef<HTMLDivElement>(null);
     const canSend = chatres.ask.trim().length > 0;
+    const suggestions = [
+        "Create Research Proposal",
+        "Identify this study",
+        "Summarize this research paper",
+        "Explain the methodology",
+        "Find the research gap",
+        "List the key findings",
+        "Create a literature review",
+        "Describe this image in detail",
+        "Extract text from this image",
+        "Analyze the image and explain what it shows",
+        "Write an abstract for this research",
+        "Generate possible research questions",
+        "Create a problem statement",
+        "Explain the theoretical framework",
+        "Identify the independent and dependent variables",
+        "Suggest related studies to compare",
+        "Create a presentation outline",
+        "Make a chapter-by-chapter summary",
+        "Check if this paper has limitations",
+        "Suggest improvements for this study",
+        "Describe the objects visible in this image",
+        "Identify important details in the image",
+        "Explain the image like a research observation",
+        "Create a caption for this image",
+        "Compare this image with the document context",
+        "Critically evaluate the strength of this study",
+        "Analyze the assumptions behind this research",
+        "Explain the deeper implications of the findings",
+        "Identify possible bias in the methodology",
+        "Evaluate the quality of the evidence",
+        "Find contradictions or weak arguments",
+        "Explain what this study contributes to the field",
+        "Compare the findings with existing theories",
+        "Suggest alternative interpretations of the results",
+        "Identify unanswered questions from this paper",
+        "Create a deeper conceptual analysis",
+        "Explain the practical impact of this research",
+        "Analyze the ethical concerns in this study",
+        "Assess whether the conclusion follows the evidence",
+        "Find hidden patterns or themes in the document",
+        "Generate a critical reflection about this research",
+        "Explain this paper from a researcher perspective",
+        "Evaluate how reliable this research is",
+        "Turn this into a thesis defense explanation",
+        "Create advanced follow-up research questions",
+    ];
+    const [shuffledSuggestions, setShuffledSuggestions] = useState(suggestions);
+    const [visibleSuggestionCount, setVisibleSuggestionCount] = useState(5);
+    const suggestionSearch = chatres.ask.trim().toLowerCase();
+    const matchedSuggestions = suggestionSearch
+        ? shuffledSuggestions.filter((suggestion) => suggestion.toLowerCase().includes(suggestionSearch))
+        : shuffledSuggestions;
     const [streamFadeMs, setStreamFadeMs] = useState(180);
     const [streamTick, setStreamTick] = useState(0);
     const [voiceStatus, setVoiceStatus] = useState("");
@@ -56,6 +109,21 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
     const analyserRef = useRef<AnalyserNode | null>(null);
     const dataArrayRef = useRef<Uint8Array | null>(null);
     const animationFrameRef = useRef<number | null>(null);
+
+    useEffect(() => {
+        const shuffled = [...suggestions];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const randomIndex = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[i]];
+        }
+
+        setShuffledSuggestions(shuffled);
+        setVisibleSuggestionCount(5);
+    }, [loading]);
+
+    useEffect(() => {
+        setVisibleSuggestionCount(5);
+    }, [chatres.ask]);
 
     useEffect(() => {
         if (inMobile === false) return;
@@ -588,12 +656,29 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
             {loading ? (
                 <div className={styles.form_fx_effects} style={{ display: status ? "flex" : "none" }} />
             ): null}
-            <div className={styles.form_contain}>
-                <span className={styles.suggestions}>
-                    <button>Create Research Proposal</button>
-                    <button>Identify this study</button>
-                </span>
-                <form className={`${styles.ask} `} onSubmit={handleSubmit} style={{ position: status ? "fixed" : "relative" }}>
+            <div className={styles.form_contain} style={{ position: status ? "fixed" : "relative", padding: loading ? 0 : "" }}>
+                {loading ? null : (
+                    <span className={styles.suggestions}>
+                        {matchedSuggestions.slice(0, visibleSuggestionCount).map((suggestion) => (
+                            <button
+                                key={suggestion}
+                                type="button"
+                                onClick={() => setChatres((prev) => ({ ...prev, ask: suggestion }))}
+                            >
+                                {suggestion}
+                            </button>
+                        ))}
+                        {visibleSuggestionCount < matchedSuggestions.length ? (
+                            <button
+                                type="button"
+                                onClick={() => setVisibleSuggestionCount((prev) => Math.min(prev + 5, matchedSuggestions.length))}
+                            >
+                                More suggestions {">>"}
+                            </button>
+                        ): null}
+                    </span>
+                )}
+                <form className={`${styles.ask} `} onSubmit={handleSubmit} style={{ margin: loading ? "0" : "" }} >
                     <svg className={styles.message_icons} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                     fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
