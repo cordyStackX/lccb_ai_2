@@ -37,6 +37,7 @@
 .user_respones div {
     width: min(500px, 70%);
     padding: 1rem;
+    margin: 0 1rem;
     background: var(--default-color-blue);
     border-radius: 10px;
     color: var(--default-color-white);
@@ -59,7 +60,7 @@
 }
 .ai_response pre {
     width: min(700px, 100%);
-    background: var(--fx-color);       
+    background: var(--foreground);       
     color: var(--default-color-white);            
     padding: 1rem;
     border-radius: 10px;
@@ -190,7 +191,7 @@
     }
 }
 .form_contain {
-    width: min(900px, 100dvw);
+    width: min(900px, 90dvw);
     height: auto;
     overflow: hidden;
     border-radius: 5px;
@@ -208,7 +209,7 @@
     box-shadow: 0 0 3px 1px var(--default-color-gray);
 }
 .suggestions {
-    width: 900px;
+    width: 100%;
     height: auto;
     display: flex;
     justify-content: flex-start;
