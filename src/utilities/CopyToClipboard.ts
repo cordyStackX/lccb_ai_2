@@ -4,8 +4,6 @@ function stripMarkdown(input: string): string {
         .replace(/```[\s\S]*?```/g, (block) => block.replace(/```/g, ""))
         .replace(/^#{1,6}\s+/gm, "")
         .replace(/^\s*>\s?/gm, "")
-        .replace(/^\s*[-*+]\s+/gm, "")
-        .replace(/^\s*\d+\.\s+/gm, "")
         .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, "$1")
         .replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1")
         .replace(/`([^`]+)`/g, "$1")
