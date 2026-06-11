@@ -13,11 +13,6 @@
     background: var(--default-color-white);
 }
 
-.chat_page_2 { 
-    background: linear-gradient(90deg, var(--adaptive-color-1), var(--adaptive-color-3));
-    color: var(--foreground);
-}
-
 .admin {
     background: var(--default-color-white); 
     width: max(1500px, 100%);

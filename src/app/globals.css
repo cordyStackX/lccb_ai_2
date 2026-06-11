@@ -65,11 +65,11 @@ body {
 .gradientDivAnimation {
   background: linear-gradient(
     90deg,
-    #808080 0%,
+    var(--default-color-white) 0%,
     #c0c0c0 25%,
     transparent 50%,
     #c0c0c0 75%,
-    #808080 100%
+    var(--default-color-white) 100%
   );
   background-size: 200% 100%;
   animation: gradientShiftDiv 1s forwards infinite;

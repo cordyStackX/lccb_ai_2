@@ -4,8 +4,9 @@ import {
 	Banner,
 	Content_1,
 	Content_2,
+	Content_3,
 	Chat_bot,
-	// Footer
+	Footer
 } from "@/components/landpage";
 import { useState } from "react";
 import { Fetch_to } from "@/utilities";
@@ -31,6 +32,7 @@ export default function Home() {
 			<Banner />
 			<Content_1 />
 			<Content_2 />
+			<Content_3 />
 			<Chat_bot show={show} setShow={setShow} />
 			<div
 				style={{
@@ -67,7 +69,7 @@ export default function Home() {
 				title="Chat Bot"
 				/>
 			</div>
-			{/* <Footer /> */}
+			<Footer />
 		</main>
 	);
 }

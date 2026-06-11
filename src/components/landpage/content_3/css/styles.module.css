@@ -1,0 +1,105 @@
+.container {
+    width: 100%;
+    height: auto;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.fx_effects {
+    width: 100%;
+    position: absolute;
+    z-index: -1;
+    height: 1px;
+    background: var(--primary);
+    box-shadow: 0 0 220px 110px var(--primary);
+}
+
+.wrapper {
+    width: var(--max-width);
+    margin: 70px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-flow: column;
+}
+
+.navi {
+    padding: 0.8rem 1.5rem;
+    margin: 2rem 0;
+    background: transparent;
+    border-radius: 50px;
+    backdrop-filter: blur(70px);
+    box-shadow: inset 2px -1px 5px 1px var(--default-color-white-2);
+    font-size: clamp(0.6rem, 0.5rem + 1vw, 0.8rem);
+}
+
+.title {
+    text-align: center;
+    width: 90%;
+}
+
+.title h2 {
+    font-size: clamp(1.5rem, 1rem + 1vw, 3.2rem);
+    margin: 20px 0;
+}
+
+.para {
+    font-size: clamp(0.8rem, 1rem + 1vw, 1.2rem);
+    text-align: center;
+    margin: 20px 0;
+}
+
+.flexing {
+    width: 90%;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: auto;
+}
+
+.flexing figure {
+    display: flex;
+    width: 1200px;
+    justify-content: left;
+    align-items: center;
+    border-radius: 20px;
+    overflow-x: auto;
+}
+
+.buttons {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.buttons button {
+    margin: 2rem 1rem;
+    width: 150px;
+    height: 45px;
+    background: linear-gradient(
+        30deg,
+        var(--default-color-white) 0%,
+        var(--primary) 50%,
+        var(--primary) 75%,
+        var(--primary) 100%
+    );
+    background-size: 100% 100%;
+    border: 2px solid var(--background);
+    border-radius: 50px;
+    font-weight: bold;
+    cursor: pointer;
+    transform: scale(1.0);
+    opacity: var(--spand-in);
+    transition: all 500ms ease;
+    font-size: 1rem;
+    color: var(--default-color-white);
+    box-shadow: 1px 2px 8px 2px var(--primary);
+}
+.buttons button:hover {
+    background-size: 200% 100%;
+}

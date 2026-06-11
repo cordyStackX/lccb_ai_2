@@ -158,13 +158,13 @@
     background: conic-gradient(
         from 0deg,
         transparent,
-        var(--fx-color-bg-effects),
         transparent,
-        var(--fx-color-bg-effects),
-        transparent 
+        transparent,
+        var(--fx-color-bg-effects) ,
+        var(--fx-color-bg-effects) 
     );
 
-    animation: rotateGradient 2s linear infinite;
+    animation: rotateGradient 1s linear infinite;
 
     z-index: -2;
 }
@@ -183,11 +183,11 @@
 
 @keyframes rotateGradient {
     from {
-        transform: rotate(0deg);
+        transform: rotate(0deg) translateY(10px);
     }
 
     to {
-        transform: rotate(360deg);
+        transform: rotate(360deg) translateY(-10px);
     }
 }
 .form_contain {
@@ -416,9 +416,9 @@
     background: linear-gradient(
         0deg,
         var(--primary) 0%,
-        var(--default-color-white) 100%
+        transparent 100%
     );
-    z-index: -1;
+    z-index: 1;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -445,7 +445,7 @@
     position: fixed;
     bottom: 170px;
     border-radius: 50%;
-    z-index: 1;
+    z-index: 2;
 }
 
 @keyframes fadeInGrow {
