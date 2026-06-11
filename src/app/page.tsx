@@ -3,6 +3,7 @@ import {
 	Header,
 	Banner,
 	Content_1,
+	Content_2,
 	Chat_bot,
 	// Footer
 } from "@/components/landpage";
@@ -29,6 +30,7 @@ export default function Home() {
 			<Header />
 			<Banner />
 			<Content_1 />
+			<Content_2 />
 			<Chat_bot show={show} setShow={setShow} />
 			<div
 				style={{

@@ -10,9 +10,9 @@ export default function Content_1() {
             <div className={styles.wrapper}>
                 <span className={styles.navi}><h3>AI Advantage</h3></span>
                 <div className={styles.title}>
-                    <h2>Empowering Learning Through AI with <br />Smart Learning Assistance</h2>
+                    <h2>Empowering Learning Through AI with Smart Learning Assistance</h2>
                     <p>Integrating the OpenAI API, LACO AI provides accurate and contextual responses to your questions, 
-                        <br /> assisting you in mastering your academic materials.</p>
+                        assisting you in mastering your academic materials.</p>
                 </div>
                 <div className={styles.flexing}>
                     <div className={styles.contain}>
