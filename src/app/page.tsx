@@ -3,7 +3,7 @@ import {
 	Header,
 	Banner,
 	Chat_bot,
-	Chat_bot_ask
+	Footer
 } from "@/components/landpage";
 import { useState } from "react";
 import { Fetch_to } from "@/utilities";
@@ -28,7 +28,42 @@ export default function Home() {
 			<Header />
 			<Banner />
 			<Chat_bot show={show} setShow={setShow} />
-			<Chat_bot_ask show={show} setShow={setShow} />
+			<div
+				style={{
+				display: show ? "block" : "none" ,
+				width: "500px",
+				height: "98vh",
+				position: "fixed",
+				bottom: "10px",
+				right: "10px",
+				zIndex: 9999,
+				}}
+			>
+				<div style={{
+					color: "#000",
+					position: "absolute",
+					top: "10px",
+					left: "10px",
+					fontWeight: "20px",
+					cursor: "pointer",
+					fontSize: "21px"
+				}} onClick={() => {setShow(false);}}>
+					{">"}
+				</div>
+				<iframe
+				src="http://localhost:3000/chat_bot"
+				style={{
+					width: "100%",
+					height: "100%",
+					border: "none",
+					borderRadius: "12px",
+					overflow: "hidden",
+					background: "transparent",
+				}}
+				title="Chat Bot"
+				/>
+			</div>
+			<Footer />
 		</main>
 	);
 }

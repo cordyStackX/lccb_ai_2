@@ -1,9 +1,8 @@
 .container {
     width: 100%;
     height: auto;
-    background: linear-gradient(0deg,  var(--default-color-white-2), var(--primary));
+    background: transparent;
     position: fixed;
-    backdrop-filter: blur(10px);
     z-index: 999;
 }
 .wrapper {
@@ -14,23 +13,34 @@
     margin: 0 auto;
 }
 .logo {
-    width: 50%;
-    height: 100%;
+    width: 80px;
+    height: 70px;
     overflow-x: auto;
-    padding: 0.5rem 0;
+    padding: 1rem 0;
     display: flex;
     justify-content: left;
     align-items: center;
+    backdrop-filter: blur(20px);
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.2) 0%,
+        transparent 30%
+    );
+    background-size: 100% 200%;
+    position: relative;
+    border-radius: 10px;
+    margin: 0.5rem 0;
 }
 .image1 {
-    margin: 0 0 0 30px;
+    width: 100%;
+    height: 100%;
 }
 .image2{
     margin: 0 0 0 20px;
 }
 
 .title {
-    width: 40%;
+    width: 10%;
     height: 100%;
     font-size: clamp(0.8rem, 0.5rem + 1vw, 1rem);
     display: flex;
@@ -38,7 +48,7 @@
     align-items: center;
 }
 .buttons {
-    width: 50%;
+    width: 80%;
     height: 100%;
     display: flex;
     justify-content: right;
@@ -48,16 +58,16 @@
     margin: 0 30px;
     width: 130px;
     height: 40px;
-    background-color: var(--primary);
+    background-color: var(--default-color-white);
     border: 2px solid var(--background);
-    border-radius: 5px;
+    border-radius: 50px;
     font-weight: bold;
     cursor: pointer;
     transform: scale(1.0);
     opacity: 1;
     transition: all 500ms ease-out;
     font-size: 1rem;
-    color: var(--default-color-white);
+    color: var(--foreground);
 }
 .buttons button:hover {
     opacity: 0.8;

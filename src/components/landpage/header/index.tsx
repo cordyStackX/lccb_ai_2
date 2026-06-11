@@ -13,9 +13,8 @@ export default function Header() {
                     <Image 
                     src={image_src.lccb}
                     alt="LCCB Logo"
-                    width={65}
-                    height={65}
                     className={styles.image1}
+                    fill
                     />
                 </figure>
                 <section className={`${styles.title}`}>

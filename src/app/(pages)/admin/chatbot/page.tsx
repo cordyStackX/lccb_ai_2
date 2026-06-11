@@ -22,7 +22,7 @@ export default function Chat_botPage() {
     }, [nav]);
 
     return (
-        <main className="admin display_flex_center">
+        <main className="admin">
             <Sidebar nav={nav} />
             <Chat_bot />
         </main>

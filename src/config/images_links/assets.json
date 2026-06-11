@@ -7,5 +7,6 @@
     "face" : "/face.png",
     "pdf_icon" : "/pdf.png",
     "profile" : "/profile.png",
-    "admin_user_icons" : "/user.png"
+    "admin_user_icons" : "/user.png",
+    "banner_fx_effect" : "/banner_fx_effect.png"
 }

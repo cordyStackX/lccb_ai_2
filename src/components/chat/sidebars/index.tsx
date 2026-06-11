@@ -277,7 +277,9 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentIm
                                             No IMAGE Found
                                         </p>
                                     ) : (
-                                        <p style={{ textAlign: "center", marginTop: "30px" }} className="gradientTextAnimation" >Loading...</p>
+                                        <div>
+                                            <div className={`gradientDivAnimation ${styles.fx_load}`}></div>
+                                        </div>
                                     )}
                                 </div>
                                 
@@ -352,7 +354,11 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentIm
                                             No PDF Found
                                         </p>
                                     ) : (
-                                        <React_Spinners status="Fetching..."/>
+                                        <div>
+                                            <div className={`gradientDivAnimation ${styles.fx_load}`}></div>
+                                            <div className={`gradientDivAnimation ${styles.fx_load}`}></div>
+                                            <div className={`gradientDivAnimation ${styles.fx_load}`}></div>
+                                        </div>
                                     )}
                                 </div>
                                 

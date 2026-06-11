@@ -1,9 +1,7 @@
 
 .landpage {
-	background: linear-gradient(0deg, var(--primary), var(--default-color-white-2));
-    position: fixed;
     width: 100%;
-    z-index: -2;
+    color: var(--default-color-white);
 }
 
 .auth_page {
@@ -12,7 +10,7 @@
 }
 
 .chat_page { 
-    background: linear-gradient(90deg, var(--adaptive-color-1), var(--adaptive-color-3));
+    background: var(--default-color-white);
 }
 
 .chat_page_2 { 
@@ -21,7 +19,7 @@
 }
 
 .admin {
-    background: linear-gradient(90deg, var(--adaptive-color-1), var(--adaptive-color-3)); 
+    background: var(--default-color-white); 
     width: max(1500px, 100%);
     display: flex;
     justify-content: center;

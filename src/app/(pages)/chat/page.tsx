@@ -16,7 +16,7 @@ function ChatContent() {
     const mobile = searchParams.get('mobile');
     const [inMobile, setInMobile] = useState(false);
     const [inMobileHead, setInMobileHead] = useState(false);
-    const [isOpen, setOpen] = useState(false);
+    const [isOpen, setOpen] = useState(true);
     const [globalRefresh, setGlobalRefresh] = useState(false);
     const [email, setEmail] = useState("");
     const [name, setName] = useState("");

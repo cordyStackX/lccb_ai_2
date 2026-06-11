@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import Swal from "sweetalert2";
 
-interface ManageUserDataProps {
+type ManageUserDataProps = {
     created_at?: string;
     email?: string;
     f_name?: string;
@@ -15,7 +15,7 @@ interface ManageUserDataProps {
     role?: string;
 }
 
-interface System_logs {
+type System_logs = {
     request?: string;
     email?: string;
     api_request?: string;

@@ -3,7 +3,6 @@ import styles from "./css/styles.module.css";
 import { useEffect, useState, useRef } from "react";
 import Markdown from "react-markdown";
 import api_link from "@/config/conf/json_config/fetch_url.json";
-import { ThreeDots } from "react-loader-spinner";
 import Image from "next/image";
 import image_src from "@/config/images_links/assets.json";
 
@@ -154,24 +153,15 @@ export default function Chat_bot() {
                                             </div>
                                         </div>
                                     ) : index === messages.length - 1 && loading ? (
-                                        <div className={` ${styles.plushie_talk}`}>
+                                       <div className={styles.plushie_talk}>
                                             <Image 
                                             src={image_src.plushie}
                                             alt="plushie"
                                             width={45}
                                             height={50}
                                             />
-                                            <div className={`${styles.spinner_wrapper} `}>
-                                                <ThreeDots
-                                                visible={true}
-                                                height="30"
-                                                width="50"
-                                                color="#fff"
-                                                radius="9"
-                                                ariaLabel="three-dots-loading"
-                                                wrapperStyle={{}}
-                                                wrapperClass=""
-                                                />
+                                            <div className={`${styles.spinner_wrapper}`}>
+                                                <p className="gradientTextAnimation">Thinking...</p>
                                             </div>
                                         </div>
                                         
