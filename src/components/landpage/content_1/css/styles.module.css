@@ -1,0 +1,109 @@
+.container {
+    width: 100%;
+    height: auto;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.wrapper {
+    width: var(--max-width);
+    margin: 10px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-flow: column;
+}
+
+.navi {
+    padding: 0.8rem 1.5rem;
+    margin: 2rem 0;
+    background: transparent;
+    border-radius: 50px;
+    backdrop-filter: blur(70px);
+    box-shadow: inset 2px -1px 5px 1px var(--default-color-white-2);
+    font-size: clamp(0.6rem, 0.5rem + 1vw, 0.8rem);
+}
+
+.title {
+    text-align: center;
+    width: 90%;
+}
+
+.title h2 {
+    font-size: clamp(1.5rem, 1rem + 1vw, 3.2rem);
+    margin: 20px 0;
+}
+
+.title p {
+    font-size: clamp(0.5rem, 0.5rem + 1vw, 1.2rem);
+    margin: 20px 0;
+    opacity: 0.89;
+}
+
+.flexing {
+    width: 100%;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 0;
+    margin: 20px 0;
+}
+
+.contain {
+    background: linear-gradient(
+        to bottom,
+        rgba(59, 130, 246, 0.95) 0%,
+        rgba(59, 130, 246, 0.68) 20%,
+        rgba(59, 130, 246, 0.32) 45%,
+        rgba(59, 130, 246, 0.04) 65%,
+        transparent 100%
+    );
+    width: 380px;
+    height: 670px;
+    margin: 0 10px;
+    border-radius: 20px;
+    backdrop-filter: blur(70px);
+    transition: all 500ms ease;
+    padding: 2rem;
+    display: flex;
+    justify-content: space-between;
+    flex-flow: column;
+}
+
+.contain:hover {
+    transform: scale(1.03);
+}
+
+.logo {
+    max-width: 90px;
+    margin: 1rem 0;
+    padding: 1rem;
+    background: var(--primary);
+    box-shadow: inset 0 5px 8px 1px var(--secondary), 0 5px 8px 1px var(--secondary);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+}
+
+.f_title h3 {
+    font-size: clamp(1.3rem, 0.5rem + 1vw, 1.4rem);
+    margin: 10px 0;
+}
+
+.f_title p {
+    font-size: clamp(0.8rem, 0.5rem + 1vw, 0.94rem);
+}
+
+.image {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    margin: 10px 0;
+    overflow: hidden;
+    border-radius: 20px;
+}

@@ -10,16 +10,18 @@ export default function Header() {
         <header className={styles.container}>
             <div className={styles.wrapper}>
                 <figure className={`${styles.logo}`}>
-                    <Image 
-                    src={image_src.lccb}
-                    alt="LCCB Logo"
-                    className={styles.image1}
-                    fill
-                    />
+                    <div>
+                        <Image 
+                        src={image_src.lccb}
+                        alt="LCCB Logo"
+                        className={styles.image1}
+                        fill
+                        />
+                    </div>
+                    <figcaption>
+                        <h2>LACO AI</h2>
+                    </figcaption>
                 </figure>
-                <section className={`${styles.title}`}>
-                    <h2>LACO AI</h2>
-                </section>
                 <section className={`${styles.buttons}`}>
                     <button onClick={() => {router.push("/auth/register");}}>Ask LACO</button>
                 </section>

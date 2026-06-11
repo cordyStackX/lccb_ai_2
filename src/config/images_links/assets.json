@@ -8,5 +8,11 @@
     "pdf_icon" : "/pdf.png",
     "profile" : "/profile.png",
     "admin_user_icons" : "/user.png",
-    "banner_fx_effect" : "/banner_fx_effect.png"
+    "banner_fx_effect" : "/banner_fx_effect.png",
+    "security" : "/security.png",
+    "secure_ui" : "/secure_ui.jpg",
+    "google-docs" : "/google-docs.png",
+    "pdf_ui" : "/pdf_ui.jpg",
+    "interactive" : "/interactive.png",
+    "Interactions" : "/Interactions.png"
 }
