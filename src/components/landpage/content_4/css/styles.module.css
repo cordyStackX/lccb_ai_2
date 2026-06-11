@@ -1,0 +1,233 @@
+.container {
+    width: 100%;
+    height: auto;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.fx_effects {
+    width: 100%;
+    position: absolute;
+    z-index: -1;
+    height: 1px;
+    background: var(--primary);
+    box-shadow: 0 0 220px 110px var(--primary);
+    bottom: 0;
+}
+
+.wrapper {
+    width: var(--max-width);
+    margin: 50px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-flow: column;
+}
+
+.navi {
+    padding: 0.8rem 1.5rem;
+    margin: 2rem 0;
+    background: transparent;
+    border-radius: 50px;
+    backdrop-filter: blur(70px);
+    box-shadow: inset 2px -1px 5px 1px var(--default-color-white-2);
+    font-size: clamp(0.6rem, 0.5rem + 1vw, 0.8rem);
+}
+
+.title {
+    text-align: center;
+    width: 90%;
+}
+
+.title h2 {
+    font-size: clamp(1.5rem, 1rem + 1vw, 3.2rem);
+    margin: 20px 0;
+}
+
+.searchBox {
+    width: 90%;
+    display: flex;
+    justify-content: center;
+    margin: 0.5rem 0 1.5rem 0;
+}
+
+.searchInput {
+    width: min(100%, 620px);
+    padding: 0.95rem 1.1rem;
+    border-radius: 999px;
+    border: 1px solid var(--default-color-white-2);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--default-color-white);
+    outline: none;
+    font-size: 1rem;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(16px);
+}
+
+.searchInput::placeholder {
+    color: var(--default-color-gray);
+}
+
+.searchInput:focus {
+    border-color: rgba(59, 130, 246, 0.45);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+}
+
+.para {
+    font-size: clamp(0.8rem, 1rem + 1vw, 1.2rem);
+    text-align: center;
+    margin: 20px 0;
+}
+
+.flexing {
+    width: 90%;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    flex-flow: column;
+    margin-top: 1rem;
+}
+
+.card {
+    width: 100%;
+    padding: 1rem 1.1rem;
+    margin: 10px 0;
+    border-radius: 18px;
+    border: 1px solid var(--default-color-white-2);
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.08) 0%,
+        rgba(255, 255, 255, 0.03) 100%
+    );
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+    backdrop-filter: blur(18px);
+    transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+}
+
+.question {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    cursor: pointer;
+    list-style: none;
+}
+
+.question::-webkit-details-marker {
+    display: none;
+}
+
+.question span {
+    flex: 0 0 auto;
+    min-width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--default-color-white);
+    background: linear-gradient(135deg, var(--primary), var(--fx-color-bg-effects));
+    box-shadow: 0 0 18px rgba(59, 130, 246, 0.3);
+}
+
+.question h3 {
+    margin: 0;
+    font-size: clamp(1rem, 0.9rem + 0.35vw, 1.2rem);
+    line-height: 1.4;
+    text-align: left;
+}
+
+.answer {
+    margin: 0.9rem 0 0 3rem;
+    color: var(--default-color-gray);
+    line-height: 1.8;
+    font-size: clamp(0.9rem, 0.85rem + 0.25vw, 1rem);
+    animation: answerClose 220ms ease forwards;
+}
+
+.card[open] {
+    border-color: rgba(59, 130, 246, 0.35);
+    box-shadow: 0 16px 45px rgba(59, 130, 246, 0.12);
+    transform: translateY(-2px);
+}
+
+.card[open] .answer {
+    animation: answerOpen 280ms ease forwards;
+}
+
+.card[open] .question span {
+    animation: markerSpin 280ms ease forwards;
+}
+
+.card[open] .question h3 {
+    animation: titleLift 280ms ease forwards;
+}
+
+.noResults {
+    width: 100%;
+    padding: 1rem;
+    text-align: center;
+    color: var(--default-color-gray);
+    border: 1px dashed var(--default-color-white-2);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.showMore {
+    margin-top: 1rem;
+    padding: 0.85rem 1.4rem;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    font-weight: 700;
+    color: var(--default-color-white);
+    background: linear-gradient(135deg, var(--primary), var(--fx-color-bg-effects));
+    box-shadow: 0 12px 28px rgba(59, 130, 246, 0.2);
+}
+
+@keyframes answerOpen {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 500px;
+    }
+}
+
+@keyframes answerClose {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes markerSpin {
+    from {
+        transform: rotate(0deg) scale(1);
+    }
+    to {
+        transform: rotate(360deg) scale(1.05);
+    }
+}
+
+@keyframes titleLift {
+    from {
+        transform: translateY(4px);
+    }
+    to {
+        transform: translateY(0);
+    }
+}

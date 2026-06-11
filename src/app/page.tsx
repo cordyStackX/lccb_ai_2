@@ -5,6 +5,7 @@ import {
 	Content_1,
 	Content_2,
 	Content_3,
+	Content_4,
 	Chat_bot,
 	Footer
 } from "@/components/landpage";
@@ -33,6 +34,7 @@ export default function Home() {
 			<Content_1 />
 			<Content_2 />
 			<Content_3 />
+			<Content_4 />
 			<Chat_bot show={show} setShow={setShow} />
 			<div
 				style={{

@@ -1,6 +1,7 @@
 "use client";
 import styles from "./css/styles.module.css";
 import image_src from "@/config/images_links/assets.json";
+import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
@@ -23,6 +24,7 @@ export default function Header() {
                     </figcaption>
                 </figure>
                 <section className={`${styles.buttons}`}>
+                    <Link href="#FaQ">FaQ</Link>
                     <button onClick={() => {router.push("/auth/register");}}>Ask LACO</button>
                 </section>
             </div>
