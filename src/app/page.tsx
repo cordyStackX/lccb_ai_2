@@ -12,6 +12,7 @@ import {
 import { useState } from "react";
 import { Fetch_to } from "@/utilities";
 import api_link from "@/config/conf/json_config/fetch_url.json";
+import fetch_link from "@/config/conf/json_config/Api_links.json";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -59,7 +60,7 @@ export default function Home() {
 					{">"}
 				</div>
 				<iframe
-				src="http://localhost:3000/chat_bot"
+				src={process.env.NEXT_PUBLIC_CHATBOTURL || fetch_link.iframe_localhost}
 				style={{
 					width: "100%",
 					height: "100%",
