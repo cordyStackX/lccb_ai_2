@@ -1,9 +1,9 @@
 "use client";
 import styles from "./css/styles.module.css";
 import image_src from "@/config/images_links/assets.json";
-import { useState, useEffect, useRef } from "react";
+import { SetStateAction, Dispatch, useState, useEffect, useRef } from "react";
 import Swal from "sweetalert2";
-import { Fetch_to, React_Spinners, SweetAlert2, Fetch_toFile } from "@/utilities";
+import { Fetch_to, SweetAlert2, Fetch_toFile } from "@/utilities";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import Image from "next/image";
 
@@ -12,7 +12,10 @@ type SidebarsProps = {
     emailRes: string;
     setCurrentPdf: (val: number | undefined) => void;
     setCurrentImg: (val: string | undefined) => void;
+    setCurrentMsg: (val: number | undefined) => void;
     globalRefresh: boolean;
+    globalRefreshMsg: boolean;
+    setGlobalMessages: Dispatch<SetStateAction<{ ask: string; respond: string }[]>>;
 }
 
 type PdfFile = {
@@ -32,22 +35,46 @@ type ImageFile = {
     size_mb?: string;
 }
 
-export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentImg, globalRefresh }: SidebarsProps) {
+type ChatHistoryItem = {
+    id?: number;
+    created_at?: string;
+    history?: { ask: string; respond: string }[];
+};
+
+export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentImg, globalRefresh, setGlobalMessages, globalRefreshMsg, setCurrentMsg }: SidebarsProps) {
     const pageSize = 10;
+    const historyPageSize = 7;
     const [profile, setProfile] = useState(false);
+    const [activeView, setActiveView] = useState<"pdf" | "image" | "chat">("pdf");
     const [data, setData] = useState<PdfFile[]>([]);
     const [imageData, setImageData] = useState<ImageFile[]>([]);
     const [selectedPdfId, setSelectedPdfId] = useState<number | undefined>();
+    const [selectedMsgId, setSelectedMsgId] = useState<number | undefined>();
     const [selectedImageId, setSelectedImageId] = useState<number | undefined>();
     const fileRef = useRef<HTMLInputElement>(null);
     const [refresh, setRefresh] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [showNoData, setShowNoData] = useState(false);
     const [showNoDataImage, setShowNoDataImage] = useState(false);
+    const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>([]);
+    const [showNoHistory, setShowNoHistory] = useState(false);
+    const [historyOffset, setHistoryOffset] = useState(0);
+    const [historyHasMore, setHistoryHasMore] = useState(true);
+    const [historyLoading, setHistoryLoading] = useState(false);
     const [offset, setOffset] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const [contextMenu, setContextMenu] = useState<{ visible: boolean; x: number; y: number; pdfId?: number; file?: string }>({
+        visible: false,
+        x: 0,
+        y: 0,
+    });
+    const [imageMenu, setImageMenu] = useState<{ visible: boolean; x: number; y: number; id?: number; file?: string }>({
+        visible: false,
+        x: 0,
+        y: 0,
+    });
+    const [historyMenu, setHistoryMenu] = useState<{ visible: boolean; x: number; y: number; id?: number }>({
         visible: false,
         x: 0,
         y: 0,
@@ -61,6 +88,8 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentIm
     useEffect(() => {
         const handleClick = () => {
             setContextMenu({ visible: false, x: 0, y: 0 });
+            setImageMenu({ visible: false, x: 0, y: 0 });
+            setHistoryMenu({ visible: false, x: 0, y: 0 });
         };
 
         document.addEventListener("click", handleClick);
@@ -104,9 +133,7 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentIm
 
         if (response.success) {
             const item = response.data.message;
-
             setImageData(item ? [item] : []);
-            setCurrentImg(item.image_link);
             setShowNoDataImage(!item);
         } else {
             SweetAlert2("Error", response.message, "error", true, "Okay", false, "", false);
@@ -116,18 +143,56 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentIm
         setIsLoading(false);
     };
 
+    const fetchChatHistory = async (reset = false) => {
+        if (historyLoading || (!historyHasMore && !reset) || !emailRes) return;
+        setHistoryLoading(true);
+
+        const nextOffset = reset ? 0 : historyOffset;
+
+        const response = await Fetch_to(api_link.retrieve_responses, {
+            email: emailRes,
+            limit: historyPageSize,
+            offset: nextOffset,
+        });
+
+        if (response.success) {
+            const items = response.data?.data || [];
+            setChatHistory((prev) => (reset ? items : [...prev, ...items]));
+            setHistoryOffset(nextOffset + items.length);
+            setHistoryHasMore(response.data?.hasMore ?? items.length === historyPageSize);
+            if (reset) {
+                setShowNoHistory(items.length === 0);
+            }
+        } else {
+            if (reset) {
+                setShowNoHistory(true);
+                setChatHistory([]);
+            }
+        }
+
+        setHistoryLoading(false);
+    };
+
+    useEffect(() => {
+        fetchChatHistory(true);
+    }, [globalRefreshMsg]);
+
     useEffect(() => {
         setData([]);
         setOffset(0);
         setHasMore(true);
         setShowNoData(false);
+        setHistoryOffset(0);
+        setHistoryHasMore(true);
         fetchPdfs(true);
         fetchImage();
+        fetchChatHistory(true);
     }, [emailRes, refresh, globalRefresh]);
 
     useEffect(() => {
         setCurrentPdf(selectedPdfId);
-    }, [selectedPdfId, setCurrentPdf, globalRefresh]);
+        setCurrentMsg(selectedMsgId);
+    }, [selectedPdfId, setCurrentPdf, globalRefresh, selectedMsgId]);
 
     // Filter PDFs based on search query
     const filteredPdfs = data.filter(pdf => 
@@ -177,6 +242,13 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentIm
         }
     };
 
+    const handleHistoryScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        const target = e.currentTarget;
+        if (target.scrollTop + target.clientHeight >= target.scrollHeight - 20) {
+            fetchChatHistory();
+        }
+    };
+
     const handleDeletePdf = async () => {
         if (!contextMenu.pdfId) return;
 
@@ -213,6 +285,39 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentIm
         }
     };
 
+    const handleDeleteHistory = async () => {
+        if (!historyMenu.id) return;
+
+        const result = await SweetAlert2(
+            "Delete Chat History",
+            "Are you sure you want to delete this chat history?",
+            "warning",
+            true,
+            "Yes, delete it",
+            true,
+            "Cancel"
+        );
+
+        if (!result.isConfirmed) return;
+
+        SweetAlert2("Deleting", "Please wait..", "info", false, "", false, "", true);
+
+        const response = await Fetch_to(api_link.delete_responses, {
+            email: emailRes,
+            id: historyMenu.id,
+        });
+
+        Swal.close();
+
+        if (response.success) {
+            SweetAlert2("Deleted", "Chat history deleted successfully", "success", true, "Okay", false, "", false);
+            setHistoryMenu({ visible: false, x: 0, y: 0 });
+            setRefresh((value) => !value);
+        } else {
+            SweetAlert2("Error", `${response.message}`, "error", true, "Confirm", false, "", false);
+        }
+    };
+
     return(
         <aside className={`${styles.container} ${isOpen ? styles.open : ""}`}>
              {/* Hidden Input */}
@@ -228,6 +333,9 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentIm
             </>
             <div className={`${styles.wrapper}`}>
                 <section className={styles.options}>
+                    <button onClick={() => {window.location.reload();}} title="New Chat" >
+                        New Chat
+                    </button>
                     <button onClick={UploadPdf} title="Upload your pdf" >
                         Upload New PDF
                     </button>
@@ -238,38 +346,182 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentIm
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
-                <section className={`${styles.chat_history}`}>
-                    <div className={styles.image_base}>
+                    <div className={styles.viewTabs}>
+                        <button
+                            type="button"
+                            className={activeView === "pdf" ? styles.tabActive : ""}
+                            onClick={() => setActiveView("pdf")}
+                        >
+                            PDF
+                        </button>
+                        <button
+                            type="button"
+                            className={activeView === "image" ? styles.tabActive : ""}
+                            onClick={() => setActiveView("image")}
+                        >
+                            Image
+                        </button>
+                        <button
+                            type="button"
+                            className={activeView === "chat" ? styles.tabActive : ""}
+                            onClick={() => setActiveView("chat")}
+                        >
+                            Chat
+                        </button>
+                    </div>
+                </section>
+
+                <section className={`${styles.chat_history}`} style={{ display: activeView === "chat" ? "flex" : "none" }}>
+                    <div className={styles.history_base}>
+                        <h3>Chat History</h3>
+                        <div className={styles.history_container} onScroll={handleHistoryScroll}>
+                            {chatHistory.length > 0 ? (
+                                chatHistory.map((chat, index) => {
+                                    const firstMessage = chat.history?.[0]?.ask || "Chat session";
+                                    const lastMessage = chat.history?.[chat.history.length - 1]?.respond || "";
+                                    return (
+                                        <span
+                                            key={chat.id ?? index}
+                                            className={styles.history_item}
+                                            title={firstMessage}
+                                             style={{ backgroundColor: chat.id === selectedMsgId ? "var(--fx-color)" : ""}}
+                                            onClick={() => {
+                                                setGlobalMessages(
+                                                    (chat.history ?? []).map((msg) => ({
+                                                    ask: msg.ask,
+                                                    respond: msg.respond,
+                                                    }))
+                                                );
+                                                setSelectedMsgId(chat.id);
+                                            }}
+                                        >
+                                            <span className={styles.history_icon}>
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                                    <path
+                                                        d="M7 8h10M7 12h6M21 12c0 4.418-4.03 8-9 8a10.5 10.5 0 0 1-2.2-.23L4 20l1.2-3.3A7.8 7.8 0 0 1 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8Z"
+                                                        stroke="currentColor"
+                                                        strokeWidth="2"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                    />
+                                                </svg>
+                                            </span>
+                                            <span className={styles.history_title}>{firstMessage}</span>
+                                            <span className={styles.history_preview}>
+                                                {lastMessage ? lastMessage.slice(0, 80) : "No preview"}
+                                            </span>
+                                            <span
+                                                className={styles.pdf_options}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setTimeout(() => {
+                                                        setHistoryMenu({
+                                                            visible: true,
+                                                            x: e.clientX,
+                                                            y: e.clientY,
+                                                            id: chat.id,
+                                                        });
+                                                    }, 0);
+                                                }}
+                                            >
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                                    <circle cx="5" cy="12" r="2" fill="currentColor" />
+                                                    <circle cx="12" cy="12" r="2" fill="currentColor" />
+                                                    <circle cx="19" cy="12" r="2" fill="currentColor" />
+                                                </svg>
+                                            </span>
+                                        </span>
+                                    );
+                                })
+                            ) : showNoHistory ? (
+                                <p className={styles.no_history}>No chat history found.</p>
+                            ) : (
+                                <div>
+                                    <div className={`gradientDivAnimation ${styles.fx_load}`} ></div>
+                                    <div className={`gradientDivAnimation ${styles.fx_load}`} ></div>
+                                    <div className={`gradientDivAnimation ${styles.fx_load}`} ></div>
+                                </div>
+                            )}
+                            {historyLoading && chatHistory.length > 0 && (
+                                <div>
+                                    <div className={`gradientDivAnimation ${styles.fx_load}`} ></div>
+                                    <div className={`gradientDivAnimation ${styles.fx_load}`} ></div>
+                                    <div className={`gradientDivAnimation ${styles.fx_load}`} ></div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </section>
+
+                    <div className={styles.image_base} style={{ display: activeView === "image" ? "block" : "none" }}>
                         <h3>Image Captures</h3>
                         <div className={styles.image_container}>
                             {imageData && imageData.length > 0 ? (
-                                imageData.map((image, index) => (
+                                imageData.map((image, index) => {
+                                    const imageKey = image.id ?? index;
+
+                                    return (
                                     <span
-                                    key={index}
-                                    // onContextMenu={(e) => handleContextMenu(e, image.id, image.file)}
-                                    style={{ backgroundColor: image.id === selectedImageId ? "var(--fx-color)" : ""}}
+                                    key={imageKey}
+                                    style={{
+                                        backgroundColor: imageKey === selectedImageId ? "var(--fx-color)" : ""
+                                    }}
+                                    onClick={() => {
+                                        setSelectedImageId(imageKey);
+                                        setCurrentImg(image.image_link ?? undefined);
+                                    }}
                                     >
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                                         <path d="M9 4L7.5 6H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-3.5L15 4H9z"
                                                 stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
                                         <circle cx="12" cy="13" r="4" stroke="currentColor" strokeWidth="2"/>
                                         </svg>
-                                        <button key={index}
-                                        onClick={() => setSelectedImageId(image.id)}
+                                        <button
                                         title={image.image_name}
-                                        style={{ fontWeight: image.id === selectedImageId ? "bold" : "" }}
-                                        >  {image.image_name} <br /> {image.size_mb} MB </button>
+                                        style={{
+                                            fontWeight: imageKey === selectedImageId ? "bold" : ""
+                                        }}
+                                        onClick={() => {
+                                            setSelectedImageId(imageKey);
+                                            setCurrentImg(image.image_link ?? undefined);
+                                        }}
+                                        >
+                                            {image.image_name} <br /> {image.size_mb} MB
+                                        </button>
                                     <span
-                                    style={{ display: image.id === selectedImageId ? "block" : "none" }}
+                                    style={{
+                                        display: imageKey === selectedImageId ? "block" : "none"
+                                    }}
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                         <path d="M20 6L9 17l-5-5"/>
                                         </svg>
                                     </span>
+                                    <span
+                                        className={styles.pdf_options}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setTimeout(() => {
+                                                setImageMenu({
+                                                    visible: true,
+                                                    x: e.clientX,
+                                                    y: e.clientY,
+                                                    id: imageKey,
+                                                    file: image.image_link,
+                                                });
+                                            }, 0);
+                                        }}
+                                    >
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                            <circle cx="5" cy="12" r="2" fill="currentColor"/>
+                                            <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                                            <circle cx="19" cy="12" r="2" fill="currentColor"/>
+                                        </svg>
                                     </span>
-                                
-                                ))
+                                    </span>
+                                    );
+                                })
                             ) : (
                                 <div>
                                     {showNoDataImage ? (
@@ -285,12 +537,16 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentIm
                                 
                             )}
                             {isLoading && data.length > 0 && (
-                                <p>Loading...</p>
+                                <div>
+                                    <div className={`gradientDivAnimation ${styles.fx_load}`}></div>
+                                    <div className={`gradientDivAnimation ${styles.fx_load}`}></div>
+                                    <div className={`gradientDivAnimation ${styles.fx_load}`}></div>
+                                </div>
                             )}
                         </div>
                     </div>
                     
-                    <div className={styles.pdf_base}>
+                    <div className={styles.pdf_base} style={{ display: activeView === "pdf" ? "block" : "none" }}>
                         <h3>PDF Documents</h3>
                         <div className={styles.pdf_container} onScroll={handleScroll}>
                             {data && data.length > 0 ? (
@@ -364,13 +620,14 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentIm
                                 
                             )}
                             {isLoading && data.length > 0 && (
-                                <React_Spinners status="Loading more..." />
+                                <div>
+                                    <div className={`gradientDivAnimation ${styles.fx_load}`}></div>
+                                    <div className={`gradientDivAnimation ${styles.fx_load}`}></div>
+                                    <div className={`gradientDivAnimation ${styles.fx_load}`}></div>
+                                </div>
                             )}
                         </div>
                     </div>
-                    
-                </section>
-                </section>           
             </div>
 
             {/* Context Menu */}
@@ -427,7 +684,94 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentIm
                     </button>
                 </div>
             )}
+            {historyMenu.visible && (
+                <div
+                    style={{
+                        position: "fixed",
+                        top: historyMenu.y,
+                        left: historyMenu.x,
+                        backgroundColor: "var(--default-color-white)",
+                        border: "1px solid var(--foreground)",
+                        borderRadius: "4px",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                        zIndex: 1000,
+                        padding: "4px 0",
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <button
+                        onClick={handleDeleteHistory}
+                        style={{
+                            display: "block",
+                            width: "100%",
+                            padding: "8px 16px",
+                            border: "none",
+                            background: "var(--default-color-white)",
+                            color: "var(--foreground)",
+                            textAlign: "left",
+                            cursor: "pointer",
+                            fontSize: "14px",
+                        }}
+                    >
+                        🗑️ Delete Chat
+                    </button>
+                </div>
+            )}
+            {imageMenu.visible && (
+                <div
+                    style={{
+                        position: "fixed",
+                        top: imageMenu.y,
+                        left: imageMenu.x,
+                        backgroundColor: "var(--default-color-white)",
+                        border: "1px solid var(--foreground)",
+                        borderRadius: "4px",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                        zIndex: 1000,
+                        padding: "4px 0",
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <button
+                        onClick={() => {
+                            setCurrentImg(undefined);
+                            setSelectedImageId(undefined);
+                            setImageMenu({ visible: false, x: 0, y: 0 });
+                        }}
+                        style={{
+                            display: "block",
+                            width: "100%",
+                            padding: "8px 16px",
+                            border: "none",
+                            background: "var(--default-color-white)",
+                            color: "var(--foreground)",
+                            textAlign: "left",
+                            cursor: "pointer",
+                            fontSize: "14px",
+                        }}
+                    >
+                        ⚪ Unselect Image
+                    </button>
+                    <button
+                        onClick={() => {
+                            setImageMenu({ visible: false, x: 0, y: 0 });
+                        }}
+                        style={{
+                            display: "block",
+                            width: "100%",
+                            padding: "8px 16px",
+                            border: "none",
+                            background: "var(--default-color-white)",
+                            color: "var(--foreground)",
+                            textAlign: "left",
+                            cursor: "pointer",
+                            fontSize: "14px",
+                        }}
+                    >
+                        🗑️ Delete Image
+                    </button>
+                </div>
+            )}
         </aside>
     );
 }
-

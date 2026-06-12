@@ -12,7 +12,7 @@ type RetryState = {
 
 // Retry tracking per session + IP (shared across all routes)
 const retryMap = new Map<string, RetryState>();
-const MAX_RETRIES = 20;
+const MAX_RETRIES = 50;
 const RETRY_WINDOW_MS = 60_000;
 
 function toOrigin(url: string | null): string | null {

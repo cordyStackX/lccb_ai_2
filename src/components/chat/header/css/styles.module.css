@@ -5,7 +5,7 @@
     position: fixed;
     color: var(--foreground);
     background-color: var(--default-color-white);
-    z-index: 9;
+    z-index: 3;
     top: 0;
     justify-content: space-between;
     display: flex;

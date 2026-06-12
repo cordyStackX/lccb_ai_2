@@ -129,21 +129,16 @@
     position: absolute;
 }
 .form_fx_effects {
-    width: min(910px, 93dvw);
-    height: 90px;
-
-    position: fixed;
-    bottom: -6px;
-
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    inset: 0;
     overflow: hidden;
-    border-radius: 12px;
-
-    padding: 0.5rem 1rem;
-    margin: 2rem 1rem;
-
+    border-radius: 20px;
+    padding: 0;
+    margin: 0;
     display: flex;
     justify-content: flex-start;
-
     isolation: isolate;
 }
 
@@ -191,118 +186,197 @@
     }
 }
 .form_contain {
-    width: min(900px, 90dvw);
+    width: min(980px, 94dvw);
     height: auto;
-    overflow: hidden;
-    border-radius: 5px;
-    padding: 0.5rem 0 0 0;
-    margin: 2rem 1rem;
+    padding: 1rem 0 1.25rem;
+    margin: 0.5rem 0;
     flex-flow: column;
     bottom: 0;
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
+    overflow: hidden;
     align-items: center;
     position: relative;
-    overflow: hidden;
-    border-radius: 8px;
-    background-color: var(--fx-color-bg-effects);
-    box-shadow: 0 0 3px 1px var(--default-color-gray);
+    gap: 0.75rem;
+    border-radius: 20px;
+    /* background-color: var(--fx-color-bg-effects); */
+    /* box-shadow: 0 0 3px 1px var(--default-color-gray); */
 }
-.suggestions {
+.composerFooter {
     width: 100%;
-    height: auto;
     display: flex;
     justify-content: flex-start;
-    flex-wrap: wrap;
-    gap: 5px;
-    overflow-x: scroll;
-    scrollbar-width: none;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.showSuggestions {
+    padding: 0.6rem 1rem;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 999px;
+    background: var(--default-color-white);
+    color: var(--foreground);
+    cursor: pointer;
+    font-size: 0.9rem;
 }
 .suggestions button {
-    padding: 0.3rem 0.8rem;
-    border-radius: 30px;
+    padding: 0.55rem 0.9rem;
+    border-radius: 999px;
     cursor: pointer;
-    margin: 0 0 5px 15px;
-    border: none;
+    margin: 0;
+    border: 1px solid rgba(0, 0, 0, 0.06);
     background-color: var(--default-color-white);
     color: var(--foreground);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 700;
+    white-space: nowrap;
 }
 .ask {
-    width: min(900px, 90dvw);
+    width: min(980px, 100%);
     height: auto;
     overflow: hidden;
-    border-radius: 5px;
-    padding: 0.5rem 2rem 0.5rem 2rem;
-    margin: 0.5rem 0 0 0;
+    border-radius: 24px;
+    padding: 1rem 2rem;
+    margin: 0;
     background: var(--default-color-white-2);
-    box-shadow: 0 0 2px 1px var(--default-color-gray);
     bottom: 0;
     display: flex;
+    flex-direction: column;
     justify-content: flex-start;
+    align-items: stretch;
+    gap: 0.9rem;
     position: relative;
 }
+.ask::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: 26px;
+    padding: 1px;
+    background: linear-gradient(135deg, #7c3aed 0%, #a855f7 34%, #ff8a3d 100%);
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    box-shadow:
+        0 0 24px rgba(124, 58, 237, 0.32),
+        0 0 30px rgba(255, 138, 61, 0.18);
+}
+.composerRight {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 0 0 auto;
+    margin-left: auto;
+}
+.composerLeft {
+    width: 70%;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+}
+.composerChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    height: 38px;
+    padding: 0 0.85rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.86);
+    cursor: pointer;
+    backdrop-filter: blur(12px);
+}
+.composerChip span {
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+.inlineSuggestions {
+    display: flex;
+    align-items: center;
+    scrollbar-width: none;
+    overflow-x: auto;
+}
+.inlineSuggestionChip,
+.inlineSuggestionMore,
+.inlineSuggestionToggle {
+    height: 34px;
+    padding: 0 1rem;
+    margin: 0 0.3rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.5);
+    color: var(--foreground);
+    cursor: pointer;
+    backdrop-filter: blur(12px);
+    white-space: nowrap;
+    font-size: 0.82rem;
+}
+.inlineSuggestionToggle,
+.inlineSuggestionMore {
+    background: rgba(255, 255, 255, 0.5);
+    width: auto;
+    min-width: 60px;
+    padding: 0 0.65rem;
+}
+.inlineSuggestionChip:hover,
+.inlineSuggestionMore:hover,
+.inlineSuggestionToggle:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 12px rgba(124, 58, 237, 0.16);
+}
 .expandableInput {
-    width: 92%;
-    min-height: 50px;
-    max-height: 150px;
-    padding: 1rem 0 0 1rem;
+    width: 100%;
+    min-height: 56px;
+    max-height: 160px;
+    padding: 0.1rem 0 0.25rem;
     border: none;
     outline: none;
     background: transparent;
     resize: none;
-    font-size: clamp(0.4rem, 0.5rem + 1vw, 1rem);
+    font-size: clamp(0.95rem, 0.82rem + 0.35vw, 1.02rem);
     overflow-y: auto;
     text-align: start;
-    font-weight: bold;
+    font-weight: 600;
     color: var(--foreground);
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
-.ask button {
-    padding: 0.5rem;
-    border-radius: 8px;
+.sendButton,
+.micButton {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 999px;
     font-weight: bold;
-    border: transparent;
+    border: none;
     color: var(--default-color-white);
-    background: var(--primary);
+    background: linear-gradient(135deg, var(--default-color-blue) 0%, var(--secondary) 45%, var(--primary) 100%);
     cursor: pointer;
-    position: absolute;
-    transition: all 500ms ease;
-    right: 15px;
-    bottom: 12px;
+    transition: all 240ms ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 18px rgba(167, 139, 250, 0.35), 0 0 30px rgba(255, 138, 61, 0.18);
 }
 .micButton {
-    right: 58px;
+    margin-left: -0.15rem;
+    background: rgba(255, 255, 255, 0.5);
+    color: var(--foreground);
 }
-.ask button:hover {
-    box-shadow: 0 0 5px 1px var(--foreground);   
+.composerChip:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 14px rgba(124, 58, 237, 0.18);
 }
-.ask span {
-    text-align: center;
-    padding: 0.2rem 0.8rem;
-    font-size: 1.5rem;
-    overflow: hidden;
-    border-radius: 50%;
-    cursor: pointer;
-    background: var(--primary);
-    color: var(--default-color-white);
-    transition: all 500ms ease;
-}
-.ask span:hover {
-    box-shadow: 0 0 5px 1px var(--foreground);   
-}
-.ask span:active {
-    transform: scale(0.5);
-}
-.message_icons {
-    position: absolute;
-    left: 12px;
-    bottom: 35%;
-    color: var(--default-color-gray);
+.sendButton:hover,
+.micButton:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 20px rgba(167, 139, 250, 0.45), 0 0 36px rgba(255, 138, 61, 0.22);
 }
 .cursor {
     display: inline-block;

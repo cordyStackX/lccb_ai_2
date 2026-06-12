@@ -2,7 +2,7 @@
 import styles from "./css/styles.module.css";
 import { Dispatch, SetStateAction, useEffect, useState, useRef } from "react";
 import Markdown from "react-markdown";
-import { DownloadAsPDF, SweetAlert2, Fetch_toFile, CopyToClipboard } from "@/utilities";
+import { DownloadAsPDF, SweetAlert2, Fetch_toFile, CopyToClipboard, Fetch_to } from "@/utilities";
 import { handleChatSubmit, streamVoiceToText, startRecording as startRecordingModule } from "@/modules";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import Image from "next/image";
@@ -14,12 +14,16 @@ type MainProps = {
     emailRes: string;
     currentPdf: number | undefined;
     currentImg: string | undefined;
+    currentMsg: number | undefined;
     inMobile: boolean;
     f_name: string;
     setGlobalRefresh: Dispatch<SetStateAction<boolean>>;
+    setGlobalRefreshMsg: Dispatch<SetStateAction<boolean>>;
+    setGlobalMessages: Dispatch<SetStateAction<{ ask: string; respond: string }[]>>;
+    globalMessages: { id?: number, ask: string; respond: string }[];
 }
 
-export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, currentImg, inMobile}: MainProps) {
+export default function Main({ currentMsg, emailRes, currentPdf, setGlobalRefresh, f_name, currentImg, inMobile, globalMessages, setGlobalRefreshMsg}: MainProps) {
     const [messages, setMessages] = useState<
         { ask: string; respond: string }[]
     >([]);
@@ -37,6 +41,7 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
     const canSend = chatres.ask.trim().length > 0;
     const [shuffledSuggestions, setShuffledSuggestions] = useState(suggestions);
     const [visibleSuggestionCount, setVisibleSuggestionCount] = useState(5);
+    const [showSuggestions, setShowSuggestions] = useState(true);
     const suggestionSearch = chatres.ask.trim().toLowerCase();
     const matchedSuggestions = suggestionSearch
         ? shuffledSuggestions.filter((suggestion) => suggestion.toLowerCase().includes(suggestionSearch))
@@ -63,6 +68,11 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
     const analyserRef = useRef<AnalyserNode | null>(null);
     const dataArrayRef = useRef<Uint8Array | null>(null);
     const animationFrameRef = useRef<number | null>(null);
+    const messagesRef = useRef(messages);
+
+    useEffect(() => {
+        messagesRef.current = messages;
+    }, [messages]);
 
     useEffect(() => {
         const shuffled = [...suggestions];
@@ -112,7 +122,14 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
     useEffect(() => {
         setEmail(emailRes);
         setPdf_id(currentPdf);
-    }, [emailRes, currentPdf]);
+    }, [emailRes, currentPdf, globalMessages]);
+
+    useEffect(() => {
+        if (globalMessages.length > 0) {
+            setStatus(true);
+            setMessages(globalMessages);
+        }
+    }, [globalMessages]);
 
     useEffect(() => {
         if (!textareaRef.current) return;
@@ -256,6 +273,7 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
     };
 
     const handleSubmit = async (e?: React.FormEvent<HTMLFormElement>) => {
+        e?.preventDefault();
         if (currentPdf) {
             await handleChatSubmit({
                 event: e,
@@ -276,6 +294,16 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
                 },
                 messages,
             });
+            
+            
+        await Fetch_to(api_link.save_responses, {
+            id: currentMsg,
+            email: email,
+            messages: messagesRef.current,
+        });
+
+        setGlobalRefreshMsg(true);
+
         } else {
             if (!currentImg) return SweetAlert2("Error", "Upload PDF or Image with Laco by Capture", "error", true, "Confirm", false, "", false);
             await handleImageSubmit(e);
@@ -607,87 +635,110 @@ export default function Main({ emailRes, currentPdf, setGlobalRefresh, f_name, c
                 }}>{voiceStatus}</h3>
             ): null}
             
-            {loading ? (
-                <div className={styles.form_fx_effects} style={{ display: status ? "flex" : "none" }} />
-            ): null}
+            
             <div className={styles.form_contain} style={{ position: status ? "fixed" : "relative", padding: loading ? 0 : "" }}>
-                {loading ? null : (
-                    <span className={styles.suggestions}>
-                        {matchedSuggestions.slice(0, visibleSuggestionCount).map((suggestion) => (
-                            <button
-                                key={suggestion}
-                                type="button"
-                                onClick={() => setChatres((prev) => ({ ...prev, ask: suggestion }))}
-                            >
-                                {suggestion}
-                            </button>
-                        ))}
-                        {visibleSuggestionCount < matchedSuggestions.length ? (
-                            <button
-                                type="button"
-                                onClick={() => setVisibleSuggestionCount((prev) => Math.min(prev + 5, matchedSuggestions.length))}
-                            >
-                                More suggestions {">>"}
-                            </button>
-                        ): null}
-                    </span>
-                )}
-                <form className={`${styles.ask} `} onSubmit={handleSubmit} style={{ margin: loading ? "0" : "" }} >
-                    <svg className={styles.message_icons} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                    fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
-                    </svg>
+                {loading ? (
+                    <div className={styles.form_fx_effects} style={{ display: status ? "flex" : "none" }} />
+                ): null}
+                <form className={`${styles.ask} `} onSubmit={handleSubmit} >
                     <textarea
-                    ref={textareaRef}
-                    id="chat"
-                    name="ask"
-                    placeholder="Ask questions about your document..."
-                    value={chatres.ask}
-                    onChange={(e) => {
-                        handleChange(e);
-                    }}
-                    onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey && !loading) {
-                        e.preventDefault();
-                        (e.target as HTMLTextAreaElement).style.height = "auto";
-                        handleSubmit(e as unknown as React.FormEvent<HTMLFormElement>);
-                        }
-                    }}
-                    className={styles.expandableInput}
-                    autoComplete="off"
-                    spellCheck={false}
+                        ref={textareaRef}
+                        id="chat"
+                        name="ask"
+                        placeholder="Ask questions about your document..."
+                        value={chatres.ask}
+                        onChange={(e) => {
+                            handleChange(e);
+                        }}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter" && !e.shiftKey && !loading) {
+                                e.preventDefault();
+                                (e.target as HTMLTextAreaElement).style.height = "auto";
+                                handleSubmit(e as unknown as React.FormEvent<HTMLFormElement>);
+                            }
+                        }}
+                        className={styles.expandableInput}
+                        autoComplete="off"
+                        spellCheck={false}
                     />
-                    
-                    <button
-                        type="submit"
-                        disabled={!canSend || loading}
-                        title="Send your message"
-                        style={{ opacity: `${!canSend || loading ? "0.5" : "1" }` }}
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M12 19V5" />
-                            <path d="M5 12l7-7 7 7" />
-                        </svg>
-                    </button>
-                    {!canSend && (
-                        <button
-                            className={styles.micButton}
-                            type="button"
-                            title={isRecording ? "Stop recording" : "Start recording"}
-                            disabled={!isMediaSupported && !loading}
-                            onClick={() => (startRecording())}
-                            style={{ opacity: isMediaSupported && !loading ? "1" : "0.5" }}
-                        >
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <rect x="9" y="2" width="6" height="12" rx="3" stroke="currentColor" strokeWidth="2"/>
-                                <path d="M5 10C5 13.3137 7.68629 16 11 16H13C16.3137 16 19 13.3137 19 10" stroke="currentColor" strokeWidth="2"/>
-                                <line x1="12" y1="16" x2="12" y2="22" stroke="currentColor" strokeWidth="2"/>
-                                <line x1="8" y1="22" x2="16" y2="22" stroke="currentColor" strokeWidth="2"/>
-                            </svg>
-                        </button>
-                    )}
+                    <div className={styles.composerFooter}>
+                        <div className={styles.composerLeft}>
+                            {loading ? null : (
+                                showSuggestions ? (
+                                    <span className={styles.inlineSuggestions}>
+                                        <button
+                                            type="button"
+                                            className={styles.inlineSuggestionToggle}
+                                            onClick={() => setShowSuggestions(false)}
+                                        >
+                                            {"<<"}
+                                        </button>
+                                        {matchedSuggestions.slice(0, visibleSuggestionCount).map((suggestion) => (
+                                            <button
+                                                key={suggestion}
+                                                type="button"
+                                                className={styles.inlineSuggestionChip}
+                                                onClick={() => setChatres((prev) => ({ ...prev, ask: suggestion }))}
+                                            >
+                                                {suggestion}
+                                            </button>
+                                        ))}
+                                        {visibleSuggestionCount < matchedSuggestions.length ? (
+                                            <button
+                                                type="button"
+                                                className={styles.inlineSuggestionMore}
+                                                onClick={() => setVisibleSuggestionCount((prev) => Math.min(prev + 5, matchedSuggestions.length))}
+                                            >
+                                                More
+                                            </button>
+                                        ) : null}
+                                    </span>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        className={styles.showSuggestions}
+                                        onClick={() => setShowSuggestions(true)}
+                                    >
+                                        Show suggestions
+                                    </button>
+                                )
+                            )}
+                        </div>
+
+                        <div className={styles.composerRight}>
+                            {!canSend && (
+                                <button
+                                    className={styles.micButton}
+                                    type="button"
+                                    title={isRecording ? "Stop recording" : "Start recording"}
+                                    disabled={!isMediaSupported && !loading}
+                                    onClick={() => (startRecording())}
+                                    style={{ opacity: isMediaSupported && !loading ? "1" : "0.5" }}
+                                >
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <rect x="9" y="2" width="6" height="12" rx="3" stroke="currentColor" strokeWidth="2"/>
+                                        <path d="M5 10C5 13.3137 7.68629 16 11 16H13C16.3137 16 19 13.3137 19 10" stroke="currentColor" strokeWidth="2"/>
+                                        <line x1="12" y1="16" x2="12" y2="22" stroke="currentColor" strokeWidth="2"/>
+                                        <line x1="8" y1="22" x2="16" y2="22" stroke="currentColor" strokeWidth="2"/>
+                                    </svg>
+                                </button>
+                            )}
+                            <button
+                                type="submit"
+                                disabled={!canSend || loading}
+                                title="Send your message"
+                                className={styles.sendButton}
+                                style={{ opacity: `${!canSend || loading ? "0.5" : "1" }` }}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M12 19V5" />
+                                    <path d="M5 12l7-7 7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
                 </form>
-            </div>
+            </div> 
         </section>
     );
 }

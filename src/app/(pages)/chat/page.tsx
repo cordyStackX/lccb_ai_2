@@ -7,7 +7,7 @@ import {
 } from "@/components/chat";
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Fetch_to, useConfirmExit } from "@/utilities";
+import { Fetch_to } from "@/utilities";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 
 function ChatContent() {
@@ -17,7 +17,11 @@ function ChatContent() {
     const [inMobile, setInMobile] = useState(false);
     const [inMobileHead, setInMobileHead] = useState(false);
     const [isOpen, setOpen] = useState(true);
+    const [globalMessages, setGlobalMessages] = useState<
+        { ask: string; respond: string }[]
+    >([]);
     const [globalRefresh, setGlobalRefresh] = useState(false);
+    const [globalRefreshMsg, setGlobalRefreshMsg] = useState(false);
     const [email, setEmail] = useState("");
     const [name, setName] = useState("");
     const [role, setRole] = useState("");
@@ -26,6 +30,7 @@ function ChatContent() {
     const [showProfile, setShowProfile] = useState(false);
     const [currentPdf, setCurrentPdf] = useState<number | undefined>();
     const [currentImg, setCurrentImg] = useState<string | undefined>();
+    const [currentMsg, setCurrentMsg] = useState<number | undefined>();
 
     useEffect(() => {
         async function check() {
@@ -53,10 +58,6 @@ function ChatContent() {
         check();
     }, []);
 
-    useConfirmExit({
-        onConfirm: () => router.back()
-    });
-
     useEffect(() => {
         async function check() {
             const response2 = await Fetch_to(api_link.storage.fetchimg, { email: email });
@@ -76,8 +77,8 @@ function ChatContent() {
         <main className="chat_page">
             <Header isOpen={isOpen} setOpen={setOpen} setShowProfile={setShowProfile} name={name} email={email} profilePic={profilePic} inMobile={inMobileHead} />
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center"}}>
-                <Sidebars isOpen={isOpen} emailRes={email} setCurrentPdf={setCurrentPdf} setCurrentImg={setCurrentImg} globalRefresh={globalRefresh} />
-                <Main emailRes={email} currentPdf={currentPdf} currentImg={currentImg} setGlobalRefresh={setGlobalRefresh} f_name={name} inMobile={inMobile} />
+                <Sidebars isOpen={isOpen} emailRes={email} setCurrentPdf={setCurrentPdf} setCurrentImg={setCurrentImg} globalRefresh={globalRefresh} setGlobalMessages={setGlobalMessages} globalRefreshMsg={globalRefreshMsg} setCurrentMsg={setCurrentMsg} />
+                <Main currentMsg={currentMsg} emailRes={email} currentPdf={currentPdf} currentImg={currentImg} setGlobalRefresh={setGlobalRefresh} f_name={name} inMobile={inMobile} globalMessages={globalMessages} setGlobalRefreshMsg={setGlobalRefreshMsg} setGlobalMessages={setGlobalMessages} />
                 <Profile showProfile={showProfile} setShowProfile={setShowProfile} email={email} name={name} role={role} year={year} profilePic={profilePic} setGlobalRefresh={setGlobalRefresh} />
             </div> 
         </main>

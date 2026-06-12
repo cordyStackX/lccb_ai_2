@@ -21,6 +21,9 @@
 	"response_image_stream" : "/services/api/response_image-stream",
 	"voice_stream" : "/services/api/response3-stream",
 	"tts" : "/services/api/tts",
+	"save_responses" : "/services/api/save_responses",
+	"retrieve_responses" : "/services/api/retrieve_responses",
+	"delete_responses" : "/services/api/delete_responses",
 	"storage" : {
 		"uploadPdf" : "/services/supabase/storage/uploadpdf",
 		"retrieve" : "/services/supabase/storage/retrieve",
