@@ -1,4 +1,4 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { attemptMap, cooldownMap, CodeStore } from "@/lib/code_store";
 import { rateLimit } from "@/lib/rate_limit";
@@ -49,7 +49,8 @@ export async function POST(req: NextRequest) {
 
         const resolveEmail = (email: string) => {
             if (email === process.env.ADMIN_ALIAS) {
-                return process.env.GMAIL_USERNAME!;
+                console.log("Admin Loggin as ", process.env.GMAIL_USERNAME);
+                return process.env.GMAIL_USERNAME;
             }
             return email;
         };
@@ -172,8 +173,4 @@ export async function POST(req: NextRequest) {
             { status: 500 }
         );
     }
-
-    
-
-    
 }

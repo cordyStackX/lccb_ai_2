@@ -254,6 +254,14 @@ export default function Main({ currentMsg, emailRes, currentPdf, setGlobalRefres
                     }
                     return updated;
                 });
+                
+                await Fetch_to(api_link.save_responses, {
+                    id: currentMsg,
+                    email: email,
+                    messages: messagesRef.current,
+                });
+
+                setGlobalRefreshMsg(true);
             } catch (error) {
                 const message = error instanceof Error ? error.message : "Image request failed";
                 setMessages((prev) => {
