@@ -14,7 +14,11 @@ export async function POST(params: NextRequest) {
     if (!email) {
         return NextResponse.json({ success: false, error: "Invalid" }, { status: 404 });
     }
-    console.log(id);
+
+    if (!messages || messages.length < 0) {
+        return NextResponse.json({ success: false, error: "Invalid" }, { status: 402 });
+    }
+    console.log("files ID", id);
     if (id) {
         const { error } = await supabaseServer
         .from("chat_history")
@@ -25,7 +29,7 @@ export async function POST(params: NextRequest) {
             console.error("Supabase Query Error: ", error);
             return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
         }
-        console.log("Update Current Reponses of ID: ", messages.id);
+        console.log("Update Current Reponses of ID: ", id);
         return NextResponse.json({ success: true, messages: "Saved Successfully" }, { status: 200 });
 
     }

@@ -254,14 +254,8 @@ export default function Main({ currentMsg, emailRes, currentPdf, setGlobalRefres
                     }
                     return updated;
                 });
-                
-                await Fetch_to(api_link.save_responses, {
-                    id: currentMsg,
-                    email: email,
-                    messages: messagesRef.current,
-                });
 
-                setGlobalRefreshMsg(true);
+                
             } catch (error) {
                 const message = error instanceof Error ? error.message : "Image request failed";
                 setMessages((prev) => {
@@ -276,6 +270,14 @@ export default function Main({ currentMsg, emailRes, currentPdf, setGlobalRefres
                 });
             } finally {
                 setLoading(false);
+                setTimeout(async () => {
+                    await Fetch_to(api_link.save_responses, {
+                        id: currentMsg,
+                        email: email,
+                        messages: messagesRef.current,
+                    });
+                    setGlobalRefreshMsg(true);
+                }, 1000);
             }
         }, 0);
     };
@@ -326,7 +328,7 @@ export default function Main({ currentMsg, emailRes, currentPdf, setGlobalRefres
             setCopy(true);
             setTimeout(() => {
                 setCopy(false);
-            }, 3000);
+            }, 1000);
             return;
         }
     };
