@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
 
     console.log("storage delete response:", storage, setError);
 
-    const { data, error } = await supabaseServer
+    const { error } = await supabaseServer
     .from("pdf_file")
     .delete()
     .eq("id", id);
@@ -32,6 +32,6 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, message: data }, { status: 200 });
+    return NextResponse.json({ success: true, message: "Deleted Successfully" }, { status: 200 });
 
 }

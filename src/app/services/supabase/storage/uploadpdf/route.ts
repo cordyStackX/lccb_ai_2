@@ -138,6 +138,6 @@ export async function POST(req: NextRequest) {
         uploadedResults.push({ originalName: origName, storedName: candidate, success: true });
     }
 
-    return NextResponse.json({ success: true, uploaded: uploadedResults }, { status: 200 });
+    return NextResponse.json({ success: true, message: "Uploaded Successfully", uploaded: uploadedResults }, { status: 200 });
 
 }

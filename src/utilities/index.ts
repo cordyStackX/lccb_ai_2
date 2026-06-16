@@ -22,3 +22,5 @@ export { default as DownloadAsPDF } from "./DownloadAsPDF";
 export { default as useSpeechToText } from "./useSpeechToText";
 
 export { default as CopyToClipboard } from "./CopyToClipboard";
+
+export { default as Popup_info } from "./Popup_info";

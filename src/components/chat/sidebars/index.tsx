@@ -3,7 +3,7 @@ import styles from "./css/styles.module.css";
 import image_src from "@/config/images_links/assets.json";
 import { SetStateAction, Dispatch, useState, useEffect, useRef } from "react";
 import Swal from "sweetalert2";
-import { Fetch_to, SweetAlert2, Fetch_toFile } from "@/utilities";
+import { Fetch_to, SweetAlert2, Fetch_toFile, Popup_info } from "@/utilities";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import Image from "next/image";
 
@@ -64,6 +64,10 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentIm
     const [offset, setOffset] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
+    const [isLoadState, setIsLoadState] = useState(false);
+    const [isLoadStateDone, setIsLoadStateDone] = useState(false);
+    const [isLoadError, setIsLoadError] = useState(false);
+    const [isLoadStatus, setIsLoadStatus] = useState("");
     const [contextMenu, setContextMenu] = useState<{ visible: boolean; x: number; y: number; pdfId?: number; file?: string }>({
         visible: false,
         x: 0,
@@ -207,7 +211,9 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentIm
         const files = e.target.files ? Array.from(e.target.files) : [];
         if (files.length === 0) return;
 
-        SweetAlert2("Uploading", "Please wait..", "info", false, "", false, "", true);
+        setIsLoadState(true);
+        setIsLoadStateDone(true);
+        setIsLoadStatus("Uploading Your PDF File Please Wait...");
 
         const hasInvalid = files.some((file) => file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf"));
         if (hasInvalid) {
@@ -221,13 +227,18 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentIm
         Swal.close();
 
         if (response.success) {
-            SweetAlert2("Success", "Successfully uploaded", "success", true, "Okay", false, "", false);
+            setIsLoadStateDone(false);
+            setIsLoadStatus(response.data.message);
+            setTimeout(() => setIsLoadState(false), 3000);
             if (fileRef.current) {
                 fileRef.current.value = "";
             }
             setRefresh(!refresh);
         } else {
-            SweetAlert2("Error", `${response.message}`, "error", true, "Confirm", false, "", false);
+            setIsLoadStateDone(false);
+            setIsLoadStatus(response.message);
+            setIsLoadError(true);
+            setTimeout(() => setIsLoadState(false), 3000);
             if (fileRef.current) {
                 fileRef.current.value = "";
             }
@@ -264,7 +275,9 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentIm
 
         if (!result.isConfirmed) return;
 
-        SweetAlert2("Deleting", "Please wait..", "info", false, "", false, "", true);
+        setIsLoadState(true);
+        setIsLoadStateDone(true);
+        setIsLoadStatus("Deleting Your PDF File Please Wait");
 
         const response = await Fetch_to(api_link.storage.deletepdf, {
             filePath: contextMenu.file,
@@ -274,14 +287,19 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentIm
         Swal.close();
 
         if (response.success) {
-            SweetAlert2("Deleted", "PDF deleted successfully", "success", true, "Okay", false, "", false);
+            setIsLoadStateDone(false);
+            setIsLoadStatus(response.data.message);
+            setTimeout(() => setIsLoadState(false), 3000);
             setContextMenu({ visible: false, x: 0, y: 0 });
             if (selectedPdfId === contextMenu.pdfId) {
                 setSelectedPdfId(undefined);
             }
             setRefresh(!refresh);
         } else {
-            SweetAlert2("Error", `${response.message}`, "error", true, "Confirm", false, "", false);
+            setIsLoadStateDone(false);
+            setIsLoadStatus(response.message);
+            setIsLoadError(true);
+            setTimeout(() => setIsLoadState(false), 3000);
         }
     };
 
@@ -321,6 +339,18 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentIm
     return(
         <aside className={`${styles.container} ${isOpen ? styles.open : ""}`}>
              {/* Hidden Input */}
+             {isLoadState ? (
+                isLoadStateDone ? (
+                    <Popup_info status={isLoadStatus} bg_color="var(--primary)" states={true} load={true} error={false} />
+                ) : (
+                    isLoadError ? (
+                        <Popup_info status={isLoadStatus} bg_color="var(--default-color-red)" states={false} load={true} error={true} />
+                    ) : (
+                        <Popup_info status={isLoadStatus} bg_color="var(--default-color-green)" states={false} load={true} error={false} />
+                    )
+                )
+                
+             ) : null}
             <>
                 <input
                 ref={fileRef}
