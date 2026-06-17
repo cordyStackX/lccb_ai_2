@@ -13,7 +13,6 @@ export default function Popup_info({ status, bg_color, states, load, error } : H
 
     return (
         <div className={styles.container} style={{ display: load ? "flex" : "none", background: bg_color }} role="status" aria-live="polite">
-            <p>{status}</p>
             {states ? (
                 <span className={styles.spinner} aria-hidden="true"></span>
             ) : (
@@ -53,6 +52,7 @@ export default function Popup_info({ status, bg_color, states, load, error } : H
                     </svg>
                 )
             )}
+            <p>{status}</p>
         </div>
     );
 }
