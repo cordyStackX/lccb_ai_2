@@ -1,6 +1,6 @@
 .container {
     width: 0;
-    height: 100dvh;
+    height: 100vh;
     background-color: var(--default-color-white);
     z-index: 2;
     transition: all 800ms ease;
@@ -88,12 +88,11 @@
 }
 .chat_history {
     width: 100%;
-    height: max(400px, 100%);
+    height: auto;
     display: flex;
     flex-flow: column;
     align-items: flex-start;
     justify-content: flex-start;
-    min-height: 0;
 }
 .history_base {
     width: 100%;
@@ -109,8 +108,11 @@
 }
 .history_container {
     width: 100%;
-    height: max(400px, 100%);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
     overflow: auto;
+    max-height: calc(100vh - 320px);
 }
 .history_item {
     width: 100%;
@@ -181,8 +183,8 @@
 }
 .pdf_container {
     width: 100%;
-    height: max(400px, 100%);
     overflow: auto;
+    max-height: calc(100vh - 320px);
 }
 .fx_load {
     width: 100%;
@@ -237,8 +239,8 @@
 }
 .image_container {
     width: 100%;
-    height: 100px;
     overflow: auto;
+    max-height: calc(100vh - 320px);
 }
 .image_container span {
     display: flex;
