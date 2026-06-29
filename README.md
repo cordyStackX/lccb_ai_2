@@ -328,14 +328,14 @@ User → Next.js UI → API Routes → Rate Limit Check → JWT Auth
 - **Email Dependency**: Password reset requires email verification
 
 ### Planned Improvements
-- [*] Enhanced PDF chunking algorithm for better context retention
-- [*] Conversation history export and management
+- [x] Enhanced PDF chunking algorithm for better context retention
+- [x] Conversation history export and management
 - [ ] Multi-language support for international users
-- [*] Advanced search within document content
-- [ ] Document comparison and diff features
-- [*] Batch PDF processing
-- [ ] Mobile app version
-- [*] Improved admin analytics dashboard
+- [x] Advanced search within document content
+- [x] Document comparison and diff features
+- [x] Batch PDF processing
+- [x] Mobile app version
+- [x] Improved admin analytics dashboard
 - [ ] Custom AI model fine-tuning for educational content
 
 ---
