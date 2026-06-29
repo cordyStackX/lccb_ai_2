@@ -52,9 +52,7 @@ This is a **BETA VERSION** for educational and research purposes only. Not inten
 
 ### 🎨 Modern User Interface
 - **Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
-- **Interactive 3D Effects**: Engaging visual effects using Three.js and React Three Fiber
 - **Intuitive Navigation**: User-friendly dashboard and chat interface
-- **Dark/Light Theme**: Adaptive color scheme for comfortable viewing
 - **Loading States**: SweetAlert2 notifications and progress indicators
 - **Real-time Updates**: Instant feedback for user actions
 
@@ -66,7 +64,6 @@ This is a **BETA VERSION** for educational and research purposes only. Not inten
 - **Framework**: Next.js 15 (React 19)
 - **Language**: TypeScript
 - **Styling**: CSS Modules with adaptive theming
-- **3D Graphics**: Three.js, React Three Fiber (@react-three/fiber, @react-three/drei)
 - **State Management**: React Hooks (useState, useEffect, useRef)
 - **Routing**: Next.js App Router
 
@@ -283,7 +280,6 @@ python main.py
 
 ### Visual Design
 - **Modern UI**: Clean, minimalist interface with adaptive theming
-- **3D Effects**: Interactive sphere with distortion effects using Three.js
 - **Responsive Layout**: Optimized for all screen sizes
 - **Accessibility**: WCAG-compliant color contrast and keyboard navigation
 
@@ -332,15 +328,14 @@ User → Next.js UI → API Routes → Rate Limit Check → JWT Auth
 - **Email Dependency**: Password reset requires email verification
 
 ### Planned Improvements
-- [ ] Enhanced PDF chunking algorithm for better context retention
-- [ ] Support for more document formats (DOCX, TXT, PPTX)
-- [ ] Conversation history export and management
+- [*] Enhanced PDF chunking algorithm for better context retention
+- [*] Conversation history export and management
 - [ ] Multi-language support for international users
-- [ ] Advanced search within document content
+- [*] Advanced search within document content
 - [ ] Document comparison and diff features
-- [ ] Batch PDF processing
+- [*] Batch PDF processing
 - [ ] Mobile app version
-- [ ] Improved admin analytics dashboard
+- [*] Improved admin analytics dashboard
 - [ ] Custom AI model fine-tuning for educational content
 
 ---
