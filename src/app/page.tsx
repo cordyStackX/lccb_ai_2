@@ -40,8 +40,8 @@ export default function Home() {
 			<div
 				style={{
 				display: show ? "block" : "none" ,
-				width: "500px",
-				height: "98vh",
+				width: "min(500px, 95%)",
+				height: "95vh",
 				position: "fixed",
 				bottom: "10px",
 				right: "10px",
