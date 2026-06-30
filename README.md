@@ -562,54 +562,14 @@ The Data Flow Diagram illustrates how data moves through the LACO AI system, fro
 
 The Context Diagram shows the system boundaries and external entities that interact with LACO AI.
 
-```mermaid
-flowchart TB
-    %% External entities
-    Students[Students] -->|Upload PDFs / Ask Questions| LACO[LACO AI System]
-    Teachers[Teachers] -->|Upload / Manage Content| LACO
-    Admin[Admin] -->|Monitor / Manage System| LACO
-    Kiosk[Touch Screen Kiosk] -->|Campus Info / Guidance| LACO
-
-    %% LACO AI System internal boundary
-    subgraph "LACO AI System"
-        direction TB
-        AI[AI Engine] 
-        Filtering[User-Level Filtering]
-        Departments[Departments: SARFAID, SBIT, SHTM, SSLATE]
-        Programs[Programs by Department]
-        Levels[Educational Levels / Tracks: Pre-K, Elementary, JHS, Night HS, SHS - Academic, Arts, TVL]
-        
-        %% Internal connections
-        LACO --> Filtering
-        Filtering --> Departments
-        Departments --> Programs
-        Programs --> Levels
-        Levels --> AI
-        AI --> LACO
-    end
-
-    %% Outputs from system
-    LACO -->|AI Responses / Summaries| Students
-    LACO -->|Content Feedback / Reports| Teachers
-    LACO -->|System Reports / Logs| Admin
-    LACO -->|Filtered Campus Info| Kiosk
-
-```
-
-**External Entities:**
-- **Users**: Students, Teachers, Administrators
-- **OpenAI**: AI processing and natural language understanding
-- **Supabase**: Database, authentication, and file storage provider
-- **Email Service**: Authentication codes and password reset notifications
-- **Render**: Python Flask API hosting
+![Data Flow Diagram](./public/CFD.png)
 
 ---
 
-## 📅 Project Timeline (Gantt Chart)
+**External Entities:**
+- **Users**: Students, Teachers, Administrators
 
-Development timeline and milestones for the LACO AI project.
-
-![Gant Chart](./public/GantChart.jpeg)
+---
 
 
 ## Directory Tree
@@ -620,6 +580,7 @@ src
 │   ├── favicon.ico
 │   ├── globals.css
 │   ├── layout.tsx
+│   ├── manifest.ts
 │   ├── not-found.module.css
 │   ├── not-found.tsx
 │   ├── (pages)
@@ -643,75 +604,105 @@ src
 │   │   │   │   └── page.tsx
 │   │   │   ├── forgot-password
 │   │   │   │   └── page.tsx
-│   │   │   ├── signin
+│   │   │   ├── register
 │   │   │   │   └── page.tsx
-│   │   │   ├── signup
+│   │   │   ├── signin
 │   │   │   │   └── page.tsx
 │   │   │   └── update-password
 │   │   │       └── page.tsx
+│   │   ├── chat
+│   │   │   └── page.tsx
 │   │   ├── chat_bot
 │   │   │   └── page.tsx
 │   │   ├── privacy
 │   │   │   └── page.tsx
-│   │   ├── terms
-│   │   │   └── page.tsx
-│   │   └── user
-│   │       └── settings
-│   │           └── page.tsx
+│   │   └── terms
+│   │       └── page.tsx
 │   ├── page.tsx
-│   └── services
-│       ├── api
-│       │   ├── response
-│       │   │   └── route.ts
-│       │   └── response2
-│       │       └── route.ts
-│       ├── jwt
-│       │   ├── auth
-│       │   │   └── route.ts
-│       │   ├── deauth
-│       │   │   └── route.ts
-│       │   └── verify
-│       │       └── route.ts
-│       └── supabase
-│           ├── admin
-│           │   ├── delete_user
-│           │   │   └── route.ts
-│           │   ├── retrieve_API_logs
-│           │   │   └── route.ts
-│           │   ├── retrieve_code_logs
-│           │   │   └── route.ts
-│           │   ├── retrieve_user
-│           │   │   └── route.ts
-│           │   └── update_user_status
-│           │       └── route.ts
-│           ├── auth
-│           │   ├── check_code
-│           │   │   └── route.ts
-│           │   ├── check_status
-│           │   │   └── route.ts
-│           │   ├── forgot_password
-│           │   │   ├── check_email
-│           │   │   │   └── route.ts
-│           │   │   └── update_account
-│           │   │       └── route.ts
-│           │   ├── signin
-│           │   │   └── route.ts
-│           │   └── signup
-│           │       ├── check_email
-│           │       │   └── route.ts
-│           │       └── create_account
-│           │           └── route.ts
-│           ├── health
-│           │   └── route.ts
-│           └── storage
-│               ├── deletepdf
-│               │   └── route.ts
-│               ├── retrieve
-│               │   └── route.ts
-│               ├── updatepdf
-│               │   └── route.ts
-│               └── uploadpdf
-│                   └── route.ts
+│   ├── services
+│   │   ├── api
+│   │   │   ├── delete_responses
+│   │   │   │   └── route.ts
+│   │   │   ├── response2-stream
+│   │   │   │   └── route.ts
+│   │   │   ├── response3-stream
+│   │   │   │   └── route.ts
+│   │   │   ├── response_image-stream
+│   │   │   │   └── route.ts
+│   │   │   ├── response-stream
+│   │   │   │   └── route.ts
+│   │   │   ├── retrieve_responses
+│   │   │   │   └── route.ts
+│   │   │   ├── save_responses
+│   │   │   │   └── route.ts
+│   │   │   └── tts
+│   │   │       └── route.ts
+│   │   ├── jwt
+│   │   │   ├── auth
+│   │   │   │   └── route.ts
+│   │   │   ├── deauth
+│   │   │   │   └── route.ts
+│   │   │   └── verify
+│   │   │       └── route.ts
+│   │   └── supabase
+│   │       ├── admin
+│   │       │   ├── delete_user
+│   │       │   │   └── route.ts
+│   │       │   ├── get-suspension-state
+│   │       │   │   └── route.ts
+│   │       │   ├── retrieve_user
+│   │       │   │   └── route.ts
+│   │       │   ├── suspension-state
+│   │       │   │   └── route.ts
+│   │       │   ├── system_logs
+│   │       │   │   └── route.ts
+│   │       │   └── update_user_status
+│   │       │       └── route.ts
+│   │       ├── auth
+│   │       │   ├── check_code
+│   │       │   │   └── route.ts
+│   │       │   ├── check_status
+│   │       │   │   └── route.ts
+│   │       │   ├── forgot_password
+│   │       │   │   ├── check_email
+│   │       │   │   │   └── route.ts
+│   │       │   │   └── update_account
+│   │       │   │       └── route.ts
+│   │       │   ├── register
+│   │       │   │   ├── check_email
+│   │       │   │   │   └── route.ts
+│   │       │   │   └── create_account
+│   │       │   │       └── route.ts
+│   │       │   ├── signin
+│   │       │   │   └── route.ts
+│   │       │   └── update
+│   │       │       └── route.ts
+│   │       ├── health
+│   │       │   └── route.ts
+│   │       └── storage
+│   │           ├── deletepdf
+│   │           │   └── route.ts
+│   │           ├── deletepdf_chatbot
+│   │           │   └── route.ts
+│   │           ├── downloadpdf_chatbot
+│   │           │   └── route.ts
+│   │           ├── fetchimg
+│   │           │   └── route.ts
+│   │           ├── lbc_image_retieve
+│   │           │   └── route.ts
+│   │           ├── lbc_image_upload
+│   │           │   └── route.ts
+│   │           ├── retrieve
+│   │           │   └── route.ts
+│   │           ├── retrieve_chatbot
+│   │           │   └── route.ts
+│   │           ├── uploadimg
+│   │           │   └── route.ts
+│   │           ├── uploadpdf
+│   │           │   └── route.ts
+│   │           └── uploadpdf_chatbot
+│   │               └── route.ts
+│   └── under-develop.tsx
 ├── components
 │   ├── admin
 │   │   ├── chat_bot
@@ -740,11 +731,11 @@ src
 │   │   │   ├── css
 │   │   │   │   └── styles.module.css
 │   │   │   └── index.tsx
-│   │   ├── confirm_email_signin
+│   │   ├── confirm_email_register
 │   │   │   ├── css
 │   │   │   │   └── styles.module.css
 │   │   │   └── index.tsx
-│   │   ├── confirm_email_signup
+│   │   ├── confirm_email_signin
 │   │   │   ├── css
 │   │   │   │   └── styles.module.css
 │   │   │   └── index.tsx
@@ -757,11 +748,11 @@ src
 │   │   │   │   └── styles.module.css
 │   │   │   └── index.tsx
 │   │   ├── index.ts
-│   │   ├── signin
+│   │   ├── register
 │   │   │   ├── css
 │   │   │   │   └── styles.module.css
 │   │   │   └── index.tsx
-│   │   ├── signup
+│   │   ├── signin
 │   │   │   ├── css
 │   │   │   │   └── styles.module.css
 │   │   │   └── index.tsx
@@ -769,7 +760,7 @@ src
 │   │       ├── css
 │   │       │   └── styles.module.css
 │   │       └── index.tsx
-│   ├── chat_bot
+│   ├── chat
 │   │   ├── header
 │   │   │   ├── css
 │   │   │   │   └── styles.module.css
@@ -779,7 +770,17 @@ src
 │   │   │   ├── css
 │   │   │   │   └── styles.module.css
 │   │   │   └── index.tsx
+│   │   ├── profile
+│   │   │   ├── css
+│   │   │   │   └── styles.module.css
+│   │   │   └── index.tsx
 │   │   └── sidebars
+│   │       ├── css
+│   │       │   └── styles.module.css
+│   │       └── index.tsx
+│   ├── chat_bot
+│   │   ├── index.ts
+│   │   └── main
 │   │       ├── css
 │   │       │   └── styles.module.css
 │   │       └── index.tsx
@@ -802,11 +803,23 @@ src
 │   │   │   ├── css
 │   │   │   │   └── styles.module.css
 │   │   │   └── index.tsx
-│   │   ├── chat_bot_ask
+│   │   ├── content_1
 │   │   │   ├── css
 │   │   │   │   └── styles.module.css
 │   │   │   └── index.tsx
-│   │   ├── fx_effect
+│   │   ├── content_2
+│   │   │   ├── css
+│   │   │   │   └── styles.module.css
+│   │   │   └── index.tsx
+│   │   ├── content_3
+│   │   │   ├── css
+│   │   │   │   └── styles.module.css
+│   │   │   └── index.tsx
+│   │   ├── content_4
+│   │   │   ├── css
+│   │   │   │   └── styles.module.css
+│   │   │   └── index.tsx
+│   │   ├── footer
 │   │   │   ├── css
 │   │   │   │   └── styles.module.css
 │   │   │   └── index.tsx
@@ -815,16 +828,14 @@ src
 │   │   │   │   └── styles.module.css
 │   │   │   └── index.tsx
 │   │   └── index.ts
-│   └── user
-│       ├── dashboard
-│       │   └── index.ts
+│   └── pwa_register
 │       └── index.ts
 ├── config
 │   ├── conf
 │   │   ├── css_config
+│   │   │   ├── animations.css
 │   │   │   ├── background_colors.css
 │   │   │   ├── config.css
-│   │   │   ├── display_flex.css
 │   │   │   └── status.css
 │   │   └── json_config
 │   │       ├── Api_links.json
@@ -832,21 +843,40 @@ src
 │   │       └── Metadata.json
 │   └── images_links
 │       └── assets.json
+├── global.d.ts
 ├── lib
 │   ├── code_store.ts
+│   ├── rate_limit.ts
 │   ├── security.ts
 │   └── supabase-server.ts
 ├── modules
+│   ├── chat
+│   │   ├── handle_submit.ts
+│   │   ├── startRecording.ts
+│   │   ├── StreamVoiceToText.ts
+│   │   └── voice_tts.ts
 │   ├── formula
 │   │   ├── Use_scroll_deg.ts
 │   │   └── Use_scroll.ts
 │   └── index.ts
+├── sources
+│   └── suggestion.json
 └── utilities
+    ├── Confirm_Exit.ts
+    ├── CopyToClipboard.ts
+    ├── DownloadAsPDF.ts
     ├── Fetch_toFile.ts
     ├── Fetch_to.ts
     ├── index.ts
     ├── InView.ts
     ├── Meta_data.ts
+    ├── Popup_info
+    │   ├── css
+    │   │   └── styles.module.css
+    │   └── index.tsx
     ├── Prevent_Exit.ts
-    └── SweetAlert2.ts
+    ├── Progress.ts
+    ├── React_Spinners.tsx
+    ├── SweetAlert2.ts
+    └── useSpeechToText.ts
 ```
