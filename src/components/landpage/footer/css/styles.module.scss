@@ -81,12 +81,4 @@
     z-index: 1;
 }
 
-@media (max-width: 900px) {
-    .wrapper {
-        grid-template-columns: 1fr;
-    }
 
-    .bottom {
-        flex-direction: column;
-    }
-}

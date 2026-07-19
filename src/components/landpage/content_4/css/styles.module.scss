@@ -1,3 +1,6 @@
+
+@use "./_keyframes";
+
 .container {
     width: 100%;
     height: auto;
@@ -190,44 +193,3 @@
     box-shadow: 0 12px 28px rgba(59, 130, 246, 0.2);
 }
 
-@keyframes answerOpen {
-    from {
-        opacity: 0;
-        transform: translateY(-8px);
-        max-height: 0;
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-        max-height: 500px;
-    }
-}
-
-@keyframes answerClose {
-    from {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes markerSpin {
-    from {
-        transform: rotate(0deg) scale(1);
-    }
-    to {
-        transform: rotate(360deg) scale(1.05);
-    }
-}
-
-@keyframes titleLift {
-    from {
-        transform: translateY(4px);
-    }
-    to {
-        transform: translateY(0);
-    }
-}

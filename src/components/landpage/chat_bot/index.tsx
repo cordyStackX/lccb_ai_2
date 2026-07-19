@@ -1,4 +1,4 @@
-import styles from "./css/styles.module.css";
+import styles from "./css/styles.module.scss";
 import Image from "next/image";
 import image_src from "@/config/images_links/assets.json";
 

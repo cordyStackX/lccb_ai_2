@@ -1,6 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
-import styles from "./css/styles.module.css";
+import styles from "./css/styles.module.scss";
 
 const faqs = [
     {

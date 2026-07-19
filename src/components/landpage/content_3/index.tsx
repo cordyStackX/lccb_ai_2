@@ -1,5 +1,5 @@
 "use client";
-import styles from "./css/styles.module.css";
+import styles from "./css/styles.module.scss";
 import { useRouter } from "next/navigation";
 import { useInView, Progress } from "@/utilities";
 import Image from "next/image";

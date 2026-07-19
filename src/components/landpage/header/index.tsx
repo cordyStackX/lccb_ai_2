@@ -1,5 +1,5 @@
 "use client";
-import styles from "./css/styles.module.css";
+import styles from "./css/styles.module.scss";
 import image_src from "@/config/images_links/assets.json";
 import Link from "next/link";
 import Image from "next/image";
