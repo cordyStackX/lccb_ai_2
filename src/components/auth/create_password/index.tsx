@@ -13,29 +13,20 @@ import {
     useConfirmExit
 } from "@/utilities";
 
-type HeaderProps = {
-    mobile: boolean;
-}
 
-export default function Create_Password({ mobile }: HeaderProps) {
+export default function Create_Password() {
     const router = useRouter();
 
     const [form, setForm] = useState({
-        email: "", password: "", c_password: "", name: "", year: "", role: ""
+        email: "", password: "", c_password: "", name: "", year: "", role: "", id: ""
     });
     const [status, setStatus] = useState(false);
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showPassword2, setShowPassword2] = useState(false);
-    const [showSignin, setShowSignin] = useState(false);
 
     usePreventExit(true);
-
-    useEffect(() => {
-        if (mobile) return setShowSignin(false);
-        setShowSignin(true);
-    }, [mobile]);
 
     const confirmExit = useConfirmExit({
         onConfirm: () => router.push("/auth/register")
@@ -51,7 +42,8 @@ export default function Create_Password({ mobile }: HeaderProps) {
             const saveName = localStorage.getItem("name");
             const saveYear = localStorage.getItem("year");
             const saveRole = localStorage.getItem("role");
-            setForm(prev => ({ ...prev, email: saveEmail || "", name: saveName || "", year: saveYear || "", role: saveRole || "" }));
+            const saveId = localStorage.getItem("id");
+            setForm(prev => ({ ...prev, email: saveEmail || "", name: saveName || "", year: saveYear || "", role: saveRole || "", id: saveId || "" }));
         };
         checkCode();
     }, []);
@@ -66,7 +58,6 @@ export default function Create_Password({ mobile }: HeaderProps) {
 
             if (autosignin_response.success) {
                 localStorage.clear();
-                if (showSignin) return (window as Window & { ReactNativeWebView?: { postMessage: (message: string) => void } }).ReactNativeWebView?.postMessage("closeWebView");
                 await Fetch_to(api_link.jwt.auth, { email: form.email });
                 router.push("/chat");
             } else {

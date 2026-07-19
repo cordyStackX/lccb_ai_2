@@ -1,9 +1,10 @@
 .container {
     width: 100%;
-    height: max(750px, 100dvh);
+    height: max(850px, 100dvh);
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow: hidden;
 }
 .wrapper {
     width: var(--max-width);

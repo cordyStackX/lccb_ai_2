@@ -13,11 +13,8 @@ import {
     Progress
 } from "@/utilities";
 
-type HeaderProps = {
-    mobile: boolean;
-}
 
-export default function SignUp({ mobile }: HeaderProps) {
+export default function SignUp() {
     const router = useRouter();
 
     const [form, setForm] = useState({
@@ -29,14 +26,8 @@ export default function SignUp({ mobile }: HeaderProps) {
     const [isDirty, setIsDirty] = useState(false);
     const [ifMinors, setIfMinors] = useState(true);
     const [ifTeaher, setIfTeacher] = useState(false);
-    const [showSignin, setShowSignin] = useState(false);
 
     usePreventExit(isDirty);
-
-    useEffect(() => {
-        if (mobile) return setShowSignin(false);
-        setShowSignin(true);
-    }, [mobile]);
 
     useEffect(() => {
         if (form.year == "Kinder Garten" ) {
@@ -69,6 +60,7 @@ export default function SignUp({ mobile }: HeaderProps) {
             localStorage.setItem("year", form.year);
             localStorage.setItem("role", form.role);
             localStorage.setItem("assign_by", form.assign_by);
+            localStorage.setItem("id", form.school_id);
             const responds = await Fetch_to(api_link.checkcode, { email: form.email, key: "register" });
             if(!responds.success) {
                 setMessage(responds.message || "Somethings Went Wrong");
@@ -112,8 +104,10 @@ export default function SignUp({ mobile }: HeaderProps) {
                         <div className={styles.input_holder}>
                             <span>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <rect x="3" y="5" width="18" height="14" rx="2"/>
-                                <path d="M3 7l9 6 9-6"/>
+                                <rect x="3" y="4" width="18" height="16" rx="2"/>
+                                <circle cx="9" cy="10" r="2"/>
+                                <path d="M6 16c0-1.7 1.3-3 3-3s3 1.3 3 3"/>
+                                <path d="M14 9h4M14 13h4"/>
                                 </svg>
                             </span>
                             <input 
@@ -227,9 +221,7 @@ export default function SignUp({ mobile }: HeaderProps) {
                         <section className={`${styles.buttons} `}>
                             <button>Register</button>
                         </section>
-                        {showSignin ? (
-                            <p >Already have an Account? <Link href={"/auth/signin"} onClick={() => {Progress(true);}}>Sign In</Link></p>
-                        ) : null}
+                        <p >Already have an Account? <Link href={"/auth/signin"} onClick={() => {Progress(true);}}>Sign In</Link></p>
                     </form>
                 )}
             </div>
