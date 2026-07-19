@@ -1,0 +1,19 @@
+.plushie_talk {
+    justify-content: flex-start;
+    align-items: flex-start;
+    display: flex;
+    width: inherit;
+    position: relative;
+}
+.plushie_talk div {
+    margin: 0 0.2rem;
+    padding: 0.8rem;
+    width: inherit;
+    color: var(--default-color-black);
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+.plushie_talk img {
+    bottom: 25px;
+    position: absolute;
+}

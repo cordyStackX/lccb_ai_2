@@ -1,5 +1,5 @@
 "use client";
-import styles from "./css/styles.module.css";
+import styles from "./css/styles.module.scss";
 import { useEffect, useState, useRef } from "react";
 import Markdown from "react-markdown";
 import api_link from "@/config/conf/json_config/fetch_url.json";

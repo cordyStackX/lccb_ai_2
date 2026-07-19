@@ -268,15 +268,4 @@
     color: var(--foreground);
 }
 
-@media (max-width: 1200px) {
-    .container {
-        position: fixed;
-        left: 0;
-        width: 0;
-    }
-    .open {
-        width: 250px;
-        opacity: 1;
-        overflow: visible;
-    }
-}
+

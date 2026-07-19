@@ -1,0 +1,40 @@
+.welcome_intro {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-flow: column;
+}
+.welcome_intro_svg1 {
+    background-color: var(--primary);
+    margin: 20px 0;
+}
+.welcome_intro h1 {
+    text-align: center;
+    margin: 1rem 0 0 0;
+    color: var(--primary);
+    font-size: clamp(1.5rem, 1rem + 1vw, 2rem);
+}
+.welcome_intro p {
+    font-size: clamp(0.9rem, 0.5rem + 1vw, 1.1rem);
+}
+.welcome_intro button {
+    position: relative;
+    padding: 0.8rem 1rem 0.8rem 3rem;
+    margin: 20px 0 0 0;
+    background-color: var(--primary);
+    border-radius: 8px;
+    box-shadow: 0 0 2px 1px var(--default-color-gray);
+    border: transparent;
+    cursor: pointer;
+    color: var(--default-color-white);
+    transition: all 1s ease;
+}
+.welcome_intro button:hover {
+    opacity: 0.7;
+}
+.welcome_intro_svg2 {
+    position: absolute;
+    left: 15px;
+    top: 22%;
+    color: var(--default-color-white);
+}

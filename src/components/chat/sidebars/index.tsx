@@ -1,5 +1,5 @@
 "use client";
-import styles from "./css/styles.module.css";
+import styles from "./css/styles.module.scss";
 import image_src from "@/config/images_links/assets.json";
 import { SetStateAction, Dispatch, useState, useEffect, useRef } from "react";
 import Swal from "sweetalert2";
@@ -11,7 +11,6 @@ type SidebarsProps = {
     isOpen: boolean;
     emailRes: string;
     setCurrentPdf: (val: number | undefined) => void;
-    setCurrentImg: (val: string | undefined) => void;
     setCurrentMsg: (val: number | undefined) => void;
     globalRefresh: boolean;
     globalRefreshMsg: boolean;
@@ -25,37 +24,24 @@ type PdfFile = {
     file?: string;
 }
 
-type ImageFile = {
-    id?: number;
-    email?: string;
-    image_link?: string;
-    image_name?: string;
-    size_bytes?: string;
-    size_kb?: string;
-    size_mb?: string;
-}
-
 type ChatHistoryItem = {
     id?: number;
     created_at?: string;
     history?: { ask: string; respond: string }[];
 };
 
-export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentImg, globalRefresh, setGlobalMessages, globalRefreshMsg, setCurrentMsg }: SidebarsProps) {
+export default function Sidebars({ isOpen, emailRes, setCurrentPdf, globalRefresh, setGlobalMessages, globalRefreshMsg, setCurrentMsg }: SidebarsProps) {
     const pageSize = 10;
     const historyPageSize = 7;
     const [profile, setProfile] = useState(false);
-    const [activeView, setActiveView] = useState<"pdf" | "image" | "chat">("pdf");
+    const [activeView, setActiveView] = useState<"pdf" | "chat">("pdf");
     const [data, setData] = useState<PdfFile[]>([]);
-    const [imageData, setImageData] = useState<ImageFile[]>([]);
     const [selectedPdfId, setSelectedPdfId] = useState<number | undefined>();
     const [selectedMsgId, setSelectedMsgId] = useState<number | undefined>();
-    const [selectedImageId, setSelectedImageId] = useState<number | undefined>();
     const fileRef = useRef<HTMLInputElement>(null);
     const [refresh, setRefresh] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [showNoData, setShowNoData] = useState(false);
-    const [showNoDataImage, setShowNoDataImage] = useState(false);
     const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>([]);
     const [showNoHistory, setShowNoHistory] = useState(false);
     const [historyOffset, setHistoryOffset] = useState(0);
@@ -69,11 +55,6 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentIm
     const [isLoadError, setIsLoadError] = useState(false);
     const [isLoadStatus, setIsLoadStatus] = useState("");
     const [contextMenu, setContextMenu] = useState<{ visible: boolean; x: number; y: number; pdfId?: number; file?: string }>({
-        visible: false,
-        x: 0,
-        y: 0,
-    });
-    const [imageMenu, setImageMenu] = useState<{ visible: boolean; x: number; y: number; id?: number; file?: string }>({
         visible: false,
         x: 0,
         y: 0,
@@ -92,7 +73,6 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentIm
     useEffect(() => {
         const handleClick = () => {
             setContextMenu({ visible: false, x: 0, y: 0 });
-            setImageMenu({ visible: false, x: 0, y: 0 });
             setHistoryMenu({ visible: false, x: 0, y: 0 });
         };
 
@@ -122,26 +102,6 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentIm
             }
         } else if (reset) {
             setShowNoData(true);
-        }
-
-        setIsLoading(false);
-    };
-
-    const fetchImage = async () => {
-        if (isLoading || !emailRes) return;
-        setIsLoading(true);
-
-        const response = await Fetch_to(api_link.storage.lbc_image_retieve, {
-            email: emailRes
-        });
-
-        if (response.success) {
-            const item = response.data.message;
-            setImageData(item ? [item] : []);
-            setShowNoDataImage(!item);
-        } else {
-            SweetAlert2("Error", response.message, "error", true, "Okay", false, "", false);
-            setShowNoDataImage(true);
         }
 
         setIsLoading(false);
@@ -189,7 +149,6 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentIm
         setHistoryOffset(0);
         setHistoryHasMore(true);
         fetchPdfs(true);
-        fetchImage();
         fetchChatHistory(true);
     }, [emailRes, refresh, globalRefresh]);
 
@@ -386,17 +345,10 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentIm
                         </button>
                         <button
                             type="button"
-                            className={activeView === "image" ? styles.tabActive : ""}
-                            onClick={() => setActiveView("image")}
-                        >
-                            Image
-                        </button>
-                        <button
-                            type="button"
                             className={activeView === "chat" ? styles.tabActive : ""}
                             onClick={() => setActiveView("chat")}
                         >
-                            Chat
+                            History
                         </button>
                     </div>
                 </section>
@@ -483,99 +435,7 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentIm
                     </div>
                 </section>
 
-                    <div className={styles.image_base} style={{ display: activeView === "image" ? "block" : "none" }}>
-                        <h3>Image Captures</h3>
-                        <div className={styles.image_container}>
-                            {imageData && imageData.length > 0 ? (
-                                imageData.map((image, index) => {
-                                    const imageKey = image.id ?? index;
-
-                                    return (
-                                    <span
-                                    key={imageKey}
-                                    style={{
-                                        backgroundColor: imageKey === selectedImageId ? "var(--fx-color)" : ""
-                                    }}
-                                    onClick={() => {
-                                        setSelectedImageId(imageKey);
-                                        setCurrentImg(image.image_link ?? undefined);
-                                    }}
-                                    >
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                        <path d="M9 4L7.5 6H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-3.5L15 4H9z"
-                                                stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
-                                        <circle cx="12" cy="13" r="4" stroke="currentColor" strokeWidth="2"/>
-                                        </svg>
-                                        <button
-                                        title={image.image_name}
-                                        style={{
-                                            fontWeight: imageKey === selectedImageId ? "bold" : ""
-                                        }}
-                                        onClick={() => {
-                                            setSelectedImageId(imageKey);
-                                            setCurrentImg(image.image_link ?? undefined);
-                                        }}
-                                        >
-                                            {image.image_name} <br /> {image.size_mb} MB
-                                        </button>
-                                    <span
-                                    style={{
-                                        display: imageKey === selectedImageId ? "block" : "none"
-                                    }}
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M20 6L9 17l-5-5"/>
-                                        </svg>
-                                    </span>
-                                    <span
-                                        className={styles.pdf_options}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setTimeout(() => {
-                                                setImageMenu({
-                                                    visible: true,
-                                                    x: e.clientX,
-                                                    y: e.clientY,
-                                                    id: imageKey,
-                                                    file: image.image_link,
-                                                });
-                                            }, 0);
-                                        }}
-                                    >
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                            <circle cx="5" cy="12" r="2" fill="currentColor"/>
-                                            <circle cx="12" cy="12" r="2" fill="currentColor"/>
-                                            <circle cx="19" cy="12" r="2" fill="currentColor"/>
-                                        </svg>
-                                    </span>
-                                    </span>
-                                    );
-                                })
-                            ) : (
-                                <div>
-                                    {showNoDataImage ? (
-                                        <p style={{ textAlign: "center", padding: "1rem", color: "var(--foreground)", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
-                                            No IMAGE Found
-                                        </p>
-                                    ) : (
-                                        <div>
-                                            <div className={`gradientDivAnimation ${styles.fx_load}`}></div>
-                                        </div>
-                                    )}
-                                </div>
-                                
-                            )}
-                            {isLoading && data.length > 0 && (
-                                <div>
-                                    <div className={`gradientDivAnimation ${styles.fx_load}`}></div>
-                                    <div className={`gradientDivAnimation ${styles.fx_load}`}></div>
-                                    <div className={`gradientDivAnimation ${styles.fx_load}`}></div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                    
+                
                     <div className={styles.pdf_base} style={{ display: activeView === "pdf" ? "block" : "none" }}>
                         <h3>PDF Documents</h3>
                         <div className={styles.pdf_container} onScroll={handleScroll}>
@@ -744,61 +604,6 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, setCurrentIm
                         }}
                     >
                         🗑️ Delete Chat
-                    </button>
-                </div>
-            )}
-            {imageMenu.visible && (
-                <div
-                    style={{
-                        position: "fixed",
-                        top: imageMenu.y,
-                        left: imageMenu.x,
-                        backgroundColor: "var(--default-color-white)",
-                        border: "1px solid var(--foreground)",
-                        borderRadius: "4px",
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                        zIndex: 1000,
-                        padding: "4px 0",
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    <button
-                        onClick={() => {
-                            setCurrentImg(undefined);
-                            setSelectedImageId(undefined);
-                            setImageMenu({ visible: false, x: 0, y: 0 });
-                        }}
-                        style={{
-                            display: "block",
-                            width: "100%",
-                            padding: "8px 16px",
-                            border: "none",
-                            background: "var(--default-color-white)",
-                            color: "var(--foreground)",
-                            textAlign: "left",
-                            cursor: "pointer",
-                            fontSize: "14px",
-                        }}
-                    >
-                        ⚪ Unselect Image
-                    </button>
-                    <button
-                        onClick={() => {
-                            setImageMenu({ visible: false, x: 0, y: 0 });
-                        }}
-                        style={{
-                            display: "block",
-                            width: "100%",
-                            padding: "8px 16px",
-                            border: "none",
-                            background: "var(--default-color-white)",
-                            color: "var(--foreground)",
-                            textAlign: "left",
-                            cursor: "pointer",
-                            fontSize: "14px",
-                        }}
-                    >
-                        🗑️ Delete Image
                     </button>
                 </div>
             )}

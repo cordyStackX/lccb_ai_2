@@ -1,0 +1,262 @@
+.form_fx_effects {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: 20px;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: flex-start;
+    isolation: isolate;
+}
+
+/* rotating gradient layer */
+.form_fx_effects::before {
+    content: "";
+
+    position: absolute;
+
+    inset: -250%;
+
+    background: conic-gradient(
+        from 0deg,
+        transparent,
+        transparent,
+        transparent,
+        var(--fx-color-bg-effects) ,
+        var(--fx-color-bg-effects) 
+    );
+
+    animation: rotateGradient 1s linear infinite;
+
+    z-index: -2;
+}
+
+/* optional dark overlay */
+.form_fx_effects::after {
+    content: "";
+
+    position: absolute;
+    inset: 2px;
+
+    border-radius: inherit;
+
+    z-index: -1;
+}
+
+.form_contain {
+    width: min(850px, 94dvw);
+    height: auto;
+    padding: 1rem 0 1.25rem;
+    margin: 0.5rem 0;
+    flex-flow: column;
+    bottom: 0;
+    display: flex;
+    justify-content: flex-end;
+    overflow: hidden;
+    align-items: center;
+    position: relative;
+    gap: 0.75rem;
+    border-radius: 20px;
+
+}
+
+.composerFooter {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.showSuggestions {
+    padding: 0.6rem 1rem;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 999px;
+    background: var(--default-color-white);
+    color: var(--foreground);
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+.suggestions button {
+    padding: 0.55rem 0.9rem;
+    border-radius: 999px;
+    cursor: pointer;
+    margin: 0;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    background-color: var(--default-color-white);
+    color: var(--foreground);
+    font-size: 0.85rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.ask {
+    width: inherit;
+    height: auto;
+    overflow: hidden;
+    border-radius: 24px;
+    padding: 0.8rem 2rem;
+    margin: 0;
+    background: var(--default-color-white-2);
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    gap: 0.9rem;
+    position: relative;
+}
+.ask::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: 26px;
+    padding: 1px;
+    background: linear-gradient(135deg, #7c3aed 0%, #a855f7 34%, #ff8a3d 100%);
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    box-shadow:
+        0 0 24px rgba(124, 58, 237, 0.32),
+        0 0 30px rgba(255, 138, 61, 0.18);
+}
+.composerRight {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 0 0 auto;
+    margin-left: auto;
+}
+.composerLeft {
+    width: 70%;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+}
+.composerChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    height: 38px;
+    padding: 0 0.85rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.86);
+    cursor: pointer;
+    backdrop-filter: blur(12px);
+}
+.composerChip span {
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+.inlineSuggestions {
+    display: flex;
+    align-items: center;
+    scrollbar-width: none;
+    overflow-x: auto;
+}
+.inlineSuggestionChip,
+.inlineSuggestionMore,
+.inlineSuggestionToggle {
+    height: 34px;
+    padding: 0 1rem;
+    margin: 0 0.3rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.5);
+    color: var(--foreground);
+    cursor: pointer;
+    backdrop-filter: blur(12px);
+    white-space: nowrap;
+    font-size: 0.82rem;
+}
+.inlineSuggestionToggle,
+.inlineSuggestionMore {
+    background: rgba(255, 255, 255, 0.5);
+    width: auto;
+    min-width: 60px;
+    padding: 0 0.65rem;
+}
+.inlineSuggestionChip:hover,
+.inlineSuggestionMore:hover,
+.inlineSuggestionToggle:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 12px rgba(124, 58, 237, 0.16);
+}
+.expandableInput {
+    width: 100%;
+    min-height: 36px;
+    max-height: 160px;
+    padding: 0.1rem 0 0.25rem;
+    border: none;
+    outline: none;
+    background: transparent;
+    resize: none;
+    font-size: clamp(0.95rem, 0.82rem + 0.35vw, 1.02rem);
+    overflow-y: auto;
+    text-align: start;
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+.sendButton,
+.micButton {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 999px;
+    font-weight: bold;
+    border: none;
+    color: var(--default-color-white);
+    background: linear-gradient(135deg, var(--default-color-blue) 0%, var(--secondary) 45%, var(--primary) 100%);
+    cursor: pointer;
+    transition: all 240ms ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 18px rgba(167, 139, 250, 0.35), 0 0 30px rgba(255, 138, 61, 0.18);
+}
+.micButton {
+    margin-left: -0.15rem;
+    background: rgba(255, 255, 255, 0.5);
+    color: var(--foreground);
+}
+.composerChip:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 14px rgba(124, 58, 237, 0.18);
+}
+.sendButton:hover,
+.micButton:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 20px rgba(167, 139, 250, 0.45), 0 0 36px rgba(255, 138, 61, 0.22);
+}
+.cursor {
+    display: inline-block;
+    animation: blink 1s infinite;
+    margin-left: 2px;
+    color: var(--default-color-white);
+}
+
+.streamFade {
+    animation-name: streamFade;
+    animation-timing-function: ease;
+    animation-fill-mode: both;
+}
+
+.laco_voice {
+    padding: clamp(2rem, 1rem + 1vw, 7rem);
+    background: linear-gradient(45deg, var(--default-color-gray) 0%, var(--default-color-blue) 100%);
+    position: fixed;
+    bottom: 170px;
+    border-radius: 50%;
+    z-index: 2;
+}

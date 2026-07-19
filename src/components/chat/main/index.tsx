@@ -1,5 +1,5 @@
 "use client";
-import styles from "./css/styles.module.css";
+import styles from "./css/styles.module.scss";
 import { Dispatch, SetStateAction, useEffect, useState, useRef } from "react";
 import Markdown from "react-markdown";
 import { DownloadAsPDF, SweetAlert2, Fetch_toFile, CopyToClipboard, Fetch_to } from "@/utilities";
@@ -13,9 +13,7 @@ import suggestions from "@/sources/suggestion.json";
 type MainProps = {
     emailRes: string;
     currentPdf: number | undefined;
-    currentImg: string | undefined;
     currentMsg: number | undefined;
-    inMobile: boolean;
     f_name: string;
     setGlobalRefresh: Dispatch<SetStateAction<boolean>>;
     setGlobalRefreshMsg: Dispatch<SetStateAction<boolean>>;
@@ -23,7 +21,7 @@ type MainProps = {
     globalMessages: { id?: number, ask: string; respond: string }[];
 }
 
-export default function Main({ currentMsg, emailRes, currentPdf, setGlobalRefresh, f_name, currentImg, inMobile, globalMessages, setGlobalRefreshMsg}: MainProps) {
+export default function Main({ currentMsg, emailRes, currentPdf, setGlobalRefresh, f_name, globalMessages, setGlobalRefreshMsg}: MainProps) {
     const [messages, setMessages] = useState<
         { ask: string; respond: string }[]
     >([]);
@@ -90,12 +88,6 @@ export default function Main({ currentMsg, emailRes, currentPdf, setGlobalRefres
     }, [chatres.ask]);
 
     useEffect(() => {
-        if (inMobile === false) return;
-        setLoading(true);
-        SweetAlert2("Analysing", "Checking Your Image", "process", false, "", false, "", true);
-    }, [inMobile]);
-
-    useEffect(() => {
         if (chatEndRef.current) {
             chatEndRef.current.scrollIntoView();
         }
@@ -108,16 +100,6 @@ export default function Main({ currentMsg, emailRes, currentPdf, setGlobalRefres
             && Boolean(navigator.mediaDevices?.getUserMedia);
         setIsMediaSupported(supported);
     }, []);
-
-    useEffect(() => {
-        if (inMobile === false) return;
-        if (inMobile && currentImg) {
-            const autoPrompt = "Describe the contents of this image in detail.";
-            setChatres((prev) => ({ ...prev, ask: autoPrompt }));
-            void handleImageSubmit(undefined, autoPrompt);
-            Swal.close();
-        }
-    }, [currentImg, inMobile]);
 
     useEffect(() => {
         setEmail(emailRes);
@@ -188,100 +170,6 @@ export default function Main({ currentMsg, emailRes, currentPdf, setGlobalRefres
 
     };
 
-    const handleImageSubmit = async (
-        e?: React.FormEvent<HTMLFormElement>,
-        overridePrompt?: string
-    ) => {
-        e?.preventDefault();
-        const promptText = (overridePrompt ?? chatres.ask).trim();
-        if (!promptText) return;
-        if (!currentImg) return;
-
-        setStatus(true);
-        setLoading(true);
-
-        setMessages((prev) => {
-            return [
-                ...prev,
-                { ask: promptText, respond: "" }
-            ];
-        });
-
-        setChatres({ ask: "", respond2: "" });
-        if (textareaRef.current) {
-            textareaRef.current.style.height = "auto";
-        }
-
-        // Use a callback to ensure correct context for API call and message update
-        setTimeout(async () => {
-            let lastUserResponse = "";
-            let lastAIResponse = "";
-            let msgIndex = 0;
-            setMessages((prev) => {
-                msgIndex = prev.length - 1;
-                if (msgIndex > 0) {
-                    lastUserResponse = prev[msgIndex - 1]?.ask || "";
-                    lastAIResponse = prev[msgIndex - 1]?.respond || "";
-                }
-                return prev;
-            });
-
-            try {
-                const response = await fetch(api_link.response_image_stream, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        prompt: promptText,
-                        image_url: currentImg,
-                        last_markdown: lastAIResponse,
-                        user_reply: lastUserResponse,
-                        email,
-                    }),
-                });
-
-                const data = await response.json();
-                if (!response.ok || !data?.success) {
-                    throw new Error(data?.error || "Image request failed");
-                }
-
-                setMessages((prev) => {
-                    const updated = [...prev];
-                    if (msgIndex >= 0 && msgIndex < updated.length) {
-                        updated[msgIndex] = {
-                            ...updated[msgIndex],
-                            respond: data?.markdown || "",
-                        };
-                    }
-                    return updated;
-                });
-
-                
-            } catch (error) {
-                const message = error instanceof Error ? error.message : "Image request failed";
-                setMessages((prev) => {
-                    const updated = [...prev];
-                    if (msgIndex >= 0 && msgIndex < updated.length) {
-                        updated[msgIndex] = {
-                            ask: promptText,
-                            respond: message,
-                        };
-                    }
-                    return updated;
-                });
-            } finally {
-                setLoading(false);
-                setTimeout(async () => {
-                    await Fetch_to(api_link.save_responses, {
-                        id: currentMsg,
-                        email: email,
-                        messages: messagesRef.current,
-                    });
-                    setGlobalRefreshMsg(true);
-                }, 1000);
-            }
-        }, 0);
-    };
-
     const handleSubmit = async (e?: React.FormEvent<HTMLFormElement>) => {
         e?.preventDefault();
         if (currentPdf) {
@@ -314,11 +202,7 @@ export default function Main({ currentMsg, emailRes, currentPdf, setGlobalRefres
 
         setGlobalRefreshMsg(true);
 
-        } else {
-            if (!currentImg) return SweetAlert2("Error", "Upload PDF or Image with Laco by Capture", "error", true, "Confirm", false, "", false);
-            await handleImageSubmit(e);
-            return;
-        }
+        } 
     };
 
     const handleCopyResponse = async (text: string) => {
