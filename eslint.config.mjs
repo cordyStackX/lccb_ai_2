@@ -113,7 +113,7 @@ export default [
       "**/node_modules/**",
       "**/.venv/**",
       "**/python/**",
-      "**/mobile/**",
+      "**/docker/**"
     ],
   },
 ];
