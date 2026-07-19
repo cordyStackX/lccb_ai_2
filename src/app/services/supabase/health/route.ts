@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     try {
 
         const { error } = await supabaseServer
-        .from("system_logs")
+        .from("auth")
         .select("id")
         .limit(1);
 
