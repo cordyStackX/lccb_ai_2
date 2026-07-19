@@ -8,3 +8,5 @@ export { default as Chat_bot } from "./chat_bot";
 export { default as ManageUser } from "./manage_user";
 
 export { default as Setting } from "./setting";
+
+export { default as Embeded_code } from "./embeded_code";

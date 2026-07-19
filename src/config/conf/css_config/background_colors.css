@@ -15,7 +15,7 @@
 
 .admin {
     background: var(--default-color-white); 
-    width: max(1500px, 100%);
+    width: 100%;
     display: flex;
     justify-content: center;
     align-items: flex-start;

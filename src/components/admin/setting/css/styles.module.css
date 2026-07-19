@@ -7,8 +7,9 @@
     color: var(--default-color-black);
 }
 .container p {
-    font-weight: bold;
-    margin: 0 1rem;
+    font-weight: 700;
+    margin: 0;
+    font-size: 0.95rem;
 }
 
 .wrapper {
@@ -20,43 +21,279 @@
     align-items: center;
 }
 .title svg {
-    width: 50px;
-    height: 50px;
-    margin: 0 1rem;
+    width: 40px;
+    height: 40px;
+    margin: 0 1rem 0 0;
+    color: var(--primary);
 }
+.title h2 {
+    margin: 0;
+}
+
+/* ---------- Card ---------- */
 .settings {
     width: 100%;
     height: auto;
-    background-color: var(--default-color-white-2);
-    box-shadow: 0 0 0.5rem 0.1rem var(--default-color-black);
+    background-color: var(--default-color-white);
+    border: 1px solid var(--default-color-white-2);
+    box-shadow: 0 4px 20px var(--fx-color-bg);
     margin: 2rem 0;
-    padding: 2rem 1.5rem;
-    border-radius: 5px;
+    padding: 0.5rem 1.5rem 1.5rem 1.5rem;
+    border-radius: 12px;
 }
-.settings h3 {
-    margin: 0.5rem 2rem;
+.sectionLabel {
+    margin: 1.75rem 0 0.25rem 0;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--secondary);
+    font-weight: 700;
 }
-.setting_set {
+.settingRow {
     display: flex;
-    padding: 2rem;
-    justify-content: flex-start;
-}
-.setting_set select {
-    cursor: pointer;
-    
-}
-.update_password {
-    display: flex;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: center;
-    padding: 2rem;
-    border-bottom: 1px solid var(--primary);
+    gap: 1.5rem;
+    padding: 1.25rem 0.25rem;
+    border-bottom: 1px solid var(--default-color-white-2);
 }
-.update_password button {
+.settings > .settingRow:last-child {
+    border-bottom: none;
+}
+.hint {
+    display: block;
+    margin-top: 0.3rem;
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--default-color-gray);
+}
+
+/* ---------- Controls ---------- */
+.primaryButton {
     background-color: var(--primary);
-    width: 130px;
-    padding: 0.5rem 0.5rem;
+    color: var(--default-color-white);
+    white-space: nowrap;
+    padding: 0.6rem 1.2rem;
     cursor: pointer;
-    border-radius: 5px;
+    font-weight: 600;
+    border-radius: 8px;
     border: transparent;
+    transition: background-color 200ms ease, box-shadow 200ms ease;
+}
+.primaryButton:hover {
+    background-color: var(--secondary);
+    box-shadow: 0 0 8px 1px var(--fx-color);
+}
+
+.controlGroup {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    flex-shrink: 0;
+}
+
+.statusBadge {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.statusDot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+}
+.statusOpen {
+    background: rgba(76, 175, 80, 0.12);
+    color: var(--default-color-green);
+}
+.statusOpen .statusDot {
+    background: var(--default-color-green);
+}
+.statusSuspended {
+    background: rgba(233, 75, 60, 0.12);
+    color: var(--default-color-red);
+}
+.statusSuspended .statusDot {
+    background: var(--default-color-red);
+    animation: pulse 1.6s infinite ease-in-out;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.select {
+    cursor: pointer;
+    padding: 0.5rem 0.8rem;
+    border-radius: 8px;
+    border: 1px solid var(--default-color-white-2);
+    background: var(--default-color-white);
+    font-weight: 600;
+    color: var(--foreground);
+    transition: border-color 200ms ease;
+}
+.select:hover:not(:disabled) {
+    border-color: var(--secondary);
+}
+.select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ---------- Branding ---------- */
+.brandingRow {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.75rem;
+    padding: 1.25rem 0.25rem;
+    border-bottom: 1px solid var(--default-color-white-2);
+}
+
+.logoUpload {
+    flex-shrink: 0;
+}
+.logoDropzone {
+    width: 110px;
+    height: 110px;
+    border-radius: 12px;
+    border: 2px dashed var(--default-color-white-2);
+    background: var(--fx-color-bg);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 0;
+    transition: border-color 200ms ease, background-color 200ms ease;
+}
+.logoDropzone:hover {
+    border-color: var(--primary);
+    background: var(--fx-color-bg-effects);
+}
+.logoPreviewImg {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: var(--default-color-white);
+}
+.logoPlaceholder {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    color: var(--default-color-gray);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-align: center;
+    padding: 0.5rem;
+}
+.hiddenFileInput {
+    display: none;
+}
+.skeletonLogo {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+}
+
+.brandingFields {
+    flex: 1;
+    display: flex;
+    flex-flow: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+    min-width: 0;
+}
+.nameInput {
+    width: 100%;
+    max-width: 340px;
+    padding: 0.6rem 0.9rem;
+    border-radius: 8px;
+    border: 1px solid var(--default-color-white-2);
+    background: var(--default-color-white);
+    color: var(--default-color-black);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 200ms ease;
+}
+.nameInput:focus {
+    border-color: var(--primary);
+}
+.nameInput:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ---------- Skeleton (shared shimmer) ---------- */
+.skeletonBar {
+    display: block;
+    background: linear-gradient(
+        90deg,
+        var(--default-color-white-2) 25%,
+        var(--fx-color-bg) 50%,
+        var(--default-color-white-2) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+}
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+    .container {
+        /* clear the fixed burger button from the sidebar */
+        padding: 4.5rem 1rem 1rem 1rem;
+    }
+
+    .wrapper {
+        width: 100%;
+    }
+
+    .settings {
+        padding: 0.5rem 1rem 1rem 1rem;
+    }
+
+    .settingRow {
+        flex-flow: column;
+        align-items: flex-start;
+        gap: 0.85rem;
+    }
+
+    .controlGroup {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .primaryButton {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .title h2 {
+        font-size: 1.15rem;
+    }
+
+    .title svg {
+        width: 32px;
+        height: 32px;
+    }
+
+    .statusBadge {
+        display: none; /* select value already communicates state; save space */
+    }
+
+    .controlGroup {
+        justify-content: flex-end;
+    }
 }

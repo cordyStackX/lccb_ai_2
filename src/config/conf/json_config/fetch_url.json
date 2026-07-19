@@ -34,7 +34,11 @@
 		"downloadpdf_chatbot" : "/services/supabase/storage/downloadpdf_chatbot",
 		"deletepdf_chatbot" : "/services/supabase/storage/deletepdf_chatbot",
 		"fetchimg" : "/services/supabase/storage/fetchimg",
-		"lbc_image_retieve" : "/services/supabase/storage/lbc_image_retieve"
+		"lbc_image_retieve" : "/services/supabase/storage/lbc_image_retieve",
+		"uploadpdf_sensitive" : "/services/supabase/storage/uploadpdf_chatbot_sensitive",
+		"retrieve_sensitive" : "/services/supabase/storage/retrieve_chatbot_sensitive",
+		"deletepdf_sensitive" : "/services/supabase/storage/deletepdf_chatbot_sensitive",
+		"downloadpdf_sensitive" : "/services/supabase/storage/downloadpdf_chatbot_sensitive"
 	},
 	"admin" : {
 		"retrieve_user" : "/services/supabase/admin/retrieve_user",
@@ -43,6 +47,8 @@
 		"retrieve_pdf_record" : "/services/supabase/admin/retrieve_pdf_record",
 		"system_logs" : "/services/supabase/admin/system_logs",
 		"get_suspension_state" : "/services/supabase/admin/get-suspension-state",
-		"set_suspension_state" : "/services/supabase/admin/suspension-state"
+		"set_suspension_state" : "/services/supabase/admin/suspension-state",
+		"update_branding" : "",
+		"get_branding" : ""
 	}
 }

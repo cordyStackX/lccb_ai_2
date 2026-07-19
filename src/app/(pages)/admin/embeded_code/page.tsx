@@ -1,11 +1,11 @@
 "use client";
-import { ManageUser, Sidebar } from "@/components/admin";
+import { Embeded_code, Sidebar } from "@/components/admin";
 import { useEffect, useState } from "react";
 import { Fetch_to, Progress } from "@/utilities";
 import { useRouter } from "next/navigation";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 
-export default function ManageUserPage() {
+export default function Embeded_codePage() {
     const router = useRouter();
     const [nav, setNav] = useState("");
 
@@ -19,13 +19,13 @@ export default function ManageUserPage() {
     }, []);
 
     useEffect(() => {
-        setNav("manage_user");
+        setNav("embeded_code");
     }, [nav]);
-    
-    return (
+
+    return(
         <main className="admin">
             <Sidebar nav={nav} />
-            <ManageUser />
+            <Embeded_code />
         </main>
     );
 }

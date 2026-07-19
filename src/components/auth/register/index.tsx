@@ -21,7 +21,7 @@ export default function SignUp({ mobile }: HeaderProps) {
     const router = useRouter();
 
     const [form, setForm] = useState({
-        email: "", name: "", year: "", role: "", assign_by: ""
+        email: "", name: "", year: "", role: "", assign_by: "", school_id: ""
     });
     const [status, setStatus] = useState(false);
     const [message, setMessage] = useState("");
@@ -108,6 +108,25 @@ export default function SignUp({ mobile }: HeaderProps) {
                         <div className={styles.text_contain}>
                             <h1>Register</h1>
                             <p>Please Register to continue</p>
+                        </div>
+                        <div className={styles.input_holder}>
+                            <span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <rect x="3" y="5" width="18" height="14" rx="2"/>
+                                <path d="M3 7l9 6 9-6"/>
+                                </svg>
+                            </span>
+                            <input 
+                            type="number" 
+                            name="school_id" 
+                            id="school_id" 
+                            autoComplete="email"
+                            value={form.school_id}
+                            onChange={handleChange}
+                            placeholder="School Id"
+                            style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
+                            required
+                            />
                         </div>
                         <div className={styles.input_holder}>
                             <span>

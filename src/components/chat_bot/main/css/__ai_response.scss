@@ -1,0 +1,36 @@
+.ai_response pre {
+    width: min(700px, 100%);
+    background: var(--foreground);
+    color: var(--default-color-white);
+    padding: 1rem;
+    border-radius: 10px;
+    overflow-x: auto;
+    font-family: monospace;
+    max-width: 100%;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+.ai_response code {
+    background: none;
+    padding: 0.2rem 0.4rem;
+    border-radius: 5px;
+    font-weight: bolder;
+    font-size: 1rem;
+    color: var(--foreground);
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+.ai_response ol,
+.ai_response ul {
+    padding-left: 2rem;
+    margin: 0 0 1rem 0;
+    list-style-position: outside;
+}
+.ai_response li {
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+}
+.ai_response a {
+    color: var(--secondary);
+    text-decoration: underline;
+}

@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
 
     try {
 
-        const { email, password, c_password, name, year, role } = await req.json();
+        const { id, email, password, c_password, name, year, role } = await req.json();
 
         if (password !== c_password) return NextResponse.json({ succes: false, error: "Password is not match" }, { status: 409 });
 
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
 
             const { error } = await supabaseServer
             .from("auth")
-            .insert([{ email: cleanEmail, password: String(hashed), f_name: cleanName, year: year, status: status, role: role, assign_by: cleanAssign_by }]);
+            .insert([{ id, email: cleanEmail, password: String(hashed), f_name: cleanName, year: year, status: status, role: role, assign_by: cleanAssign_by }]);
 
             await supabaseServer
             .from("system_logs")
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
 
             const { error } = await supabaseServer
             .from("auth")
-            .insert([{ email: cleanEmail, password: String(hashed), f_name: cleanName, year: year, status: status, role: role, assign_by: cleanAssign_by }]);
+            .insert([{ id, email: cleanEmail, password: String(hashed), f_name: cleanName, year: year, status: status, role: role, assign_by: cleanAssign_by }]);
 
             await supabaseServer
             .from("system_logs")

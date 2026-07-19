@@ -1,0 +1,26 @@
+/* ---------- Empty state / intro ---------- */
+.introduction {
+    color: var(--foreground);
+    text-align: center;
+    width: min(700px, 90dvw);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+.eyebrow {
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--secondary);
+    font-weight: 700;
+}
+.introduction h1 {
+    margin: 0.25rem 0;
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 700;
+}
+.introduction > p {
+    color: var(--default-color-gray);
+    margin: 0 0 1.5rem 0;
+}

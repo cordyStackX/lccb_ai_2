@@ -3,94 +3,221 @@
     height: 700px;
     flex-flow: column;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     position: sticky;
     top: 5%;
     margin-left: 1rem;
     color: var(--default-color-black);
-    border: 1px solid var(--default-color-gray);
-    border-radius: 8px;
-    padding: 2rem 0;
-    box-shadow: 0px 0px 5px 1px var(--default-color-gray);
+    background: var(--default-color-white);
+    border: 1px solid var(--default-color-white-2);
+    border-radius: 12px;
+    padding: 1.5rem 0;
+    box-shadow: 0 4px 20px var(--fx-color-bg);
 }
 
-.options {
-    width: 100%;
-    height: 600px;
-    display: flex;
-    flex-flow: column;
-    align-items: flex-start;
-    justify-content: flex-start;
-    padding: 1rem;
-}
-.options button {
-    width: 100%;
-    padding: 0.8rem;
-    margin: 0.1rem 0;
-    cursor: pointer;
-    font-weight: bold;
-    text-align: start;
-    background: transparent;
-    border: transparent;
-    border-radius: 5px;
-    display: flex;
-    justify-content: left;
-    align-items: center;
-    font-weight: bolder;
-    color: var(--default-color-black);
-}
-.options svg {
-    margin: 0 10px;
-}
-.options button:hover {
-    background-color: var(--fx-color-button);
-}
-.options_2 {
-    width: 100%;
-    height: auto;
-    display: flex;
-    flex-flow: column;
-    align-items: flex-start;
-    justify-content: flex-start;
-    padding: 1rem;
-}
-.options_2 button {
-    width: 230px;
-    padding: 0.8rem;
-    margin: 0.5rem 0;
-    cursor: pointer;
-    font-weight: bold;
-    text-align: start;
-    color: var(--default-color-red);
-    background: none;
-    border: transparent;
-    border-radius: 10px;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    transition: 0.5s ease;
-}
-.options_2 button:hover {
-    background-color: var(--default-color-red);
-    color: var(--default-color-white);
-}
-.options_2 svg {
-    margin: 0 1rem;
-}
+/* ---------- Admin identity block ---------- */
 .admin {
-    padding: 2rem 1rem;
+    width: 100%;
+    padding: 0 1.4rem 1.5rem 1.4rem;
+    margin: 0 0 0.75rem 0;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
+    border-bottom: 1px solid var(--default-color-white-2);
+}
+.avatar {
+    border-radius: 50%;
+    border: 2px solid var(--default-color-white-2);
+    flex-shrink: 0;
+}
+.admin span {
+    margin-left: 0.9rem;
+    min-width: 0;
 }
 .admin figcaption {
-    margin: 0 1rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--foreground);
 }
 .admin p {
-    width: 130px;
+    width: 140px;
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
-    margin: 0.5rem 1rem;
+    margin: 0.2rem 0 0 0;
+    font-size: 0.75rem;
+    color: var(--default-color-gray);
+}
+
+/* ---------- Nav ---------- */
+.options {
+    width: 100%;
+    flex: 1;
+    display: flex;
+    flex-flow: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 0.2rem;
+    padding: 0 0.85rem;
+}
+.navButton {
+    position: relative;
+    width: 100%;
+    padding: 0.75rem 0.9rem 0.75rem 1.1rem;
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-align: start;
+    background: transparent;
+    border: transparent;
+    border-radius: 8px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    color: var(--default-color-gray);
+    transition: background-color 200ms ease, color 200ms ease;
+}
+.navButton svg {
+    margin: 0 0.7rem 0 0;
+    flex-shrink: 0;
+    transition: stroke 200ms ease;
+}
+.navButton:not(:disabled):hover {
+    background-color: var(--fx-color-bg);
+    color: var(--primary);
+}
+.navIndicator {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%) scaleY(0);
+    width: 3px;
+    height: 60%;
+    border-radius: 0 3px 3px 0;
+    background: var(--primary);
+    transition: transform 200ms ease;
+    transform-origin: center;
+}
+.navButtonActive {
+    background-color: var(--fx-color-bg-effects);
+    color: var(--default-color-white);
+    cursor: default;
+}
+.navButtonActive .navIndicator {
+    transform: translateY(-50%) scaleY(1);
+    background: var(--secondary);
+}
+
+/* ---------- Sign out ---------- */
+.options_2 {
+    width: 100%;
+    padding: 0.85rem 0.85rem 0 0.85rem;
+    margin-top: 0.5rem;
+    border-top: 1px solid var(--default-color-white-2);
+}
+.logoutButton {
+    width: 100%;
+    padding: 0.75rem 0.9rem;
+    margin-top: 0.85rem;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.88rem;
+    text-align: start;
+    color: var(--default-color-red);
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    transition: background-color 200ms ease, border-color 200ms ease;
+}
+.logoutButton svg {
+    margin: 0 0.7rem 0 0;
+    flex-shrink: 0;
+}
+.logoutButton:hover {
+    background-color: var(--default-color-red);
+    color: var(--default-color-white);
+}
+
+/* ---------- Burger button (hidden on desktop) ---------- */
+.burger {
+    display: none;
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1100;
+    width: 42px;
+    height: 42px;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    background: var(--default-color-white);
+    border: 1px solid var(--default-color-white-2);
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px var(--fx-color-bg);
+}
+.burgerBar {
+    width: 20px;
+    height: 2px;
+    background: var(--default-color-black);
+    border-radius: 2px;
+    transition: transform 200ms ease, opacity 200ms ease;
+}
+.burgerBarOpenTop {
+    transform: translateY(7px) rotate(45deg);
+}
+.burgerBarOpenMid {
+    opacity: 0;
+}
+.burgerBarOpenBot {
+    transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ---------- Backdrop (hidden on desktop) ---------- */
+.backdrop {
+    display: none;
+}
+
+/* ---------- Responsive aside ---------- */
+@media (max-width: 900px) {
+    .burger {
+        display: flex;
+    }
+
+    .backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: 1000;
+    }
+
+    .container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        margin-left: 0;
+        height: 100vh;
+        max-height: 100vh;
+        width: 270px;
+        border-radius: 0;
+        transform: translateX(-100%);
+        transition: transform 250ms ease;
+        z-index: 1050;
+    }
+
+    .containerOpen {
+        transform: translateX(0);
+    }
+}
+
+@media (max-width: 400px) {
+    .container {
+        width: 85vw;
+    }
 }

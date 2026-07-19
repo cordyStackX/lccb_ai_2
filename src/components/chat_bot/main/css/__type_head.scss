@@ -1,0 +1,34 @@
+.typeahead {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(100% + 8px);
+    background: var(--default-color-white);
+    border: 1px solid var(--default-color-white-2);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px var(--fx-color-bg);
+    overflow: hidden;
+    z-index: 5;
+}
+.typeaheadItem {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0.7rem 1rem;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--default-color-white-2);
+    font-family: inherit;
+    font-size: 0.85rem;
+    color: var(--foreground);
+    cursor: pointer;
+    transition: background 160ms ease, color 160ms ease, padding-left 160ms ease;
+}
+.typeaheadItem:last-child {
+    border-bottom: none;
+}
+.typeaheadItem:hover {
+    background: var(--fx-color-bg);
+    color: var(--primary);
+    padding-left: 1.3rem;
+}

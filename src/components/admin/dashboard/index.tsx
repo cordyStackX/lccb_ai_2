@@ -426,7 +426,7 @@ export default function Dashboard() {
                         
                         <span className={styles.icons}>
                             <span>
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <rect x="3" y="5" width="18" height="18" rx="4" stroke="currentColor" strokeWidth="2"/>
                                 <circle cx="9" cy="11" r="2" fill="currentColor"/>
                                 <circle cx="15" cy="11" r="2" fill="currentColor"/>
@@ -488,31 +488,32 @@ export default function Dashboard() {
                             </div>
                         </div>
                         <h3 className={styles.reportTitle}>Most Top 20 users by Laco AI usage</h3>
-                        <table className={styles.rankings}>
-                            <thead>
-                                <tr>
-                                    <th>Top</th>
-                                    <th>Email</th>
-                                    <th>API Usage</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {topApiUsers.length > 0 ? (
-                                    topApiUsers.map((user, index) => (
-                                        <tr key={index}>
-                                            <td>{index + 1}</td>
-                                            <td>{user.email}</td>
-                                            <td>{user.count}</td>
-                                        </tr>
-                                    ))
-                                ) : (
+                        <div className={styles.tableScroll}>
+                            <table className={styles.rankings}>
+                                <thead>
                                     <tr>
-                                        <td colSpan={3}>No Data</td>
+                                        <th>Top</th>
+                                        <th>Email</th>
+                                        <th>API Usage</th>
                                     </tr>
-                                )}
-                                
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {topApiUsers.length > 0 ? (
+                                        topApiUsers.map((user, index) => (
+                                            <tr key={index}>
+                                                <td>{index + 1}</td>
+                                                <td>{user.email}</td>
+                                                <td>{user.count}</td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan={3}>No Data</td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </section>
                 
