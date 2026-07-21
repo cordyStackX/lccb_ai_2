@@ -1,25 +1,30 @@
 .container {
     position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100dvh;
     z-index: 99;
     display: none;
     justify-content: center;
     align-items: center;
+    background-color: rgba(24, 24, 24, 0.45);
+    backdrop-filter: blur(4px);
 }
 .container_open {
     display: flex;
 }
 .profile_container {
-    width: min(400px, 100%);
-    height: min(750px, 100vh);
+    width: min(400px, 92%);
+    height: min(750px, 92vh);
     background-color: var(--default-color-white);
-    box-shadow: 0 0 5px 2px var(--default-color-gray);
+    box-shadow: 0 8px 28px rgba(24, 24, 24, 0.25);
     overflow: auto;
-    border-radius: 5px;
+    border-radius: 12px;
     z-index: 9999;
     position: relative;
     padding-bottom: 2rem;
+    color: var(--foreground);
 }
 .title {
     text-align: center;
@@ -27,18 +32,33 @@
     position: sticky;
     top: 0;
     width: 100%;
-    background-color: var(--primary);
+    background: linear-gradient(135deg, var(--background_linear_1), var(--background_linear_2));
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 2;
 }
 .title h2 {
-    margin: 0.5rem 0;
+    margin: 0.9rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
 }
-.title span{
+.title span {
     position: absolute;
-    left: 10px;
+    right: 14px;
+    left: auto;
     cursor: pointer;
+    color: var(--default-color-white);
+    display: flex;
+    padding: 4px;
+    border-radius: 6px;
+    opacity: 0.85;
+    transition: opacity 0.15s ease, background-color 0.15s ease;
+}
+.title span:hover {
+    opacity: 1;
+    background-color: rgba(255, 255, 255, 0.15);
 }
 .profile_img, .information {
     width: 100%;
@@ -47,12 +67,13 @@
     justify-content: center;
     align-items: center;
     flex-flow: column;
-    margin: 1rem 0;
+    margin: 1.5rem 0;
 }
 .profile_img span {
-    width: 180px;
-    height: 180px;
-    background-color: var(--primary);
+    width: 140px;
+    height: 140px;
+    background-color: var(--default-color-white-2);
+    border: 3px solid var(--secondary);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -60,55 +81,118 @@
     overflow: hidden;
     position: relative;
     cursor: pointer;
+    transition: border-color 0.15s ease;
 }
 .profile_img span:hover {
-    opacity: 0.8;
+    border-color: var(--primary);
+    opacity: 1;
 }
 .profile_img button {
     position: absolute;
-    background-color: var(--primary);
-    border: 1px solid var(--foreground);
-    padding: 0.5rem;
-    border-radius: 5px;
+    inset: 0;
+    background-color: rgba(24, 24, 24, 0.5);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
+    color: var(--default-color-white);
+    opacity: 0;
+    z-index: 3;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+}
+.profile_img span:hover button {
+    opacity: 1;
+    pointer-events: auto;
 }
 .information form {
     display: flex;
     justify-content: center;
     flex-flow: column;
-    width: 90%;
+    width: 88%;
     color: var(--foreground);
+}
+.information label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--default-color-gray);
+    margin-bottom: 0.35rem;
 }
 .information input {
     width: 100%;
-    height: 40px;
-    padding: 1rem;
-    margin: 1rem 0;
-    background: transparent;
-    border: 1px solid var(--foreground);
+    height: 42px;
+    padding: 0 0.9rem;
+    margin: 0 0 1.1rem 0;
+    background: var(--default-color-white);
+    border: 1px solid var(--default-color-white-2);
     color: var(--foreground);
-    border-radius: 5px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.information input:focus {
+    outline: none;
+    border-color: var(--secondary);
+    box-shadow: 0 0 0 3px var(--fx-color);
+}
+.information input:disabled {
+    color: var(--default-color-gray);
+    cursor: not-allowed;
+    background: var(--default-color-white-2);
+}
+.information > form > span:first-of-type h4 {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--foreground);
+    margin: 0.2rem 0;
 }
 .information span {
     width: 100%;
     height: auto;
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     align-items: center;
     margin: 1rem 0;
+    gap: 0.75rem;
 }
 .information button {
-    width: 150px;
-    height: 40px;
+    flex: 1;
+    height: 42px;
     cursor: pointer;
     background-color: var(--primary);
-    border: transparent;
-    border-radius: 5px;
+    border: 1px solid transparent;
+    border-radius: 8px;
     color: var(--default-color-white);
+    font-weight: 500;
+    font-size: 0.85rem;
+    transition: background-color 0.15s ease, transform 0.1s ease;
+}
+.information button:hover {
+    background-color: var(--secondary);
+}
+.information button:active {
+    transform: scale(0.98);
+}
+.information button[title="Change your password"] {
+    background-color: transparent;
+    border: 1px solid var(--default-color-white-2);
+    color: var(--foreground);
+}
+.information button[title="Change your password"]:hover {
+    background-color: var(--default-color-white-2);
 }
 .deleteaccount {
     width: 100%;
     height: auto;
     text-align: center;
     color: var(--default-color-red);
+    font-size: 0.85rem;
+    cursor: pointer;
+    opacity: 0.85;
+    transition: opacity 0.15s ease;
+}
+.deleteaccount:hover {
+    opacity: 1;
 }

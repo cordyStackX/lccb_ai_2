@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, error: "File not found" }, { status: 404 });
     }
 
-    const bucketName = "chatbot_pdf_private";
+    const bucketName = "chatbot_pdfs";
 
     const toRelativePath = (value: string) => {
         let path = value.trim();

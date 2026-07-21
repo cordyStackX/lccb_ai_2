@@ -12,6 +12,7 @@ type SidebarsProps = {
     emailRes: string;
     setCurrentPdf: (val: number | undefined) => void;
     setCurrentMsg: (val: number | undefined) => void;
+    currentMsg: number | undefined;
     globalRefresh: boolean;
     globalRefreshMsg: boolean;
     setGlobalMessages: Dispatch<SetStateAction<{ ask: string; respond: string }[]>>;
@@ -30,7 +31,7 @@ type ChatHistoryItem = {
     history?: { ask: string; respond: string }[];
 };
 
-export default function Sidebars({ isOpen, emailRes, setCurrentPdf, globalRefresh, setGlobalMessages, globalRefreshMsg, setCurrentMsg }: SidebarsProps) {
+export default function Sidebars({ currentMsg, isOpen, emailRes, setCurrentPdf, globalRefresh, setGlobalMessages, globalRefreshMsg, setCurrentMsg }: SidebarsProps) {
     const pageSize = 10;
     const historyPageSize = 7;
     const [profile, setProfile] = useState(false);
@@ -138,8 +139,11 @@ export default function Sidebars({ isOpen, emailRes, setCurrentPdf, globalRefres
     };
 
     useEffect(() => {
+        if (currentMsg) {
+            return setSelectedMsgId(currentMsg);
+        };
         fetchChatHistory(true);
-    }, [globalRefreshMsg]);
+    }, [currentMsg, globalRefreshMsg]);
 
     useEffect(() => {
         setData([]);

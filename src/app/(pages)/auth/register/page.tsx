@@ -3,9 +3,9 @@ import { SignUp } from "@/components/auth";
 import { Fetch_to } from "@/utilities";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import { useRouter } from "next/navigation";
-import { Suspense, useEffect } from "react";
+import { useEffect } from "react";
 
-function SignupContent() {
+export default function SignupContent() {
     const router = useRouter();
 
     useEffect(() => {
@@ -25,12 +25,4 @@ function SignupContent() {
         </main>
     );
 
-}
-
-export default function SignUpPage() {
-    return (
-        <Suspense fallback={null}>
-            <SignupContent />
-        </Suspense>
-    );
 }

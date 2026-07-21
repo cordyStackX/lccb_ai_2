@@ -106,6 +106,7 @@ export async function POST(req: NextRequest) {
             token: apikey,
             email: cleanEmail,
             filePath: filePath,
+            table: "chatbot_pdf_file"
         });
 
         if (!response.success) {
@@ -116,6 +117,24 @@ export async function POST(req: NextRequest) {
         await supabaseServer
             .from("chatbot_pdf_file")
             .update([{ summary: response.data.markdown }])
+            .eq("file", filePath);
+        
+        const response_suggest = await Fetch_to(`${apiUrl}generate_md_summary`, {
+            prompt: "provide small 1 suggested prompt limit 15 - 20 words example What are the available courses in the SBIT",
+            token: apikey,
+            email: cleanEmail,
+            filePath: filePath,
+            table: "chatbot_pdf_file"
+        });
+
+        if (!response_suggest.success) {
+            uploadedResults.push({ originalName: file.name, filePath, success: false, message: "Failed to create summary" });
+            continue;
+        }
+
+        await supabaseServer
+            .from("chatbot_pdf_file")
+            .update([{ suggest: response_suggest.data.markdown }])
             .eq("file", filePath);
 
         uploadedResults.push({ originalName: file.name, filePath, success: true });

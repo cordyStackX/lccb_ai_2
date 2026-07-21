@@ -31,7 +31,7 @@ def _build_prompt_context(data):
     if not row.data:
         return None, (jsonify({"success": False, "error": "PDF not found"}), 404)
 
-    user = supabase.table("auth").select("year, role").eq("email", email).single().execute()
+    user = supabase.table("auth").select("year, role, id").eq("email", email).single().execute()
     if not user.data:
         return None, (jsonify({"success": False, "error": "User not found"}), 404)
 
@@ -39,6 +39,7 @@ def _build_prompt_context(data):
     tmp_path = f"/tmp/{email}_{file_name}"
     role = user.data["role"]
     year = user.data["year"]
+    user_id = user.data["id"]
 
     if not os.path.exists(tmp_path):
         return None, (
@@ -136,7 +137,8 @@ Respond with ONLY comma-separated numbers (e.g., \"1,3,4\"). If all chunks seem 
         role=role,
         year=year,
         name=f_name,
-        method=method
+        method=method,
+        user_id=user_id
     )
 
     return {"final_prompt": final_prompt, "system_role": systemRole}, None

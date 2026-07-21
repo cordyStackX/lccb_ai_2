@@ -53,6 +53,7 @@ export default function ChatContent() {
                 if (result < 0) return setProfilePic("");
                 setProfilePic(result);
                 console.log("Image Public link: ", response2.data.message[0].file_link);
+                setGlobalRefresh(false);
             } else {
                 setProfilePic("");
             }
@@ -64,8 +65,8 @@ export default function ChatContent() {
         <main className="chat_page">
             <Header isOpen={isOpen} setOpen={setOpen} setShowProfile={setShowProfile} name={name} email={email} profilePic={profilePic}/>
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center"}}>
-                <Sidebars isOpen={isOpen} emailRes={email} setCurrentPdf={setCurrentPdf} globalRefresh={globalRefresh} setGlobalMessages={setGlobalMessages} globalRefreshMsg={globalRefreshMsg} setCurrentMsg={setCurrentMsg} />
-                <Main currentMsg={currentMsg} emailRes={email} currentPdf={currentPdf} setGlobalRefresh={setGlobalRefresh} f_name={name} globalMessages={globalMessages} setGlobalRefreshMsg={setGlobalRefreshMsg} setGlobalMessages={setGlobalMessages} />
+                <Sidebars currentMsg={currentMsg} isOpen={isOpen} emailRes={email} setCurrentPdf={setCurrentPdf} globalRefresh={globalRefresh} setGlobalMessages={setGlobalMessages} globalRefreshMsg={globalRefreshMsg} setCurrentMsg={setCurrentMsg} />
+                <Main setCurrentMsg={setCurrentMsg} currentMsg={currentMsg} emailRes={email} currentPdf={currentPdf} setGlobalRefresh={setGlobalRefresh} f_name={name} globalMessages={globalMessages} setGlobalRefreshMsg={setGlobalRefreshMsg} setGlobalMessages={setGlobalMessages} />
                 <Profile showProfile={showProfile} setShowProfile={setShowProfile} email={email} name={name} role={role} year={year} profilePic={profilePic} setGlobalRefresh={setGlobalRefresh} />
             </div> 
         </main>

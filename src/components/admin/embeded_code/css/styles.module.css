@@ -163,7 +163,7 @@
 /* ---------- Live preview ---------- */
 .previewShell {
     width: 100%;
-    padding: 0 1rem 1rem 1rem;
+    padding: 2rem 1rem;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -194,6 +194,92 @@
 @keyframes shimmer {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
+}
+
+/* ---------- AI config fields (name / instructions / body) ---------- */
+.detailsRow {
+    display: flex;
+    gap: 1rem;
+    padding: 0 1rem;
+    margin-bottom: 1.2rem;
+    flex-wrap: wrap;
+    align-items: flex-start;
+}
+.detailsField {
+    display: flex;
+    flex-flow: column;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--default-color-gray);
+    flex: 1 1 200px;
+    min-width: 0;
+}
+.detailsField input,
+.detailsField textarea {
+    width: 100%;
+    padding: 0.55rem 0.8rem;
+    border-radius: 8px;
+    border: 1px solid var(--default-color-white-2);
+    background: var(--default-color-white);
+    color: var(--default-color-black);
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 200ms ease;
+}
+.detailsField textarea {
+    resize: vertical;
+    min-height: 90px;
+    line-height: 1.5;
+}
+.detailsField input:focus,
+.detailsField textarea:focus {
+    border-color: var(--primary);
+}
+
+.saveInfoButton {
+    align-self: flex-end;
+    flex: 0 0 auto;
+    padding: 0.6rem 1.4rem;
+    border-radius: 8px;
+    border: none;
+    background: var(--primary);
+    color: var(--default-color-white);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 200ms ease, transform 150ms ease;
+    height: 42px;
+    margin-top: auto;
+}
+.saveInfoButton:hover {
+    background: var(--secondary);
+}
+.saveInfoButton:active {
+    transform: scale(0.95);
+}
+
+@media (max-width: 900px) {
+    .saveInfoButton {
+        align-self: stretch;
+        width: 100%;
+    }
+}
+
+/* Instruction Body takes more room than Name/Instructions on wide screens */
+.detailsFieldWide {
+    flex: 2 1 280px;
+}
+
+@media (max-width: 900px) {
+    .detailsRow {
+        gap: 0.75rem;
+    }
+    .detailsField {
+        flex: 1 1 100%;
+    }
 }
 
 /* ---------- Responsive ---------- */

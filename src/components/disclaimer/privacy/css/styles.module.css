@@ -2,45 +2,54 @@
     width: 100%;
     min-height: 100vh;
     padding: 2rem;
+    background-color: var(--default-color-white-2);
 }
 
 .content {
     max-width: 900px;
     margin: 0 auto;
-    background: var(--primary);
+    background: var(--default-color-white);
     padding: 3rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 14px;
+    border-top: 4px solid;
+    border-image: linear-gradient(90deg, var(--background_linear_1), var(--background_linear_2)) 1;
+    box-shadow: 0 10px 30px rgba(24, 24, 24, 0.08);
 }
 
 .content h1 {
     font-size: 2.5rem;
-    color: var(--adaptive-color-1);
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--background_linear_1), var(--background_linear_2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
     margin-bottom: 0.5rem;
 }
 
 .updated {
-    color: var(--adaptive-color-3);
+    color: var(--default-color-gray);
     font-size: 0.9rem;
     margin-bottom: 2rem;
 }
 
 .notice {
-    background: #fff3cd;
-    border-left: 4px solid #ffc107;
+    background: #fff8e6;
+    border-left: 4px solid var(--default-color-yellow);
     padding: 1.5rem;
     margin: 2rem 0;
-    border-radius: 6px;
+    border-radius: 8px;
 }
 
 .notice h2 {
-    color: #856404;
+    color: #8a5a00;
     margin-top: 0;
+    font-size: 1.1rem;
 }
 
 .notice p {
-    color: #856404;
+    color: #8a5a00;
     margin-bottom: 0;
+    line-height: 1.6;
 }
 
 .section {
@@ -48,64 +57,93 @@
 }
 
 .section h2 {
-    font-size: 1.75rem;
-    color: var(--adaptive-color-1);
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--foreground);
     margin-top: 2rem;
     margin-bottom: 1rem;
-    border-bottom: 2px solid var(--adaptive-color-2);
-    padding-bottom: 0.5rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 2px solid var(--default-color-white-2);
+    position: relative;
+}
+
+.section h2::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 60px;
+    height: 2px;
+    background: var(--secondary);
 }
 
 .section h3 {
-    font-size: 1.25rem;
-    color: var(--adaptive-color-2);
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--primary);
     margin-top: 1.5rem;
     margin-bottom: 0.75rem;
 }
 
 .section p {
-    line-height: 1.7;
-    color: var(--adaptive-color-3);
+    line-height: 1.75;
+    color: var(--foreground);
     margin-bottom: 1rem;
 }
 
 .section ul {
-    list-style: disc;
-    padding-left: 2rem;
+    list-style: none;
+    padding-left: 0.25rem;
     margin: 1rem 0;
 }
 
 .section li {
     line-height: 1.7;
-    color: var(--adaptive-color-3);
-    margin-bottom: 0.5rem;
+    color: var(--foreground);
+    margin-bottom: 0.6rem;
+    padding-left: 1.4rem;
+    position: relative;
+}
+
+.section li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.65rem;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--secondary);
 }
 
 .section a {
-    color: var(--adaptive-color-2);
-    text-decoration: underline;
+    color: var(--primary);
+    text-decoration: none;
+    border-bottom: 1px solid var(--secondary);
+    transition: color 0.15s ease, border-color 0.15s ease;
 }
 
 .section a:hover {
-    color: var(--adaptive-color-1);
+    color: var(--secondary);
+    border-color: var(--primary);
 }
 
-
 .disclaimer {
-    background: #f8d7da;
-    border-left: 4px solid #dc3545;
+    background: #fdecea;
+    border-left: 4px solid var(--default-color-red);
     padding: 1.5rem;
     margin: 2rem 0;
-    border-radius: 6px;
+    border-radius: 8px;
 }
 
 .disclaimer h2 {
-    color: #721c24;
+    color: #7a231a;
     margin-top: 0;
+    font-size: 1.1rem;
 }
 
 .disclaimer p {
-    color: #721c24;
+    color: #7a231a;
     margin-bottom: 0.5rem;
     line-height: 1.6;
 }
@@ -120,14 +158,14 @@
     }
 
     .content {
-        padding: 1.5rem;
+        padding: 1.75rem;
     }
 
     .content h1 {
-        font-size: 2rem;
+        font-size: 1.85rem;
     }
 
     .section h2 {
-        font-size: 1.5rem;
+        font-size: 1.35rem;
     }
 }

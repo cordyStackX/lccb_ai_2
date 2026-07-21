@@ -1,10 +1,11 @@
 "use client";
 import styles from "./css/styles.module.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import api_link from "@/config/conf/json_config/fetch_url.json";
+import { Popup_info } from "@/utilities";
 import Markdown from "react-markdown";
-import { useRouter } from "next/navigation";
 import { DocFile, useDocumentTable } from "@/modules/documents/useDocumentTable";
+import remarkGfm from "remark-gfm";
 
 const ViewIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -57,6 +58,26 @@ function SkeletonRows() {
     );
 }
 
+// Small countdown toast shown while a delete is pending, with an Undo button.
+function UndoToast({ count, onUndo }: { count: number; onUndo: () => void }) {
+    const [secondsLeft, setSecondsLeft] = useState(5);
+
+    useEffect(() => {
+        setSecondsLeft(5);
+        const interval = setInterval(() => {
+            setSecondsLeft((s) => Math.max(0, s - 1));
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [count]);
+
+    return (
+        <div className={styles.undoToast}>
+            <span>{count > 1 ? `${count} files deleted` : "File deleted"} ({secondsLeft}s)</span>
+            <button onClick={onUndo}>Undo</button>
+        </div>
+    );
+}
+
 interface DocumentTableSectionProps {
     title: string;
     description?: string;
@@ -68,10 +89,16 @@ function DocumentTableSection({ title, description, sensitive, table }: Document
     const {
         fileRef, data, search, setSearch, page, setPage, totalPages,
         isLoading, refresh, setRefresh, triggerUpload, handleFile,
-        downloadFile, deleteFile,
+        downloadFile, deleteFile, undoDelete, pendingDeleteIds,
+        selectedIds, toggleSelect, toggleSelectAll, deleteSelected,
     } = table;
 
     const [viewingDoc, setViewingDoc] = useState<DocFile | null>(null);
+
+    const visibleIds = data.map((doc) => doc.id).filter((id): id is number => id !== undefined);
+    const allSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id));
+    const selectedCount = selectedIds.size;
+    const pendingCount = pendingDeleteIds.size;
 
     return (
         <section className={`${styles.status} ${sensitive ? styles.statusSensitive : ""}`}>
@@ -81,6 +108,11 @@ function DocumentTableSection({ title, description, sensitive, table }: Document
                     <h2>{title}</h2>
                 </span>
                 <span className={styles.sectionActions}>
+                    {selectedCount > 0 && (
+                        <button className={styles.button_delete_bulk} onClick={deleteSelected}>
+                            <DeleteIcon /> Delete {selectedCount} selected
+                        </button>
+                    )}
                     <button className={styles.button_upload} onClick={triggerUpload}>
                         Upload PDF File
                     </button>
@@ -120,6 +152,14 @@ function DocumentTableSection({ title, description, sensitive, table }: Document
                 <table>
                     <thead>
                         <tr>
+                            <th>
+                                <input
+                                    type="checkbox"
+                                    checked={allSelected}
+                                    onChange={() => toggleSelectAll(visibleIds)}
+                                    aria-label="Select all files"
+                                />
+                            </th>
                             <th>File Name</th>
                             <th>Actions</th>
                         </tr>
@@ -130,6 +170,14 @@ function DocumentTableSection({ title, description, sensitive, table }: Document
                         ) : data && data.length > 0 ? (
                             data.map((doc: DocFile, index: number) => (
                                 <tr key={index}>
+                                    <td>
+                                        <input
+                                            type="checkbox"
+                                            checked={doc.id !== undefined && selectedIds.has(doc.id)}
+                                            onChange={() => toggleSelect(doc.id)}
+                                            aria-label={`Select ${doc.file_name}`}
+                                        />
+                                    </td>
                                     <td className={styles.file_name}>{doc.file_name}</td>
                                     <td>
                                         <button className={styles.button_view} onClick={() => setViewingDoc(doc)}>
@@ -143,7 +191,7 @@ function DocumentTableSection({ title, description, sensitive, table }: Document
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={2} style={{ textAlign: "center", padding: "2rem" }}>
+                                <td colSpan={3} style={{ textAlign: "center", padding: "2rem" }}>
                                     No PDF Found
                                 </td>
                             </tr>
@@ -151,6 +199,13 @@ function DocumentTableSection({ title, description, sensitive, table }: Document
                     </tbody>
                 </table>
             </div>
+
+            {pendingCount > 0 && (
+                <UndoToast
+                    count={pendingCount}
+                    onUndo={() => undoDelete(Array.from(pendingDeleteIds))}
+                />
+            )}
 
             <div className={styles.pagination}>
                 <button
@@ -180,7 +235,7 @@ function DocumentTableSection({ title, description, sensitive, table }: Document
                             </button>
                         </div>
                         <div className={styles.modalBody}>
-                            <Markdown>{viewingDoc.summary || "No summary available."}</Markdown>
+                            <Markdown remarkPlugins={[remarkGfm]}>{viewingDoc.summary || "No summary available."}</Markdown>
                         </div>
                         <div className={styles.modalFooter}>
                             <button
@@ -197,42 +252,92 @@ function DocumentTableSection({ title, description, sensitive, table }: Document
     );
 }
 
-export default function Chat_bot() {
-    const router = useRouter();
+type Chat_botProps = {
+    email: string;
+}
+
+export default function Chat_bot({ email } : Chat_botProps) {
 
     // NOTE: api_link.storage.retrieve_sensitive / uploadpdf_sensitive /
     // downloadpdf_sensitive / deletepdf_sensitive are placeholder keys —
     // add matching routes to fetch_url.json and a separate backend
     // route/bucket with restricted RLS before wiring real grade data here.
-    const publicDocs = useDocumentTable({
-        retrieve: api_link.storage.retrieve_chatbot,
-        upload: api_link.storage.uploadpdf_chatbot,
-        download: api_link.storage.downloadpdf_chatbot,
-        delete: api_link.storage.deletepdf_chatbot,
-    });
+    const [isLoadState, setIsLoadState] = useState(false);
+    const [isLoadStateDone, setIsLoadStateDone] = useState(false);
+    const [isLoadError, setIsLoadError] = useState(false);
+    const [isLoadStatus, setIsLoadStatus] = useState("");
 
-    const sensitiveDocs = useDocumentTable({
-        retrieve: api_link.storage.retrieve_sensitive,
-        upload: api_link.storage.uploadpdf_sensitive,
-        download: api_link.storage.downloadpdf_sensitive,
-        delete: api_link.storage.deletepdf_sensitive,
-    });
+    // Started: show the "in progress" popup (green, spinning)
+    const showLoading = (status: string) => {
+        setIsLoadStatus(status);
+        setIsLoadState(true);
+        setIsLoadStateDone(true);
+    };
+
+    // Success: switch to the "done" variant, then auto-hide
+    const showSuccess = (status: string) => {
+        setIsLoadStatus(status);
+        setIsLoadError(false);
+        setIsLoadStateDone(false);
+        setTimeout(() => setIsLoadState(false), 2000);
+    };
+
+    // Error: switch to the red/error variant, then auto-hide
+    const showError = (status: string) => {
+        setIsLoadStatus(status);
+        setIsLoadStateDone(false);
+        setIsLoadError(true);
+
+        setTimeout(() => setIsLoadState(false), 2500);
+    };
+
+    const notifyHandlers = { onStart: showLoading, onSuccess: showSuccess, onError: showError };
+
+    const publicDocs = useDocumentTable(
+        {
+            retrieve: api_link.storage.retrieve_chatbot,
+            upload: api_link.storage.uploadpdf_chatbot,
+            download: api_link.storage.downloadpdf_chatbot,
+            delete: api_link.storage.deletepdf_chatbot,
+        },
+        email,
+        notifyHandlers
+    );
+
+    const sensitiveDocs = useDocumentTable(
+        {
+            retrieve: api_link.storage.retrieve_sensitive,
+            upload: api_link.storage.uploadpdf_sensitive,
+            download: api_link.storage.downloadpdf_sensitive,
+            delete: api_link.storage.deletepdf_sensitive,
+        },
+        email,
+        notifyHandlers
+    );
 
     return (
         <section className={styles.container}>
+            {isLoadState ? (
+                isLoadStateDone ? (
+                    <Popup_info status={isLoadStatus} bg_color="var(--primary)" states={true} load={true} error={false} />
+                ) : (
+                    isLoadError ? (
+                        <Popup_info status={isLoadStatus} bg_color="var(--default-color-red)" states={false} load={true} error={true} />
+                    ) : (
+                        <Popup_info status={isLoadStatus} bg_color="var(--default-color-green)" states={false} load={true} error={false} />
+                    )
+                )
+                
+             ) : null}
             <header className={styles.header_cons}>
                 <span>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="6" y="5" width="12" height="12" rx="4" stroke="currentColor" strokeWidth="2" />
-                        <circle cx="10" cy="11" r="1" fill="currentColor" />
-                        <circle cx="14" cy="11" r="1" fill="currentColor" />
-                        <path d="M12 2v3M9 2h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                        <path d="M14 2v6h6" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                        <path d="M8 13h8M8 17h8M8 9h2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                     </svg>
-                    <h1>Chat Bot</h1>
+                    <h1>Documents</h1>
                 </span>
-                <button className={styles.button_upload} onClick={() => router.push("/chat_bot")}>
-                    Open Chatbot
-                </button>
             </header>
 
             <div className={styles.tablesRow}>

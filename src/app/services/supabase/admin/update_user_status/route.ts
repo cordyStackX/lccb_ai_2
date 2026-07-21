@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
 
         const { id, status } = await req.json();
 
-        const { data, error } = await supabaseServer
+        const { error } = await supabaseServer
         .from("auth")
         .update({ status: status })
         .eq("id", id);
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
         }
 
-        return NextResponse.json({ success: true, message: data }, { status: 200 });
+        return NextResponse.json({ success: true, message: "User Status Updated Successfully" }, { status: 200 });
 
     } catch(err) {
 

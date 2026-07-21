@@ -65,7 +65,7 @@
     border-radius: 5px;
     font-weight: bolder;
     font-size: 1rem;
-    color: var(--default-color-white);
+    color: var(--default-color-blue);
     overflow-wrap: anywhere;
     word-break: break-word;
 }
@@ -88,4 +88,33 @@
 .ai_response a {
     color: #1e90ff; /* blue */
     text-decoration: underline;
+}
+.ai_response table {
+    width: 100%;
+    max-width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    overflow-x: auto;
+    display: block;
+}
+
+.ai_response thead {
+    background: var(--foreground);
+}
+
+.ai_response th,
+.ai_response td {
+    padding: 0.6rem 1rem;
+    text-align: left;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    white-space: nowrap;
+}
+
+.ai_response th {
+    font-weight: bold;
+    color: var(--default-color-white);
+}
+
+.ai_response tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.03);
 }

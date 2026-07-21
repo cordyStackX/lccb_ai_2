@@ -19,30 +19,33 @@ export async function POST(params: NextRequest) {
         return NextResponse.json({ success: false, error: "Invalid" }, { status: 402 });
     }
     console.log("files ID", id);
-    if (id) {
-        const { error } = await supabaseServer
+
+    if (!id) {
+         const { data, error } = await supabaseServer
         .from("chat_history")
-        .update({ history: messages })
-        .eq("id", id);
+        .insert([{ email: email, history: messages }])
+        .select()
+        .single();
+
 
         if (error) {
             console.error("Supabase Query Error: ", error);
             return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
         }
-        console.log("Update Current Reponses of ID: ", id);
-        return NextResponse.json({ success: true, messages: "Saved Successfully" }, { status: 200 });
-
+        return NextResponse.json({ success: true, messages: data }, { status: 200 });
     }
 
-    const { error } = await supabaseServer
+    const { data, error } = await supabaseServer
     .from("chat_history")
-    .insert([{ email: email, history: messages }]);
+    .update({ history: messages })
+    .eq("id", id)
+    .select();
 
     if (error) {
         console.error("Supabase Query Error: ", error);
         return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
     }
-
-    return NextResponse.json({ success: true, messages: "Saved Successfully" }, { status: 200 });
+    console.log("Update Current Reponses of ID: ", id);
+    return NextResponse.json({ success: true, messages: data }, { status: 200 });
 
 }

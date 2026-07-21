@@ -1,41 +1,53 @@
 import sys
 import json
 from flask import request, jsonify, Response, stream_with_context
-from .context import EXPECTED_API_KEY, client, supabase
+from .context import EXPECTED_API_KEY, client, supabase, PDF_ENCRYPT_PASSWORD
+from .encryptions import decrypt_text
 
-
-def _build_chatbot_context(data):
+def _build_prompt_context(data):
     received_token = data.get("token")
     prompt = data.get("prompt", "")
     last_user_response = str(data.get("last_user_response", "")).strip()
     last_ai_response = str(data.get("last_ai_response", "")).strip()
     email = data.get("email")
     f_name = data.get("f_name")
+    method = data.get("method")
 
     if received_token != EXPECTED_API_KEY:
         return None, (jsonify({"success": False, "error": "Unauthorized"}), 401)
     if not prompt:
-        return None, (jsonify({"success": False, "error": "Prompt cannot be empty"}), 404)
+        return None, (jsonify({"success": False, "error": "Prompt cannot be empty"}), 400)
     if not email:
-        return None, (jsonify({"success": False, "error": "Email not found"}), 404)
+        return None, (jsonify({"success": False, "error": "Email not found"}), 400)
+    if not f_name:
+        return None, (jsonify({"success": False, "error": "Name not found"}), 400)
 
-    rows = supabase.table("chatbot_pdf_file").select("id, file_name, summary").execute()
+    rows = supabase.table("chatbot_pdf_file_private").select("id, file_name, summary").eq("email", "admin@admin.com").execute()
     if not rows.data:
         return None, (jsonify({"success": False, "error": "No summaries found"}), 404)
 
-    user = supabase.table("auth").select("year, role").eq("email", email).single().execute()
-    if not user.data:
+    user = supabase.table("auth").select("year, role, id").eq("email", email).single().execute()
+    if not user.data["id"]:
         return None, (jsonify({"success": False, "error": "User not found"}), 404)
 
-    role = "admin"
-    year = "admin2026"
+    role = user.data["role"]
+    year = user.data["year"]
+    user_id = user.data["id"]
+
+    print(role, year, user_id)
 
     summaries = []
     for item in rows.data:
-        summary_text = (item.get("summary") or "").strip()
-        if summary_text:
-            label = item.get("file_name") or f"PDF {item.get('id')}"
-            summaries.append(f"[{label}]\n{summary_text}")
+        raw_summary = (item.get("summary") or "").strip()
+        if not raw_summary:
+            continue
+        try:
+            summary_text = decrypt_text(raw_summary, PDF_ENCRYPT_PASSWORD)
+        except Exception as e:
+            print(f"🔥 Failed to decrypt summary for {item.get('file_name')}: {e}", file=sys.stderr)
+            continue
+        label = item.get("file_name") or f"PDF {item.get('id')}"
+        summaries.append(f"[{label}]\n{summary_text}")
 
     if not summaries:
         return None, (jsonify({"success": False, "error": "PDF summaries not found"}), 404)
@@ -69,8 +81,8 @@ def _build_chatbot_context(data):
                     {"role": "system", "content": system_role},
                     {"role": "user", "content": chunk_prompt},
                 ],
-                temperature=0.4,
-                max_tokens=500,
+                temperature=0.7,
+                max_tokens=1000,
             )
             chunk_md = (chunk_response.choices[0].message.content or "").strip()
             if chunk_md:
@@ -100,22 +112,22 @@ def _build_chatbot_context(data):
         role=role,
         year=year,
         name=f_name,
-        user_id="null",
-        method="text"
+        method=method,
+        user_id=user_id
     )
 
     return {"final_prompt": final_prompt, "system_role": systemRole}, None
 
 
-def generate_md_chatbot():
+def generate_md_sensitive_data():
     try:
         data = request.json or {}
-        context, error = _build_chatbot_context(data)
+        context, error = _build_prompt_context(data)
         if error:
             return error
 
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="gpt-4.1-mini",
             messages=[
                 {"role": "system", "content": context["system_role"]},
                 {"role": "user", "content": context["final_prompt"]},
@@ -125,25 +137,24 @@ def generate_md_chatbot():
         )
 
         md = response.choices[0].message.content or ""
-
         return jsonify({"success": True, "markdown": md})
 
     except Exception as e:
-        print("f525 OpenAI Error:", e, file=sys.stderr)
+        print("🔥 OpenAI Error:", e, file=sys.stderr)
         return jsonify({"success": False, "error": str(e)}), 500
 
 
-def generate_md_chatbot_stream():
+def generate_md_sensitive_data_stream():
     try:
         data = request.json or {}
-        context, error = _build_chatbot_context(data)
+        context, error = _build_prompt_context(data)
         if error:
             return error
 
         def event_stream():
             try:
                 stream = client.chat.completions.create(
-                    model="gpt-4o-mini",
+                    model="gpt-4.1-mini",
                     messages=[
                         {"role": "system", "content": context["system_role"]},
                         {"role": "user", "content": context["final_prompt"]},
@@ -165,5 +176,5 @@ def generate_md_chatbot_stream():
         return Response(stream_with_context(event_stream()), mimetype="text/event-stream")
 
     except Exception as e:
-        print("f525 OpenAI Error:", e, file=sys.stderr)
+        print("🔥 OpenAI Error:", e, file=sys.stderr)
         return jsonify({"success": False, "error": str(e)}), 500

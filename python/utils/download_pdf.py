@@ -11,6 +11,7 @@ def download_file():
         received_token = data.get("token")
         file_id = data.get("pdf_id")  # get file id dynamically from request
         file_path_input = data.get("filePath")
+        file_path_input2 = data.get("filePath2")
 
         # Security
         if received_token != EXPECTED_API_KEY:
@@ -30,6 +31,14 @@ def download_file():
                 supabase.table("chatbot_pdf_file")
                 .select("file, file_name, email")
                 .eq("file", file_path_input)
+                .single()
+                .execute()
+            )
+        elif file_path_input2:
+            row = (
+                supabase.table("chatbot_pdf_file_private")
+                .select("file, file_name, email")
+                .eq("file", file_path_input2)
                 .single()
                 .execute()
             )
@@ -60,7 +69,7 @@ def download_file():
             })
 
         # ---- Download content using service role key ----
-        bucket_name = "chatbot_pdfs" if file_path_input else "pdfs"
+        bucket_name = "chatbot_pdfs" if (file_path_input or file_path_input2) else "pdfs"
         file_bytes = supabase.storage.from_(bucket_name).download(file_path)
         if not file_bytes:
             return jsonify({"success": False, "error": "Failed to download file"}), 500
@@ -70,7 +79,7 @@ def download_file():
             f.write(file_bytes)
 
         # Schedule deletion after 5 minutes
-        delete_file_after_delay(tmp_path, delay=300)
+        delete_file_after_delay(tmp_path, delay=100)
 
         return jsonify({
             "success": True,

@@ -5,10 +5,27 @@ import Markdown from "react-markdown";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import Image from "next/image";
 import image_src from "@/config/images_links/assets.json";
+import { Fetch_to } from "@/utilities";
+import remarkGfm from "remark-gfm";
 
-// Swap this for your real sources/suggestion.json shape if it differs —
-// kept as plain strings here so it drops in without guessing your schema.
-const SUGGESTIONS: string[] = [];
+// Suggestions are plain strings shown in the typeahead dropdown.
+// The API may return plain strings, or objects like { suggest: string }
+// (or similarly-shaped objects) — normalizeSuggestions handles both.
+type Suggestion = string;
+
+function normalizeSuggestions(raw: unknown[]): Suggestion[] {
+    return raw
+        .map((item) => {
+            if (typeof item === "string") return item;
+            if (item && typeof item === "object") {
+                const obj = item as Record<string, unknown>;
+                const candidate = obj.suggest ?? obj.text ?? obj.label ?? obj.value ?? obj.name;
+                if (typeof candidate === "string") return candidate;
+            }
+            return null;
+        })
+        .filter((s): s is string => typeof s === "string" && s.length > 0);
+}
 
 export default function Chat_bot() {
     const [messages, setMessages] = useState<
@@ -20,12 +37,16 @@ export default function Chat_bot() {
     const [status, setStatus] = useState(false);
     const [loading, setLoading] = useState(false);
     const chatEndRef = useRef<HTMLDivElement>(null);
+    const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+    const [chatbot, setChatbot] = useState({
+        name: "Sample AI", instructions: "Ask about ---", body: "velit voluptate doloremque magnam sequi, culpa nam consequatur eaque libero. Dolores."
+    });
 
     const [showTypeahead, setShowTypeahead] = useState(false);
     const typeaheadMatches = chatres.ask.trim()
-        ? SUGGESTIONS.filter((s) =>
-            s.toLowerCase().includes(chatres.ask.trim().toLowerCase())
-          ).slice(0, 5)
+        ? suggestions.filter((s): s is string =>
+            typeof s === "string" && s.toLowerCase().includes(chatres.ask.trim().toLowerCase())
+        ).slice(0, 5)
         : [];
 
     useEffect(() => {
@@ -34,6 +55,23 @@ export default function Chat_bot() {
         }
     }, [messages]);
 
+    useEffect(() => {
+        async function Suggest() {
+            const response = await Fetch_to(api_link.storage.retrieve_chatbot_suggest);
+            if (response.success && Array.isArray(response.data?.message)) {
+                setSuggestions(normalizeSuggestions(response.data.message));
+            }
+        }
+        Suggest();
+        async function Chatbot() {
+            const response = await Fetch_to(api_link.chatbot_public);
+            const result = response.data.message[0];
+            if (response.success) {
+                setChatbot(prev => ({ ...prev, name: result.name, instructions: result.instruction, body: result.body }));
+            }
+        }
+        Chatbot();
+    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setChatres({ ...chatres, [e.target.name]: e.target.value });
@@ -77,8 +115,9 @@ export default function Chat_bot() {
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
             let buffer = "";
+            let streamDone = false;
 
-            while (true) {
+            while (!streamDone) {
                 const { value, done } = await reader.read();
                 if (done) break;
 
@@ -104,6 +143,7 @@ export default function Chat_bot() {
                     }
 
                     if (payload.done) {
+                        streamDone = true;
                         break;
                     }
 
@@ -120,6 +160,11 @@ export default function Chat_bot() {
                         });
                     }
                 }
+            }
+
+            // Release the reader once we've deliberately stopped early on `done`.
+            if (streamDone) {
+                await reader.cancel().catch(() => {});
             }
         } catch (error) {
             const message = error instanceof Error ? error.message : "Streaming failed";
@@ -144,6 +189,7 @@ export default function Chat_bot() {
     const handleTypeaheadSelect = (text: string) => {
         setChatres({ ...chatres, ask: text });
         setShowTypeahead(false);
+        submitPrompt(text);
     };
 
     return (
@@ -168,7 +214,7 @@ export default function Chat_bot() {
                                                 height={50}
                                             />
                                             <div>
-                                                <Markdown>{msg.respond}</Markdown>
+                                                <Markdown remarkPlugins={[remarkGfm]}>{msg.respond}</Markdown>
                                             </div>
                                         </div>
                                     ) : index === messages.length - 1 && loading ? (
@@ -193,9 +239,9 @@ export default function Chat_bot() {
                 </section>
             ) : (
                 <section className={styles.introduction}>
-                    <span className={styles.eyebrow}>LACO AI</span>
-                    <h1>Ask about LCCB</h1>
-                    <p>Admissions, programs, requirements, and more — pick a topic or type your question.</p>
+                    <span className={styles.eyebrow}> {chatbot.name?.toUpperCase()} </span>
+                    <h1> {chatbot.instructions} </h1>
+                    <p> {chatbot.body} </p>
                 </section>
             )}
 
@@ -233,7 +279,7 @@ export default function Chat_bot() {
                             e.preventDefault();
                             (e.target as HTMLTextAreaElement).style.height = "auto";
                             setShowTypeahead(false);
-                            handleSubmit(e as unknown as React.FormEvent<HTMLFormElement>);
+                            submitPrompt(chatres.ask);
                         }
                         if (e.key === "Escape") {
                             setShowTypeahead(false);
@@ -244,7 +290,7 @@ export default function Chat_bot() {
                     spellCheck={false}
                 />
                 <button disabled={loading} className={styles.sendButton}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="25" height="20" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M12 19V5" />
                         <path d="M5 12l7-7 7 7" />
                     </svg>

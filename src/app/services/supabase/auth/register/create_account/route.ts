@@ -92,41 +92,47 @@ export async function POST(req: NextRequest) {
             from: process.env.GMAIL_USERNAME,
             to: cleanEmail,
             subject: `Welcome to LACO AI`,
-            html:  `<style>
-                
-
-                .welcome-message {
-                    animation: fadeIn 2s linear infinite;
-                }
-
-                @keyframes fadeIn {
-                    0% { color: #fff; }
-                    20% { color: #ff0; }
-                    40% { color: #0ff; }
-                    60% { color: #f00; }
-                    70% { color: #0f0; }
-                    100% { color: #00f; }
-                }
-
-                .header {
-                    padding: 20px;
-                    background-color: #0d1117;
-                    border-radius: 10px;
-                    color: #fff;
-                    animation: fadeIn 2s ease-in-out;
-                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                }
-
-                .header:hover {
-                    background-color: #23272a;
-                    transition: background-color 0.3s ease;
-                }
-            </style>
-            
-            <p class="welcome-message"> 🎉😊 Welcome ${cleanEmail} </p>
-            <h1 class="header">
-                Welcome to my web applications, you have been successfully create your account congrats. 👻🤫🧏‍♂️🤭🥳
-            </h1>`
+            html: `
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f5; padding:40px 0; font-family:Arial, Helvetica, sans-serif;">
+                <tr>
+                    <td align="center">
+                        <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:12px; overflow:hidden; box-shadow:0 4px 16px rgba(0,0,0,0.08);">
+                            <tr>
+                                <td style="background:linear-gradient(135deg, #017d93, #3fa5b7); padding:36px 24px; text-align:center;">
+                                    <div style="font-size:40px; line-height:1; margin-bottom:8px;">🎉</div>
+                                    <h1 style="margin:0; color:#ffffff; font-size:24px; font-weight:700;">Welcome to LACO AI</h1>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding:32px 32px 8px 32px; text-align:center;">
+                                    <p style="margin:0 0 16px 0; font-size:15px; color:#808080;">Your account has been created for</p>
+                                    <p style="margin:0 0 24px 0; font-size:16px; font-weight:600; color:#213b94; background-color:#f0f6f7; display:inline-block; padding:8px 16px; border-radius:6px;">
+                                        ${cleanEmail}
+                                    </p>
+                                    <p style="margin:0 0 28px 0; font-size:15px; line-height:1.6; color:#3c3c3c;">
+                                        You're all set! You can now upload PDF documents and ask LACO AI questions to get instant explanations and insights.
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding:0 32px 36px 32px; text-align:center;">
+                                    <a href="${process.env.APP_URL}" style="display:inline-block; background-color:#213b94; color:#ffffff; text-decoration:none; font-size:15px; font-weight:600; padding:12px 28px; border-radius:8px;">
+                                        Get Started
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding:20px 32px; background-color:#f4f4f5; text-align:center;">
+                                    <p style="margin:0; font-size:12px; color:#808080;">
+                                        LACO AI &middot; This is an automated message, please do not reply.
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+            `
         };
 
         await transporter.sendMail(mailOption);

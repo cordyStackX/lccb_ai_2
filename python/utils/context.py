@@ -18,7 +18,8 @@ load_dotenv(ENV_PATH)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 EXPECTED_API_KEY = os.getenv("API_KEY")
 SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+SUPABASE_SECRET_KEY = os.getenv("SUPABASE_SECRET_KEY")
+PDF_ENCRYPT_PASSWORD = os.getenv("PDF_ENCRYPT_PASSWORD")
 
 if not OPENAI_API_KEY:
     raise ValueError("OPENAI_API_KEY is missing in .env.local")
@@ -29,8 +30,11 @@ if not EXPECTED_API_KEY:
 if not SUPABASE_URL:
     raise ValueError("SUPABASE_URL not found")
 
-if not SUPABASE_SERVICE_ROLE_KEY:
-    raise ValueError("SUPABASE_SERVICE_ROLE_KEY not found")
+if not SUPABASE_SECRET_KEY:
+    raise ValueError("SUPABASE_SECRET_KEY not found")
+
+if not PDF_ENCRYPT_PASSWORD:
+    raise ValueError("PDF_ENCRYPT_PASSWORD not found")
 
 # -----------------------------------------
 # Init Flask
@@ -43,4 +47,4 @@ CORS(app)  # allow Next.js to access the Flask server
 # -----------------------------------------
 client = OpenAI(api_key=OPENAI_API_KEY)
 
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_SECRET_KEY)

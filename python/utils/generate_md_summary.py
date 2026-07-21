@@ -14,6 +14,7 @@ def generate_md_summary():
         last_ai_response = str(data.get("last_ai_response", "")).strip()
         email = data.get("email")
         file = data.get("filePath")  # new: PDF id
+        table = data.get("table")
 
         # Validate token
         if received_token != EXPECTED_API_KEY:
@@ -26,7 +27,7 @@ def generate_md_summary():
             return jsonify({"success": False, "error": "Email not found"}), 400
 
         # --- Get file name from Supabase ---
-        row = supabase.table("chatbot_pdf_file").select("file_name").eq("file", file).single().execute()
+        row = supabase.table(table).select("file_name").eq("file", file).single().execute()
         if not row.data:
             return jsonify({"success": False, "error": "PDF not found"}), 404
 
@@ -143,6 +144,7 @@ Respond with ONLY comma-separated numbers (e.g., \"1,3,4\"). If all chunks seem 
             role=role,
             year=year,
             name="admin",
+            user_id="admin_summaries",
             method="summaries"
         )
 

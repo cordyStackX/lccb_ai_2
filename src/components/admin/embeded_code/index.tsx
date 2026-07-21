@@ -1,17 +1,47 @@
 "use client";
 import styles from "./css/styles.module.css";
 import { useEffect, useState } from "react";
+import { Fetch_to, Popup_info } from "@/utilities";
+import api_link from "@/config/conf/json_config/fetch_url.json";
 
-export default function Embeded_code() {
+type Embeded_codeProps = {
+    email: string;
+}
+
+export default function Embeded_code({ email } : Embeded_codeProps) {
     const [origin, setOrigin] = useState("");
     const [width, setWidth] = useState("400");
     const [height, setHeight] = useState("600");
     const [copied, setCopied] = useState(false);
+    const [chatbot_info, setChatbot_info] = useState({
+        name: "", instruction: "", body: ""
+    });
+    const [isLoadState, setIsLoadState] = useState(false);
+    const [isLoadStateDone, setIsLoadStateDone] = useState(false);
+    const [isLoadError, setIsLoadError] = useState(false);
+    const [isLoadStatus, setIsLoadStatus] = useState("");
+    const [iframeKey, setIframeKey] = useState(0);
+
+    const refreshIframe = () => {
+        setIframeKey((prev) => prev + 1);
+    };
 
     useEffect(() => {
         // window is only available client-side, hence "use client" + useEffect
         setOrigin(window.location.origin);
+        async function Chatbot() {
+            const response = await Fetch_to(api_link.chatbot_public);
+            const result = response.data.message[0];
+            if (response.success) {
+                setChatbot_info(prev => ({ ...prev, name: result.name, instruction: result.instruction, body: result.body }));
+            }
+        }
+        Chatbot();
     }, []);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        setChatbot_info({ ...chatbot_info, [e.target.name]: e.target.value });
+    };
 
     const embedUrl = `${origin}/chat_bot`;
 
@@ -34,8 +64,48 @@ export default function Embeded_code() {
         }
     };
 
+    const handleSave = async () => {
+
+        setIsLoadState(true);
+        setIsLoadStateDone(true);
+        setIsLoadStatus("Updating Please Wait...");
+
+        const response = await Fetch_to(api_link.admin.update_chatbot, {
+            name: chatbot_info.name,
+            instruction: chatbot_info.instruction,
+            body: chatbot_info.body,
+            email: email
+        });
+
+        if (response.success) {
+            setIsLoadStateDone(false);
+            setIsLoadStatus(response.data.message);
+            setTimeout(() => setIsLoadState(false), 3000);
+            refreshIframe();
+        } else {
+            setIsLoadStateDone(false);
+            setIsLoadStatus(response.message);
+            setIsLoadError(true);
+            setTimeout(() => setIsLoadState(false), 3000);
+            alert(response.message);
+        }
+
+    };
+
     return (
         <section className={styles.container}>
+            {isLoadState ? (
+                isLoadStateDone ? (
+                    <Popup_info status={isLoadStatus} bg_color="var(--primary)" states={true} load={true} error={false} />
+                ) : (
+                    isLoadError ? (
+                        <Popup_info status={isLoadStatus} bg_color="var(--default-color-red)" states={false} load={true} error={true} />
+                    ) : (
+                        <Popup_info status={isLoadStatus} bg_color="var(--default-color-green)" states={false} load={true} error={false} />
+                    )
+                )
+                
+             ) : null}
             <header className={styles.header_cons}>
                 <span>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -78,6 +148,45 @@ export default function Embeded_code() {
                     </label>
                 </div>
 
+                <div className={styles.detailsRow}>
+                    <label className={styles.detailsField}>
+                        <span>AI Name</span>
+                        <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            value={chatbot_info.name}
+                            onChange={handleChange}
+                            placeholder="e.g. LACO"
+                            maxLength={20}
+                        />
+                    </label>
+                    <label className={styles.detailsField}>
+                        <span>Instructions</span>
+                        <input
+                            type="text"
+                            id="instruction"
+                            name="instruction"
+                            value={chatbot_info.instruction}
+                            onChange={handleChange}
+                            placeholder="Short instruction summary"
+                            maxLength={50}
+                        />
+                    </label>
+                    <label className={`${styles.detailsField} ${styles.detailsFieldWide}`}>
+                        <span>Instruction Body</span>
+                        <textarea
+                            name="body"
+                            value={chatbot_info.body}
+                            onChange={handleChange}
+                            placeholder="Full instruction body"
+                            rows={3}
+                            maxLength={100}
+                        />
+                    </label>
+                    <button className={styles.saveInfoButton} onClick={handleSave} >Save</button>
+                </div>
+
                 <div className={styles.codeBlockWrapper}>
                     <div className={styles.codeBlockHeader}>
                         <span>HTML</span>
@@ -109,6 +218,7 @@ export default function Embeded_code() {
                 <div className={styles.previewShell}>
                     {origin ? (
                         <iframe
+                            key={iframeKey}
                             src={embedUrl}
                             width={width}
                             height={height}

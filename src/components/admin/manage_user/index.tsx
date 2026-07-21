@@ -1,6 +1,6 @@
 "use client";
 import styles from "./css/styles.module.css";
-import { Fetch_to, SweetAlert2 } from "@/utilities";
+import { Fetch_to, Popup_info, SweetAlert2 } from "@/utilities";
 import { useEffect, useState } from "react";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import Swal from "sweetalert2";
@@ -34,6 +34,10 @@ export default function ManageUser() {
     const [yearFilter, setYearFilter] = useState("");
     const [roleFilter, setRoleFilter] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [isLoadState, setIsLoadState] = useState(false);
+    const [isLoadStateDone, setIsLoadStateDone] = useState(false);
+    const [isLoadError, setIsLoadError] = useState(false);
+    const [isLoadStatus, setIsLoadStatus] = useState("");
     const [viewingUser, setViewingUser] = useState<ManageUserDataProps | null>(null);
 
     useEffect(() => {
@@ -84,32 +88,59 @@ export default function ManageUser() {
     };
 
     const handleDelete = async (target: ManageUserDataProps) => {
-        const alert2 = await SweetAlert2("Delete?", `Are you sure want to delete this ${target.email}`, "warning", true, "Yes", true, "No");
+        const alert2 = await SweetAlert2("Terminate?", `Are you sure want to Terminate this ${target.email}`, "warning", true, "Yes", true, "No");
         if (!alert2.isConfirmed) return;
-        SweetAlert2("Deleting", "Please wait..", "info", false, "", false, "", true);
+        setIsLoadState(true);
+        setIsLoadStateDone(true);
+        setIsLoadStatus(`Terminating ${target.email} Please Wait...`);
         const response = await Fetch_to(api_link.admin.delete_user, { email: target.email });
         Swal.close();
-        if (response) {
+        if (response.success) {
+            setIsLoadStateDone(false);
+            setIsLoadStatus(response.data.message);
+            setTimeout(() => setIsLoadState(false), 3000);
             setRefresh(!refresh);
         } else {
-            SweetAlert2("Error", `${response}`, "error", true, "Confirm", false, "", false);
+            setIsLoadStateDone(false);
+            setIsLoadStatus(response.message);
+            setIsLoadError(true);
+            setTimeout(() => setIsLoadState(false), 3000);
         }
     };
 
     const handleStatusChange = async (target: ManageUserDataProps, newStatus: string) => {
-        SweetAlert2("Updating", "Please wait..", "info", false, "", false, "", true);
+        setIsLoadState(true);
+        setIsLoadStateDone(true);
+        setIsLoadStatus("Updating Please Wait...");
         const response = await Fetch_to(api_link.admin.update_user_status, { id: target.id, status: newStatus });
-        Swal.close();
         if (response.success) {
+            setIsLoadStateDone(false);
+            setIsLoadStatus(response.data.message);
+            setTimeout(() => setIsLoadState(false), 3000);
             setViewingUser((prev) => (prev ? { ...prev, status: newStatus } : prev));
             setRefresh(!refresh);
         } else {
-            SweetAlert2("Error", `${response.message}`, "error", true, "Confirm", false, "", false);
+            setIsLoadStateDone(false);
+            setIsLoadStatus(response.message);
+            setIsLoadError(true);
+            setTimeout(() => setIsLoadState(false), 3000);
         }
     };
 
     return (
         <section className={styles.container}>
+            {isLoadState ? (
+                isLoadStateDone ? (
+                    <Popup_info status={isLoadStatus} bg_color="var(--primary)" states={true} load={true} error={false} />
+                ) : (
+                    isLoadError ? (
+                        <Popup_info status={isLoadStatus} bg_color="var(--default-color-red)" states={false} load={true} error={true} />
+                    ) : (
+                        <Popup_info status={isLoadStatus} bg_color="var(--default-color-green)" states={false} load={true} error={false} />
+                    )
+                )
+                
+             ) : null}
             <header className={styles.header_cons}>
                 <span>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
 // import { Security } from "@/lib/security";
+import { decryptText } from "@/lib/encryptions";
 
 export async function POST(req: NextRequest) {
 
@@ -28,11 +29,12 @@ export async function POST(req: NextRequest) {
     .from("chatbot_pdf_file_private")
     .select("id, file, file_name, summary", { count: "exact" })
     .eq("email", cleanEmail);
+    
 
   if (term) {
     const safeTerm = term.replace(/[%_]/g, "\\$&");
     query = query.or(
-      `file_name.ilike.%${safeTerm}%,summary.ilike.%${safeTerm}%`
+      `file_name.ilike.%${safeTerm}%`
     );
   }
 
@@ -56,7 +58,25 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const bucketName = "chatbot_pdf_private";
+  const pdfPassword = process.env.PDF_ENCRYPT_PASSWORD;
+
+  const decryptedData = data.map((item) => {
+      if (!item.summary) return item; // nothing to decrypt
+
+      if (!pdfPassword) {
+          console.error("PDF_ENCRYPT_PASSWORD not configured — cannot decrypt summaries");
+          return { ...item, summary: null };
+      }
+
+      try {
+          return { ...item, summary: decryptText(item.summary, pdfPassword) };
+      } catch (err) {
+          console.error(`Failed to decrypt summary for file ${item.file_name}:`, err);
+          return { ...item, summary: null }; // don't leak ciphertext to the client
+      }
+  });
+
+  const bucketName = "chatbot_pdfs";
 
   const toRelativePath = (value: string) => {
     let path = value.trim();
@@ -80,7 +100,7 @@ export async function POST(req: NextRequest) {
   };
 
   const filesWithSize = await Promise.all(
-    data.map(async (item) => {
+    decryptedData.map(async (item) => {
       try {
         const fullPath = String(item.file || "");
         const relativePath = toRelativePath(fullPath);

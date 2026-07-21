@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
         const mailOption = {
             from: process.env.GMAIL_USERNAME,
             to: targetEmail,
-            subject: "Verification Code",
+            subject: "Your LACO AI Verification Code",
             priority: "high" as const,
             headers: {
                 Importance: "High",
@@ -68,15 +68,38 @@ export async function POST(req: NextRequest) {
                 "X-MSMail-Priority": "High",
             },
             html: `
-                <p>Hello ${recipient},</p>
-                <h3>Your Code:</h3>
-                <h1 style="
-                color: #fff;
-                font-weight: bold;
-                background-color: #043988;
-                padding: 10px;
-                border-radius: 10px;
-                ">${confirmationCode}</h1>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f5; padding:40px 0; font-family:Arial, Helvetica, sans-serif;">
+                <tr>
+                    <td align="center">
+                        <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:12px; overflow:hidden; box-shadow:0 4px 16px rgba(0,0,0,0.08);">
+                            <tr>
+                                <td style="background:linear-gradient(135deg, #017d93, #3fa5b7); padding:28px 24px; text-align:center;">
+                                    <h1 style="margin:0; color:#ffffff; font-size:20px; font-weight:700;">Verification Code</h1>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding:32px 32px 8px 32px; text-align:center;">
+                                    <p style="margin:0 0 4px 0; font-size:15px; color:#3c3c3c;">Hello ${recipient},</p>
+                                    <p style="margin:0 0 24px 0; font-size:14px; color:#808080;">Use the code below to verify your account. This code will expire shortly.</p>
+                                    <div style="display:inline-block; background-color:#213b94; color:#ffffff; font-size:32px; font-weight:700; letter-spacing:6px; padding:16px 28px; border-radius:10px; margin-bottom:24px;">
+                                        ${confirmationCode}
+                                    </div>
+                                    <p style="margin:0 0 28px 0; font-size:13px; color:#808080;">
+                                        If you didn't request this code, you can safely ignore this email.
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding:20px 32px; background-color:#f4f4f5; text-align:center;">
+                                    <p style="margin:0; font-size:12px; color:#808080;">
+                                        LACO AI &middot; This is an automated message, please do not reply.
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
             `,
         };
 

@@ -3,10 +3,15 @@ import styles from "./css/styles.module.css";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import api_link from "@/config/conf/json_config/fetch_url.json";
-import { Fetch_to, SweetAlert2, Fetch_toFile } from "@/utilities";
+import { Fetch_to, SweetAlert2, Fetch_toFile, Popup_info } from "@/utilities";
 import Swal from "sweetalert2";
 
-export default function Setting() {
+type SettingProps = {
+    email: string;
+    f_name: string;
+}
+
+export default function Setting({ email, f_name } : SettingProps) {
     const router = useRouter();
     const [suspensionState, setSuspensionState] = useState("off");
     const [loading, setLoading] = useState(true);
@@ -17,6 +22,10 @@ export default function Setting() {
     const [savingBranding, setSavingBranding] = useState(false);
     const [loadingBranding, setLoadingBranding] = useState(true);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
+    const [isLoadState, setIsLoadState] = useState(false);
+    const [isLoadStateDone, setIsLoadStateDone] = useState(false);
+    const [isLoadError, setIsLoadError] = useState(false);
+    const [isLoadStatus, setIsLoadStatus] = useState("");
 
     useEffect(() => {
         // Fetch current suspension state
@@ -27,7 +36,7 @@ export default function Setting() {
 
                 if (response.success) {
                     setSuspensionState(response.data.message[0].state || "off");
-
+                    
                 }
 
             } catch (e) {
@@ -43,10 +52,9 @@ export default function Setting() {
     useEffect(() => {
         const fetchBranding = async () => {
             try {
-                const response = await Fetch_to(api_link.admin.get_branding);
+                const response = await Fetch_to(api_link.storage.fetchimg, { email: email });
                 if (response.success) {
-                    setSchoolName(response.data.message?.name || "");
-                    setLogoPreview(response.data.message?.logo_url || null);
+                    setLogoPreview(response.data.message[0]?.file_link || null);
                 }
             } catch (e) {
                 console.error("Failed to fetch branding:", e);
@@ -55,11 +63,11 @@ export default function Setting() {
             }
         };
         fetchBranding();
-    }, []);
+    }, [email]);
 
     const ChangePassword = async () => {
-        localStorage.setItem("email", "admin@admin.com");
-        const response = await Fetch_to(api_link.checkcode, { email: "admin@admin.com" });
+        localStorage.setItem("email", email);
+        const response = await Fetch_to(api_link.checkcode, { email: email });
         if (!response.success) return alert(response.message || "Something went wrong to the server find a developer to fix this problem");
         router.push("/auth/confirm-email-forgot-pwd");
     };
@@ -71,20 +79,28 @@ export default function Setting() {
         const alert2 = await SweetAlert2("Update?", `Are you sure want to ${newState} Voice Routes`, "warning", true, "Yes", true, "No");
         if (!alert2.isConfirmed) return setLoading(!loading);
 
+        setIsLoadState(true);
+        setIsLoadStateDone(true);
+        setIsLoadStatus("Updating Please Wait...");
+
         try {
-            SweetAlert2("Updating", "Please wait..", "info", false, "", false, "", true);
             const response = await Fetch_to(api_link.admin.set_suspension_state, { state: newState });
 
             if (!response.success) {
                 Swal.close();
-                SweetAlert2("Error", `${response.message}`, "error", true, "Confirm", false, "", false);
                 setSuspensionState(suspensionState); // Revert on failure
             } else {
                 Swal.close();
+                setIsLoadStateDone(false);
+                setIsLoadStatus(response.data.message);
+                setTimeout(() => setIsLoadState(false), 3000);
             }
         } catch (e) {
             console.error("Error updating suspension state:", e);
-            SweetAlert2("Error", `${e}`, "error", true, "Confirm", false, "", false);
+            setIsLoadStateDone(false);
+            setIsLoadStatus(`{e}`);
+            setIsLoadError(true);
+            setTimeout(() => setIsLoadState(false), 3000);
             setSuspensionState(suspensionState); // Revert on error
         }
     };
@@ -107,37 +123,30 @@ export default function Setting() {
     };
 
     const handleSaveBranding = async () => {
-        if (!schoolName.trim()) {
-            SweetAlert2("Name required", "Please enter a school or company name", "error", true, "Ok", false, "");
-            return;
-        }
-
+        let response;
         setSavingBranding(true);
         try {
-            let response;
 
             if (logoFile) {
                 // Logo + name together via the multipart helper
                 response = await Fetch_toFile(
-                    api_link.admin.update_branding,
+                    api_link.storage.uploadimg,
                     logoFile,
-                    { name: schoolName.trim() }
+                    { email: email }
                 );
-            } else {
-                // No new logo selected — just update the name via the normal JSON helper
-                response = await Fetch_to(api_link.admin.update_branding, { name: schoolName.trim() });
+
             }
 
-            if (response.success) {
-                SweetAlert2("Saved", "Branding updated successfully", "success", true, "Ok", false, "");
-                setLogoFile(null);
-            } else {
-                SweetAlert2("Error", `${response.message}`, "error", true, "Confirm", false, "", false);
+            if (schoolName) {
+                response = await Fetch_to(api_link.update, { name: schoolName, email: email });
             }
+
         } catch (e) {
             SweetAlert2("Error", `${e}`, "error", true, "Confirm", false, "", false);
         } finally {
             setSavingBranding(false);
+            SweetAlert2("Success", response?.data.message, "success", true, "Confirm", false, "");
+            await Fetch_to(api_link.jwt.auth, { email: email });
         }
     };
 
@@ -145,6 +154,18 @@ export default function Setting() {
 
     return (
         <section className={styles.container}>
+            {isLoadState ? (
+                isLoadStateDone ? (
+                    <Popup_info status={isLoadStatus} bg_color="var(--primary)" states={true} load={true} error={false} />
+                ) : (
+                    isLoadError ? (
+                        <Popup_info status={isLoadStatus} bg_color="var(--default-color-red)" states={false} load={true} error={true} />
+                    ) : (
+                        <Popup_info status={isLoadStatus} bg_color="var(--default-color-green)" states={false} load={true} error={false} />
+                    )
+                )
+                
+             ) : null}
             <div className={styles.wrapper}>
                 <span className={styles.title}>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -200,7 +221,7 @@ export default function Setting() {
                             <input
                                 type="text"
                                 className={styles.nameInput}
-                                placeholder="e.g. Laco Learning Institute"
+                                placeholder={f_name ? f_name : "e.g. Laco Learning Institute"}
                                 value={schoolName}
                                 onChange={(e) => setSchoolName(e.target.value)}
                                 disabled={loadingBranding}
@@ -227,9 +248,9 @@ export default function Setting() {
                     <h3 className={styles.sectionLabel}>Emergency Suspensions</h3>
                     <div className={styles.settingRow}>
                         <div>
-                            <p>Voice API connections</p>
+                            <p>API connections</p>
                             <span className={styles.hint}>
-                                Immediately blocks new voice route requests when suspended
+                                Immediately blocks API route requests when suspended
                             </span>
                         </div>
                         <div className={styles.controlGroup}>

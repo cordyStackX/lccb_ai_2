@@ -9,6 +9,8 @@ import Image from "next/image";
 import image_src from "@/config/images_links/assets.json";
 import Swal from "sweetalert2";
 import suggestions from "@/sources/suggestion.json";
+import remarkGfm from "remark-gfm";
+
 
 type MainProps = {
     emailRes: string;
@@ -18,10 +20,11 @@ type MainProps = {
     setGlobalRefresh: Dispatch<SetStateAction<boolean>>;
     setGlobalRefreshMsg: Dispatch<SetStateAction<boolean>>;
     setGlobalMessages: Dispatch<SetStateAction<{ ask: string; respond: string }[]>>;
+    setCurrentMsg: Dispatch<SetStateAction<number | undefined>>
     globalMessages: { id?: number, ask: string; respond: string }[];
 }
 
-export default function Main({ currentMsg, emailRes, currentPdf, setGlobalRefresh, f_name, globalMessages, setGlobalRefreshMsg}: MainProps) {
+export default function Main({ setCurrentMsg, currentMsg, emailRes, currentPdf, setGlobalRefresh, f_name, globalMessages, setGlobalRefreshMsg}: MainProps) {
     const [messages, setMessages] = useState<
         { ask: string; respond: string }[]
     >([]);
@@ -194,15 +197,55 @@ export default function Main({ currentMsg, emailRes, currentPdf, setGlobalRefres
             });
             
             
-        await Fetch_to(api_link.save_responses, {
-            id: currentMsg,
-            email: email,
-            messages: messagesRef.current,
-        });
+            setTimeout(async() => {
+                const response = await Fetch_to(api_link.save_responses, {
+                    id: currentMsg,
+                    email: email,
+                    messages: messagesRef.current,
+                });
+                if (response.success) {
+                    if (!response.data.messages.id) return;
+                    setCurrentMsg(response.data.messages.id);
+                }
+                setGlobalRefreshMsg(true);
+            }, 100);
 
-        setGlobalRefreshMsg(true);
 
-        } 
+        } else {
+            await handleChatSubmit({
+                event: e,
+                chatInput: chatres.ask,
+                setChatres,
+                setStatus,
+                setLoading,
+                setMessages,
+                setStreamFadeMs,
+                setStreamTick,
+                lastChunkAtRef,
+                textareaRef,
+                apiUrl: api_link["response4-stream"],
+                payloadBase: {
+                    email,
+                    pdf_id,
+                    f_name,
+                },
+                messages,
+            });
+
+            setTimeout(async() => {
+                const response = await Fetch_to(api_link.save_responses, {
+                    id: currentMsg,
+                    email: email,
+                    messages: messagesRef.current,
+                });
+                if (response.success) {
+                    if (!response.data.messages.id) return;
+                    setCurrentMsg(response.data.messages.id);
+                }
+                setGlobalRefreshMsg(true);
+            }, 100);
+        
+        }
     };
 
     const handleCopyResponse = async (text: string) => {
@@ -407,7 +450,7 @@ export default function Main({ currentMsg, emailRes, currentPdf, setGlobalRefres
                                                     className={index === messages.length - 1 && loading ? styles.streamFade : undefined}
                                                     style={index === messages.length - 1 && loading ? { animationDuration: `${streamFadeMs}ms` } : undefined}
                                                 >
-                                                    <Markdown>{msg.respond}</Markdown>
+                                                    <Markdown remarkPlugins={[remarkGfm]}>{msg.respond}</Markdown>
                                                 </div>
                                                 {!(index === messages.length - 1 && loading) && (
                                                     <div className={styles.buttons_links}>
@@ -488,9 +531,9 @@ export default function Main({ currentMsg, emailRes, currentPdf, setGlobalRefres
                         <line x1="0" y1="5" x2="100" y2="5"  strokeWidth="5"/>
                         </svg>
                         <p style={{ textAlign: "center" }}>
-                            Upload a PDF document to begin analysis. <br /> 
+                            Upload a PDF document to begin analysis. or ask about your grades.<br /> 
                             Ask questions to recieve explainations <br />
-                            and insights 
+                            and insights
                         </p>
                         {/* Hidden Input */}
                         <>

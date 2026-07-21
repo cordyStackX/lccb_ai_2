@@ -14,28 +14,25 @@ export default function Privacy() {
         <section className={styles.container}>
             <div className={styles.content}>
                 <h1>Privacy Policy</h1>
-                <p className={styles.updated}>Last Updated: March 12, 2026</p>
+                <p className={styles.updated}>Last Updated: July 22, 2026</p>
 
                 <div className={styles.notice}>
                     <h2>⚠️ Important Notice</h2>
-                    <p>This is a <strong>BETA VERSION</strong> educational project for research and experimental purposes only. This platform is not intended for production use or commercial purposes.</p>
+                    <p>LACO AI provides AI-powered information services covering schools, businesses, and student academic records. Full sensitive-data features (including student grades) are currently available exclusively to <strong>La Consolacion College Bacolod (LCCB)</strong>. Businesses may sign up for general document analysis under a separate tier described below. This platform is provided &quot;as-is&quot; and is under active development.</p>
                 </div>
 
                 <section className={styles.section}>
                     <h2>1. Introduction</h2>
-                    <p>Welcome to LACO AI (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our educational AI research platform.</p>
-                    <p>This project is developed under the Apache License 2.0 and is intended solely for educational, research, and experimental purposes. We are committed to protecting your privacy and handling your data responsibly.</p>
+                    <p>Welcome to LACO AI (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our AI-powered platform for school, business, and academic-record information services.</p>
+                    <p>This project is developed under the Apache License 2.0. We are committed to protecting your privacy and handling your data responsibly.</p>
                 </section>
 
                 <section className={styles.section}>
-                    <h2>2. Educational and Experimental Nature</h2>
-                    <p>This platform is:</p>
+                    <h2>2. Platform Scope</h2>
+                    <p>LACO AI operates under two distinct scopes:</p>
                     <ul>
-                        <li>A beta version for educational and research purposes</li>
-                        <li>Not intended for commercial or production use</li>
-                        <li>Provided &quot;as-is&quot; without any warranties</li>
-                        <li>Subject to changes, updates, or discontinuation without notice</li>
-                        <li>Not designed to handle sensitive, confidential, or personal data</li>
+                        <li><strong>Academic (La Consolacion College Bacolod only):</strong> Full access to sensitive student data, including grades, is available exclusively to LCCB. Other schools or institutions seeking full system access must contact us directly to negotiate a separate agreement.</li>
+                        <li><strong>Business:</strong> Businesses may sign up for general PDF document analysis under a Free or Enterprise tier (see Section 3.5). This tier is not intended for sensitive or confidential data.</li>
                     </ul>
                 </section>
 
@@ -76,12 +73,19 @@ export default function Privacy() {
                         <li>Request headers and origin validation</li>
                     </ul>
 
-                    <h3>3.4 Admin and Teacher Data</h3>
+                    <h3>3.4 Academic Data (LCCB Only)</h3>
                     <ul>
+                        <li>Student grades and related academic records</li>
                         <li>Admin users have access to user management features</li>
-                        <li>Teachers can monitor and filter content for assigned students</li>
                         <li>Admin activity logs (user creation, status updates, deletions)</li>
                         <li>API usage logs accessible by admins</li>
+                    </ul>
+
+                    <h3>3.5 Business Accounts</h3>
+                    <ul>
+                        <li><strong>Free Tier:</strong> Limited to 1 PDF upload</li>
+                        <li><strong>Enterprise Tier (paid subscription):</strong> Up to 20 PDF uploads</li>
+                        <li>Business PDF uploads are treated as Public Documents and should not contain sensitive information (see Section 6)</li>
                     </ul>
                 </section>
 
@@ -91,15 +95,14 @@ export default function Privacy() {
                     <ul>
                         <li>User authentication via JWT tokens and email verification</li>
                         <li>Role-based access control (Admin, Teacher, Student)</li>
-                        <li>Processing PDF documents with OpenAI for educational chat</li>
-                        <li>Generating AI-powered responses to user questions</li>
+                        <li>Processing PDF documents with OpenAI (gpt-4o-mini) for information retrieval and chat</li>
+                        <li>Generating AI-powered responses to user questions, including academic records for LCCB students</li>
                         <li>Storing and managing profile pictures</li>
                         <li>Enabling search and filtering of uploaded PDFs</li>
-                        <li>Teacher supervision and content filtering for students under 13</li>
                         <li>Admin features: user management, API logs, and system monitoring</li>
                         <li>Rate limiting to prevent spam and abuse (1 request per second per IP)</li>
                         <li>CSRF protection and origin validation</li>
-                        <li>Research and educational analysis</li>
+                        <li>Enforcing tier limits (Free vs. Enterprise) for business accounts</li>
                         <li>Debugging and system performance monitoring</li>
                     </ul>
                 </section>
@@ -108,14 +111,14 @@ export default function Privacy() {
                     <h2>5. Data Storage and Security</h2>
                     <ul>
                         <li>User data stored in Supabase PostgreSQL database with row-level security</li>
+                        <li>Sensitive data and document summaries are encrypted at rest</li>
                         <li>Profile pictures stored in Supabase public storage buckets</li>
-                        <li>PDF files stored temporarily in Supabase storage buckets</li>
-                        <li>Passwords encrypted using bcrypt or similar industry-standard hashing</li>
+                        <li>PDF files stored in Supabase storage buckets</li>
+                        <li>Passwords encrypted using industry-standard hashing</li>
                         <li>JWT tokens with secret key encryption for session management</li>
                         <li>API endpoints protected with JWT authentication and rate limiting</li>
                         <li>CSRF protection via origin header validation</li>
                         <li>Rate limiting: 1 request per second per IP address to prevent spam</li>
-                        <li>Cooldown mechanism tracks requests using in-memory maps</li>
                         <li>Old profile pictures automatically deleted when updating</li>
                         <li>We implement reasonable security measures but cannot guarantee absolute security</li>
                         <li>HTTPS encryption for all data transmission</li>
@@ -123,11 +126,17 @@ export default function Privacy() {
                 </section>
 
                 <section className={styles.section}>
-                    <h2>6. Third-Party Services</h2>
+                    <h2>6. Public Documents and Sensitive Data Warning</h2>
+                    <p><strong>Business and general users:</strong> PDF documents uploaded outside the LCCB academic scope are treated as Public Documents. Do not upload documents containing passwords, credentials, or other sensitive information into Public Documents.</p>
+                    <p>La Consolacion College Bacolod is not responsible for any damages, losses, or consequences resulting from sensitive data uploaded into Public Documents by businesses or general users.</p>
+                </section>
+
+                <section className={styles.section}>
+                    <h2>7. Third-Party Services</h2>
                     <p>We use the following third-party services:</p>
                     <ul>
                         <li><strong>Supabase:</strong> PostgreSQL database, authentication, and file storage services</li>
-                        <li><strong>OpenAI:</strong> AI-powered chat responses and PDF document analysis</li>
+                        <li><strong>OpenAI (gpt-4o-mini):</strong> AI-powered chat responses and document analysis</li>
                         <li><strong>Render:</strong> Python API hosting for backend services</li>
                         <li><strong>Vercel/GitHub Pages:</strong> Next.js application deployment</li>
                         <li><strong>Next.js:</strong> React framework for the web application</li>
@@ -136,81 +145,88 @@ export default function Privacy() {
                 </section>
 
                 <section className={styles.section}>
-                    <h2>7. Data Retention</h2>
+                    <h2>8. Data Retention</h2>
                     <ul>
-                        <li><strong>Account data:</strong> Retained until manual account deletion by user or admin</li>
-                        <li><strong>Profile pictures:</strong> Stored permanently until replaced or account deleted</li>
+                        <li><strong>Account data:</strong> Retained until you request deletion by contacting the admin (see Section 9)</li>
+                        <li><strong>Profile pictures:</strong> Stored until replaced or account deleted</li>
                         <li><strong>PDF files:</strong> Stored in database and storage bucket until manually deleted via context menu</li>
                         <li><strong>Chat history:</strong> Stored indefinitely in your account until manually cleared</li>
                         <li><strong>API logs:</strong> Retained for debugging, research, and admin monitoring purposes</li>
                         <li><strong>Authentication tokens:</strong> JWT tokens expire based on configured session duration</li>
                         <li><strong>Rate limit data:</strong> Stored temporarily in memory; old entries auto-cleaned</li>
-                        <li><strong>Verification codes:</strong> Email codes for password reset and verification</li>
+                        <li><strong>OTP verification codes:</strong> Used for password reset and verification, short-lived</li>
                     </ul>
                 </section>
 
                 <section className={styles.section}>
-                    <h2>8. Your Rights</h2>
+                    <h2>9. Account Security, Password Recovery, and Deletion</h2>
+                    <ul>
+                        <li>You retain full control over your own account password</li>
+                        <li>Password recovery is self-service via OTP (One-Time Password) sent to your registered email, through <code>/auth/forgot-password</code></li>
+                        <li>Admins <strong>cannot</strong> recover or reset your password on your behalf — recovery is only possible through your own email via OTP</li>
+                        <li>Account deletion is <strong>not</strong> self-service. To delete your account and wipe all associated data, you must contact the admin email directly</li>
+                    </ul>
+                </section>
+
+                <section className={styles.section}>
+                    <h2>10. Your Rights</h2>
                     <p>You have the right to:</p>
                     <ul>
                         <li>Access your personal data through your profile settings</li>
                         <li>Update your name and profile picture</li>
-                        <li>Change your password via email verification</li>
+                        <li>Recover your password via OTP at <code>/auth/forgot-password</code></li>
                         <li>View your uploaded PDFs and chat history</li>
                         <li>Delete individual PDFs via right-click context menu</li>
                         <li>Request correction of inaccurate account data</li>
-                        <li>Request deletion of your account and all associated data</li>
-                        <li>Export your data (contact us for manual export requests)</li>
-                        <li>Opt-out of data collection by not using the service</li>
+                        <li>Request full account and data deletion by contacting the admin email</li>
                         <li>Be informed of data breaches affecting your information</li>
                     </ul>
-                    <p><strong>Note:</strong> Profile updates, password changes, and PDF deletions can be performed directly through the application interface.</p>
                 </section>
 
                 <section className={styles.section}>
-                    <h2>9. User Roles and Permissions</h2>\n                    <h3>9.1 Students</h3>
+                    <h2>11. User Roles and Permissions</h2>
+                    <h3>11.1 Students and Teachers (LCCB)</h3>
                     <ul>
                         <li>Can upload and manage their own PDF documents</li>
-                        <li>Can chat with AI about their PDFs</li>
+                        <li>Can chat with AI about their PDFs and their own academic records</li>
                         <li>Can search and filter their PDF library</li>
-                        <li>Can update their profile and password</li>
-                        <li>Students under 13 require teacher supervision</li>
+                        <li>Can update their profile and recover their password via OTP</li>
+                        <li>Students under 13 require Guardian or Parent supervision</li>
                     </ul>
 
-                    <h3>9.2 Teachers</h3>
-                    <ul>
-                        <li>Have all student permissions</li>
-                        <li>Can be assigned by administrators to supervise students</li>
-                        <li>Responsible for monitoring and filtering content for assigned students under 13</li>
-                        <li>Can review student interactions and manage their access</li>
-                    </ul>
-
-                    <h3>9.3 Administrators</h3>
+                    <h3>11.2 Administrators</h3>
                     <ul>
                         <li>Full access to user management features</li>
-                        <li>Can create, update, and delete user accounts</li>
+                        <li>Can create, update, and manage user accounts (cannot reset user passwords — recovery is OTP-only)</li>
+                        <li>Handle account deletion requests received via admin email</li>
                         <li>Can view and manage API usage logs</li>
                         <li>Can assign teacher roles to users</li>
                         <li>Can monitor system health and performance</li>
-                        <li>Access to all administrative dashboards and logs</li>
+                    </ul>
+
+                    <h3>11.3 Business Accounts</h3>
+                    <ul>
+                        <li>Free tier: 1 PDF upload limit</li>
+                        <li>Enterprise tier: up to 20 PDF uploads (paid subscription)</li>
+                        <li>Must not upload sensitive or password-containing PDFs</li>
                     </ul>
                 </section>
 
                 <section className={styles.section}>
                     <h2>10. Children&apos;s Privacy</h2>
-                    <p>When users under 13 years of age access this educational platform, their data and interactions are supervised and filtered by teachers who have been assigned by the administrator.</p>
+                    <p>Users under 13 years of age are <strong>not permitted to sign up or use LACO AI without direct parental supervision and consent</strong>.</p>
                     <ul>
-                        <li>Teachers assigned by administrators are responsible for managing and monitoring content for underage users</li>
-                        <li>Data filtering and content moderation for children under 13 is handled through teacher oversight</li>
-                        <li>Teachers can review, filter, and control the AI interactions of their assigned students</li>
-                        <li>Parental consent is required and should be obtained by the educational institution or teacher before allowing underage users to access the platform</li>
-                        <li>We do not directly collect data from children without appropriate teacher supervision and institutional approval</li>
+                        <li>A parent or legal guardian must provide consent before a child under 13 creates an account or uses the Service</li>
+                        <li>A parent or legal guardian is solely responsible for supervising their child&apos;s use of the Service, including AI interactions and PDF uploads</li>
+                        <li>We do not knowingly collect data from children under 13 without verified parental consent</li>
+                        <li>If we become aware that a child under 13 has registered without parental consent, we will take steps to disable the account and delete associated data</li>
+                        <li>Parents or guardians may contact the admin email to review, request deletion of, or ask questions about their child&apos;s data</li>
                     </ul>
                 </section>
 
                 <section className={styles.section}>
-                    <h2>11. No Illegal Activities</h2>
-                    <p>This platform is strictly for educational and research purposes. We:</p>
+                    <h2>13. No Illegal Activities</h2>
+                    <p>This platform is strictly for lawful use. We:</p>
                     <ul>
                         <li>Do not engage in any illegal activities</li>
                         <li>Do not support or facilitate illegal content or actions</li>
@@ -220,13 +236,13 @@ export default function Privacy() {
                 </section>
 
                 <section className={styles.section}>
-                    <h2>12. Changes to This Privacy Policy</h2>
-                    <p>As this is a beta educational project, we may update this Privacy Policy at any time. Changes will be posted on this page with an updated revision date.</p>
+                    <h2>14. Changes to This Privacy Policy</h2>
+                    <p>We may update this Privacy Policy at any time. Changes will be posted on this page with an updated revision date.</p>
                 </section>
 
                 <section className={styles.section}>
-                    <h2>13. Contact Information</h2>
-                    <p>For questions about this Privacy Policy, please contact:</p>
+                    <h2>15. Contact Information</h2>
+                    <p>For questions about this Privacy Policy, account deletion requests, or negotiating full-system access for other schools, please contact the admin.</p>
                     <p><strong>Project Owner:</strong> cordyStackX</p>
                     <p><strong>License:</strong> Apache License 2.0</p>
                     <p><strong>GitHub:</strong> <a href="https://github.com/cordyStackX/lccb_ai_2" target="_blank" rel="noopener noreferrer">github.com/cordyStackX/lccb_ai_2</a></p>
@@ -234,8 +250,7 @@ export default function Privacy() {
 
                 <div className={styles.disclaimer}>
                     <h2>Disclaimer</h2>
-                    <p><strong>THIS IS A BETA EDUCATIONAL PROJECT FOR RESEARCH AND EXPERIMENTAL PURPOSES ONLY.</strong></p>
-                    <p>This is an educational beta project. Use at your own risk. We provide no warranties and are not liable for any damages arising from use of this service. Do not upload sensitive or confidential information. Your data is processed by third-party services including OpenAI.</p>
+                    <p>Use at your own risk. We provide no warranties beyond what is stated in this policy and are not liable for damages arising from sensitive data uploaded into Public Documents. Your data is processed by third-party services including OpenAI.</p>
                 </div>
             </div>
         </section>

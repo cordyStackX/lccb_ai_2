@@ -39,15 +39,14 @@ const NAV_ITEMS = [
         ),
     },
     {
-        key: "chat_bot",
+        key: "document",
         label: "Documents",
-        path: "/admin/chatbot",
+        path: "/admin/document",
         icon: (
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="6" y="5" width="12" height="12" rx="4" stroke="currentColor" strokeWidth="2" />
-                <circle cx="10" cy="11" r="1" fill="currentColor" />
-                <circle cx="14" cy="11" r="1" fill="currentColor" />
-                <path d="M12 2v3M9 2h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                <path d="M14 2v6h6" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                <path d="M8 13h8M8 17h8M8 9h2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
             </svg>
         ),
     },

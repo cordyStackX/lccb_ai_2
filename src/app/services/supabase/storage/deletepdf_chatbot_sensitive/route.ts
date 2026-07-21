@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     if (!id || !filePath) return NextResponse.json({ success: false, error: "File Not Found" }, { status: 409 });
 
     const { data: storage, error: setError } = await supabaseServer.storage
-    .from("chatbot_pdf_private")
+    .from("chatbot_pdfs")
     .remove([filePath]);
 
     if (setError) {

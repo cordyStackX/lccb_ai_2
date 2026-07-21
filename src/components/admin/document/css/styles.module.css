@@ -358,3 +358,110 @@
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
 }
+.ai_response table {
+    width: 100%;
+    max-width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    overflow-x: auto;
+    display: block;
+}
+
+.ai_response thead {
+    background: var(--foreground);
+}
+
+.ai_response th,
+.ai_response td {
+    padding: 0.6rem 1rem;
+    text-align: left;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    white-space: nowrap;
+}
+
+.ai_response th {
+    font-weight: bold;
+    color: var(--default-color-white);
+}
+
+.ai_response tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.03);
+}
+.undoToast {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: var(--foreground);
+    color: var(--default-color-white);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin: 0.75rem 0;
+}
+
+.undoToast button {
+    background: var(--secondary);
+    color: var(--default-color-white);
+    border: none;
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.button_delete_bulk {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--default-color-red);
+    color: var(--default-color-white);
+    border: none;
+    padding: 0.5rem 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.status table th:first-child,
+.status table td:first-child {
+    width: 40px;
+    text-align: center;
+}
+
+.status table input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--default-color-gray);
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    background: var(--default-color-white);
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+    vertical-align: middle;
+}
+
+.status table input[type="checkbox"]:hover {
+    border-color: var(--secondary);
+}
+
+.status table input[type="checkbox"]:checked {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.status table input[type="checkbox"]:checked::after {
+    content: "";
+    position: absolute;
+    left: 5px;
+    top: 1px;
+    width: 5px;
+    height: 10px;
+    border: solid var(--default-color-white);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.status table input[type="checkbox"]:focus-visible {
+    outline: 2px solid var(--secondary);
+    outline-offset: 2px;
+}

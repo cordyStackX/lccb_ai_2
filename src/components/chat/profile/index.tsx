@@ -99,7 +99,7 @@ export default function Profile({ showProfile, setShowProfile, email, name, role
             // await Fetch_to(api_link.jwt.deauth);
             const alert2 = await SweetAlert2("Updated", "Complete", "success", true, "Okay", false, "");
             if (alert2.isConfirmed) { setGlobalRefresh(true); }
-
+            await Fetch_to(api_link.jwt.auth, { email: email });
             setSelectedFile(null); // Clear selected file after successful upload
             if (profilePicRef.current) {
                 profilePicRef.current.value = "";
@@ -131,7 +131,12 @@ export default function Profile({ showProfile, setShowProfile, email, name, role
                             type="button"
                             onClick={handleProfilePicUpload}
                             title="Upload your profile picture" 
-                        >Upload profile picture</button>
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M12 16V4M12 4l-4 4M12 4l4 4" />
+                                <path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
+                            </svg>
+                        </button>
                         <Image 
                         src={previewUrl || image_src.profile}
                         alt="Profile Pic"

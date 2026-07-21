@@ -2,6 +2,8 @@ import { NextResponse, NextRequest } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
 import { Security } from "@/lib/security";
 import { Fetch_to } from "@/utilities";
+import { encryptPDF } from "@pdfsmaller/pdf-encrypt-lite";
+import { encryptText } from "@/lib/encryptions";
 import api_links from "@/config/conf/json_config/Api_links.json";
 
 export async function POST(req: NextRequest) {
@@ -62,7 +64,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, error: `PDF name already exists: ${names}` }, { status: 409 });
     }
 
-    const bucketName = "chatbot_pdf_private";
+    const bucketName = "chatbot_pdfs";
     const apiUrl = process.env.RENDER_API || api_links.python_links;
     const apikey = process.env.API_KEY;
     const uploadedResults: Array<{ originalName: string; filePath?: string; success: boolean; message?: string }> = [];
@@ -86,7 +88,7 @@ export async function POST(req: NextRequest) {
         }
 
         const { error: insertError } = await supabaseServer
-            .from("chatbot_pdf_file")
+            .from("chatbot_pdf_file_private")
             .insert([{ file: filePath, email: cleanEmail, file_name: file.name }]);
 
         if (insertError) {
@@ -95,17 +97,18 @@ export async function POST(req: NextRequest) {
             continue;
         }
 
-        const response1 = await Fetch_to(`${apiUrl}download-file`, { token: apikey, filePath: filePath });
+        const response1 = await Fetch_to(`${apiUrl}download-file`, { token: apikey, filePath2: filePath });
         if (!response1.success) {
             uploadedResults.push({ originalName: file.name, filePath, success: false, message: "3rd party failed to read the data" });
             continue;
         }
 
         const response = await Fetch_to(`${apiUrl}generate_md_summary`, {
-            prompt: "Summarize the Documents make sure all topics are included with the limit of 5 paragraphs",
+            prompt: "Create a tables. make sure all details are provided",
             token: apikey,
             email: cleanEmail,
             filePath: filePath,
+            table: "chatbot_pdf_file_private"
         });
 
         if (!response.success) {
@@ -113,10 +116,46 @@ export async function POST(req: NextRequest) {
             continue;
         }
 
+        const pdfPassword = process.env.PDF_ENCRYPT_PASSWORD;
+        if (!pdfPassword) {
+            uploadedResults.push({ originalName: file.name, filePath, success: false, message: "PDF password not configured" });
+            continue;
+        }
+
+        const encryptedSummary = encryptText(response.data.markdown, pdfPassword);
+
         await supabaseServer
-            .from("chatbot_pdf_file")
-            .update([{ summary: response.data.markdown }])
+            .from("chatbot_pdf_file_private")
+            .update([{ summary: encryptedSummary }])
             .eq("file", filePath);
+
+        // 🔒 Encrypt LAST — file's already summarized, now lock it down
+        if (!pdfPassword) {
+            uploadedResults.push({ originalName: file.name, filePath, success: false, message: "PDF password not configured" });
+            continue;
+        }
+
+        try {
+            const arrayBuffer = await file.arrayBuffer();
+            const encryptedBytes = await encryptPDF(new Uint8Array(arrayBuffer), pdfPassword);
+
+            // overwrite the already-uploaded file with the encrypted version
+            const { error: reuploadError } = await supabaseServer.storage
+                .from(bucketName)
+                .update(filePath, Buffer.from(encryptedBytes), {
+                    contentType: "application/pdf",
+                });
+
+            if (reuploadError) {
+                console.error("Supabase Re-upload Error: ", reuploadError);
+                uploadedResults.push({ originalName: file.name, filePath, success: false, message: "Failed to encrypt PDF" });
+                continue;
+            }
+        } catch (err) {
+            console.error("PDF Encryption Error: ", err);
+            uploadedResults.push({ originalName: file.name, filePath, success: false, message: "Failed to encrypt PDF" });
+            continue;
+        }
 
         uploadedResults.push({ originalName: file.name, filePath, success: true });
     }
@@ -139,7 +178,8 @@ export async function POST(req: NextRequest) {
             await supabaseServer
                 .from("system_logs")
                 .update({ uploaded_pdf: record_add })
-                .eq("request", cleanEmail);
+                .eq("request", cleanEmail)
+                .maybeSingle();
         } else {
             await supabaseServer
                 .from("system_logs")

@@ -1,5 +1,12 @@
 import os
-from utils import app, download_file, generate_md, generate_md_stream, generate_md_chatbot, generate_md_chatbot_stream, generate_md_summary, generate_tts, generate_voice_md, generate_voice_md_stream, generate_voice_md_stream_pdf, generate_md_image, generate_md_image_stream
+from utils import (
+    app, download_file,
+    generate_md, generate_md_stream,
+    generate_md_sensitive_data, generate_md_sensitive_data_stream,
+    generate_md_chatbot, generate_md_chatbot_stream,
+    generate_md_summary, generate_tts,
+    generate_voice_md, generate_voice_md_stream, generate_voice_md_stream_pdf,
+)
 
 # -----------------------------------------
 # ROUTE: Generate Markdown
@@ -14,9 +21,20 @@ def generate_md_stream_route():
     return generate_md_stream()
 
 
+@app.route("/generate-md-sensitive-data", methods=["POST"])
+def generate_md_sensitive_data_route():
+    return generate_md_sensitive_data()
+
+
+@app.route("/generate-md-stream-sensitive-data", methods=["POST"])
+def generate_md_stream_sensitive_data_route():
+    return generate_md_sensitive_data_stream()
+
+
 @app.route("/download-file", methods=["POST"])
 def download_file_route():
     return download_file()
+
 
 @app.route("/generate-md-chatbot", methods=["POST"])
 def generate_md_chat_bot_route():
@@ -26,6 +44,7 @@ def generate_md_chat_bot_route():
 @app.route("/generate-md-chatbot-stream", methods=["POST"])
 def generate_md_chat_bot_stream_route():
     return generate_md_chatbot_stream()
+
 
 @app.route("/generate_md_summary", methods=["POST"])
 def generate_md_summary_route():
@@ -50,16 +69,6 @@ def generate_voice_md_stream_route():
 @app.route("/generate-voice-md-stream-pdf", methods=["POST"])
 def generate_voice_md_stream_pdf_route():
     return generate_voice_md_stream_pdf()
-
-
-@app.route("/generate-md-image", methods=["POST"])
-def generate_md_image_route():
-    return generate_md_image()
-
-
-@app.route("/generate-md-image-stream", methods=["POST"])
-def generate_md_image_stream_route():
-    return generate_md_image_stream()
 
 
 # -----------------------------------------
