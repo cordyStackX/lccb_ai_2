@@ -80,7 +80,7 @@ export default function SignUp() {
         <section className={`${styles.container} `}>
             <div className={`${styles.wrapper} `}>
                 {loading ? (
-                    <div className={`${styles.form_styles} `} style={{ flexFlow: "column" }}>
+                    <div style={{ height: "100dvh" }}>
                         <React_Spinners status="Registering Your Account..."/>
                     </div>
                 ) : (

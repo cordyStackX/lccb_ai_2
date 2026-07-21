@@ -8,10 +8,8 @@
     background: var(--default-color-white);
     color: var(--foreground);
     overflow: auto;
-    height: min(100dvh, 750px);
+    height: auto;
     display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 .chat_page { 
