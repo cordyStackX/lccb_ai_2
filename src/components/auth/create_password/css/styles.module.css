@@ -16,7 +16,7 @@
     width: min(500px, 100%);
     height: auto;
     border-radius: 10px;
-    padding: clamp(1rem, 10dvw, 3rem);
+    padding: 2.3rem;
     overflow: hidden;
     opacity: 0;
     transform: translateY(50px);
