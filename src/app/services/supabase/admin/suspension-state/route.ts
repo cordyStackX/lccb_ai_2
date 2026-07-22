@@ -10,13 +10,13 @@ export async function POST(req: NextRequest) {
 
     try {
         const body = await req.json();
-        const { state } = body;
+        const { state, email } = body;
 
         // Update setting
         const { error } = await supabaseServer
         .from("setting")
         .update([{ state: state }])
-        .eq("target", "suspend");
+        .eq("email", email);
 
         if (error) {
             console.error("Supabase Query Error: ", error);

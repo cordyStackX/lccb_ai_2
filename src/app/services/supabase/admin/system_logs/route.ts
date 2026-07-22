@@ -7,6 +7,8 @@ export async function POST(req: NextRequest) {
     const auth = await Security(req);
     if(auth?.error) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
 
+    const { email } = await req.json();
+
     const now = new Date();
     const isJanFirstUtc = now.getUTCMonth() === 0 && now.getUTCDate() === 1;
 
@@ -21,15 +23,31 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ success: false, error: "Failed to rotate API logs" }, { status: 500 });
         }
     }
-    
-    const { data, error } = await supabaseServer
+
+    if (email === "admin@admin.com") {
+        const { data, error } = await supabaseServer
         .from("system_logs")
         .select("*");
+
+        if (error) {
+            console.error("Supabase Query Error: ", error);
+            return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
+        }
+
+        return NextResponse.json({ success: true, message: data }, { status: 200 });
+    }
+
+    const { data, error } = await supabaseServer
+    .from("system_logs")
+    .select("*")
+    .eq("request", email);
 
     if (error) {
         console.error("Supabase Query Error: ", error);
         return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
     }
+
+    console.log(data);
 
     return NextResponse.json({ success: true, message: data }, { status: 200 });
 

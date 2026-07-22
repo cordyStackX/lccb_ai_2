@@ -8,9 +8,12 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { email } = await req.json();
+
     const { data, error } = await supabaseServer
     .from("setting")
-    .select("*");
+    .select("*")
+    .eq("email", email);
 
     if (error) {
         console.error("Supabase Query Error: ", error);

@@ -32,10 +32,10 @@ export default function Setting({ email, f_name } : SettingProps) {
         const fetchSuspensionState = async () => {
             try {
 
-                const response = await Fetch_to(api_link.admin.get_suspension_state);
+                const response = await Fetch_to(api_link.admin.get_suspension_state, { email: email });
 
                 if (response.success) {
-                    setSuspensionState(response.data.message[0].state || "off");
+                    setSuspensionState(response.data?.message[0]?.state || "off");
                     
                 }
 
@@ -76,7 +76,7 @@ export default function Setting({ email, f_name } : SettingProps) {
         const newState = e.target.value;
         setSuspensionState(newState);
 
-        const alert2 = await SweetAlert2("Update?", `Are you sure want to ${newState} Voice Routes`, "warning", true, "Yes", true, "No");
+        const alert2 = await SweetAlert2("Update?", `Are you sure want to ${newState} API Routes`, "warning", true, "Yes", true, "No");
         if (!alert2.isConfirmed) return setLoading(!loading);
 
         setIsLoadState(true);
@@ -84,7 +84,7 @@ export default function Setting({ email, f_name } : SettingProps) {
         setIsLoadStatus("Updating Please Wait...");
 
         try {
-            const response = await Fetch_to(api_link.admin.set_suspension_state, { state: newState });
+            const response = await Fetch_to(api_link.admin.set_suspension_state, { state: newState, email: email });
 
             if (!response.success) {
                 Swal.close();

@@ -18,6 +18,7 @@ export default function DashboardPage() {
             Progress(false);
             setEmail(response.data.message.final_data.data[0].email);
             setName(response.data.message.final_data.data[0].f_name);
+            return;
         }
         check();
     }, []);

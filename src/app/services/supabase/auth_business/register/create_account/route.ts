@@ -52,6 +52,8 @@ export async function POST(req: NextRequest) {
         .from("auth")
         .insert([{ email: cleanEmail, password: String(hashed), f_name: cleanName, year: year, status: status, role: role, assign_by: cleanAssign_by }]);
 
+        await supabaseServer.from("setting").insert([{ state: "open", target: "suspend", email: cleanEmail }]);
+
         if (error) {
             console.error("Supabase Query Error: ", error);
             return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });

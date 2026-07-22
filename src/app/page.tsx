@@ -23,7 +23,11 @@ export default function Home() {
 	useEffect(() => {
         async function check() {
             const response = await Fetch_to(api_link.jwt.verify);
-            if (response.success) return router.push("/chat");
+            if (response.success) {
+				if (response.data.message.final_data.data[0].role === "admin") return router.push("/admin/dashboard");
+				if (response.data.message.final_data.data[0].role === "Business") return router.push("/admin_business/dashboard");
+				return router.push("/chat");
+			}
         }
         check();
     }, []);

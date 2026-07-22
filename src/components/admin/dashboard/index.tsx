@@ -40,7 +40,11 @@ interface WeeklyPoint {
 
 type GraphRange = "day" | "week" | "year";
 
-export default function Dashboard() {
+type DashboardProps = {
+    email: string;
+}
+
+export default function Dashboard({ email } : DashboardProps) {
     const [data, setData] = useState<ManageUserDataProps[]>([]);
     const [system_logs, setSystem_logs] = useState<System_logs[]>([]);
     const [graphRange, setGraphRange] = useState<GraphRange>("week");
@@ -53,54 +57,18 @@ export default function Dashboard() {
 
     useEffect(() => {
         const RetrieveUserData = async () => {
-            const cacheKey = "admin_dashboard_cache_v1";
-            const cacheTtlMs = 1000 * 60 * 3; // 3 minutes
-
-            try {
-                const cachedRaw = localStorage.getItem(cacheKey);
-                if (cachedRaw) {
-                    const cached = JSON.parse(cachedRaw) as {
-                        at: number;
-                        users: ManageUserDataProps[];
-                        logs: System_logs[];
-                    };
-
-                    if (Date.now() - cached.at < cacheTtlMs) {
-                        setData(Array.isArray(cached.users) ? cached.users : []);
-                        setSystem_logs(Array.isArray(cached.logs) ? cached.logs : []);
-                        return;
-                    }
-                }
-            } catch {
-                // Ignore cache parse errors and fetch fresh data.
-            }
-
-            const response = await Fetch_to(api_link.admin.retrieve_user);
-            const response2 = await Fetch_to(api_link.admin.system_logs);
+            const response = await Fetch_to(api_link.admin.retrieve_user, { email });
+            const response2 = await Fetch_to(api_link.admin.system_logs, { email });
             if (response.success && response2.success) {
-                const users = response.data.message ?? [];
-                const logs = response2.data.message ?? [];
-                setData(users);
-                setSystem_logs(logs);
-
-                try {
-                    localStorage.setItem(
-                        cacheKey,
-                        JSON.stringify({
-                            at: Date.now(),
-                            users,
-                            logs,
-                        })
-                    );
-                } catch {
-                    // Ignore storage quota/permission errors.
-                }
+                setData(response.data.message ?? []);
+                setSystem_logs(response2.data.message ?? []);
             }
         };
         RetrieveUserData();
-        
-    }, []);
 
+    }, [email]);
+
+    useEffect(() => {alert(email);}, [email]);
 
     function getDayOfWeek(dateString: string) {
         return new Date(dateString).getDay(); // 0 Sun, 1 Mon, ...
@@ -153,7 +121,7 @@ export default function Dashboard() {
 
     data.forEach((user) => {
         if (!user.created_at) return;
-        
+
         if (graphRange === "week" && isInCurrentWeek(user.created_at)) {
             userSeries[getDayOfWeek(user.created_at)] += 1;
         }
@@ -182,7 +150,7 @@ export default function Dashboard() {
     });
 
     const toPeriodSet = (series: number[]): WeeklyPoint[] => {
-    
+
         if (graphRange === "week") {
             return [
                 { name: "Sun", value: series[0] },
@@ -250,13 +218,6 @@ export default function Dashboard() {
         { uploadedPdfCount: 0, apiRequestCount: 0 }
     );
 
-    const adminApiRequestCount = system_logs.reduce((total, log) => {
-        if (log.request === "admin@admin.com") {
-            return total + Number(log.api_request ?? 0);
-        }
-        return total;
-    }, 0);
-
     useEffect(() => {
         const durationMs = 3000;
         const start = performance.now();
@@ -265,7 +226,7 @@ export default function Dashboard() {
             accounts: data.length,
             uploadedPdf: uploadedPdfCount,
             userApi: apiRequestCount,
-            chatbotApi: adminApiRequestCount,
+            chatbotApi: apiRequestCount,
         };
 
         let rafId = 0;
@@ -288,13 +249,12 @@ export default function Dashboard() {
 
         rafId = requestAnimationFrame(animate);
         return () => cancelAnimationFrame(rafId);
-    }, [data.length, uploadedPdfCount, apiRequestCount, adminApiRequestCount]);
+    }, [data.length, uploadedPdfCount, apiRequestCount]);
 
     const usagePieData = [
         { name: "PDF Uploads", value: uploadedPdfCount },
         { name: "User Logs", value: apiRequestCount },
         { name: "Registered Accounts", value: data.length },
-        { name: "Chatbot", value: adminApiRequestCount },
     ];
     const pieColors = ["#2563eb", "#f59e0b", "#16c784", "#ff0800"];
 
