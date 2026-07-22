@@ -1,6 +1,8 @@
 
 export { default as SignUp } from "./register";
 
+export { default as SignUpBusiness } from "./register_business";
+
 export { default as SignIn } from "./signin";
 
 export { default as Forgot_password } from "./forgot_password";

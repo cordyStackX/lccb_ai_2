@@ -52,12 +52,35 @@ export default function Create_Password() {
         e.preventDefault();
         setLoading(true);
 
+        if (form.role === "Business") {
+            
+            const responds = await Fetch_to(api_link.business.signup.createAccount, form);
+            if (responds.success) {
+                const autosignin_response = await Fetch_to(api_link.signin, {email: form.email, password: form.password});
+                if (autosignin_response.success) {
+                    localStorage.clear();
+                    
+                    await Fetch_to(api_link.jwt.auth, { email: form.email });
+                    router.push("/admin_business/dashboard");
+                } else {
+                    alert(responds.message);
+                    router.push("/auth/signin");
+                }
+            } else {
+                setStatus(true);
+                setLoading(false);
+                setMessage(responds.message || "Somethings Went Wrong");
+            }
+            return;
+        }
+
         const responds = await Fetch_to(api_link.signup.createAccount, form);
         if (responds.success) {
             const autosignin_response = await Fetch_to(api_link.signin, {email: form.email, password: form.password});
 
             if (autosignin_response.success) {
                 localStorage.clear();
+                
                 await Fetch_to(api_link.jwt.auth, { email: form.email });
                 router.push("/chat");
             } else {
@@ -144,7 +167,7 @@ export default function Create_Password() {
                             <p>I agree to the <Link href={"/privacy"}>Privacy Policy</Link> & <Link href={"/terms"}>Terms of Conditions</Link></p>
                         </span>
                         <section className={`${styles.buttons} `}>
-                            <button type="button" onClick={() => { if(confirmExit()) return router.push("/auth/register");  }} style={{backgroundColor: "var(--secondary)"}}>Back</button>
+                            <button type="button" onClick={() => { if(confirmExit()) return router.push("/auth/signin");  }} style={{backgroundColor: "var(--secondary)"}}>Back</button>
                             <button>Register</button>
                         </section>
                     </form>

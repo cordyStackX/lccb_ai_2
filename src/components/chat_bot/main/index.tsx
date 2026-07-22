@@ -27,7 +27,11 @@ function normalizeSuggestions(raw: unknown[]): Suggestion[] {
         .filter((s): s is string => typeof s === "string" && s.length > 0);
 }
 
-export default function Chat_bot() {
+type Chat_botProps = {
+    email: string;
+}
+
+export default function Chat_bot({ email } : Chat_botProps) {
     const [messages, setMessages] = useState<
         { ask: string; respond: string }[]
     >([]);
@@ -39,7 +43,7 @@ export default function Chat_bot() {
     const chatEndRef = useRef<HTMLDivElement>(null);
     const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
     const [chatbot, setChatbot] = useState({
-        name: "Sample AI", instructions: "Ask about ---", body: "velit voluptate doloremque magnam sequi, culpa nam consequatur eaque libero. Dolores."
+        name: "", instructions: "", body: ""
     });
 
     const [showTypeahead, setShowTypeahead] = useState(false);
@@ -57,21 +61,21 @@ export default function Chat_bot() {
 
     useEffect(() => {
         async function Suggest() {
-            const response = await Fetch_to(api_link.storage.retrieve_chatbot_suggest);
+            const response = await Fetch_to(api_link.storage.retrieve_chatbot_suggest, { email: email });
             if (response.success && Array.isArray(response.data?.message)) {
                 setSuggestions(normalizeSuggestions(response.data.message));
             }
         }
         Suggest();
         async function Chatbot() {
-            const response = await Fetch_to(api_link.chatbot_public);
-            const result = response.data.message[0];
+            const response = await Fetch_to(api_link.chatbot_public, { email: email });
+            const result = response.data?.message[0] || { name: "Sample AI", instruction: "Ask about ---", body: "velit voluptate doloremque magnam sequi, culpa nam consequatur eaque libero. Dolores." };
             if (response.success) {
                 setChatbot(prev => ({ ...prev, name: result.name, instructions: result.instruction, body: result.body }));
             }
         }
         Chatbot();
-    }, []);
+    }, [email]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setChatres({ ...chatres, [e.target.name]: e.target.value });
@@ -104,6 +108,7 @@ export default function Chat_bot() {
                     prompt,
                     last_user_response: lastUserResponse,
                     last_ai_response: lastAIResponse,
+                    email: email
                 }),
             });
 

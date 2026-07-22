@@ -1,0 +1,379 @@
+.container {
+    width: 100%;
+    height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 0 2rem 2rem 2rem;
+}
+.header_cons {
+    color: var(--foreground);
+    width: 100%;
+    height: 80px;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    padding: 3rem 0;
+}
+.header_cons svg {
+    width: 40px;
+    height: 40px;
+    margin: 0 1rem;
+    color: var(--primary);
+}
+.header_cons span {
+    display: flex;
+    align-items: center;
+}
+
+.status {
+    width: 100%;
+    height: auto;
+    padding: 0;
+    border-radius: 12px;
+}
+
+.statusHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--default-color-white-2);
+    margin-bottom: 0.5rem;
+}
+.statusHeader h2 {
+    margin: 0;
+}
+.statusHeader p {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--default-color-gray);
+}
+.container h2 {
+    color: var(--default-color-black);
+}
+
+/* ---------- Stat cards ---------- */
+.info {
+    width: 100%;
+    height: auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.1rem;
+    padding: 1rem 0;
+    margin-top: 0.5rem;
+}
+.info div {
+    width: 100%;
+    height: auto;
+    padding: 1.3rem;
+    border-radius: 12px;
+    color: var(--foreground);
+    background-color: var(--default-color-white);
+    border: 1px solid var(--default-color-white-2);
+    box-shadow: 0 4px 20px var(--fx-color-bg);
+    transition: transform 200ms ease, box-shadow 200ms ease;
+}
+.info div:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px var(--fx-color-bg-effects);
+}
+.info h3 {
+    margin: 0 0 0.2rem 0.2rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--default-color-gray);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.info p {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0.4rem 0.2rem;
+    color: var(--foreground);
+}
+.icons {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 0.6rem 0.2rem 0 0.2rem;
+}
+.icons span {
+    padding: 0.7rem;
+    background: var(--background_linear_1);
+    border-radius: 10px;
+    display: flex;
+}
+.icons svg {
+    width: 22px;
+    height: 22px;
+    color: var(--default-color-white);
+}
+
+/* ---------- Analytics layout ---------- */
+.analytics_data {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: 100%;
+    height: auto;
+    margin-top: 1rem;
+}
+.graph_container {
+    width: 50%;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-flow: column;
+}
+.graph_container select {
+    cursor: pointer;
+    padding: 0.5rem 0.9rem;
+    border-radius: 8px;
+    background-color: var(--primary);
+    color: var(--default-color-white);
+    border: none;
+    font-weight: 600;
+    transition: background-color 200ms ease;
+}
+.graph_container select:hover {
+    background-color: var(--secondary);
+}
+.reportTitle {
+    width: min(780px, 100%);
+    margin: 1.2rem 1rem 0.6rem 1rem;
+    color: var(--default-color-black);
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.02rem;
+}
+
+/* ---------- Chart cards ---------- */
+.graph {
+    width: min(780px, 100%);
+    height: auto;
+    margin: 0.2rem 0 1rem 0;
+    background: var(--default-color-white);
+    border: 1px solid var(--default-color-white-2);
+    box-shadow: 0 4px 20px var(--fx-color-bg);
+    padding: 1.6rem;
+    border-radius: 12px;
+    position: relative;
+    transition: box-shadow 200ms ease;
+}
+.graph:hover {
+    box-shadow: 0 8px 28px var(--fx-color-bg-effects);
+}
+.info2 {
+    width: 100%;
+    height: auto;
+    margin: 0;
+    padding: 0.75rem 0.3rem 0 0.3rem;
+}
+
+.chartHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.graph h2 {
+    color: var(--foreground);
+    margin: 0;
+    font-size: 1.05rem;
+}
+
+.chartShell {
+    width: 100%;
+    height: 270px;
+    border-radius: 8px;
+    padding: 0.4rem 0;
+}
+
+.trendUp,
+.trendDown {
+    font-size: 0.78rem;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 0.4rem 0.8rem;
+    letter-spacing: 0.015rem;
+    white-space: nowrap;
+}
+.trendUp {
+    color: var(--default-color-green);
+    background-color: rgba(76, 175, 80, 0.12);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+}
+.trendDown {
+    color: var(--default-color-red);
+    background-color: rgba(233, 75, 60, 0.12);
+    border: 1px solid rgba(233, 75, 60, 0.3);
+}
+
+/* ---------- Records column ---------- */
+.records {
+    width: 50%;
+    height: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-flow: column;
+    padding: 0 0 0 1rem;
+}
+
+.pieCard {
+    background-color: var(--default-color-white);
+    border: 1px solid var(--default-color-white-2);
+    border-radius: 12px;
+    padding: 1.4rem;
+    margin: 0 0 1.2rem;
+    box-shadow: 0 4px 20px var(--fx-color-bg);
+    width: 100%;
+}
+.pieCard h3 {
+    margin: 0 0 0.8rem;
+    color: var(--default-color-black);
+    font-size: 1rem;
+}
+.pieShell {
+    width: 100%;
+    height: 260px;
+}
+
+/* ---------- Rankings table ---------- */
+.tableScroll {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 12px;
+}
+.rankings {
+    width: 100%;
+    min-width: 420px;
+    height: auto;
+    text-align: center;
+    margin: 0.4rem 0 1rem 0;
+    background-color: var(--default-color-white);
+    color: var(--foreground);
+    border: 1px solid var(--default-color-white-2);
+    box-shadow: 0 4px 20px var(--fx-color-bg);
+    border-radius: 12px;
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+}
+.rankings th {
+    padding: 0.9rem 1rem;
+    text-align: center;
+    border-bottom: 2px solid var(--default-color-white-2);
+    background-color: var(--default-color-white);
+    color: var(--default-color-gray);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    position: sticky;
+    top: 0;
+    white-space: nowrap;
+}
+.rankings td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--default-color-white-2);
+    font-size: 0.9rem;
+}
+.rankings tbody tr:last-child td {
+    border-bottom: none;
+}
+.rankings tbody tr:hover td {
+    background-color: var(--fx-color-bg);
+}
+
+/* ---------- Responsive ---------- */
+@media screen and (max-width: 1100px) {
+    .info {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media screen and (max-width: 900px) {
+    .container {
+        padding: 4.5rem 1rem 1.5rem 1rem; /* clears fixed burger button */
+    }
+
+    .header_cons {
+        padding: 0 0 1.5rem 0;
+        height: auto;
+    }
+
+    .statusHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.3rem;
+    }
+
+    .reportTitle {
+        width: 100%;
+        margin: 1.2rem 0 0.5rem 0;
+    }
+
+    .graph {
+        width: 100%;
+        margin: 0 0 1rem 0;
+        padding: 1.2rem;
+    }
+
+    .chartHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .records,
+    .graph_container {
+        width: 100%;
+        padding: 0;
+    }
+
+    .records {
+        margin-top: 1.5rem;
+    }
+}
+
+@media screen and (max-width: 560px) {
+    .info {
+        grid-template-columns: 1fr;
+        gap: 0.85rem;
+    }
+
+    .info p {
+        font-size: 1.7rem;
+    }
+
+    .header_cons svg {
+        width: 30px;
+        height: 30px;
+        margin: 0 0.7rem 0 0;
+    }
+    .header_cons h1 {
+        font-size: 1.25rem;
+    }
+
+    .chartShell {
+        height: 210px;
+    }
+    .pieShell {
+        height: 220px;
+    }
+
+    .graph,
+    .pieCard {
+        padding: 1rem;
+    }
+
+    .rankings th,
+    .rankings td {
+        padding: 0.65rem 0.75rem;
+        font-size: 0.82rem;
+    }
+}

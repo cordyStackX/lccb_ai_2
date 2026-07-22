@@ -17,7 +17,7 @@ export default function SignIn() {
     const router = useRouter();
 
     const [form, setForm] = useState({
-        email: "", password: ""
+        email: "", password: "", role: ""
     });
     const [status, setStatus] = useState(false);
     const [message, setMessage] = useState("");
@@ -51,6 +51,7 @@ export default function SignIn() {
         const responds = await Fetch_to(api_link.signin, form);
         if (responds.success) {
             localStorage.setItem("email", form.email);
+            localStorage.setItem("role", status.data.message);
             const responds = await Fetch_to(api_link.checkcode, { email: form.email });
             if(!responds.success) {
                 setMessage(responds.message || "Somethings Went Wrong");
@@ -153,7 +154,8 @@ export default function SignIn() {
                             <button>Log In</button>
                         </section>
                        
-                        <p>Register an Account? <Link href={"/auth/register"} onClick={() => {Progress(true);}}>Register</Link></p>
+                        <p>Register an Account? <Link href={"/auth/register"} onClick={() => {Progress(true);}}>Register Account</Link></p>
+                        <p>Register Business Account? <Link href={"/auth/register_business"} onClick={() => {Progress(true);}}>Register Business Account </Link></p>
                         <p><Link href={"/auth/forgot-password"} onClick={() => {Progress(true);}}>Forgot Password?</Link></p>
                         
                     </form>

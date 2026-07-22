@@ -11,36 +11,25 @@ import {
     useConfirmExit
 } from "@/utilities";
 
-type HeaderProps = {
-    mobile: boolean;
-    email: string;
-}
 
-export default function Confirm_email_signin({ mobile, email }: HeaderProps) {
+export default function Confirm_email_signin() {
     const router = useRouter();
 
     const [form, setForm] = useState({
-        code: "", email: ""
+        code: "", email: "", role: ""
     });
     const [status, setStatus] = useState(false);
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
-    const [showSignin, setShowSignin] = useState(false);
-
-    useEffect(() => {
-        setForm(prev => ({ ...prev, email: email }));
-        if (mobile) return setShowSignin(false);
-        setShowSignin(true);
-    }, [mobile]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
 
    useEffect(() => {
-        if (mobile) return;
         const saveEmail = localStorage.getItem("email");
-        setForm(prev => ({ ...prev, email: saveEmail || "" }));
+        const saveRole = localStorage.getItem("role");
+        setForm(prev => ({ ...prev, email: saveEmail || "", role: saveRole || "" }));
     }, []);
 
     const confirmExit = useConfirmExit({
@@ -66,10 +55,6 @@ export default function Confirm_email_signin({ mobile, email }: HeaderProps) {
         const responds = await Fetch_to(api_link.checkcode, { email: form.email, code: form.code });
         if (responds.success) {
             localStorage.clear();
-            if (!showSignin) {
-                await Fetch_to(api_link.jwt.auth, { email: form.email });
-                return (window as Window & { ReactNativeWebView?: { postMessage: (message: string) => void } }).ReactNativeWebView?.postMessage(`${form.code}`);
-            }
             const response = await Fetch_to(api_link.checkcode, { email: form.email, code: form.code, key: "confirm_code" });
             if (!response.success) {
                 setMessage(response.message);
@@ -78,6 +63,7 @@ export default function Confirm_email_signin({ mobile, email }: HeaderProps) {
                 return;
             }
             await Fetch_to(api_link.jwt.auth, { email: form.email });
+            if (form.role === "Business") return router.push("/admin_business/dashboard");
             if (form.email.endsWith("@admin.com")) return router.push("/admin/dashboard");
             router.push("/chat");
         } else {

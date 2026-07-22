@@ -145,7 +145,8 @@ Respond with ONLY comma-separated numbers (e.g., \"1,3,4\"). If all chunks seem 
             year=year,
             name="admin",
             user_id="admin_summaries",
-            method="summaries"
+            method="summaries",
+            chat_bot_name=""
         )
 
         # --- Call OpenAI with relevant context ---

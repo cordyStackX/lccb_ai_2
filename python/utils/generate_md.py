@@ -138,7 +138,8 @@ Respond with ONLY comma-separated numbers (e.g., \"1,3,4\"). If all chunks seem 
         year=year,
         name=f_name,
         method=method,
-        user_id=user_id
+        user_id=user_id,
+        chat_bot_name=""
     )
 
     return {"final_prompt": final_prompt, "system_role": systemRole}, None

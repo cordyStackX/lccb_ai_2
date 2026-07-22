@@ -1,0 +1,467 @@
+.container {
+    width: 100%;
+    height: 100vh;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    flex-flow: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 0 1rem;
+}
+
+.status {
+    flex: 1 1 0;
+    min-width: 320px;
+    height: auto;
+    padding: 1rem;
+    border-radius: 8px;
+    color: var(--default-color-black);
+    margin-bottom: 2.5rem;
+}
+
+.tablesRow {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+/* Section header replaces the old .status > span for both tables */
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: auto;
+    padding: 1rem;
+}
+.sectionTitleGroup {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.sectionTitleGroup h2 {
+    margin: 0;
+}
+.sectionActions {
+    display: flex;
+    gap: 0.5rem;
+}
+.sectionDescription {
+    padding: 0 1rem;
+    margin: -0.5rem 0 0.5rem 0;
+    font-size: 0.85rem;
+    color: var(--default-color-gray);
+    font-weight: 400;
+}
+
+/* ---------- Sensitive table treatment ---------- */
+.statusSensitive {
+    border: 1px solid rgba(233, 75, 60, 0.35);
+    background: rgba(233, 75, 60, 0.03);
+}
+.statusSensitive .sectionTitleGroup h2 {
+    color: var(--default-color-red);
+}
+.statusSensitive .sectionTitleGroup svg {
+    color: var(--default-color-red);
+}
+.statusSensitive table {
+    box-shadow: 0 4px 20px rgba(233, 75, 60, 0.15);
+}
+
+.button_upload {
+    padding: 0.8rem;
+    border-radius: 8px;
+    color: var(--default-color-black);
+    cursor: pointer;
+    border: 2px solid var(--default-color-gray);
+    background: transparent;
+    transition: transform 300ms ease, background-color 200ms ease;
+    margin: 0 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.button_upload:active {
+    transform: scale(0.92);
+}
+.button_download {
+    padding: 0.5rem;
+    border-radius: 8px;
+    color: var(--default-color-black);
+    cursor: pointer;
+    border: 2px solid var(--default-color-gray);
+    background: transparent;
+    transition: transform 300ms ease, background-color 200ms ease;
+    margin: 0 0.5rem;
+}
+.button_download:hover {
+    background-color: var(--primary);
+    color: var(--default-color-white);
+}
+.button_download:active {
+    transform: scale(0.92);
+}
+.button_delete {
+    padding: 0.5rem;
+    border-radius: 8px;
+    color: var(--default-color-black);
+    cursor: pointer;
+    border: 2px solid var(--default-color-gray);
+    background: transparent;
+    transition: transform 300ms ease, background-color 200ms ease;
+    margin: 0 0.5rem;
+}
+.button_delete:hover {
+    background-color: var(--default-color-red);
+    color: var(--default-color-white);
+}
+.button_delete:active {
+    transform: scale(0.92);
+}
+.status table {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--default-color-white-2);
+    box-shadow: 0 4px 20px var(--fx-color-bg);
+    border-collapse: collapse;
+    margin: 5px 0 0 0;
+}
+.status th {
+    border-bottom: 2px solid var(--default-color-gray);
+    padding: 1rem;
+}
+.status td {
+    padding: 1rem;
+    height: auto;
+    background: var(--default-color-white);
+    text-align: center;
+}
+.header_cons {
+    color: var(--foreground);
+    width: 100%;
+    height: 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3rem 0;
+}
+.header_cons svg {
+    width: 40px;
+    height: 40px;
+    margin: 0 1rem;
+}
+.header_cons span {
+    display: flex;
+    align-items: center;
+}
+.search {
+    width: 100%;
+    padding: 1rem;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+}
+.search input {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    margin: 0;
+    background: transparent;
+    border: 2px solid var(--default-color-gray);
+    outline: none;
+    color: var(--default-color-black);
+    font-size: 1rem;
+    border-radius: 8px;
+}
+.search button {
+    cursor: pointer;
+    padding: 0.5rem;
+    margin: 0 1rem;
+    background: var(--default-color-white);
+    border: 2px solid var(--default-color-gray);
+    color: var(--foreground);
+    border-radius: 8px;
+}
+.pagination {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+}
+
+.pageInfo {
+    color: var(--foreground);
+    font-weight: 600;
+}
+
+.pageButton {
+    cursor: pointer;
+    padding: 0.5rem 0.9rem;
+    background: var(--default-color-white);
+    border: 2px solid var(--default-color-gray);
+    color: var(--foreground);
+    border-radius: 8px;
+}
+
+.pageButton:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+.summary {
+    width: 800px;
+    text-align: left;
+    vertical-align: top;
+}
+.summaryContent {
+    max-height: 200px;
+    overflow: auto;
+    padding: 1rem;
+}
+.summary :global(p),
+.summary :global(ul),
+.summary :global(ol),
+.summary :global(li),
+.summary :global(pre),
+.summary :global(code),
+.summary :global(blockquote) {
+    text-align: left;
+    line-height: 2rem;
+}
+.file_name {
+    max-width: 220px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.button_view {
+    padding: 0.5rem;
+    border-radius: 8px;
+    color: var(--default-color-black);
+    cursor: pointer;
+    border: 2px solid var(--default-color-gray);
+    background: transparent;
+    transition: transform 300ms ease, background-color 200ms ease;
+    margin: 0 0.5rem;
+}
+.button_view:hover {
+    background-color: var(--secondary);
+    color: var(--default-color-white);
+}
+.button_view:active {
+    transform: scale(0.92);
+}
+
+/* ---------- View modal ---------- */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 50;
+    padding: 1.5rem;
+}
+.modalCard {
+    width: min(700px, 100%);
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--default-color-white);
+    border-radius: 12px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+}
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem 1.5rem;
+    border-bottom: 1px solid var(--default-color-white-2);
+}
+.modalHeader h3 {
+    margin: 0;
+    font-size: 1rem;
+    word-break: break-word;
+}
+.modalClose {
+    background: none;
+    border: none;
+    font-size: 1.6rem;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--default-color-gray);
+    padding: 0 0.25rem;
+}
+.modalClose:hover {
+    color: var(--default-color-red);
+}
+.modalBody {
+    padding: 1.5rem;
+    overflow-y: auto;
+    line-height: 1.9;
+    text-align: left;
+}
+.modalFooter {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--default-color-white-2);
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* ---------- Skeleton loading ---------- */
+.skeletonBar {
+    display: block;
+    height: 0.85rem;
+    border-radius: 6px;
+    margin: 0.4rem auto;
+    background: linear-gradient(
+        90deg,
+        var(--default-color-white-2) 25%,
+        var(--fx-color-bg) 50%,
+        var(--default-color-white-2) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+}
+.skeletonShort {
+    width: 70%;
+}
+.skeletonMedium {
+    width: 85%;
+}
+.skeletonLong {
+    width: 95%;
+}
+.skeletonIcon {
+    display: inline-block;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    margin: 0 0.5rem;
+    background: linear-gradient(
+        90deg,
+        var(--default-color-white-2) 25%,
+        var(--fx-color-bg) 50%,
+        var(--default-color-white-2) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+}
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+.ai_response table {
+    width: 100%;
+    max-width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    overflow-x: auto;
+    display: block;
+}
+
+.ai_response thead {
+    background: var(--foreground);
+}
+
+.ai_response th,
+.ai_response td {
+    padding: 0.6rem 1rem;
+    text-align: left;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    white-space: nowrap;
+}
+
+.ai_response th {
+    font-weight: bold;
+    color: var(--default-color-white);
+}
+
+.ai_response tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.03);
+}
+.undoToast {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: var(--foreground);
+    color: var(--default-color-white);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin: 0.75rem 0;
+}
+
+.undoToast button {
+    background: var(--secondary);
+    color: var(--default-color-white);
+    border: none;
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.button_delete_bulk {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--default-color-red);
+    color: var(--default-color-white);
+    border: none;
+    padding: 0.5rem 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.status table th:first-child,
+.status table td:first-child {
+    width: 40px;
+    text-align: center;
+}
+
+.status table input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--default-color-gray);
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    background: var(--default-color-white);
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+    vertical-align: middle;
+}
+
+.status table input[type="checkbox"]:hover {
+    border-color: var(--secondary);
+}
+
+.status table input[type="checkbox"]:checked {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.status table input[type="checkbox"]:checked::after {
+    content: "";
+    position: absolute;
+    left: 5px;
+    top: 1px;
+    width: 5px;
+    height: 10px;
+    border: solid var(--default-color-white);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.status table input[type="checkbox"]:focus-visible {
+    outline: 2px solid var(--secondary);
+    outline-offset: 2px;
+}

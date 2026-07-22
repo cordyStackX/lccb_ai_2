@@ -208,6 +208,7 @@ export default function ManageUser() {
                         <option value="">All Roles</option>
                         <option value="Student">Student</option>
                         <option value="Teacher">Teacher</option>
+                        <option value="Business">Business</option>
                     </select>
                 </section>
 
@@ -216,7 +217,7 @@ export default function ManageUser() {
                         <thead>
                             <tr>
                                 <th>Name</th>
-                                <th>Year</th>
+                                <th>Role</th>
                                 <th>Gmail</th>
                                 <th>Actions</th>
                             </tr>
@@ -238,7 +239,7 @@ export default function ManageUser() {
                                 data.map((row, index) => (
                                     <tr key={index}>
                                         <td> {row.f_name} </td>
-                                        <td> {row.year} </td>
+                                        <td> {row.role} </td>
                                         <td> {row.email} </td>
                                         <td>
                                             <button

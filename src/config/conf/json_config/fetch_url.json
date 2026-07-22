@@ -10,6 +10,12 @@
 		"checkEmail" : "/services/supabase/auth/forgot_password/check_email",
 		"updateAccount" : "/services/supabase/auth/forgot_password/update_account"
 	},
+	"business" : {
+		"signup" : {
+			"checkEmail" : "/services/supabase/auth_business/register/check_email",
+			"createAccount" : "/services/supabase/auth_business/register/create_account"
+		}
+	},
 	"update" : "/services/supabase/auth/update",
 	"jwt" : {
 		"auth" : "/services/jwt/auth",

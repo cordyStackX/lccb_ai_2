@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
         );
     }
 
-    const { prompt, last_user_response, last_ai_response } = await req.json();
+    const { prompt, last_user_response, last_ai_response, email } = await req.json();
 
     const apikey = process.env.API_KEY;
     if (!apikey) {
@@ -35,8 +35,6 @@ export async function POST(req: NextRequest) {
     if (!prompt) {
         return NextResponse.json({ success: false, error: "Prompt is required" }, { status: 401 });
     }
-
-    const email = "admin@admin.com";
 
     const upstream = await fetch(`${apiUrl}generate-md-chatbot-stream`, {
         method: "POST",

@@ -19,9 +19,15 @@ def _build_chatbot_context(data):
     if not email:
         return None, (jsonify({"success": False, "error": "Email not found"}), 404)
 
-    rows = supabase.table("chatbot_pdf_file").select("id, file_name, summary").execute()
-    if not rows.data:
-        return None, (jsonify({"success": False, "error": "No summaries found"}), 404)
+    rows = supabase.table("chatbot_pdf_file").select("id, file_name, summary").eq("email", email).execute()
+
+    chatbot_name = supabase.table("chatbot_public").select("name").eq("email", email).execute()
+    
+    if rows.data is None:
+        return None, (jsonify({"success": False, "error": "Query failed"}), 500)
+
+    if len(rows.data) < 1:
+        return None, (jsonify({"success": False, "error": "No Data was setup"}), 404)
 
     user = supabase.table("auth").select("year, role").eq("email", email).single().execute()
     if not user.data:
@@ -101,7 +107,8 @@ def _build_chatbot_context(data):
         year=year,
         name=f_name,
         user_id="null",
-        method="text"
+        method="chat_bot",
+        chat_bot_name=chatbot_name
     )
 
     return {"final_prompt": final_prompt, "system_role": systemRole}, None

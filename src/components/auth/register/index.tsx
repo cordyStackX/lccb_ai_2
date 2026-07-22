@@ -98,7 +98,7 @@ export default function SignUp() {
                             </figure>
                         </section>
                         <div className={styles.text_contain}>
-                            <h1>Register</h1>
+                            <h1>LCCB Account Registration</h1>
                             <p>Please Register to continue</p>
                         </div>
                         <div className={styles.input_holder}>
@@ -221,7 +221,7 @@ export default function SignUp() {
                         <section className={`${styles.buttons} `}>
                             <button>Register</button>
                         </section>
-                        <p >Already have an Account? <Link href={"/auth/signin"} onClick={() => {Progress(true);}}>Sign In</Link></p>
+                        <p>Already have an Account? <Link href={"/auth/signin"} onClick={() => {Progress(true);}}>Sign In an Account</Link></p>
                     </form>
                 )}
             </div>

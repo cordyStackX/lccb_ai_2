@@ -113,7 +113,8 @@ def _build_prompt_context(data):
         year=year,
         name=f_name,
         method=method,
-        user_id=user_id
+        user_id=user_id,
+        chat_bot_name=""
     )
 
     return {"final_prompt": final_prompt, "system_role": systemRole}, None

@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
 
   let query = supabaseServer
     .from("chatbot_pdf_file")
-    .select("id, file, file_name, summary", { count: "exact" })
+    .select("id, file, file_name, summary, suggest", { count: "exact" })
     .eq("email", cleanEmail);
 
   if (term) {

@@ -1,0 +1,138 @@
+.container {
+    width: 100%;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+.wrapper {
+    width: var(--max-width);
+    height: auto;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.form_styles {
+    width: min(500px, 100%);
+    height: max(700px, 100dvh);
+    border-radius: 10px;
+    padding: 2.3rem;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(50px);
+    animation: fade_in 500ms forwards ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-flow: column;
+}
+@keyframes fade_in {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form_styles input {
+    width: 100%;
+    height: auto;
+    margin: 1rem 0;
+    font-size: clamp(1rem, 0.5rem + 1vw, 1.1rem);
+    padding: 15px 0 15px 50px;
+    background: transparent;
+    border: transparent;
+    border: 2px solid var(--primary);
+    outline: none;
+    color: var(--foreground);
+    border-radius: 15px;
+}
+.form_styles p {
+    margin: 1rem 0 0 0;
+    font-size: clamp(0.8rem, 0.5rem + 1vw, 1rem);
+}
+.form_styles a {
+    color: var(--default-color-blue);
+}
+.form_styles select {
+    background: var(--primary);
+    cursor: pointer;
+    padding: 15px 0 15px 50px;
+    margin: 1rem 0;
+    outline: none;
+    border: 2px solid var(--primary);
+    font-size: clamp(1rem, 0.5rem + 1vw, 1.1rem);
+    width: 100%;
+    height: auto;
+    background: transparent;
+    border-radius: 15px;
+    color: var(--foreground);
+}
+.info {
+    flex-flow: column;
+    align-items: center;
+    display: flex;
+    margin: 0 auto;
+    width: auto;
+}
+.info h1 {
+    font-size: clamp(1.3rem, 0.5rem + 1vw, 2rem);
+    margin: 1rem 0;
+}
+.logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-flow: column;
+}
+.logo figcaption {
+    font-size: clamp(1.5rem, 0.5rem + 1vw, 3rem);
+    font-weight: 900;
+    opacity: 0.5;
+    margin: 1rem;
+}
+.buttons {
+    padding: 1rem 0 0 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+.buttons button {
+    width: 100%;
+    padding: 15px;
+    background: var(--primary);
+    border-radius: 15px;
+    border: transparent;
+    font-size: 1rem;
+    cursor: pointer;
+    color: var(--default-color-white);
+}
+.buttons button:active {
+    opacity: 0.3;
+}
+.text_contain {
+    width: 100%;
+    height: auto;
+    margin: 15px 0;
+}
+.text_contain h1 {
+    color: var(--default-color-black);
+    font-size: clamp(1.5rem, 0.5rem + 2vw, 2rem);
+}
+.input_holder {
+    width: 100%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.input_holder span {
+    position: absolute;
+    left: 15px;
+    color: var(--default-color-gray);
+}

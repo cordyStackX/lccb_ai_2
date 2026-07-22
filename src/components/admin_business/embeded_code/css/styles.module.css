@@ -1,0 +1,322 @@
+.container {
+    width: 100%;
+    height: 100vh;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    display: flex;
+    flex-flow: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 0 1rem;
+}
+
+.header_cons {
+    color: var(--foreground);
+    width: 100%;
+    height: 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3rem 0;
+}
+.header_cons svg {
+    width: 40px;
+    height: 40px;
+    margin: 0 1rem;
+    color: var(--primary);
+}
+.header_cons span {
+    display: flex;
+    align-items: center;
+}
+
+/* ---------- Card ---------- */
+.status {
+    width: 100%;
+    height: auto;
+    padding: 1rem;
+    border-radius: 8px;
+    color: var(--default-color-black);
+    margin-bottom: 2.5rem;
+}
+
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: auto;
+    padding: 1rem;
+}
+.sectionTitleGroup {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.sectionTitleGroup h2 {
+    margin: 0;
+}
+.sectionDescription {
+    padding: 0 1rem;
+    margin: -0.5rem 0 1.2rem 0;
+    font-size: 0.85rem;
+    color: var(--default-color-gray);
+    font-weight: 400;
+}
+.sectionLabel {
+    margin: 1.75rem 1rem 0.6rem 1rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--secondary);
+    font-weight: 700;
+}
+
+/* ---------- Size inputs ---------- */
+.sizeRow {
+    display: flex;
+    gap: 1rem;
+    padding: 0 1rem;
+    margin-bottom: 1.2rem;
+    flex-wrap: wrap;
+}
+.sizeField {
+    display: flex;
+    flex-flow: column;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--default-color-gray);
+}
+.sizeField input {
+    width: 140px;
+    padding: 0.55rem 0.8rem;
+    border-radius: 8px;
+    border: 1px solid var(--default-color-white-2);
+    background: var(--default-color-white);
+    color: var(--default-color-black);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 200ms ease;
+}
+.sizeField input:focus {
+    border-color: var(--primary);
+}
+
+/* ---------- Code block ---------- */
+.codeBlockWrapper {
+    width: 100%;
+    margin: 0 0 1.5rem 0;
+    padding: 0 1rem;
+}
+.codeBlockHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #1e2530;
+    color: #9aa7bd;
+    padding: 0.6rem 1rem;
+    border-radius: 10px 10px 0 0;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+.copyButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    padding: 0.35rem 0.8rem;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.06);
+    color: #e6ebf5;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: normal;
+    transition: background-color 200ms ease, border-color 200ms ease;
+}
+.copyButton:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+.copyButton:active {
+    transform: scale(0.95);
+}
+.codeBlock {
+    margin: 0;
+    background: #12161f;
+    color: #cfd8e6;
+    padding: 1.2rem;
+    border-radius: 0 0 10px 10px;
+    overflow-x: auto;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    white-space: pre;
+    border: 1px solid var(--default-color-white-2);
+    border-top: none;
+}
+
+/* ---------- Live preview ---------- */
+.previewShell {
+    width: 100%;
+    padding: 2rem 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--fx-color-bg);
+    border-radius: 12px;
+    margin: 0 1rem;
+    box-sizing: border-box;
+}
+
+/* ---------- Skeleton ---------- */
+.skeletonBar {
+    display: block;
+    border-radius: 12px;
+    background: linear-gradient(
+        90deg,
+        var(--default-color-white-2) 25%,
+        var(--fx-color-bg) 50%,
+        var(--default-color-white-2) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+}
+.skeletonPreview {
+    width: 400px;
+    max-width: 100%;
+    height: 600px;
+}
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ---------- AI config fields (name / instructions / body) ---------- */
+.detailsRow {
+    display: flex;
+    gap: 1rem;
+    padding: 0 1rem;
+    margin-bottom: 1.2rem;
+    flex-wrap: wrap;
+    align-items: flex-start;
+}
+.detailsField {
+    display: flex;
+    flex-flow: column;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--default-color-gray);
+    flex: 1 1 200px;
+    min-width: 0;
+}
+.detailsField input,
+.detailsField textarea {
+    width: 100%;
+    padding: 0.55rem 0.8rem;
+    border-radius: 8px;
+    border: 1px solid var(--default-color-white-2);
+    background: var(--default-color-white);
+    color: var(--default-color-black);
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 200ms ease;
+}
+.detailsField textarea {
+    resize: vertical;
+    min-height: 90px;
+    line-height: 1.5;
+}
+.detailsField input:focus,
+.detailsField textarea:focus {
+    border-color: var(--primary);
+}
+
+.saveInfoButton {
+    align-self: flex-end;
+    flex: 0 0 auto;
+    padding: 0.6rem 1.4rem;
+    border-radius: 8px;
+    border: none;
+    background: var(--primary);
+    color: var(--default-color-white);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 200ms ease, transform 150ms ease;
+    height: 42px;
+    margin-top: auto;
+}
+.saveInfoButton:hover {
+    background: var(--secondary);
+}
+.saveInfoButton:active {
+    transform: scale(0.95);
+}
+
+@media (max-width: 900px) {
+    .saveInfoButton {
+        align-self: stretch;
+        width: 100%;
+    }
+}
+
+/* Instruction Body takes more room than Name/Instructions on wide screens */
+.detailsFieldWide {
+    flex: 2 1 280px;
+}
+
+@media (max-width: 900px) {
+    .detailsRow {
+        gap: 0.75rem;
+    }
+    .detailsField {
+        flex: 1 1 100%;
+    }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+    .container {
+        padding: 4.5rem 0.75rem 1rem 0.75rem; /* clears fixed burger button */
+    }
+    .header_cons {
+        height: auto;
+        padding: 0 0 1.5rem 0;
+    }
+    .sizeField input {
+        width: 100%;
+    }
+    .sizeRow {
+        gap: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .header_cons svg {
+        width: 30px;
+        height: 30px;
+        margin: 0 0.6rem 0 0;
+    }
+    .header_cons h1 {
+        font-size: 1.2rem;
+    }
+    .sizeRow {
+        flex-flow: column;
+    }
+    .codeBlock {
+        font-size: 0.78rem;
+        padding: 1rem;
+    }
+    .previewShell {
+        margin: 0;
+        padding: 0 0.5rem 0.75rem 0.5rem;
+    }
+}

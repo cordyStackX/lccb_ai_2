@@ -6,6 +6,7 @@ export interface DocFile {
     file_name?: string;
     file?: string;
     summary?: string;
+    suggest?: string;
 }
 
 interface DocumentTableEndpoints {
