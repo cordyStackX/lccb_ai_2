@@ -309,7 +309,7 @@ export default function Chat_bot({ email } : Chat_botProps) {
                 <textarea
                     id="chat"
                     name="ask"
-                    placeholder="Ask about LCCB..."
+                    placeholder={`Ask about ${chatbot.name}...`}
                     value={chatres.ask}
                     onChange={(e) => {
                         handleChange(e);
