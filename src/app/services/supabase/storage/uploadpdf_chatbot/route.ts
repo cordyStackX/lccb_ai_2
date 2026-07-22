@@ -25,6 +25,72 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, error: `Invalid PDF file: ${invalidFiles.map((file) => file.name).join(", ")}` }, { status: 400 });
     }
 
+    const { data: limit_pdf, error: limit_pdfErr } = await supabaseServer
+        .from("chatbot_pdf_file")
+        .select("*")
+        .eq("email", email);
+    
+    if (limit_pdfErr) {
+        console.error("Supabase Query Error: ", limit_pdfErr);
+        return NextResponse.json({ success: false, error: "Failed to fetch account plan" }, { status: 500 });
+    }
+
+    const { data: planRow, error: planError } = await supabaseServer
+        .from("auth")
+        .select("current_plan, current_limit, current_pdf_limit, current_pdf_limit_per_mb")
+        .eq("email", cleanEmail)
+        .maybeSingle();
+
+    if (planError || !planRow) {
+        console.error("Supabase Query Error: ", planError);
+        return NextResponse.json({ success: false, error: "Failed to fetch account plan" }, { status: 500 });
+    }
+
+    const { current_plan, current_limit, current_pdf_limit, current_pdf_limit_per_mb } = planRow;
+
+    if (current_plan === "Free Tier") {
+
+        const { data: logRows, error: logError } = await supabaseServer
+            .from("system_logs")
+            .select("api_request, uploaded_pdf")
+            .eq("request", cleanEmail);
+
+        if (logError) {
+            console.error("Supabase Query Error: ", logError);
+            return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
+        }
+
+        const totalApiRequest = (logRows ?? []).reduce((sum, row) => sum + (row.api_request ?? 0), 0);
+
+
+        if (limit_pdf.length + files.length > Number(current_pdf_limit)) {
+            return NextResponse.json(
+                { success: false, error: "Current plan already reach limit, upgrade plan now" },
+                { status: 403 }
+            );
+        }
+
+        if (totalApiRequest >= Number(current_limit)) {
+            return NextResponse.json(
+                { success: false, error: "Current plan already reach limit, upgrade plan now" },
+                { status: 403 }
+            );
+        }
+
+        const maxMb = Number(current_pdf_limit_per_mb);
+        const oversizedFiles = files.filter((file) => file.size / (1024 * 1024) > maxMb);
+
+        if (oversizedFiles.length > 0) {
+            return NextResponse.json(
+                { success: false, error: `Current plan already reach limit, upgrade plan to upload >${maxMb}MB` },
+                { status: 403 }
+            );
+        }
+
+    } else if (current_plan === "Pro") {
+        // Pro tier — no limit enforcement for now
+    }
+
     const incomingNames = files.map((file) => file.name);
     const seenNames = new Set<string>();
     const duplicateBatchNames = new Set<string>();
@@ -102,7 +168,7 @@ export async function POST(req: NextRequest) {
         }
 
         const response = await Fetch_to(`${apiUrl}generate_md_summary`, {
-            prompt: "Summarize the Documents make sure all topics are included with the limit of 5 paragraphs",
+            prompt: "Summarize the Documents make sure all topics are included",
             token: apikey,
             email: cleanEmail,
             filePath: filePath,
@@ -120,7 +186,30 @@ export async function POST(req: NextRequest) {
             .eq("file", filePath);
         
         const response_suggest = await Fetch_to(`${apiUrl}generate_md_summary`, {
-            prompt: "provide small 1 suggested prompt limit 15 - 20 words example What are the available courses in the SBIT",
+            prompt: `Read this PDF and generate questions a user might realistically ask about it.
+
+        Rules:
+        - Generate ONE question per distinct topic or section covered in the PDF.
+        - If the PDF is short or covers only one topic, generate just ONE question. Do not pad the list with filler or repetitive questions.
+        - If the PDF covers multiple distinct topics, generate one question per topic, up to a maximum of 8 questions.
+        - Each question must be a single, natural sentence a real user would type, ending in a question mark.
+        - Do not include answers, numbering, or duplicate/near-duplicate questions.
+
+        Respond with ONLY a raw JSON array of strings. No markdown fences, no explanation, no extra text before or after.
+
+        CORRECT example output (multi-topic PDF):
+        ["What are the requirements for enrollment?", "What courses are offered under the SBIT program?", "How do I apply for a scholarship?"]
+
+        CORRECT example output (single-topic PDF):
+        ["What are the requirements for enrollment?"]
+
+        WRONG (do NOT do this — extra text or preamble):
+        Here is a question: ["What are the requirements?"]
+
+        WRONG (do NOT do this — objects instead of plain strings):
+        [{"question": "What are the requirements?"}]
+
+        Your output must be a JSON array of plain strings matching the CORRECT examples exactly — nothing else.`,
             token: apikey,
             email: cleanEmail,
             filePath: filePath,

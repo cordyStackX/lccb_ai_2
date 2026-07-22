@@ -50,6 +50,11 @@ function SkeletonRows() {
                     </td>
                     <td>
                         <span className={styles.skeletonIcon} />
+                    </td>
+                    <td>
+                        <span className={styles.skeletonIcon} />
+                    </td>
+                    <td>
                         <span className={styles.skeletonIcon} />
                     </td>
                 </tr>
@@ -193,7 +198,7 @@ function DocumentTableSection({ title, description, sensitive, table }: Document
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={3} style={{ textAlign: "center", padding: "2rem" }}>
+                                <td colSpan={4} style={{ textAlign: "center", padding: "2rem" }}>
                                     No PDF Found
                                 </td>
                             </tr>

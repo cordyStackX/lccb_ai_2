@@ -8,16 +8,24 @@ import api_link from "@/config/conf/json_config/fetch_url.json";
 export default function DashboardPage() {
     const router = useRouter();
     const [nav, setNav] = useState("");
-    const [email, setEmail] = useState("");
-    const [name, setName] = useState("");
+    const [data, setData] = useState({
+        email: "", name: "", current_limit: 0, current_pdf_limit: 0, current_pdf_limit_per_mb: 0, current_plan: ""
+    });
 
     useEffect(() => {
         async function check() {
             const response = await Fetch_to(api_link.jwt.verify);
             if (!response.success) return router.push("/");
             Progress(false);
-            setEmail(response.data.message.final_data.data[0].email);
-            setName(response.data.message.final_data.data[0].f_name);
+            const result = response.data.message.final_data.data[0];
+            setData(prev => ({ ...prev, 
+                email: result.email,
+                name: result.f_name,
+                current_limit: result.current_limit,
+                current_pdf_limit: result.current_pdf_limit,
+                current_pdf_limit_per_mb: result.current_pdf_limit_per_mb,
+                current_plan: result.current_plan
+             }));
             return;
         }
         check();
@@ -29,8 +37,8 @@ export default function DashboardPage() {
     
     return (
         <main className="admin">
-            <Sidebar nav={nav} email={email} f_name={name} />
-            <Dashboard email={email} />
+            <Sidebar nav={nav} email={data.email} f_name={data.name} />
+            <Dashboard email={data.email} current_limit={data.current_limit} current_pdf_limit={data.current_pdf_limit} current_pdf_limit_per_mb={data.current_pdf_limit_per_mb} current_plan={data.current_plan} />
         </main>
     );
 }

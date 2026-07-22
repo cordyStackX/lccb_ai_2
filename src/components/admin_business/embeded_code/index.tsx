@@ -13,6 +13,7 @@ export default function Embeded_code({ email } : Embeded_codeProps) {
     const [width, setWidth] = useState("400");
     const [height, setHeight] = useState("600");
     const [copied, setCopied] = useState(false);
+    const [copied2, setCopied2] = useState(false);
     const [chatbot_info, setChatbot_info] = useState({
         name: "", instruction: "", body: ""
     });
@@ -60,6 +61,16 @@ export default function Embeded_code({ email } : Embeded_codeProps) {
             await navigator.clipboard.writeText(snippet);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
+        } catch (e) {
+            console.error("Copy failed:", e);
+        }
+    };
+
+    const handleCopy2 = async () => {
+        try {
+            await navigator.clipboard.writeText(embedUrl);
+            setCopied2(true);
+            setTimeout(() => setCopied2(false), 2000);
         } catch (e) {
             console.error("Copy failed:", e);
         }
@@ -114,7 +125,7 @@ export default function Embeded_code({ email } : Embeded_codeProps) {
                         <path d="M16 6L22 12L16 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         <path d="M13.5 4L10.5 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                     </svg>
-                    <h1>Embed Code</h1>
+                    <h1>Embedded Code</h1>
                 </span>
             </header>
 
@@ -212,6 +223,34 @@ export default function Embeded_code({ email } : Embeded_codeProps) {
                     </div>
                     <pre className={styles.codeBlock}>
                         <code>{snippet}</code>
+                    </pre>
+                </div>
+
+                <div className={styles.codeBlockWrapper}>
+                    <div className={styles.codeBlockHeader}>
+                        <span>HTML</span>
+                        <button className={styles.copyButton} onClick={handleCopy2}>
+                            {copied2 ? (
+                                <>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                    Copied
+                                </>
+                            ) : (
+                                <>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" strokeWidth="2" />
+                                        <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" strokeWidth="2" />
+                                    </svg>
+                                    Copy
+                                </>
+                            )}
+                        </button>
+                        
+                    </div>
+                    <pre className={styles.codeBlock}>
+                        <code>{embedUrl}</code>
                     </pre>
                 </div>
 

@@ -42,7 +42,7 @@ const NAV_ITEMS = [
     },
     {
         key: "embeded_code",
-        label: "Embeded Code",
+        label: "Embedded Code",
         path: "/admin_business/embeded_code",
         icon: (
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

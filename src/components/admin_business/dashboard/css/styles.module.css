@@ -58,7 +58,7 @@
     width: 100%;
     height: auto;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 1.1rem;
     padding: 1rem 0;
     margin-top: 0.5rem;
@@ -289,7 +289,252 @@
     background-color: var(--fx-color-bg);
 }
 
+/* ---------- Header upgrade button ---------- */
+.header_cons {
+    justify-content: space-between; /* changed from "left" so the button sits on the right */
+}
+.upgradeBtn {
+    cursor: pointer;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    background-color: var(--primary);
+    color: var(--default-color-white);
+    border: none;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: background-color 200ms ease, transform 150ms ease;
+}
+.upgradeBtn:hover {
+    background-color: var(--secondary);
+    transform: translateY(-1px);
+}
+
+/* ---------- Pricing modal ---------- */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(10, 15, 30, 0.55);
+    backdrop-filter: blur(3px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 1.5rem;
+}
+
+.modalCard {
+    width: min(1000px, 100%);
+    max-height: 90vh;
+    overflow-y: auto;
+    background-color: var(--default-color-white);
+    border-radius: 16px;
+    padding: 1.8rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+.modalHeader h2 {
+    margin: 0;
+    color: var(--default-color-black);
+}
+
+.closeBtn {
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    color: var(--default-color-gray);
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    transition: background-color 150ms ease;
+}
+.closeBtn:hover {
+    background-color: var(--default-color-white-2);
+}
+
+.tiersGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.2rem;
+}
+
+.tierCard {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--default-color-white-2);
+    border-radius: 12px;
+    padding: 1.5rem;
+    background-color: var(--default-color-white);
+    transition: transform 200ms ease, box-shadow 200ms ease;
+}
+.tierCard:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 28px var(--fx-color-bg-effects);
+}
+
+.tierHighlight {
+    border: 2px solid var(--primary);
+    box-shadow: 0 8px 28px var(--fx-color-bg-effects);
+}
+
+.popularBadge {
+    position: absolute;
+    top: -12px;
+    right: 1.2rem;
+    background-color: var(--primary);
+    color: var(--default-color-white);
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    letter-spacing: 0.03em;
+}
+
+.tierCard h3 {
+    margin: 0 0 0.3rem;
+    font-size: 1.15rem;
+    color: var(--default-color-black);
+}
+
+.tierPrice {
+    margin: 0 0 0.4rem;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--foreground);
+}
+.tierPrice span {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--default-color-gray);
+}
+
+.tierTagline {
+    margin: 0 0 1rem;
+    font-size: 0.85rem;
+    color: var(--default-color-gray);
+}
+
+.tierFeatures {
+    list-style: none;
+    margin: 0 0 1.5rem;
+    padding: 0;
+    flex-grow: 1;
+}
+.tierFeatures li {
+    font-size: 0.85rem;
+    color: var(--foreground);
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--default-color-white-2);
+}
+.tierFeatures li:last-child {
+    border-bottom: none;
+}
+.tierFeatures li::before {
+    content: "✓";
+    color: var(--default-color-green);
+    font-weight: 700;
+    margin-right: 0.5rem;
+}
+
+.tierCtaPrimary,
+.tierCtaSecondary {
+    cursor: pointer;
+    width: 100%;
+    padding: 0.7rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    border: none;
+    transition: background-color 200ms ease;
+}
+.tierCtaPrimary {
+    background-color: var(--primary);
+    color: var(--default-color-white);
+}
+.tierCtaPrimary:hover {
+    background-color: var(--secondary);
+}
+.tierCtaSecondary {
+    background-color: var(--default-color-white);
+    color: var(--primary);
+    border: 1px solid var(--primary);
+}
+.tierCtaSecondary:hover {
+    background-color: var(--fx-color-bg);
+}
+
+/* ---------- Usage limit bars ---------- */
+.limitBars {
+    width: 100%;
+    margin-top: 1.2rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--default-color-white-2);
+}
+
+.limitRow {
+    margin-bottom: 1rem;
+}
+.limitRow:last-child {
+    margin-bottom: 0;
+}
+
+.limitLabelRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.4rem;
+}
+.limitLabelRow span:first-child {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--default-color-gray);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.limitValue {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--foreground);
+}
+
+.limitTrack {
+    width: 100%;
+    height: 8px;
+    border-radius: 999px;
+    background-color: var(--default-color-white-2);
+    overflow: hidden;
+}
+
+.limitFill {
+    height: 100%;
+    border-radius: 999px;
+    background-color: var(--primary);
+    transition: width 600ms ease;
+}
+.limitWarning {
+    background-color: #f59e0b;
+}
+.limitDanger {
+    background-color: var(--default-color-red);
+}
+
 /* ---------- Responsive ---------- */
+@media screen and (max-width: 900px) {
+    .tiersGrid {
+        grid-template-columns: 1fr;
+    }
+    .modalCard {
+        padding: 1.2rem;
+    }
+}
+
 @media screen and (max-width: 1100px) {
     .info {
         grid-template-columns: repeat(2, 1fr);

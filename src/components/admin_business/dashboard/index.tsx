@@ -18,40 +18,120 @@ import { Fetch_to } from "@/utilities";
 import  api_link from "@/config/conf/json_config/fetch_url.json";
 
 
-interface System_logs {
+type System_logs = {
     request?: string;
     created_at?: string;
     uploaded_pdf: number;
     api_request: number;
 }
 
-interface WeeklyPoint {
+type WeeklyPoint = {
     name: string;
     value: number;
 }
 
+type CurrentFiles = {
+    id?: number;
+}
+
 type DashboardProps = {
     email: string;
+    current_plan: string;
+    current_pdf_limit: number;
+    current_pdf_limit_per_mb: number;
+    current_limit: number;
 }
+
+const PRICING_TIERS = [
+    {
+        id: "free",
+        name: "Free Trial",
+        price: "₱0",
+        period: "/month",
+        tagline: "Get started with the basics",
+        features: [
+            "2 PDF uploads limit",
+            "10,000 API requests limit",
+            "10mb per upload",
+            "Customize chatbot",
+            "Embedded link access",
+            "1 Month free trial"
+        ],
+        cta: "Current Plan",
+        highlight: false,
+    },
+    {
+        id: "pro",
+        name: "Pro",
+        price: "₱599",
+        period: "/month",
+        tagline: "For MSME's business and power users",
+        features: [
+            "250 PDF uploads / month",
+            "500,000 API requests / month",
+            "100MB per upload",
+            "Customize chatbot",
+            "Embedded link access",
+            "Good for MSME's"
+        ],
+        cta: "Upgrade to Pro",
+        highlight: true,
+    },
+    {
+        id: "enterprise",
+        name: "Enterprise",
+        price: "Custom",
+        period: "",
+        tagline: "For School/University and Big Interprises",
+        features: [
+            "Everything is Unlimited",
+            "Customize OpenAI Version",
+            "Can have user manager",
+            "Recommended for School/University",
+            "Can Handle Sensitive PDF file"
+        ],
+        cta: "Contact Sales",
+        highlight: false,
+    },
+];
+
+
+// Helper to clamp percentage 0-100
+const getUsagePercent = (used: number, max: number) => {
+    if (max <= 0) return 0;
+    return Math.min(Math.round((used / max) * 100), 100);
+};
 
 type GraphRange = "day" | "week" | "year";
 
-export default function Dashboard({ email } : DashboardProps) {
+export default function Dashboard({ email, current_limit, current_pdf_limit, current_plan } : DashboardProps) {
     const [system_logs, setSystem_logs] = useState<System_logs[]>([]);
+    const [files, setFiles] = useState<CurrentFiles[]>([]);
     const [graphRange, setGraphRange] = useState<GraphRange>("week");
     const [animatedStats, setAnimatedStats] = useState({
         uploadedPdf: 0,
         chatbotApi: 0,
+        currentFile: 0,
     });
+    const [showPricing, setShowPricing] = useState(false);
 
     useEffect(() => {
         const Retrieve = async () => {
-            const response2 = await Fetch_to(api_link.admin.system_logs, { email });
-            if (response2.success) {
-                setSystem_logs(response2.data.message ?? []);
+            const response1 = await Fetch_to(api_link.storage.retrieve_chatbot, { email });
+            if (response1.success) {
+                setFiles(response1.data.message);
+                const response2 = await Fetch_to(api_link.admin.system_logs, { email });
+                if (response2.success) {
+                    setSystem_logs(response2.data.message ?? []);
+                    
+                }
             }
         };
         Retrieve();
+        const Retrieve2 = async () => {
+            
+        };
+        Retrieve2();
     }, [email]);
 
 
@@ -178,6 +258,7 @@ export default function Dashboard({ email } : DashboardProps) {
         const targetValues = {
             uploadedPdf: uploadedPdfCount,
             chatbotApi: apiRequestCount,
+            currentFile: files.length
         };
 
         let rafId = 0;
@@ -189,6 +270,7 @@ export default function Dashboard({ email } : DashboardProps) {
             setAnimatedStats({
                 uploadedPdf: Math.round(startValues.uploadedPdf + (targetValues.uploadedPdf - startValues.uploadedPdf) * easeOut),
                 chatbotApi: Math.round(startValues.chatbotApi + (targetValues.chatbotApi - startValues.chatbotApi) * easeOut),
+                currentFile: Math.round(startValues.currentFile + (targetValues.currentFile - startValues.currentFile) * easeOut)
             });
 
             if (progress < 1) {
@@ -202,7 +284,7 @@ export default function Dashboard({ email } : DashboardProps) {
 
     const usagePieData = [
         { name: "PDF Uploads", value: uploadedPdfCount },
-        { name: "Chatbot", value: apiRequestCount },
+        { name: "API Request", value: apiRequestCount },
     ];
     const pieColors = ["#2563eb", "#f59e0b", "#16c784", "#ff0800"];
 
@@ -275,6 +357,13 @@ export default function Dashboard({ email } : DashboardProps) {
                     <h1>Dashboard</h1>
                 </span>
 
+                <button
+                    type="button"
+                    className={styles.upgradeBtn}
+                    onClick={() => setShowPricing(true)}
+                >
+                    Upgrade Plan
+                </button>
             </header>
 
             <section className={styles.status}>
@@ -294,12 +383,12 @@ export default function Dashboard({ email } : DashboardProps) {
                                 </svg>
                             </span>
                             
-                            <p> {animatedStats.uploadedPdf} </p>
+                            <p> {animatedStats.currentFile} </p>
                         </span>
                     </div>
                     
                     <div>
-                        <h3>Chatbot API Requested</h3>
+                        <h3>API Requested</h3>
                         
                         <span className={styles.icons}>
                             <span>
@@ -314,6 +403,22 @@ export default function Dashboard({ email } : DashboardProps) {
                             <p> {animatedStats.chatbotApi} </p>
                         </span>
                     </div>
+
+                    <div>
+                        <h3>Current Plan</h3>
+                        
+                        <span className={styles.icons}>
+                            <span>
+                                {/* Badge / shield icon - represents a subscription tier */}
+                                <svg width="34" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 2l7 3v6c0 5-3.4 8.5-7 10-3.6-1.5-7-5-7-10V5l7-3z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+                                    <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            </span>
+                            
+                            <p> {current_plan} </p>
+                        </span>
+                    </div>
                 </div>
                 <section className={styles.analytics_data}>
                     <div className={styles.graph_container}>
@@ -323,8 +428,8 @@ export default function Dashboard({ email } : DashboardProps) {
                                 value={graphRange}
                                 onChange={(e) => setGraphRange(e.target.value as GraphRange)}
                             >
-                                <option value="week">Week</option>
-                                <option value="year">Year</option>
+                                <option value="week">Weekly</option>
+                                <option value="year">Monthly</option>
                             </select>
                         </div>
 
@@ -363,11 +468,112 @@ export default function Dashboard({ email } : DashboardProps) {
                                 </ResponsiveContainer>
                             </div>
                         </div>
+                        <div className={styles.limitBars}>
+                            
+                            <div className={styles.limitRow}>
+                                
+                                <div className={styles.limitLabelRow}>
+                                    <span>PDF Uploads</span>
+                                    <span className={styles.limitValue}>
+                                        {animatedStats.currentFile} / {current_pdf_limit}
+                                    </span>
+                                </div>
+                                <div className={styles.limitTrack}>
+                                    <div
+                                        className={`${styles.limitFill} ${
+                                            getUsagePercent(animatedStats.currentFile, current_pdf_limit) >= 90
+                                                ? styles.limitDanger
+                                                : getUsagePercent(animatedStats.currentFile, current_pdf_limit) >= 70
+                                                    ? styles.limitWarning
+                                                    : ""
+                                        }`}
+                                        style={{ width: `${getUsagePercent(animatedStats.currentFile, current_pdf_limit)}%` }}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className={styles.limitRow}>
+                                <div className={styles.limitLabelRow}>
+                                    <span>API Requests</span>
+                                    <span className={styles.limitValue}>
+                                        {animatedStats.chatbotApi} / {current_limit}
+                                    </span>
+                                </div>
+                                <div className={styles.limitTrack}>
+                                    <div
+                                        className={`${styles.limitFill} ${
+                                            getUsagePercent(animatedStats.chatbotApi, current_limit) >= 90
+                                                ? styles.limitDanger
+                                                : getUsagePercent(animatedStats.chatbotApi, current_limit) >= 70
+                                                    ? styles.limitWarning
+                                                    : ""
+                                        }`}
+                                        style={{ width: `${getUsagePercent(animatedStats.chatbotApi, current_limit)}%` }}
+                                    />
+                                    
+                                </div>
+                            </div>
+                            
+                        </div>
+
                     </div>
+                    
                 </section>
                 
             </section>
-           
+           {showPricing && (
+                <div
+                    className={styles.modalOverlay}
+                    onClick={() => setShowPricing(false)}
+                >
+                    <div
+                        className={styles.modalCard}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className={styles.modalHeader}>
+                            <h2>Choose your plan</h2>
+                            <button
+                                type="button"
+                                className={styles.closeBtn}
+                                onClick={() => setShowPricing(false)}
+                                aria-label="Close"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <div className={styles.tiersGrid}>
+                            {PRICING_TIERS.map((tier) => (
+                                <div
+                                    key={tier.id}
+                                    className={`${styles.tierCard} ${tier.highlight ? styles.tierHighlight : ""}`}
+                                >
+                                    {tier.highlight && (
+                                        <span className={styles.popularBadge}>Most Popular</span>
+                                    )}
+                                    <h3>{tier.name}</h3>
+                                    <p className={styles.tierPrice}>
+                                        {tier.price}
+                                        <span>{tier.period}</span>
+                                    </p>
+                                    <p className={styles.tierTagline}>{tier.tagline}</p>
+                                    <ul className={styles.tierFeatures}>
+                                        {tier.features.map((f) => (
+                                            <li key={f}>{f}</li>
+                                        ))}
+                                    </ul>
+                                    <button
+                                        type="button"
+                                        className={tier.highlight ? styles.tierCtaPrimary : styles.tierCtaSecondary}
+                                    >
+                                        {tier.cta}
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
             
         </section>
     );

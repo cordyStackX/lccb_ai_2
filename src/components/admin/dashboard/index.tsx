@@ -252,6 +252,7 @@ export default function Dashboard({ email } : DashboardProps) {
     const usagePieData = [
         { name: "PDF Uploads", value: uploadedPdfCount },
         { name: "User Logs", value: apiRequestCount },
+        { name: "ChatBot", value: apiRequestCount },
         { name: "Registered Accounts", value: data.length },
     ];
     const pieColors = ["#2563eb", "#f59e0b", "#16c784", "#ff0800"];

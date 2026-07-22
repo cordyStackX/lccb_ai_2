@@ -5,17 +5,19 @@ import { supabaseServer } from "@/lib/supabase-server";
 export async function POST(req: NextRequest) {
     try {
 
+    const { prompt, last_user_response, last_ai_response, email } = await req.json();
+
     const { data: stateRows, error: stateError } = await supabaseServer
         .from("setting")
         .select("state")
-        .eq("target", "suspend");
+        .eq("email", email);
 
     if (stateError) {
         console.error("Supabase Query Error: ", stateError);
         return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
     }
 
-    // Check if voice API is suspended
+    // Check if API is suspended
     const suspendedState = Array.isArray(stateRows) && stateRows.length > 0 ? stateRows[0]?.state : null;
     if (suspendedState === "suspend") {
         return NextResponse.json(
@@ -24,7 +26,45 @@ export async function POST(req: NextRequest) {
         );
     }
 
-    const { prompt, last_user_response, last_ai_response, email } = await req.json();
+    const cleanEmail = String(email).trim().toLowerCase();
+
+    const { data: planRow, error: planError } = await supabaseServer
+        .from("auth")
+        .select("current_plan, current_limit")
+        .eq("email", cleanEmail)
+        .maybeSingle();
+
+    if (planError || !planRow) {
+        console.error("Supabase Query Error: ", planError);
+        return NextResponse.json({ success: false, error: "Failed to fetch account plan" }, { status: 500 });
+    }
+
+    const { current_plan, current_limit } = planRow;
+
+    if (current_plan === "Free Tier") {
+
+        const { data: logRows, error: logError } = await supabaseServer
+            .from("system_logs")
+            .select("api_request")
+            .eq("request", cleanEmail);
+
+        if (logError) {
+            console.error("Supabase Query Error: ", logError);
+            return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
+        }
+
+        const totalApiRequest = (logRows ?? []).reduce((sum, row) => sum + (row.api_request ?? 0), 0);
+
+        if (totalApiRequest >= Number(current_limit)) {
+            return NextResponse.json(
+                { success: false, error: "Current plan already reach limit, upgrade plan now" },
+                { status: 403 }
+            );
+        }
+
+    } else if (current_plan === "Pro") {
+        // Pro tier — no limit enforcement for now
+    }
 
     const apikey = process.env.API_KEY;
     if (!apikey) {

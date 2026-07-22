@@ -11,20 +11,60 @@ import remarkGfm from "remark-gfm";
 // Suggestions are plain strings shown in the typeahead dropdown.
 // The API may return plain strings, or objects like { suggest: string }
 // (or similarly-shaped objects) — normalizeSuggestions handles both.
+
 type Suggestion = string;
 
 function normalizeSuggestions(raw: unknown[]): Suggestion[] {
-    return raw
-        .map((item) => {
-            if (typeof item === "string") return item;
-            if (item && typeof item === "object") {
-                const obj = item as Record<string, unknown>;
-                const candidate = obj.suggest ?? obj.text ?? obj.label ?? obj.value ?? obj.name;
-                if (typeof candidate === "string") return candidate;
+    const result: string[] = [];
+
+    const pushMaybeArray = (value: unknown) => {
+        if (typeof value === "string") {
+            const trimmed = value.trim();
+
+            // If it looks like a JSON array string, try to parse and flatten it
+            if (trimmed.startsWith("[")) {
+                try {
+                    const parsed = JSON.parse(trimmed);
+                    if (Array.isArray(parsed)) {
+                        parsed.forEach((v) => {
+                            if (typeof v === "string" && v.trim().length > 0) {
+                                result.push(v.trim());
+                            }
+                        });
+                        return;
+                    }
+                } catch {
+                    // not valid JSON, fall through and treat as plain string
+                }
             }
-            return null;
-        })
-        .filter((s): s is string => typeof s === "string" && s.length > 0);
+
+            if (trimmed.length > 0) result.push(trimmed);
+            return;
+        }
+
+        if (Array.isArray(value)) {
+            value.forEach((v) => {
+                if (typeof v === "string" && v.trim().length > 0) {
+                    result.push(v.trim());
+                }
+            });
+        }
+    };
+
+    for (const item of raw) {
+        if (typeof item === "string" || Array.isArray(item)) {
+            pushMaybeArray(item);
+            continue;
+        }
+
+        if (item && typeof item === "object") {
+            const obj = item as Record<string, unknown>;
+            const candidate = obj.suggest ?? obj.text ?? obj.label ?? obj.value ?? obj.name;
+            pushMaybeArray(candidate);
+        }
+    }
+
+    return result;
 }
 
 type Chat_botProps = {
@@ -69,7 +109,7 @@ export default function Chat_bot({ email } : Chat_botProps) {
         Suggest();
         async function Chatbot() {
             const response = await Fetch_to(api_link.chatbot_public, { email: email });
-            const result = response.data?.message[0] || { name: "Sample AI", instruction: "Ask about ---", body: "velit voluptate doloremque magnam sequi, culpa nam consequatur eaque libero. Dolores." };
+            const result = response.data?.message?.[0] || { name: "Sample AI", instruction: "Ask about ---", body: "velit voluptate doloremque magnam sequi, culpa nam consequatur eaque libero. Dolores." };
             if (response.success) {
                 setChatbot(prev => ({ ...prev, name: result.name, instructions: result.instruction, body: result.body }));
             }
