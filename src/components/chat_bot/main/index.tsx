@@ -85,6 +85,8 @@ export default function Chat_bot({ email } : Chat_botProps) {
     const [chatbot, setChatbot] = useState({
         name: "", instructions: "", body: ""
     });
+    const [logoPreview, setLogoPreview] = useState<string | null>(null);
+    const [loadingBranding, setLoadingBranding] = useState(true);
 
     const [showTypeahead, setShowTypeahead] = useState(false);
     const typeaheadMatches = chatres.ask.trim()
@@ -98,6 +100,22 @@ export default function Chat_bot({ email } : Chat_botProps) {
             chatEndRef.current.scrollIntoView();
         }
     }, [messages]);
+
+    useEffect(() => {
+        const fetchBranding = async () => {
+            try {
+                const response = await Fetch_to(api_link.storage.fetchimg, { email: email });
+                if (response.success) {
+                    setLogoPreview(response.data.message[0]?.file_link || null);
+                }
+            } catch (e) {
+                console.error("Failed to fetch branding:", e);
+            } finally {
+                setLoadingBranding(false);
+            }
+        };
+        fetchBranding();
+    }, [email]);
 
     useEffect(() => {
         async function Suggest() {
@@ -284,6 +302,14 @@ export default function Chat_bot({ email } : Chat_botProps) {
                 </section>
             ) : (
                 <section className={styles.introduction}>
+                    {loadingBranding ? (
+                        <div className={styles.brandingLogoSkeleton} />
+                    ) : logoPreview ? (
+                        <div className={styles.brandingLogo}>
+                            <Image src={logoPreview} alt={`${chatbot.name} logo`} width={80} height={80} />
+                        </div>
+                    ) : null}
+                    
                     <span className={styles.eyebrow}> {chatbot.name?.toUpperCase()} </span>
                     <h1> {chatbot.instructions} </h1>
                     <p> {chatbot.body} </p>

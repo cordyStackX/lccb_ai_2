@@ -63,3 +63,13 @@
 .ai_response tbody tr:nth-child(even) {
     background: rgba(255, 255, 255, 0.03);
 }
+.brandingLogo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+
+  img {
+    border-radius: 12px;
+    object-fit: contain;
+  }
+}
