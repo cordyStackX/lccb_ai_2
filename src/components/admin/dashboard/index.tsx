@@ -68,8 +68,6 @@ export default function Dashboard({ email } : DashboardProps) {
 
     }, [email]);
 
-    useEffect(() => {alert(email);}, [email]);
-
     function getDayOfWeek(dateString: string) {
         return new Date(dateString).getDay(); // 0 Sun, 1 Mon, ...
     }
