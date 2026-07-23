@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
 
     const { current_plan, current_limit, current_pdf_limit, current_pdf_limit_per_mb } = planRow;
 
-    if (current_plan === "Free Tier") {
+    if (current_plan === "Free Trial") {
 
         const { data: logRows, error: logError } = await supabaseServer
             .from("system_logs")

@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
 
         const { error } = await supabaseServer
         .from("auth")
-        .insert([{ email: cleanEmail, password: String(hashed), f_name: cleanName, year: year, status: status, role: role, assign_by: cleanAssign_by, current_plan: "Free Tier", current_limit: "10000", current_pdf_limit: "2", current_pdf_limit_per_mb: "10" }]);
+        .insert([{ email: cleanEmail, password: String(hashed), f_name: cleanName, year: year, status: status, role: role, assign_by: cleanAssign_by, current_plan: "Free Trial", current_limit: "10000", current_pdf_limit: "2", current_pdf_limit_per_mb: "10" }]);
 
         await supabaseServer.from("setting").insert([{ state: "open", target: "suspend", email: cleanEmail }]);
 

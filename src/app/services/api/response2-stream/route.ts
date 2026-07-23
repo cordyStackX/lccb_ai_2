@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
 
     const { current_plan, current_limit } = planRow;
 
-    if (current_plan === "Free Tier") {
+    if (current_plan === "Free Trial") {
 
         const { data: logRows, error: logError } = await supabaseServer
             .from("system_logs")
