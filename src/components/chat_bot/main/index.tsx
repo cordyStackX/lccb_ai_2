@@ -85,7 +85,7 @@ export default function Chat_bot({ email } : Chat_botProps) {
     const [chatbot, setChatbot] = useState({
         name: "", instructions: "", body: ""
     });
-    const [logoPreview, setLogoPreview] = useState<string | null>(null);
+    const [logoPreview, setLogoPreview] = useState("");
     const [loadingBranding, setLoadingBranding] = useState(true);
 
     const [showTypeahead, setShowTypeahead] = useState(false);
@@ -106,7 +106,7 @@ export default function Chat_bot({ email } : Chat_botProps) {
             try {
                 const response = await Fetch_to(api_link.storage.fetchimg, { email: email });
                 if (response.success) {
-                    setLogoPreview(response.data.message[0]?.file_link || null);
+                    setLogoPreview(response.data.message[0].file_link);
                 }
             } catch (e) {
                 console.error("Failed to fetch branding:", e);
@@ -306,7 +306,7 @@ export default function Chat_bot({ email } : Chat_botProps) {
                         <div className={styles.brandingLogoSkeleton} />
                     ) : logoPreview ? (
                         <div className={styles.brandingLogo}>
-                            <Image src={logoPreview} alt={`${chatbot.name} logo`} width={80} height={80} />
+                            <Image src={`${logoPreview}`} alt={`${chatbot.name} logo`} width={80} height={80} unoptimized/>
                         </div>
                     ) : null}
                     
