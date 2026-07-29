@@ -1,41 +1,43 @@
 "use client";
 import { 
 	Header,
-	Banner,
-	Content_1,
-	Content_2,
-	Content_3,
-	Content_4,
-	Chat_bot,
-	Footer
+	// Banner,
+	// Content_1,
+	// Content_2,
+	// Content_3,
+	// Content_4,
+	// Chat_bot,
+	// Footer
 } from "@/components/landpage";
-import { useState } from "react";
-import { Fetch_to } from "@/utilities";
-import api_link from "@/config/conf/json_config/fetch_url.json";
-import fetch_link from "@/config/conf/json_config/Api_links.json";
+import { Main } from "@/components/chat_bot";
+// import { useState } from "react";
+// import { Fetch_to } from "@/utilities";
+// import api_link from "@/config/conf/json_config/fetch_url.json";
+// import fetch_link from "@/config/conf/json_config/Api_links.json";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+// import { useEffect } from "react";
 
 export default function Home() {
 	const router = useRouter();
-	const [show, setShow] = useState(false);
+	// const [show, setShow] = useState(false);
 
-	useEffect(() => {
-        async function check() {
-            const response = await Fetch_to(api_link.jwt.verify);
-            if (response.success) {
-				if (response.data.message.final_data.data[0].role === "admin") return router.push("/admin/dashboard");
-				if (response.data.message.final_data.data[0].role === "Business") return router.push("/admin_business/dashboard");
-				return router.push("/chat");
-			}
-        }
-        check();
-    }, []);
+	// useEffect(() => {
+    //     async function check() {
+    //         const response = await Fetch_to(api_link.jwt.verify);
+    //         if (response.success) {
+	// 			if (response.data.message.final_data.data[0].role === "admin") return router.push("/admin/dashboard");
+	// 			if (response.data.message.final_data.data[0].role === "Business") return router.push("/admin_business/dashboard");
+	// 			return router.push("/chat");
+	// 		}
+    //     }
+    //     check();
+    // }, []);
 
 	return (
 		<main className="landpage">
 			<Header />
-			<Banner />
+			<Main email="admin@admin.com" />
+			{/* <Banner />
 			<Content_1 />
 			<Content_2 />
 			<Content_3 />
@@ -76,7 +78,7 @@ export default function Home() {
 				title="Chat Bot"
 				/>
 			</div>
-			<Footer />
+			<Footer /> */}
 		</main>
 	);
 }

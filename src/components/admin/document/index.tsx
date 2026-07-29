@@ -180,10 +180,10 @@ function DocumentTableSection({ title, description, sensitive, table }: Document
                                     </td>
                                     <td className={styles.file_name}>{doc.file_name}</td>
                                     <td>
-                                        <button className={styles.button_view} onClick={() => setViewingDoc(doc)}>
+                                        <button className={styles.button_view} title="Read Summary" onClick={() => setViewingDoc(doc)}>
                                             <ViewIcon />
                                         </button>
-                                        <button className={styles.button_delete} onClick={() => deleteFile(doc)}>
+                                        <button className={styles.button_delete} title="Delete PDF" onClick={() => deleteFile(doc)}>
                                             <DeleteIcon />
                                         </button>
                                     </td>

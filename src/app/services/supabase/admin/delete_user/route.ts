@@ -24,6 +24,16 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
     }
 
+    const { data: chat_bot, error: chat_bot_err } = await supabaseServer
+        .from("chatbot_pdf_file")
+        .select("id, file")
+        .eq("email", cleanEmail);
+        
+    if (chat_bot_err) {
+        console.error("Supabase Query Error: ", chat_bot_err);
+        return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
+    }
+
     const { data: profile, error: profile_error } = await supabaseServer
         .from("profile_pic")
         .select("file_name")
@@ -34,7 +44,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
     }
 
-    if (!data || !profile) {
+    if (!data || !profile || !chat_bot) {
         return NextResponse.json({ success: false, error: "Account not found" }, { status: 404 });
     }
 
@@ -44,6 +54,20 @@ export async function POST(req: NextRequest) {
 
         const { error: setError } = await supabaseServer.storage
             .from("pdfs")
+            .remove([path]);
+
+        if (setError) {
+            console.error("Supabase Storage Error:", setError);
+            return NextResponse.json({ success: false, error: "Failed to delete file" }, { status: 500 });
+        }
+    }
+
+    // Delete PDF files from storage
+    for (let i = 0; i < data.length; i++) {
+        const path = chat_bot[i].file;
+
+        const { error: setError } = await supabaseServer.storage
+            .from("chatbot_pdfs")
             .remove([path]);
 
         if (setError) {

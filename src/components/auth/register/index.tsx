@@ -18,7 +18,7 @@ export default function SignUp() {
     const router = useRouter();
 
     const [form, setForm] = useState({
-        email: "", name: "", year: "", role: "", assign_by: "", school_id: ""
+        email: "", name: "", year: "", role: "", assign_by: ""
     });
     const [status, setStatus] = useState(false);
     const [message, setMessage] = useState("");
@@ -60,7 +60,6 @@ export default function SignUp() {
             localStorage.setItem("year", form.year);
             localStorage.setItem("role", form.role);
             localStorage.setItem("assign_by", form.assign_by);
-            localStorage.setItem("id", form.school_id);
             const responds = await Fetch_to(api_link.checkcode, { email: form.email, key: "register" });
             if(!responds.success) {
                 setMessage(responds.message || "Somethings Went Wrong");
@@ -101,27 +100,7 @@ export default function SignUp() {
                             <h1>LCCB Account Registration</h1>
                             <p>Please Register to continue</p>
                         </div>
-                        <div className={styles.input_holder}>
-                            <span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <rect x="3" y="4" width="18" height="16" rx="2"/>
-                                <circle cx="9" cy="10" r="2"/>
-                                <path d="M6 16c0-1.7 1.3-3 3-3s3 1.3 3 3"/>
-                                <path d="M14 9h4M14 13h4"/>
-                                </svg>
-                            </span>
-                            <input 
-                            type="number" 
-                            name="school_id" 
-                            id="school_id" 
-                            autoComplete="email"
-                            value={form.school_id}
-                            onChange={handleChange}
-                            placeholder="School Id"
-                            style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
-                            required
-                            />
-                        </div>
+                        
                         <div className={styles.input_holder}>
                             <span>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -206,9 +185,7 @@ export default function SignUp() {
                             required
                             >
                                 <option value="">Select Your Role</option>
-                                {ifMinors ? (
-                                    <option value="Student">Student</option>
-                                ) : null}
+                                <option value="Student">Student</option>
                                 <option value="Teacher">Teacher</option>
                             </select>
                         </div>
