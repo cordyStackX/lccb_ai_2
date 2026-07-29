@@ -10,7 +10,12 @@
 
 ## 🎯 Project Overview
 
-**LACO AI** is an advanced AI-powered PDF analysis and summarization system designed for La Consolacion College Bacolod (LCCB). This educational project leverages cutting-edge artificial intelligence to transform how students and educators interact with academic documents.
+**LACO AI** is an advanced AI-powered PDF analysis, summarization, and chatbot system designed for La Consolacion College Bacolod (LCCB), with a separate tier for general Business use. Admins upload documents under two distinct categories:
+
+- **Public PDF** — safe, non-sensitive documents that power the embeddable chatbot widget, available to Business accounts and anonymous site visitors.
+- **Sensitive PDF** — protected academic data (including student records and grades), restricted to verified LCCB roles (Admin, Teacher, Student) with email-based identity verification.
+
+This educational project leverages cutting-edge artificial intelligence to transform how students, educators, and businesses interact with documents — while keeping sensitive institutional data walled off from public-facing chat surfaces.
 
 ### ⚠️ Beta Version Notice
 This is a **BETA VERSION** for educational and research purposes only. Not intended for production or commercial use.
@@ -20,6 +25,7 @@ This is a **BETA VERSION** for educational and research purposes only. Not inten
 ## ✨ Key Features
 
 ### 📄 Intelligent PDF Processing
+- **Two PDF Tiers**: Admins categorize every upload as either **Public PDF** (safe for the chatbot widget and Business/general use) or **Sensitive PDF** (protected academic data, LCCB-only)
 - **Smart Summarization**: Automatically generate concise summaries of lengthy PDF documents
 - **Context-Aware Analysis**: AI understands document structure and extracts key information
 - **Multi-PDF Support**: Upload and manage multiple documents simultaneously
@@ -28,26 +34,31 @@ This is a **BETA VERSION** for educational and research purposes only. Not inten
 
 ### 💬 Interactive AI Chat
 - **Ask Questions**: Query your documents and receive accurate, context-based answers
-- **Real-time Responses**: Powered by OpenAI for instant, intelligent feedback
+- **Embeddable Chatbot Widget**: `/chat_bot` serves anonymous, third-party site visitors using **Public PDF data only** — Sensitive PDFs are never exposed through this surface
+- **Real-time Responses**: Powered by OpenAI (gpt-4o-mini) for instant, intelligent feedback
 - **Conversation Memory**: Maintains chat history for continuous dialogue
 - **PDF Context**: Select specific PDFs to chat about with AI assistance
 - **Streaming Responses**: Real-time AI response generation
 
 ### 👥 User Management & Roles
-- **Role-Based Access**: Admin, Teacher, and Student permissions
-- **Admin Dashboard**: User management, API logs, system monitoring
+- **Role-Based Access**: Admin, Teacher, and Student permissions (LCCB, Sensitive PDF scope)
+- **Business Accounts**: Separate tier for general document analysis using Public PDFs only
+  - **Free Tier**: 1 PDF upload
+  - **Enterprise Tier** (paid): up to 20 PDF uploads
+- **Admin Dashboard**: User management, PDF categorization (Public/Sensitive), API logs, system monitoring
 - **Teacher Supervision**: Monitor and filter content for students under 13
 - **Student Accounts**: Independent access for users 13 and older
 - **Profile Management**: Update name, upload profile pictures, change passwords
 
 ### 🔒 Security & Privacy
+- **Public vs Sensitive Separation**: Sensitive PDFs (academic/grade data) are never served through the public chatbot widget or to Business accounts
 - **Persistent Storage**: PDFs stored securely until manually deleted via right-click context menu
 - **Profile Pictures**: Upload and manage profile pictures with automatic updates
 - **Encrypted Authentication**: Secure JWT-based user authentication with HTTP-only cookies
 - **Rate Limiting**: 1 request per second per IP to prevent spam and abuse
 - **CSRF Protection**: Origin validation and security headers
 - **No External Data Sharing**: Privacy-first approach - your documents remain confidential
-- **Email Verification**: Secure password reset with verification codes
+- **Email Verification**: Secure password reset with verification codes; email also serves as the identity match for sensitive record disclosure
 - **Role-Based Access**: Admin, Teacher, and Student permissions
 
 ### 🎨 Modern User Interface
@@ -69,11 +80,11 @@ This is a **BETA VERSION** for educational and research purposes only. Not inten
 
 ### Backend
 - **API Framework**: Flask (Python) via FastAPI on Render
-- **AI Engine**: OpenAI (GPT-3.5-turbo / GPT-4)
+- **AI Engine**: OpenAI (gpt-4o-mini)
 - **PDF Processing**: PyPDF2, Python file handling
 - **Database**: Supabase (PostgreSQL) with row-level security
 - **Authentication**: JWT tokens with HTTP-only cookies
-- **File Storage**: Supabase Storage (public and secure buckets)
+- **File Storage**: Supabase Storage (public and secure buckets — split by Public PDF / Sensitive PDF classification)
 - **Rate Limiting**: In-memory cooldown tracking (1 req/sec per IP)
 - **Security**: CSRF protection, origin validation, bcrypt password hashing
 
@@ -94,6 +105,7 @@ LACO AI follows a **Service-Oriented Architecture (SOA)** for modularity and sca
 flowchart TD
     %% ===== User Interface =====
     User["<b>USER</b><br/>👤"]
+    ChatBotVisitor["<b>WIDGET VISITOR</b><br/>🌐"]
     
     %% ===== Presentation Layer =====
     UI_Pages["<b>APP PAGES</b><br/>📱<br/>(src/app)"]
@@ -110,11 +122,12 @@ flowchart TD
     OpenAI_API["<b>OpenAI API</b><br/>⭐"]
     
     %% ===== Storage Layer =====
-    Upload_PDF["<b>UPLOAD PDF</b><br/>📤"]
+    Upload_PDF["<b>UPLOAD PDF</b><br/>📤<br/>(Public / Sensitive)"]
     Retrieve_PDF["<b>RETRIEVE PDF</b><br/>📥"]
     Update_PDF["<b>UPDATE PDF</b><br/>✏️"]
     Delete_PDF["<b>DELETE PDF</b><br/>🗑️"]
-    Storage[("<b>SUPABASE<br/>STORAGE</b><br/>💾")]
+    Storage_Public[("<b>PUBLIC PDF<br/>STORAGE</b><br/>💾")]
+    Storage_Sensitive[("<b>SENSITIVE PDF<br/>STORAGE</b><br/>🔒")]
     
     %% ===== Admin Services =====
     Manage_User["<b>USER MGMT</b><br/>👥"]
@@ -129,6 +142,7 @@ flowchart TD
     %% ===== Flow Connections =====
     User --> UI_Pages
     User --> UI_Components
+    ChatBotVisitor --> UI_Pages
     
     UI_Pages --> JWT_Service
     UI_Pages -->Auth_Service
@@ -146,15 +160,20 @@ flowchart TD
     Manage_User -->Auth_Service
     Manage_User --> Update_Status
     
-    Upload_PDF --> Storage
-    Retrieve_PDF -->Storage
-    Update_PDF -->Storage
-    Delete_PDF -->Storage
+    Upload_PDF --> Storage_Public
+    Upload_PDF --> Storage_Sensitive
+    Retrieve_PDF -->Storage_Public
+    Retrieve_PDF -->Storage_Sensitive
+    Update_PDF -->Storage_Public
+    Update_PDF -->Storage_Sensitive
+    Delete_PDF -->Storage_Public
+    Delete_PDF -->Storage_Sensitive
     
-    API_Logs -->Storage
-    Code_Logs -->Storage
+    API_Logs -->Storage_Public
+    Code_Logs -->Storage_Public
     
-    Storage -->AI_Response
+    Storage_Public -->AI_Response
+    Storage_Sensitive -->AI_Response
     
     %% ===== Styling =====
     linkStyle default stroke:#ff4444,stroke-width:3px
@@ -166,11 +185,11 @@ flowchart TD
     classDef adminStyle fill:#fff9c4,stroke:#f57f17,stroke-width:3px,color:#000
     classDef utilStyle fill:#e0f2f1,stroke:#004d40,stroke-width:3px,color:#000
     
-    class User userStyle
+    class User,ChatBotVisitor userStyle
     class UI_Pages,UI_Components uiStyle
     class JWT_Service,Auth_Service,Email_Verification authStyle
     class AI_Response,AI_Response2,OpenAI_API aiStyle
-    class Upload_PDF,Retrieve_PDF,Update_PDF,Delete_PDF,Storage storageStyle
+    class Upload_PDF,Retrieve_PDF,Update_PDF,Delete_PDF,Storage_Public,Storage_Sensitive storageStyle
     class Manage_User,API_Logs,Code_Logs,Update_Status adminStyle
     class Security_Helper,Fetch_Utils utilStyle
 ```
@@ -241,12 +260,15 @@ python main.py
 - Verify email through confirmation link
 - Login at `/auth/signin`
 - Secure JWT-based authentication with HTTP-only cookies
-- Use email verification for password recovery
+- Email address doubles as your unique identifier and is used for password recovery and sensitive-record verification
 
-### 2. Uploading PDFs
+### 2. Uploading PDFs (Admin)
 - Access the dashboard after login
 - Click "Upload New PDF" button
 - Select your PDF file (supports various sizes)
+- **Choose a category for the upload:**
+  - **Public PDF** — safe for the embeddable chatbot widget and Business accounts; must not contain sensitive or confidential data
+  - **Sensitive PDF** — protected academic/institutional data (e.g. grades, records), restricted to LCCB roles and never served to the widget
 - PDFs stored securely until you manually delete them
 - Search and filter PDFs by filename
 
@@ -254,7 +276,7 @@ python main.py
 - **Search**: Use the search bar to filter PDFs by name
 - **Select**: Click on a PDF to use it for AI chat
 - **Delete**: Right-click any PDF and select "Delete PDF" to remove it
-- **View Details**: See filename and file size for each PDF
+- **View Details**: See filename, file size, and Public/Sensitive category for each PDF
 
 ### 4. Chatting with AI
 - Select a PDF document from your library
@@ -262,15 +284,21 @@ python main.py
 - OpenAI analyzes the selected PDF and provides intelligent responses
 - Chat history persists for reference
 
-### 5. Profile Management
+### 5. Chatbot Widget (`/chat_bot`)
+- Embeddable, anonymous-visitor chat surface for Business accounts and general site integrations
+- Answers are generated **only from that Business's own Public PDF uploads**
+- Never has access to Sensitive PDFs, other Business accounts' data, or system/internal information
+
+### 6. Profile Management
 - Click on your profile to access settings
 - **Update Name**: Edit your display name
 - **Profile Picture**: Upload and update your profile photo
 - **Change Password**: Secure password reset with email verification
 - **View Role**: See your assigned role (Admin, Teacher, or Student)
 
-### 6. Admin Features (Admin Only)
+### 7. Admin Features (Admin Only)
 - **User Management**: Create, update, delete user accounts
+- **PDF Categorization**: Upload and classify PDFs as Public or Sensitive
 - **API Logs**: Monitor API usage and system performance
 - **Role Assignment**: Assign Teacher or Student roles
 - **Status Control**: Activate or deactivate user accounts
@@ -286,29 +314,30 @@ python main.py
 ### User Flow
 1. **Landing Page** → Feature overview and project description
 2. **Authentication** → Secure signup/login with email verification
-3. **Dashboard/Chat Interface** → Upload and manage PDFs
+3. **Dashboard/Chat Interface** → Upload and manage Public/Sensitive PDFs
 4. **PDF Selection** → Choose document for AI interaction
 5. **AI Chat** → Ask questions and receive OpenAI-powered responses
-6. **Profile Management** → Update name, profile picture, password
-7. **PDF Management** → Search, filter, and delete via right-click menu
-8. **Admin Panel** (Admin only) → User management and system monitoring
+6. **Chatbot Widget** → Anonymous visitors chat against Public PDFs only
+7. **Profile Management** → Update name, profile picture, password
+8. **PDF Management** → Search, filter, categorize, and delete via right-click menu
+9. **Admin Panel** (Admin only) → User management, PDF categorization, and system monitoring
 ## ⚡ **How It Works**
 
 ### Request Flow
 1. **User Interaction** → Frontend components (React/Next.js)
 2. **API Request** → Next.js API routes handle client requests
 3. **Rate Limiting** → Cooldown check (1 request/second per IP)
-4. **Authentication** → JWT verification, CSRF protection, origin validation
-5. **PDF Processing** → Python Flask server downloads and processes PDF from Supabase
-6. **AI Analysis** → OpenAI analyzes content and generates contextual response
+4. **Authentication** → JWT verification, CSRF protection, origin validation (skipped for anonymous widget visitors, who are scoped to Public PDFs only)
+5. **PDF Processing** → Python Flask server downloads and processes the selected PDF (Public or Sensitive) from Supabase
+6. **AI Analysis** → OpenAI (gpt-4o-mini) analyzes content and generates a contextual response, respecting the Public/Sensitive boundary
 7. **Database Logging** → Supabase records API usage, user actions, and timestamps
 8. **Response Delivery** → AI-generated answer returned to frontend
 9. **File Management** → PDFs stored until manual deletion via context menu
 
 ### Technical Workflow
 ```
-User → Next.js UI → API Routes → Rate Limit Check → JWT Auth 
-→ CSRF/Origin Validation → Flask API → Supabase Storage 
+User / Widget Visitor → Next.js UI → API Routes → Rate Limit Check → JWT Auth (if applicable)
+→ CSRF/Origin Validation → Flask API → Supabase Storage (Public / Sensitive bucket)
 → PDF Download → PDF Processing → OpenAI API 
 → AI Response → Database Log → User Display
 ```
@@ -326,6 +355,7 @@ User → Next.js UI → API Routes → Rate Limit Check → JWT Auth
 - **No Offline Mode**: Requires internet connection for AI processing
 - **Search Limited**: Search only by filename, not document content
 - **Email Dependency**: Password reset requires email verification
+- **Manual Categorization**: Public/Sensitive classification is set by the admin at upload time — misclassification is the uploader's responsibility (see Privacy Policy §6)
 
 ### Planned Improvements
 - [x] Enhanced PDF chunking algorithm for better context retention
@@ -387,7 +417,7 @@ This project is licensed under the **Apache License 2.0** - see the [LICENSE](LI
 - **Started**: 2025
 - **Language**: TypeScript, Python
 - **Framework**: Next.js, Flask
-- **AI Model**: OpenAI (GPT-3.5-turbo / GPT-4)
+- **AI Model**: OpenAI (gpt-4o-mini)
 - **Database**: Supabase PostgreSQL
 - **Deployment**: Vercel (Frontend), Render (Backend API)
 
@@ -398,7 +428,7 @@ This project is licensed under the **Apache License 2.0** - see the [LICENSE](LI
 ### For Questions or Issues
 - Open an issue on [GitHub Issues](https://github.com/cordyStackX/lccb_ai_2/issues)
 - Check existing documentation and README
-- Review [Privacy Policy](https://lccb-ai-2.vercel.app/privacy) and [Terms & Conditions](https://lccb-ai-2.vercel.app/lccb-ai-2.vercel.app/terms)
+- Review [Privacy Policy](https://lccb-ai-2.vercel.app/privacy) and [Terms & Conditions](https://lccb-ai-2.vercel.app/terms)
 
 ### Important Links
 - **Privacy Policy**: [/privacy](https://lccb-ai-2.vercel.app/privacy)
@@ -431,11 +461,11 @@ This is a **BETA VERSION** educational research project. By using this software,
 - ✅ Provided "AS IS" without warranties
 - ✅ May contain bugs, errors, or unexpected behavior
 - ✅ Subject to changes or discontinuation without notice
-- ❌ Do not upload sensitive or confidential information
+- ❌ Do not upload sensitive or confidential information into **Public PDFs**
 - ❌ No illegal activities supported or condoned
 - ❌ No guarantees of data security or availability
 
-**Use at your own risk. The developers and contributors are not liable for any damages or losses arising from the use of this software.**
+**Use at your own risk. The developers and contributors are not liable for any damages or losses arising from the use of this software, including sensitive data mistakenly uploaded as a Public PDF.**
 
 ---
 
@@ -456,7 +486,7 @@ This is a **BETA VERSION** educational research project. By using this software,
 ---
 
 ✅ **Result:**  
-LACO AI is a **hybrid SOA system** combining modern web technologies with powerful AI capabilities to revolutionize document interaction for educational purposes.
+LACO AI is a **hybrid SOA system** combining modern web technologies with powerful AI capabilities to revolutionize document interaction for educational and business purposes — with a strict Public/Sensitive PDF boundary keeping institutional data out of public-facing surfaces.
 
 - *Frontend* acts as the **service consumer**
 - *Next.js API routes* as the **middleware layer**
@@ -468,6 +498,7 @@ LACO AI is a **hybrid SOA system** combining modern web technologies with powerf
 ## 🔒 Security & Privacy
 
 ### Data Protection
+- **Public vs Sensitive PDF Separation**: Sensitive PDFs (academic records, grades) are stored and served separately from Public PDFs; the chatbot widget and Business accounts can only ever reach Public PDF data
 - **Persistent Storage**: PDFs stored in Supabase until you manually delete them
 - **Right-Click Delete**: Easy PDF removal via context menu
 - **Profile Pictures**: Securely stored, automatically replaced when updated
@@ -483,6 +514,7 @@ LACO AI is a **hybrid SOA system** combining modern web technologies with powerf
 - Educational use only
 - No illegal activities supported
 - GDPR-conscious design (no unnecessary data retention)
+- See the [Privacy Policy](https://lccb-ai-2.vercel.app/privacy) for the full Public/Sensitive PDF data-handling terms
 
 ---
 
@@ -497,7 +529,7 @@ This project is developed strictly for:
 **Not intended for:**
 - ❌ Commercial use
 - ❌ Production deployment
-- ❌ Processing sensitive/confidential data
+- ❌ Processing sensitive/confidential data through Public PDFs
 - ❌ Any illegal activities
 
 ## 🚀 Getting Started
@@ -548,10 +580,10 @@ The Data Flow Diagram illustrates how data moves through the LACO AI system, fro
 ![Data Flow Diagram](./public/DFD.png)
 
 **Key Data Flows:**
-- User uploads PDF → Supabase Storage (persistent until manual deletion)
+- Admin uploads PDF and classifies it as Public or Sensitive → routed to the matching Supabase Storage bucket (persistent until manual deletion)
 - PDF retrieval → Python Flask API
 - PDF text extraction → OpenAI API
-- AI response generation → User interface
+- AI response generation (scoped to Public data for widget/Business, Public + Sensitive for verified LCCB roles) → User interface
 - Activity logging → Supabase Database
 - Profile picture upload → Supabase public bucket
 - Rate limiting → In-memory cooldown tracking
@@ -567,7 +599,8 @@ The Context Diagram shows the system boundaries and external entities that inter
 ---
 
 **External Entities:**
-- **Users**: Students, Teachers, Administrators
+- **Users**: Students, Teachers, Administrators (LCCB, Sensitive + Public PDF access)
+- **Business Accounts / Widget Visitors**: Public PDF access only
 
 ---
 
@@ -577,290 +610,290 @@ The Context Diagram shows the system boundaries and external entities that inter
 ```bash
 src
 ├── app
-│   ├── favicon.ico
-│   ├── globals.css
-│   ├── layout.tsx
-│   ├── manifest.ts
-│   ├── not-found.module.css
-│   ├── not-found.tsx
-│   ├── (pages)
-│   │   ├── admin
-│   │   │   ├── chatbot
-│   │   │   │   └── page.tsx
-│   │   │   ├── dashboard
-│   │   │   │   └── page.tsx
-│   │   │   ├── manageuser
-│   │   │   │   └── page.tsx
-│   │   │   └── setting
-│   │   │       └── page.tsx
-│   │   ├── auth
-│   │   │   ├── confirm-email-forgot-pwd
-│   │   │   │   └── page.tsx
-│   │   │   ├── confirm-email-signin
-│   │   │   │   └── page.tsx
-│   │   │   ├── confirm-email-signup
-│   │   │   │   └── page.tsx
-│   │   │   ├── create-password
-│   │   │   │   └── page.tsx
-│   │   │   ├── forgot-password
-│   │   │   │   └── page.tsx
-│   │   │   ├── register
-│   │   │   │   └── page.tsx
-│   │   │   ├── signin
-│   │   │   │   └── page.tsx
-│   │   │   └── update-password
-│   │   │       └── page.tsx
-│   │   ├── chat
-│   │   │   └── page.tsx
-│   │   ├── chat_bot
-│   │   │   └── page.tsx
-│   │   ├── privacy
-│   │   │   └── page.tsx
-│   │   └── terms
-│   │       └── page.tsx
-│   ├── page.tsx
-│   ├── services
-│   │   ├── api
-│   │   │   ├── delete_responses
-│   │   │   │   └── route.ts
-│   │   │   ├── response2-stream
-│   │   │   │   └── route.ts
-│   │   │   ├── response3-stream
-│   │   │   │   └── route.ts
-│   │   │   ├── response_image-stream
-│   │   │   │   └── route.ts
-│   │   │   ├── response-stream
-│   │   │   │   └── route.ts
-│   │   │   ├── retrieve_responses
-│   │   │   │   └── route.ts
-│   │   │   ├── save_responses
-│   │   │   │   └── route.ts
-│   │   │   └── tts
-│   │   │       └── route.ts
-│   │   ├── jwt
-│   │   │   ├── auth
-│   │   │   │   └── route.ts
-│   │   │   ├── deauth
-│   │   │   │   └── route.ts
-│   │   │   └── verify
-│   │   │       └── route.ts
-│   │   └── supabase
-│   │       ├── admin
-│   │       │   ├── delete_user
-│   │       │   │   └── route.ts
-│   │       │   ├── get-suspension-state
-│   │       │   │   └── route.ts
-│   │       │   ├── retrieve_user
-│   │       │   │   └── route.ts
-│   │       │   ├── suspension-state
-│   │       │   │   └── route.ts
-│   │       │   ├── system_logs
-│   │       │   │   └── route.ts
-│   │       │   └── update_user_status
-│   │       │       └── route.ts
-│   │       ├── auth
-│   │       │   ├── check_code
-│   │       │   │   └── route.ts
-│   │       │   ├── check_status
-│   │       │   │   └── route.ts
-│   │       │   ├── forgot_password
-│   │       │   │   ├── check_email
-│   │       │   │   │   └── route.ts
-│   │       │   │   └── update_account
-│   │       │   │       └── route.ts
-│   │       │   ├── register
-│   │       │   │   ├── check_email
-│   │       │   │   │   └── route.ts
-│   │       │   │   └── create_account
-│   │       │   │       └── route.ts
-│   │       │   ├── signin
-│   │       │   │   └── route.ts
-│   │       │   └── update
-│   │       │       └── route.ts
-│   │       ├── health
-│   │       │   └── route.ts
-│   │       └── storage
-│   │           ├── deletepdf
-│   │           │   └── route.ts
-│   │           ├── deletepdf_chatbot
-│   │           │   └── route.ts
-│   │           ├── downloadpdf_chatbot
-│   │           │   └── route.ts
-│   │           ├── fetchimg
-│   │           │   └── route.ts
-│   │           ├── lbc_image_retieve
-│   │           │   └── route.ts
-│   │           ├── lbc_image_upload
-│   │           │   └── route.ts
-│   │           ├── retrieve
-│   │           │   └── route.ts
-│   │           ├── retrieve_chatbot
-│   │           │   └── route.ts
-│   │           ├── uploadimg
-│   │           │   └── route.ts
-│   │           ├── uploadpdf
-│   │           │   └── route.ts
-│   │           └── uploadpdf_chatbot
-│   │               └── route.ts
-│   └── under-develop.tsx
+│   ├── favicon.ico
+│   ├── globals.css
+│   ├── layout.tsx
+│   ├── manifest.ts
+│   ├── not-found.module.css
+│   ├── not-found.tsx
+│   ├── (pages)
+│   │   ├── admin
+│   │   │   ├── chatbot
+│   │   │   │   └── page.tsx
+│   │   │   ├── dashboard
+│   │   │   │   └── page.tsx
+│   │   │   ├── manageuser
+│   │   │   │   └── page.tsx
+│   │   │   └── setting
+│   │   │       └── page.tsx
+│   │   ├── auth
+│   │   │   ├── confirm-email-forgot-pwd
+│   │   │   │   └── page.tsx
+│   │   │   ├── confirm-email-signin
+│   │   │   │   └── page.tsx
+│   │   │   ├── confirm-email-signup
+│   │   │   │   └── page.tsx
+│   │   │   ├── create-password
+│   │   │   │   └── page.tsx
+│   │   │   ├── forgot-password
+│   │   │   │   └── page.tsx
+│   │   │   ├── register
+│   │   │   │   └── page.tsx
+│   │   │   ├── signin
+│   │   │   │   └── page.tsx
+│   │   │   └── update-password
+│   │   │       └── page.tsx
+│   │   ├── chat
+│   │   │   └── page.tsx
+│   │   ├── chat_bot
+│   │   │   └── page.tsx
+│   │   ├── privacy
+│   │   │   └── page.tsx
+│   │   └── terms
+│   │       └── page.tsx
+│   ├── page.tsx
+│   ├── services
+│   │   ├── api
+│   │   │   ├── delete_responses
+│   │   │   │   └── route.ts
+│   │   │   ├── response2-stream
+│   │   │   │   └── route.ts
+│   │   │   ├── response3-stream
+│   │   │   │   └── route.ts
+│   │   │   ├── response_image-stream
+│   │   │   │   └── route.ts
+│   │   │   ├── response-stream
+│   │   │   │   └── route.ts
+│   │   │   ├── retrieve_responses
+│   │   │   │   └── route.ts
+│   │   │   ├── save_responses
+│   │   │   │   └── route.ts
+│   │   │   └── tts
+│   │   │       └── route.ts
+│   │   ├── jwt
+│   │   │   ├── auth
+│   │   │   │   └── route.ts
+│   │   │   ├── deauth
+│   │   │   │   └── route.ts
+│   │   │   └── verify
+│   │   │       └── route.ts
+│   │   └── supabase
+│   │       ├── admin
+│   │       │   ├── delete_user
+│   │       │   │   └── route.ts
+│   │       │   ├── get-suspension-state
+│   │       │   │   └── route.ts
+│   │       │   ├── retrieve_user
+│   │       │   │   └── route.ts
+│   │       │   ├── suspension-state
+│   │       │   │   └── route.ts
+│   │       │   ├── system_logs
+│   │       │   │   └── route.ts
+│   │       │   └── update_user_status
+│   │       │       └── route.ts
+│   │       ├── auth
+│   │       │   ├── check_code
+│   │       │   │   └── route.ts
+│   │       │   ├── check_status
+│   │       │   │   └── route.ts
+│   │       │   ├── forgot_password
+│   │       │   │   ├── check_email
+│   │       │   │   │   └── route.ts
+│   │       │   │   └── update_account
+│   │       │   │       └── route.ts
+│   │       │   ├── register
+│   │       │   │   ├── check_email
+│   │       │   │   │   └── route.ts
+│   │       │   │   └── create_account
+│   │       │   │       └── route.ts
+│   │       │   ├── signin
+│   │       │   │   └── route.ts
+│   │       │   └── update
+│   │       │       └── route.ts
+│   │       ├── health
+│   │       │   └── route.ts
+│   │       └── storage
+│   │           ├── deletepdf
+│   │           │   └── route.ts
+│   │           ├── deletepdf_chatbot
+│   │           │   └── route.ts
+│   │           ├── downloadpdf_chatbot
+│   │           │   └── route.ts
+│   │           ├── fetchimg
+│   │           │   └── route.ts
+│   │           ├── lbc_image_retieve
+│   │           │   └── route.ts
+│   │           ├── lbc_image_upload
+│   │           │   └── route.ts
+│   │           ├── retrieve
+│   │           │   └── route.ts
+│   │           ├── retrieve_chatbot
+│   │           │   └── route.ts
+│   │           ├── uploadimg
+│   │           │   └── route.ts
+│   │           ├── uploadpdf
+│   │           │   └── route.ts
+│   │           └── uploadpdf_chatbot
+│   │               └── route.ts
+│   └── under-develop.tsx
 ├── components
-│   ├── admin
-│   │   ├── chat_bot
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── dashboard
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── index.ts
-│   │   ├── manage_user
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── setting
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   └── sidebar
-│   │       ├── css
-│   │       │   └── styles.module.css
-│   │       └── index.tsx
-│   ├── auth
-│   │   ├── confirm_email_forgot_pwd
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── confirm_email_register
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── confirm_email_signin
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── create_password
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── forgot_password
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── index.ts
-│   │   ├── register
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── signin
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   └── update_password
-│   │       ├── css
-│   │       │   └── styles.module.css
-│   │       └── index.tsx
-│   ├── chat
-│   │   ├── header
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── index.ts
-│   │   ├── main
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── profile
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   └── sidebars
-│   │       ├── css
-│   │       │   └── styles.module.css
-│   │       └── index.tsx
-│   ├── chat_bot
-│   │   ├── index.ts
-│   │   └── main
-│   │       ├── css
-│   │       │   └── styles.module.css
-│   │       └── index.tsx
-│   ├── disclaimer
-│   │   ├── index.ts
-│   │   ├── privacy
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   └── terms
-│   │       ├── css
-│   │       │   └── styles.module.css
-│   │       └── index.tsx
-│   ├── landpage
-│   │   ├── banner
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── chat_bot
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── content_1
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── content_2
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── content_3
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── content_4
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── footer
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── header
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   └── index.ts
-│   └── pwa_register
-│       └── index.ts
+│   ├── admin
+│   │   ├── chat_bot
+│   │   │   ├── css
+│   │   │   │   └── styles.module.css
+│   │   │   └── index.tsx
+│   │   ├── dashboard
+│   │   │   ├── css
+│   │   │   │   └── styles.module.css
+│   │   │   └── index.tsx
+│   │   ├── index.ts
+│   │   ├── manage_user
+│   │   │   ├── css
+│   │   │   │   └── styles.module.css
+│   │   │   └── index.tsx
+│   │   ├── setting
+│   │   │   ├── css
+│   │   │   │   └── styles.module.css
+│   │   │   └── index.tsx
+│   │   └── sidebar
+│   │       ├── css
+│   │       │   └── styles.module.css
+│   │       └── index.tsx
+│   ├── auth
+│   │   ├── confirm_email_forgot_pwd
+│   │   │   ├── css
+│   │   │   │   └── styles.module.css
+│   │   │   └── index.tsx
+│   │   ├── confirm_email_register
+│   │   │   ├── css
+│   │   │   │   └── styles.module.css
+│   │   │   └── index.tsx
+│   │   ├── confirm_email_signin
+│   │   │   ├── css
+│   │   │   │   └── styles.module.css
+│   │   │   └── index.tsx
+│   │   ├── create_password
+│   │   │   ├── css
+│   │   │   │   └── styles.module.css
+│   │   │   └── index.tsx
+│   │   ├── forgot_password
+│   │   │   ├── css
+│   │   │   │   └── styles.module.css
+│   │   │   └── index.tsx
+│   │   ├── index.ts
+│   │   ├── register
+│   │   │   ├── css
+│   │   │   │   └── styles.module.css
+│   │   │   └── index.tsx
+│   │   ├── signin
+│   │   │   ├── css
+│   │   │   │   └── styles.module.css
+│   │   │   └── index.tsx
+│   │   └── update_password
+│   │       ├── css
+│   │       │   └── styles.module.css
+│   │       └── index.tsx
+│   ├── chat
+│   │   ├── header
+│   │   │   ├── css
+│   │   │   │   └── styles.module.css
+│   │   │   └── index.tsx
+│   │   ├── index.ts
+│   │   ├── main
+│   │   │   ├── css
+│   │   │   │   └── styles.module.css
+│   │   │   └── index.tsx
+│   │   ├── profile
+│   │   │   ├── css
+│   │   │   │   └── styles.module.css
+│   │   │   └── index.tsx
+│   │   └── sidebars
+│   │       ├── css
+│   │       │   └── styles.module.css
+│   │       └── index.tsx
+│   ├── chat_bot
+│   │   ├── index.ts
+│   │   └── main
+│   │       ├── css
+│   │       │   └── styles.module.css
+│   │       └── index.tsx
+│   ├── disclaimer
+│   │   ├── index.ts
+│   │   ├── privacy
+│   │   │   ├── css
+│   │   │   │   └── styles.module.css
+│   │   │   └── index.tsx
+│   │   └── terms
+│   │       ├── css
+│   │       │   └── styles.module.css
+│   │       └── index.tsx
+│   ├── landpage
+│   │   ├── banner
+│   │   │   ├── css
+│   │   │   │   └── styles.module.css
+│   │   │   └── index.tsx
+│   │   ├── chat_bot
+│   │   │   ├── css
+│   │   │   │   └── styles.module.css
+│   │   │   └── index.tsx
+│   │   ├── content_1
+│   │   │   ├── css
+│   │   │   │   └── styles.module.css
+│   │   │   └── index.tsx
+│   │   ├── content_2
+│   │   │   ├── css
+│   │   │   │   └── styles.module.css
+│   │   │   └── index.tsx
+│   │   ├── content_3
+│   │   │   ├── css
+│   │   │   │   └── styles.module.css
+│   │   │   └── index.tsx
+│   │   ├── content_4
+│   │   │   ├── css
+│   │   │   │   └── styles.module.css
+│   │   │   └── index.tsx
+│   │   ├── footer
+│   │   │   ├── css
+│   │   │   │   └── styles.module.css
+│   │   │   └── index.tsx
+│   │   ├── header
+│   │   │   ├── css
+│   │   │   │   └── styles.module.css
+│   │   │   └── index.tsx
+│   │   └── index.ts
+│   └── pwa_register
+│       └── index.ts
 ├── config
-│   ├── conf
-│   │   ├── css_config
-│   │   │   ├── animations.css
-│   │   │   ├── background_colors.css
-│   │   │   ├── config.css
-│   │   │   └── status.css
-│   │   └── json_config
-│   │       ├── Api_links.json
-│   │       ├── fetch_url.json
-│   │       └── Metadata.json
-│   └── images_links
-│       └── assets.json
+│   ├── conf
+│   │   ├── css_config
+│   │   │   ├── animations.css
+│   │   │   ├── background_colors.css
+│   │   │   ├── config.css
+│   │   │   └── status.css
+│   │   └── json_config
+│   │       ├── Api_links.json
+│   │       ├── fetch_url.json
+│   │       └── Metadata.json
+│   └── images_links
+│       └── assets.json
 ├── global.d.ts
 ├── lib
-│   ├── code_store.ts
-│   ├── rate_limit.ts
-│   ├── security.ts
-│   └── supabase-server.ts
+│   ├── code_store.ts
+│   ├── rate_limit.ts
+│   ├── security.ts
+│   └── supabase-server.ts
 ├── modules
-│   ├── chat
-│   │   ├── handle_submit.ts
-│   │   ├── startRecording.ts
-│   │   ├── StreamVoiceToText.ts
-│   │   └── voice_tts.ts
-│   ├── formula
-│   │   ├── Use_scroll_deg.ts
-│   │   └── Use_scroll.ts
-│   └── index.ts
+│   ├── chat
+│   │   ├── handle_submit.ts
+│   │   ├── startRecording.ts
+│   │   ├── StreamVoiceToText.ts
+│   │   └── voice_tts.ts
+│   ├── formula
+│   │   ├── Use_scroll_deg.ts
+│   │   └── Use_scroll.ts
+│   └── index.ts
 ├── sources
-│   └── suggestion.json
+│   └── suggestion.json
 └── utilities
     ├── Confirm_Exit.ts
     ├── CopyToClipboard.ts
@@ -871,9 +904,9 @@ src
     ├── InView.ts
     ├── Meta_data.ts
     ├── Popup_info
-    │   ├── css
-    │   │   └── styles.module.css
-    │   └── index.tsx
+    │   ├── css
+    │   │   └── styles.module.css
+    │   └── index.tsx
     ├── Prevent_Exit.ts
     ├── Progress.ts
     ├── React_Spinners.tsx

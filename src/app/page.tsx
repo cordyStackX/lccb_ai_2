@@ -14,11 +14,11 @@ import { Main } from "@/components/chat_bot";
 // import { Fetch_to } from "@/utilities";
 // import api_link from "@/config/conf/json_config/fetch_url.json";
 // import fetch_link from "@/config/conf/json_config/Api_links.json";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 // import { useEffect } from "react";
 
 export default function Home() {
-	const router = useRouter();
+	// const router = useRouter();
 	// const [show, setShow] = useState(false);
 
 	// useEffect(() => {

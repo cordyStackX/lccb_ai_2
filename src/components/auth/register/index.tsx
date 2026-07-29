@@ -24,19 +24,12 @@ export default function SignUp() {
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
-    const [ifMinors, setIfMinors] = useState(true);
+    // const [ifMinors, setIfMinors] = useState(true);
     const [ifTeaher, setIfTeacher] = useState(false);
 
     usePreventExit(isDirty);
 
     useEffect(() => {
-        if (form.year == "Kinder Garten" ) {
-            setIfMinors(false);
-        } else if (form.year == "Elementary") {
-            setIfMinors(false);
-        } else {
-            setIfMinors(true);
-        }
         Progress(false);
         if (form.role == "Teacher") {
             setIfTeacher(true);
