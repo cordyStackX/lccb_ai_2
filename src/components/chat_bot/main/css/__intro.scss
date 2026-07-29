@@ -24,3 +24,40 @@
     color: var(--default-color-gray);
     margin: 0 0 1.5rem 0;
 }
+@keyframes shimmer {
+    0% { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
+}
+
+.eyebrowSkeleton,
+.titleSkeleton,
+.bodySkeleton {
+    display: block;
+    margin: 0 auto 0.75rem auto;
+    border-radius: 6px;
+    background: linear-gradient(
+        90deg,
+        rgba(0, 0, 0, 0.08) 25%,
+        rgba(0, 0, 0, 0.15) 37%,
+        rgba(0, 0, 0, 0.08) 63%
+    );
+    background-size: 800px 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.eyebrowSkeleton {
+    width: 140px;
+    height: 0.85rem;
+}
+
+.titleSkeleton {
+    width: min(420px, 80%);
+    height: 1.8rem;
+    margin-top: 0.5rem;
+}
+
+.bodySkeleton {
+    width: min(500px, 90%);
+    height: 1rem;
+    margin-top: 0.75rem;
+}

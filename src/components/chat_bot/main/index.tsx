@@ -87,6 +87,7 @@ export default function Chat_bot({ email } : Chat_botProps) {
     });
     const [logoPreview, setLogoPreview] = useState("");
     const [loadingBranding, setLoadingBranding] = useState(true);
+    const [loadingChatbot, setLoadingChatbot] = useState(true);
 
     const [showTypeahead, setShowTypeahead] = useState(false);
     const typeaheadMatches = chatres.ask.trim()
@@ -126,10 +127,14 @@ export default function Chat_bot({ email } : Chat_botProps) {
         }
         Suggest();
         async function Chatbot() {
-            const response = await Fetch_to(api_link.chatbot_public, { email: email });
-            const result = response.data?.message?.[0] || { name: "Sample AI", instruction: "Ask about ---", body: "velit voluptate doloremque magnam sequi, culpa nam consequatur eaque libero. Dolores." };
-            if (response.success) {
-                setChatbot(prev => ({ ...prev, name: result.name, instructions: result.instruction, body: result.body }));
+            try {
+                const response = await Fetch_to(api_link.chatbot_public, { email: email });
+                const result = response.data?.message?.[0] || { name: "Sample AI", instruction: "Ask about ---", body: "velit voluptate doloremque magnam sequi, culpa nam consequatur eaque libero. Dolores." };
+                if (response.success) {
+                    setChatbot(prev => ({ ...prev, name: result.name, instructions: result.instruction, body: result.body }));
+                }
+            } finally {
+                setLoadingChatbot(false);
             }
         }
         Chatbot();
@@ -309,10 +314,20 @@ export default function Chat_bot({ email } : Chat_botProps) {
                             <Image src={`${logoPreview}`} alt={`${chatbot.name} logo`} width={80} height={80} unoptimized/>
                         </div>
                     ) : null}
-                    
-                    <span className={styles.eyebrow}> {chatbot.name?.toUpperCase()} </span>
-                    <h1> {chatbot.instructions} </h1>
-                    <p> {chatbot.body} </p>
+
+                    {loadingChatbot ? (
+                        <>
+                            <div className={styles.eyebrowSkeleton} />
+                            <div className={styles.titleSkeleton} />
+                            <div className={styles.bodySkeleton} />
+                        </>
+                    ) : (
+                        <>
+                            <span className={styles.eyebrow}> {chatbot.name?.toUpperCase()} </span>
+                            <h1> {chatbot.instructions} </h1>
+                            <p> {chatbot.body} </p>
+                        </>
+                    )}
                 </section>
             )}
 
