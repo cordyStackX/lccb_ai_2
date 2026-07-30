@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
-import { Security } from "@/lib/security";
+// import { Security } from "@/lib/security";
 
 export async function POST(req: NextRequest) {
     
-    const auth = await Security(req);
-    if(auth?.error) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    // const auth = await Security(req);
+    // if(auth?.error) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
 
     const { email } = await req.json();
 
