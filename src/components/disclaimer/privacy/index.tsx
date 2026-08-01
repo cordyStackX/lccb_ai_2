@@ -83,9 +83,10 @@ export default function Privacy() {
 
                     <h3>3.5 Business Accounts</h3>
                     <ul>
-                        <li><strong>Free Tier:</strong> Limited to 1 PDF upload</li>
-                        <li><strong>Enterprise Tier (paid subscription):</strong> Up to 20 PDF uploads</li>
-                        <li>Business PDF uploads are treated as Public Documents and should not contain sensitive information (see Section 6)</li>
+                        <li><strong>Free Trial:</strong> 2 PDF uploads, 10,000 API requests, 10MB per upload, 1 month free</li>
+                        <li><strong>Pro (₱599/month):</strong> 250 PDF uploads/month, 500,000 API requests/month, 100MB per upload</li>
+                        <li><strong>Enterprise (custom pricing):</strong> Unlimited uploads and requests, customizable OpenAI version, user management, can handle sensitive PDF files</li>
+                        <li>Business PDF uploads under Free Trial and Pro tiers are treated as Public Documents and should not contain sensitive information (see Section 6)</li>
                     </ul>
                 </section>
 
@@ -206,9 +207,10 @@ export default function Privacy() {
 
                     <h3>11.3 Business Accounts</h3>
                     <ul>
-                        <li>Free tier: 1 PDF upload limit</li>
-                        <li>Enterprise tier: up to 20 PDF uploads (paid subscription)</li>
-                        <li>Must not upload sensitive or password-containing PDFs</li>
+                        <li>Free Trial: 2 PDF uploads, 10,000 API requests, 10MB per upload limit, 1 month free trial</li>
+                        <li>Pro tier (₱599/month): 250 PDF uploads/month, 500,000 API requests/month, 100MB per upload</li>
+                        <li>Enterprise tier (custom): unlimited uploads/requests, can handle sensitive PDF files, dedicated user management</li>
+                        <li>Free Trial and Pro accounts must not upload sensitive or password-containing PDFs</li>
                     </ul>
                 </section>
 

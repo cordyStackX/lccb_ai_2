@@ -83,8 +83,9 @@ export default function Terms() {
                     </ul>
                     <p><strong>Business accounts can:</strong></p>
                     <ul>
-                        <li>Free tier: upload up to 1 PDF for analysis</li>
-                        <li>Enterprise tier (paid subscription): upload up to 20 PDFs for analysis</li>
+                        <li>Free Trial: 2 PDF uploads, 10,000 API requests, 10MB per upload, 1 month free</li>
+                        <li>Pro (₱599/month): 250 PDF uploads/month, 500,000 API requests/month, 100MB per upload</li>
+                        <li>Enterprise (custom pricing): unlimited uploads/requests, can handle sensitive PDF files, dedicated user manager</li>
                     </ul>
                 </section>
 
@@ -128,7 +129,7 @@ export default function Terms() {
                         <li>JWT tokens may expire, requiring re-authentication</li>
                         <li>Search functionality limited to file names only</li>
                         <li>Chat history persists indefinitely unless manually cleared</li>
-                        <li>Free-tier business accounts limited to 1 PDF upload; Enterprise limited to 20</li>
+                        <li>Free Trial business accounts limited to 2 PDF uploads (10MB each); Pro limited to 250/month (100MB each); Enterprise unlimited</li>
                     </ul>
                 </section>
 

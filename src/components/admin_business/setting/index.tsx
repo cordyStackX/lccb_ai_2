@@ -239,7 +239,7 @@ export default function Setting({ email, f_name } : SettingProps) {
                     <h3 className={styles.sectionLabel}>General</h3>
                     <div className={styles.settingRow}>
                         <div>
-                            <p>Admin password</p>
+                            <p>Account password</p>
                             <span className={styles.hint}>Update the password used to sign in</span>
                         </div>
                         <button className={styles.primaryButton} onClick={ChangePassword}>Change</button>
