@@ -7,11 +7,15 @@
 		"dev --https": "next dev --turbopack --experimental-https --experimental-https-key localhost+3-key.pem --experimental-https-cert localhost+3.pem",
 		"build": "next build",
 		"start": "next start",
+		"postbuild": "next-sitemap",
 		"lint": "eslint"
 	},
 	"dependencies": {
+		"@next/third-parties": "^16.2.12",
 		"@pdfsmaller/pdf-encrypt-lite": "^1.0.2",
 		"@supabase/supabase-js": "^2.108.2",
+		"@vercel/analytics": "^1.5.0",
+		"@vercel/speed-insights": "^1.2.0",
 		"bcrypt": "^6.0.0",
 		"hamburger-react": "^2.5.2",
 		"html2canvas": "^1.4.1",
@@ -19,7 +23,7 @@
 		"jsonwebtoken": "^9.0.3",
 		"jspdf": "^4.2.1",
 		"mysql2": "^3.22.5",
-		"next": "^16.2.11",
+		"next": "16.2.11",
 		"nodemailer": "^8.0.11",
 		"nprogress": "^0.2.0",
 		"react": "19.2.5",
@@ -53,6 +57,7 @@
 		"eslint-plugin-react": "^7.37.5",
 		"eslint-plugin-react-hooks": "^7.1.1",
 		"globals": "^17.7.0",
+		"next-sitemap": "^4.2.3",
 		"sass": "^1.101.0",
 		"typescript": "^6.0.3"
 	}

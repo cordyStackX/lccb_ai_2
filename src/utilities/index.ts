@@ -24,3 +24,7 @@ export { default as useSpeechToText } from "./useSpeechToText";
 export { default as CopyToClipboard } from "./CopyToClipboard";
 
 export { default as Popup_info } from "./Popup_info";
+
+export { default as Gtag } from "./Gtag";
+
+export { default as Json_LD } from "./Json_LD";

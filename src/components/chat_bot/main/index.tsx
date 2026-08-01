@@ -339,6 +339,7 @@ export default function Chat_bot({ email } : Chat_botProps) {
                                                 alt="plushie"
                                                 width={45}
                                                 height={50}
+                                                title="plushie"
                                             />
                                             <div>
                                                 <Markdown remarkPlugins={[remarkGfm]}>{msg.respond}</Markdown>
@@ -351,6 +352,7 @@ export default function Chat_bot({ email } : Chat_botProps) {
                                                 alt="plushie"
                                                 width={45}
                                                 height={50}
+                                                title="plushie"
                                             />
                                             <div className={styles.thinking}>
                                                 <span className={styles.dot} />
@@ -370,7 +372,7 @@ export default function Chat_bot({ email } : Chat_botProps) {
                         <div className={styles.brandingLogoSkeleton} />
                     ) : logoPreview ? (
                         <div className={styles.brandingLogo}>
-                            <Image src={`${logoPreview}`} alt={`${chatbot.name} logo`} width={80} height={80} unoptimized/>
+                            <Image src={`${logoPreview}`} alt={`${chatbot.name} logo`} title={`${chatbot.name} logo`} width={80} height={80} unoptimized/>
                         </div>
                     ) : null}
 

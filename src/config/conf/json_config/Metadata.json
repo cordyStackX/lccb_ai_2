@@ -1,10 +1,20 @@
 {
-    "title" : "LACO Artificial Intelligence",
-    "description" : "LACO AI is an intelligent PDF summarization and analysis system enhanced by Gemeni AI technologies",
-    "google_verify" : "google9249e550c23b54d0.html",
-    "creator" : "@CordyStackX",
-    "siteName_config" : "CordyStackX",
-    "domain__links" : "",
-    "openGraph" : "",
-    "links__src" : ""
+    "title" : "Laco AI - Intelligent PDF Analysis System",
+    "description" : "AI PDF reader for LCC Bacolod: Summarize, ask questions, and interact with your documents smarter and faster.",
+    "domain__links": "https://lccb-ai-2.vercel.app/",
+    "openGraph": "https://lccb-ai-2.vercel.app/MetaData_img_Laco_AI.png",
+    "wallet__connect_PRID": {
+        "Wallet__Connect": "",
+        "Based__Sepolia": "",
+        "Stellar" : ""
+    },
+    "links__src" : {
+        "Social__links" : {
+            "linked_in" : "https://www.linkedin.com/in/marc-giestin-louis-cordova-657849276",
+            "github" : "https://github.com/cordyStackX",
+            "facebook" : "https://www.facebook.com/cordyStackX/",
+            "twitter" : "https://x.com/cordyStackX",
+            "tiktok" : "https://www.tiktok.com/@cordystackx"
+        }
+    }
 }

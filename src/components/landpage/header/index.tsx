@@ -17,6 +17,7 @@ export default function Header() {
                         alt="LCCB Logo"
                         className={styles.image1}
                         fill
+                        title="Logo"
                         />
                     </div>
                     <figcaption>

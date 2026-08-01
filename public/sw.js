@@ -22,6 +22,11 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
+// middleware.ts — make sure public assets are excluded
+export const config = {
+    matcher: ["/((?!offline.html|offline.png|_next/static|_next/image|favicon.ico).*)"],
+};
+
 self.addEventListener("fetch", (event) => {
   const request = event.request;
   const acceptsHtml = request.headers.get("accept")?.includes("text/html");
