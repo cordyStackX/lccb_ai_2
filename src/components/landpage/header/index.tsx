@@ -4,6 +4,7 @@ import image_src from "@/config/images_links/assets.json";
 // import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { Progress } from "@/utilities";
 
 export default function Header() {
     const router = useRouter();
@@ -26,7 +27,7 @@ export default function Header() {
                 </figure>
                 <section className={`${styles.buttons}`}>
                     {/* <Link href="#FaQ">FaQ</Link> */}
-                    <button onClick={() => {router.push("/auth/register");}}>Register / Sign In</button>
+                    <button onClick={() => {router.push("/auth/register"); Progress(true);}}>Register / Sign In</button>
                 </section>
             </div>
         </header>
