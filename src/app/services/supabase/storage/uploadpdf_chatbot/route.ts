@@ -168,7 +168,18 @@ export async function POST(req: NextRequest) {
         }
 
         const response = await Fetch_to(`${apiUrl}generate_md_summary`, {
-            prompt: "Summarize the Documents make sure all topics are included",
+            prompt: `Summarize this PDF into a concise Markdown summary for a chatbot's knowledge base.
+
+        Rules:
+        - Do NOT reproduce the document verbatim or near-verbatim. Paraphrase and condense.
+        - Extract only the key facts a student/parent would ask about: program names, requirements, deadlines, contact info, office names, key policies.
+        - Use short bullet points and headers matching the document's main sections.
+        - Omit repeated boilerplate, filler narrative, and redundant sub-bullets (e.g. collapse long requirement lists into "Standard requirements: PSA birth cert, 1x1 photo, Form 9, Good Moral Cert" style if items repeat across sections).
+        - Hard limit: max 5000 words per document, regardless of source length.
+        - If the source has historical/narrative content, reduce to 2-3 sentences of key facts (founding year, founder, mission) rather than the full story.
+        - Keep exact figures (fees, percentages, phone numbers, emails) accurate — never paraphrase numbers or contact details.
+
+        Output only the Markdown summary, nothing else.`,
             token: apikey,
             email: cleanEmail,
             filePath: filePath,

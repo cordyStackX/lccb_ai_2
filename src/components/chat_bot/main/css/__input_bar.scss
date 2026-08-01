@@ -35,10 +35,10 @@
     font-weight: 400;
     color: var(--foreground);
     overflow-y: hidden;
-}
-.expandableInput::placeholder {
-    color: var(--default-color-white-2);
-    font-weight: 400;
+    &::placeholder {
+        color: #848484; // darker gray, adjust to taste
+        opacity: 1; // Firefox dims placeholder opacity by default, this overrides it
+    }
 }
 .sendButton {
     width: 36px;

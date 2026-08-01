@@ -8,6 +8,60 @@ import image_src from "@/config/images_links/assets.json";
 import { Fetch_to } from "@/utilities";
 import remarkGfm from "remark-gfm";
 
+function useTypewriterPlaceholder(items: string[], options?: { typeSpeed?: number; deleteSpeed?: number; pauseMs?: number }) {
+    const { typeSpeed = 45, deleteSpeed = 25, pauseMs = 1400 } = options ?? {};
+    const [text, setText] = useState("");
+    const indexRef = useRef(0); // which suggestion
+    const charRef = useRef(0);  // how many chars typed
+    const phaseRef = useRef<"typing" | "pausing" | "deleting">("typing");
+
+    useEffect(() => {
+        if (!items.length) return;
+
+        let timeout: ReturnType<typeof setTimeout>;
+
+        const tick = () => {
+            const current = items[indexRef.current % items.length];
+
+            if (phaseRef.current === "typing") {
+                charRef.current += 1;
+                setText(current.slice(0, charRef.current));
+
+                if (charRef.current >= current.length) {
+                    phaseRef.current = "pausing";
+                    timeout = setTimeout(tick, pauseMs);
+                    return;
+                }
+                timeout = setTimeout(tick, typeSpeed);
+                return;
+            }
+
+            if (phaseRef.current === "pausing") {
+                phaseRef.current = "deleting";
+                timeout = setTimeout(tick, deleteSpeed);
+                return;
+            }
+
+            // deleting
+            charRef.current -= 1;
+            setText(current.slice(0, charRef.current));
+
+            if (charRef.current <= 0) {
+                indexRef.current += 1;
+                phaseRef.current = "typing";
+                timeout = setTimeout(tick, typeSpeed);
+                return;
+            }
+            timeout = setTimeout(tick, deleteSpeed);
+        };
+
+        timeout = setTimeout(tick, typeSpeed);
+        return () => clearTimeout(timeout);
+    }, [items, typeSpeed, deleteSpeed, pauseMs]);
+
+    return text;
+}
+
 // Suggestions are plain strings shown in the typeahead dropdown.
 // The API may return plain strings, or objects like { suggest: string }
 // (or similarly-shaped objects) — normalizeSuggestions handles both.
@@ -88,6 +142,11 @@ export default function Chat_bot({ email } : Chat_botProps) {
     const [logoPreview, setLogoPreview] = useState("");
     const [loadingBranding, setLoadingBranding] = useState(true);
     const [loadingChatbot, setLoadingChatbot] = useState(true);
+
+    const fallbackSuggestions = [`Ask about ${chatbot.name}...`];
+    const animatedPlaceholder = useTypewriterPlaceholder(
+        suggestions.length > 0 ? suggestions : fallbackSuggestions
+    );
 
     const [showTypeahead, setShowTypeahead] = useState(false);
     const typeaheadMatches = chatres.ask.trim()
@@ -350,7 +409,7 @@ export default function Chat_bot({ email } : Chat_botProps) {
                 <textarea
                     id="chat"
                     name="ask"
-                    placeholder={`Ask about ${chatbot.name}...`}
+                    placeholder={animatedPlaceholder}
                     value={chatres.ask}
                     onChange={(e) => {
                         handleChange(e);
