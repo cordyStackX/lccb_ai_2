@@ -14,7 +14,7 @@ export default function Privacy() {
         <section className={styles.container}>
             <div className={styles.content}>
                 <h1>Privacy Policy</h1>
-                <p className={styles.updated}>Last Updated: July 22, 2026</p>
+                <p className={styles.updated}>Last Updated: August 1, 2026</p>
 
                 <div className={styles.notice}>
                     <h2>⚠️ Important Notice</h2>
@@ -85,7 +85,7 @@ export default function Privacy() {
                     <ul>
                         <li><strong>Free Trial:</strong> 2 PDF uploads, 10,000 API requests, 10MB per upload, 1 month free</li>
                         <li><strong>Pro (₱599/month):</strong> 250 PDF uploads/month, 500,000 API requests/month, 100MB per upload</li>
-                        <li><strong>Enterprise (custom pricing):</strong> Unlimited uploads and requests, customizable OpenAI version, user management, can handle sensitive PDF files</li>
+                        <li><strong>Enterprise (custom pricing):</strong> Full LACO AI feature access, limits scale with your OpenAI API budget, customizable OpenAI version, dedicated user management, can handle sensitive PDF files</li>
                         <li>Business PDF uploads under Free Trial and Pro tiers are treated as Public Documents and should not contain sensitive information (see Section 6)</li>
                     </ul>
                 </section>
@@ -209,13 +209,13 @@ export default function Privacy() {
                     <ul>
                         <li>Free Trial: 2 PDF uploads, 10,000 API requests, 10MB per upload limit, 1 month free trial</li>
                         <li>Pro tier (₱599/month): 250 PDF uploads/month, 500,000 API requests/month, 100MB per upload</li>
-                        <li>Enterprise tier (custom): unlimited uploads/requests, can handle sensitive PDF files, dedicated user management</li>
+                        <li>Enterprise tier (custom): full feature access, limits scale with OpenAI API budget, can handle sensitive PDF files, dedicated user management</li>
                         <li>Free Trial and Pro accounts must not upload sensitive or password-containing PDFs</li>
                     </ul>
                 </section>
 
                 <section className={styles.section}>
-                    <h2>10. Children&apos;s Privacy</h2>
+                    <h2>12. Children&apos;s Privacy</h2>
                     <p>Users under 13 years of age are <strong>not permitted to sign up or use LACO AI without direct parental supervision and consent</strong>.</p>
                     <ul>
                         <li>A parent or legal guardian must provide consent before a child under 13 creates an account or uses the Service</li>

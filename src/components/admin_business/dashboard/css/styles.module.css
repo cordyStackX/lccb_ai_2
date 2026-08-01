@@ -610,10 +610,12 @@
     .pieShell {
         height: 220px;
     }
-
-    .graph,
     .pieCard {
+        height: 330px;
+    }
+    .graph {
         padding: 1rem;
+        height: 400px;
     }
 
     .rankings th,

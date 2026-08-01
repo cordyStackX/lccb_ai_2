@@ -27,7 +27,7 @@ export default function Header() {
                 </figure>
                 <section className={`${styles.buttons}`}>
                     {/* <Link href="#FaQ">FaQ</Link> */}
-                    <button onClick={() => {router.push("/auth/register"); Progress(true);}}>Register / Sign In</button>
+                    <button onClick={() => {router.push("/auth/signin"); Progress(true);}}>Register / Login</button>
                 </section>
             </div>
         </header>

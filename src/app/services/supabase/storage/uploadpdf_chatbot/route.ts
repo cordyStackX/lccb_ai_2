@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
 
     const { data: planRow, error: planError } = await supabaseServer
         .from("auth")
-        .select("current_plan, current_limit, current_pdf_limit, current_pdf_limit_per_mb")
+        .select("current_plan, current_limit, current_pdf_limit, current_pdf_limit_per_mb, created_at")
         .eq("email", cleanEmail)
         .maybeSingle();
 
@@ -46,9 +46,22 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, error: "Failed to fetch account plan" }, { status: 500 });
     }
 
-    const { current_plan, current_limit, current_pdf_limit, current_pdf_limit_per_mb } = planRow;
+    const { current_plan, current_limit, current_pdf_limit, current_pdf_limit_per_mb, created_at } = planRow;
 
-    if (current_plan === "Free Trial") {
+    if (current_plan === "Free Trial" || current_plan === "Pro") {
+
+        if (current_plan === "Free Trial") {
+            const trialStart = new Date(created_at);
+            const oneMonthLater = new Date(trialStart);
+            oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+
+            if (new Date() >= oneMonthLater) {
+                return NextResponse.json(
+                    { success: false, error: "1 month free trial already reached, please upgrade plan now" },
+                    { status: 403 }
+                );
+            }
+        }
 
         const { data: logRows, error: logError } = await supabaseServer
             .from("system_logs")
@@ -87,8 +100,6 @@ export async function POST(req: NextRequest) {
             );
         }
 
-    } else if (current_plan === "Pro") {
-        // Pro tier — no limit enforcement for now
     }
 
     const incomingNames = files.map((file) => file.name);

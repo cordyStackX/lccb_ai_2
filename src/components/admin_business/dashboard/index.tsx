@@ -84,7 +84,8 @@ const PRICING_TIERS = [
         period: "",
         tagline: "For School/University and Big Interprises",
         features: [
-            "Everything is Unlimited",
+            "Full LACO AI feature access",
+            "Limits scale with your OpenAI API budget",
             "Customize OpenAI Version",
             "Can have user manager",
             "Recommended for School/University",

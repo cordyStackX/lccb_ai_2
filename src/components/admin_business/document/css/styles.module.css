@@ -121,15 +121,22 @@
 .button_delete:active {
     transform: scale(0.92);
 }
+.tableScroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* smooth momentum scroll on iOS Safari */
+}
+
 .status table {
     width: 100%;
+    min-width: 600px; /* forces horizontal scroll instead of squishing columns unreadably */
     height: auto;
     border-radius: 12px;
-    overflow: hidden;
     border: 1px solid var(--default-color-white-2);
     box-shadow: 0 4px 20px var(--fx-color-bg);
     border-collapse: collapse;
     margin: 5px 0 0 0;
+    /* removed overflow: hidden — that was blocking scroll */
 }
 .status th {
     border-bottom: 2px solid var(--default-color-gray);

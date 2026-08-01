@@ -148,7 +148,7 @@ function DocumentTableSection({ title, description, sensitive, table }: Document
                 onChange={handleFile}
             />
 
-            <div>
+            <div className={styles.tableScroll}>
                 <table>
                     <thead>
                         <tr>

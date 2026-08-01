@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
 
     const { current_plan, current_limit } = planRow;
 
-    if (current_plan === "Free Trial") {
+    if (current_plan === "Free Trial" || current_plan === "Pro") {
 
         const { data: logRows, error: logError } = await supabaseServer
             .from("system_logs")
@@ -62,9 +62,7 @@ export async function POST(req: NextRequest) {
             );
         }
 
-    } else if (current_plan === "Pro") {
-        // Pro tier — no limit enforcement for now
-    }
+    } 
 
     const apikey = process.env.API_KEY;
     if (!apikey) {

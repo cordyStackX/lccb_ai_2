@@ -134,6 +134,7 @@ export default function SignUpBusiness() {
                             <button>Register</button>
                         </section>
                         <p >Already have an Account? <Link href={"/auth/signin"} onClick={() => {Progress(true);}}>Sign In an Account</Link></p>
+                        <p style={{ textAlign: "center" }}>Register an LCC Account? <Link href={"/auth/register"} onClick={() => {Progress(true);}}>Registered LCC Account</Link></p>
                     </form>
                 )}
             </div>

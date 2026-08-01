@@ -365,10 +365,12 @@
     .pieShell {
         height: 220px;
     }
-
-    .graph,
     .pieCard {
+        height: 340px;
+    }
+    .graph {
         padding: 1rem;
+        height: 400px;
     }
 
     .rankings th,

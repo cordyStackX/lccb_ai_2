@@ -142,6 +142,7 @@ export default function SignIn() {
                                 {showPassword ? "Hide" : "Show"}
                             </button>
                         </div>
+                        <p><Link href={"/auth/forgot-password"} onClick={() => {Progress(true);}}>Forgot Password?</Link></p>
                         {message && (
                             <p className={status ?  "error" : "success"}>{message}</p>
                         )}
@@ -154,9 +155,9 @@ export default function SignIn() {
                             <button>Log In</button>
                         </section>
                        
-                        <p>Register an Account? <Link href={"/auth/register"} onClick={() => {Progress(true);}}>Register Account</Link></p>
-                        <p>Register Business Account? <Link href={"/auth/register_business"} onClick={() => {Progress(true);}}>Register Business Account </Link></p>
-                        <p><Link href={"/auth/forgot-password"} onClick={() => {Progress(true);}}>Forgot Password?</Link></p>
+                        <p style={{ textAlign: "center" }}>Register an LCC Account? <Link href={"/auth/register"} onClick={() => {Progress(true);}}>Registered LCC Account</Link></p>
+                        <p style={{ textAlign: "center" }}>Register Business Account? <Link href={"/auth/register_business"} onClick={() => {Progress(true);}}>Registered Business Account </Link></p>
+                        
                         
                     </form>
                 )}

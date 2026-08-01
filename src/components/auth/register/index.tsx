@@ -192,7 +192,7 @@ export default function SignUp() {
                             <button>Register</button>
                         </section>
                         <p>Already have an Account? <Link href={"/auth/signin"} onClick={() => {Progress(true);}}>Sign In an Account</Link></p>
-                        <p>Register Business Account? <Link href={"/auth/register_business"} onClick={() => {Progress(true);}}>Register Business Account </Link></p>
+                        <p style={{ textAlign: "center" }}>Register Business Account? <Link href={"/auth/register_business"} onClick={() => {Progress(true);}}>Registered Business Account </Link></p>
                     </form>
                 )}
             </div>
