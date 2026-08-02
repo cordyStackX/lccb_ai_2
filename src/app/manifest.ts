@@ -7,7 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "LACO PWA Web Development App",
     id: "/",
     scope: "/",
-    start_url: "/auth/register",
+    start_url: "/",
     display: "standalone",
     orientation: "portrait",
     background_color: "#1A54B8",
@@ -15,19 +15,19 @@ export default function manifest(): MetadataRoute.Manifest {
     prefer_related_applications: false,
     icons: [
       {
-        src: "/lccb_logo.png",
+        src: "/logo3_nobg_title.png.png",
         sizes: "192x192",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/lccb_logo.png",
+        src: "/logo3_nobg_title.png.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/lccb_logo.png",
+        src: "/logo3_nobg_title.png.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable",
@@ -35,10 +35,10 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
     shortcuts: [
       {
-        name: "Sign up",
-        short_name: "Sign up",
-        description: "Open the signup page",
-        url: "/auth/signup",
+        name: "Sign in",
+        short_name: "Sign in",
+        description: "Open the signin page",
+        url: "/auth/signin",
       },
     ],
   };
