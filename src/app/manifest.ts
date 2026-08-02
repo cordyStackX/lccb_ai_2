@@ -15,19 +15,19 @@ export default function manifest(): MetadataRoute.Manifest {
     prefer_related_applications: false,
     icons: [
       {
-        src: "/logo3_nobg_title.png.png",
+        src: "/logo3_nobg_title.png",
         sizes: "192x192",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/logo3_nobg_title.png.png",
+        src: "/logo3_nobg_title.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/logo3_nobg_title.png.png",
+        src: "/logo3_nobg_title.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable",
