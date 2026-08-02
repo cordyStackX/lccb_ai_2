@@ -147,7 +147,7 @@
     display: none;
     position: fixed;
     top: 1rem;
-    left: 1rem;
+    right: 1rem;
     z-index: 1100;
     width: 42px;
     height: 42px;
@@ -202,8 +202,7 @@
         top: 0;
         left: 0;
         margin-left: 0;
-        height: 100vh;
-        max-height: 100vh;
+        height: 100dvh;
         width: 270px;
         border-radius: 0;
         transform: translateX(-100%);
