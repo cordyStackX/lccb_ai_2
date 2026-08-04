@@ -49,6 +49,9 @@ function SkeletonRows() {
                         <span className={`${styles.skeletonBar} ${styles.skeletonShort}`} />
                     </td>
                     <td>
+                        <span className={`${styles.skeletonBar} ${styles.skeletonMedium}`} />
+                    </td>
+                    <td>
                         <span className={styles.skeletonIcon} />
                         <span className={styles.skeletonIcon} />
                     </td>
