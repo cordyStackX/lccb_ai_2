@@ -177,35 +177,6 @@ export async function POST(req: NextRequest) {
             uploadedResults.push({ originalName: file.name, filePath, success: false, message: "3rd party failed to read the data" });
             continue;
         }
-
-        const response = await Fetch_to(`${apiUrl}generate_md_summary`, {
-            prompt: `Summarize this PDF into a concise Markdown summary for a chatbot's knowledge base.
-
-        Rules:
-        - Do NOT reproduce the document verbatim or near-verbatim. Paraphrase and condense.
-        - Extract only the key facts a student/parent would ask about: program names, requirements, deadlines, contact info, office names, key policies.
-        - Use short bullet points and headers matching the document's main sections.
-        - Omit repeated boilerplate, filler narrative, and redundant sub-bullets (e.g. collapse long requirement lists into "Standard requirements: PSA birth cert, 1x1 photo, Form 9, Good Moral Cert" style if items repeat across sections).
-        - Hard limit: max 5000 words per document, regardless of source length.
-        - If the source has historical/narrative content, reduce to 2-3 sentences of key facts (founding year, founder, mission) rather than the full story.
-        - Keep exact figures (fees, percentages, phone numbers, emails) accurate — never paraphrase numbers or contact details.
-
-        Output only the Markdown summary, nothing else.`,
-            token: apikey,
-            email: cleanEmail,
-            filePath: filePath,
-            table: "chatbot_pdf_file"
-        });
-
-        if (!response.success) {
-            uploadedResults.push({ originalName: file.name, filePath, success: false, message: "Failed to create summary" });
-            continue;
-        }
-
-        await supabaseServer
-            .from("chatbot_pdf_file")
-            .update([{ summary: response.data.markdown }])
-            .eq("file", filePath);
         
         const response_suggest = await Fetch_to(`${apiUrl}generate_md_summary`, {
             prompt: `Read this PDF and generate questions a user might realistically ask about it.
@@ -243,9 +214,48 @@ export async function POST(req: NextRequest) {
             continue;
         }
 
+        let questions: string[];
+        try {
+            const raw = response_suggest.data.markdown.trim()
+                .replace(/^```json\s*/i, '')
+                .replace(/```$/i, '');
+            questions = JSON.parse(raw);
+        } catch {
+            uploadedResults.push({ originalName: file.name, filePath, success: false, message: "Failed to parse questions" });
+            continue;
+        }
+
+        const numberedQuestions = questions.map((q, i) => `${i + 1}. ${q}`).join('\n');
+
+        const response = await Fetch_to(`${apiUrl}generate_md_summary`, {
+            prompt: `You must answer EVERY SINGLE question below — there are exactly ${questions.length} questions. Do not skip, merge, or summarize any of them.
+
+        Questions:
+        ${numberedQuestions}
+
+        For each question, search the ENTIRE document carefully. Many answers are not stated in one single sentence — they are spread across multiple sections, bullet points, or sub-headings. You MUST synthesize and combine relevant scattered information into a single coherent answer.
+
+        Example: if asked "how do I apply for a scholarship?" and the document lists several different scholarship types each with their own application requirements, combine them into one summarized answer covering the general process (e.g. "Requirements vary by scholarship type: for X, submit Y; for Z, apply at W..."), rather than saying the process isn't specified.
+
+        Only write "Not specified in document" if you have checked the full document and genuinely found NO related information anywhere, even partial or indirect.
+
+        Create a markdown table with columns "Question" and "Answer". The table MUST have exactly ${questions.length} rows, one per question, in the same order listed above.
+
+        Respond with ONLY the raw markdown table. No preamble, no explanation.`,
+            token: apikey,
+            email: cleanEmail,
+            filePath: filePath,
+            table: "chatbot_pdf_file"
+        });
+
+        if (!response.success) {
+            uploadedResults.push({ originalName: file.name, filePath, success: false, message: "Failed to create summary" });
+            continue;
+        }
+
         await supabaseServer
             .from("chatbot_pdf_file")
-            .update([{ suggest: response_suggest.data.markdown }])
+            .update([{ summary: response.data.markdown, suggest: response_suggest.data.markdown }])
             .eq("file", filePath);
 
         uploadedResults.push({ originalName: file.name, filePath, success: true });
