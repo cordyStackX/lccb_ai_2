@@ -16,7 +16,7 @@
 }
 .form_styles {
     width: min(500px, 100%);
-    height: max(900px, 100dvh);
+    height: max(1080px, 100dvh);
     border-radius: 10px;
     padding: 2.3rem;
     overflow: hidden;

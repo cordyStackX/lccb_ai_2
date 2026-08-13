@@ -2,6 +2,7 @@
 import styles from "./css/styles.module.css";
 import { Progress } from "@/utilities";
 import { useEffect } from "react";
+import Link from "next/link";
 
 export default function Privacy() {
 
@@ -13,9 +14,10 @@ export default function Privacy() {
     return(
         <section className={styles.container}>
             <div className={styles.content}>
+                <Link href="/" style={{ color: "blue" }} > {"<<"} Go Back</Link>
                 <h1>Privacy Policy</h1>
                 <p className={styles.updated}>Last Updated: August 1, 2026</p>
-
+                
                 <div className={styles.notice}>
                     <h2>⚠️ Important Notice</h2>
                     <p>LACO AI provides AI-powered information services covering schools, businesses, and student academic records. Full sensitive-data features (including student grades) are currently available exclusively to <strong>La Consolacion College Bacolod (LCCB)</strong>. Businesses may sign up for general document analysis under a separate tier described below. This platform is provided &quot;as-is&quot; and is under active development.</p>

@@ -1,8 +1,8 @@
 "use client";
 import styles from "./css/styles.module.css";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import api_link from "@/config/conf/json_config/fetch_url.json";
-import { Popup_info } from "@/utilities";
+import { Popup_info, SweetAlert2 } from "@/utilities";
 import Markdown from "react-markdown";
 import { DocFile, useDocumentTable } from "@/modules/documents/useDocumentTable";
 import remarkGfm from "remark-gfm";
@@ -61,26 +61,6 @@ function SkeletonRows() {
     );
 }
 
-// Small countdown toast shown while a delete is pending, with an Undo button.
-function UndoToast({ count, onUndo }: { count: number; onUndo: () => void }) {
-    const [secondsLeft, setSecondsLeft] = useState(5);
-
-    useEffect(() => {
-        setSecondsLeft(5);
-        const interval = setInterval(() => {
-            setSecondsLeft((s) => Math.max(0, s - 1));
-        }, 1000);
-        return () => clearInterval(interval);
-    }, [count]);
-
-    return (
-        <div className={styles.undoToast}>
-            <span>{count > 1 ? `${count} files deleted` : "File deleted"} ({secondsLeft}s)</span>
-            <button onClick={onUndo}>Undo</button>
-        </div>
-    );
-}
-
 interface DocumentTableSectionProps {
     title: string;
     description?: string;
@@ -92,8 +72,8 @@ function DocumentTableSection({ title, description, sensitive, table }: Document
     const {
         fileRef, data, search, setSearch, page, setPage, totalPages,
         isLoading, refresh, setRefresh, triggerUpload, handleFile,
-        downloadFile, deleteFile, undoDelete, pendingDeleteIds,
-        selectedIds, toggleSelect, toggleSelectAll, deleteSelected,
+        downloadFile, deleteFile, deleteSelected,
+        selectedIds, toggleSelect, toggleSelectAll,
     } = table;
 
     const [viewingDoc, setViewingDoc] = useState<DocFile | null>(null);
@@ -101,7 +81,32 @@ function DocumentTableSection({ title, description, sensitive, table }: Document
     const visibleIds = data.map((doc) => doc.id).filter((id): id is number => id !== undefined);
     const allSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id));
     const selectedCount = selectedIds.size;
-    const pendingCount = pendingDeleteIds.size;
+
+    const handleDeleteFile = async (doc: DocFile) => {
+        const result = await SweetAlert2(
+            "Delete File?",
+            `Are you sure you want to delete "${doc.file_name}"? This action cannot be undone.`,
+            "warning",
+            true, "Delete",
+            true, "Cancel"
+        );
+        if (result.isConfirmed) {
+            deleteFile(doc);
+        }
+    };
+
+    const handleDeleteSelected = async () => {
+        const result = await SweetAlert2(
+            "Delete Selected Files?",
+            `Are you sure you want to delete ${selectedCount} selected file${selectedCount > 1 ? "s" : ""}? This action cannot be undone.`,
+            "warning",
+            true, "Delete",
+            true, "Cancel"
+        );
+        if (result.isConfirmed) {
+            deleteSelected();
+        }
+    };
 
     return (
         <section className={`${styles.status} ${sensitive ? styles.statusSensitive : ""}`}>
@@ -112,7 +117,7 @@ function DocumentTableSection({ title, description, sensitive, table }: Document
                 </span>
                 <span className={styles.sectionActions}>
                     {selectedCount > 0 && (
-                        <button className={styles.button_delete_bulk} onClick={deleteSelected}>
+                        <button className={styles.button_delete_bulk} onClick={handleDeleteSelected}>
                             <DeleteIcon /> Delete {selectedCount} selected
                         </button>
                     )}
@@ -186,7 +191,7 @@ function DocumentTableSection({ title, description, sensitive, table }: Document
                                         <button className={styles.button_view} title="Read Summary" onClick={() => setViewingDoc(doc)}>
                                             <ViewIcon />
                                         </button>
-                                        <button className={styles.button_delete} title="Delete PDF" onClick={() => deleteFile(doc)}>
+                                        <button className={styles.button_delete} title="Delete PDF" onClick={() => handleDeleteFile(doc)}>
                                             <DeleteIcon />
                                         </button>
                                     </td>
@@ -202,13 +207,6 @@ function DocumentTableSection({ title, description, sensitive, table }: Document
                     </tbody>
                 </table>
             </div>
-
-            {pendingCount > 0 && (
-                <UndoToast
-                    count={pendingCount}
-                    onUndo={() => undoDelete(Array.from(pendingDeleteIds))}
-                />
-            )}
 
             <div className={styles.pagination}>
                 <button

@@ -36,6 +36,8 @@ export async function POST(req: NextRequest) {
 
     if (data.status === "active") {
         return NextResponse.json({ success: true, message: data.role }, { status: 200 });
+    } else if (data.status === "under_review") {
+        return NextResponse.json({ success: false, error: "Account is Under Review by Admin" }, { status: 409 });
     }
 
     return NextResponse.json({ success: false, error: "Account Has Been Suspended" }, { status: 409 });

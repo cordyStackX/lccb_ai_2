@@ -2,6 +2,7 @@
 import styles from "./css/styles.module.css";
 import { Progress } from "@/utilities";
 import { useEffect } from "react";
+import Link from "next/link";
 
 export default function Terms() {
 
@@ -12,6 +13,7 @@ export default function Terms() {
     return(
         <section className={styles.container}>
             <div className={styles.content}>
+                <Link href="/" style={{ color: "blue" }} > {"<<"} Go Back</Link>
                 <h1>Terms and Conditions</h1>
                 <p className={styles.updated}>Last Updated: August 1, 2026</p>
 

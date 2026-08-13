@@ -18,13 +18,13 @@ export default function SignUp() {
     const router = useRouter();
 
     const [form, setForm] = useState({
-        email: "", name: "", year: "", role: "", assign_by: ""
+        id: "", email: "", name: "", year: "", role: "", assign_by: "", department: ""
     });
     const [status, setStatus] = useState(false);
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
-    // const [ifMinors, setIfMinors] = useState(true);
+    const [ifNotMinors, setIfNotMinors] = useState(false);
     const [ifTeaher, setIfTeacher] = useState(false);
 
     usePreventExit(isDirty);
@@ -35,6 +35,11 @@ export default function SignUp() {
             setIfTeacher(true);
         } else {
             setIfTeacher(false);
+        }
+        if (form.year === "College") {
+            setIfNotMinors(true);
+        } else {
+            setIfNotMinors(false);
         }
     }, [form]);
 
@@ -48,10 +53,12 @@ export default function SignUp() {
         setLoading(true);
         const responds = await Fetch_to(api_link.signup.checkEmail, { email: form.email, assign_by: form.assign_by, role: form.role, year: form.year });
         if (responds.success) {
+            localStorage.setItem("id", form.id);
             localStorage.setItem("email", form.email);
             localStorage.setItem("name", form.name);
             localStorage.setItem("year", form.year);
             localStorage.setItem("role", form.role);
+            localStorage.setItem("department", form.department);
             localStorage.setItem("assign_by", form.assign_by);
             const responds = await Fetch_to(api_link.checkcode, { email: form.email, key: "register" });
             if(!responds.success) {
@@ -92,6 +99,31 @@ export default function SignUp() {
                         <div className={styles.text_contain}>
                             <h1>LCCB Account Registration</h1>
                             <p>Please Register to continue</p>
+                        </div>
+
+                        <div className={styles.input_holder}>
+                            <span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                    fill="none" stroke="currentColor" strokeWidth="2"
+                                    strokeLinecap="round" strokeLinejoin="round">
+                                    <rect x="3" y="4" width="18" height="16" rx="2"/>
+                                    <circle cx="8" cy="10" r="2"/>
+                                    <path d="M13 9h5"/>
+                                    <path d="M13 13h5"/>
+                                    <path d="M6 16h12"/>
+                                </svg>
+                            </span>
+                            <input 
+                            type="number" 
+                            name="id" 
+                            id="id" 
+                            autoComplete="id"
+                            value={form.id}
+                            onChange={handleChange}
+                            placeholder="School Id"
+                            style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
+                            required
+                            />
                         </div>
                         
                         <div className={styles.input_holder}>
@@ -160,7 +192,6 @@ export default function SignUp() {
                             </select>
                         </div>
                         
-
                         <div className={styles.input_holder}>
                             <span>
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -182,6 +213,43 @@ export default function SignUp() {
                                 <option value="Teacher">Teacher</option>
                             </select>
                         </div>
+                        
+                        <div className={styles.input_holder}>
+                            <span>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 21h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                    <path d="M5 21V9l7-4 7 4v12" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+                                    <path d="M9 21v-5h6v5" stroke="currentColor" strokeWidth="2"/>
+                                    <path d="M9 11h.01M15 11h.01M9 14h.01M15 14h.01"
+                                        stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                </svg>
+                            </span>
+                            <select 
+                            id="department"
+                            name="department"
+                            value={form.department}
+                            onChange={handleChange}
+                            style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
+                            required
+                            >
+                                <option value="">Select Your Department</option>
+                                
+                                {ifNotMinors ? null : (
+                                    <option value="IBED">Integrated Basic Education Department</option>
+                                )}
+
+                                {ifNotMinors ? (
+                                    <>
+                                        <option value="SARFAID">School of Architecture, Fine Arts & Interior Design</option>
+                                        <option value="SBIT">School of Business & Information Technology</option>
+                                        <option value="SHTM">School of Hospitality & Tourism Management</option>
+                                        <option value="SSLATE">School of Sciences, Liberal Arts & Teacher Education</option>
+                                    </>
+                                ) : null}
+                            </select>
+                        </div>
+
                         {message && (
                             <p className={status ?  "error" : "success"}>{message}</p>
                         )}
