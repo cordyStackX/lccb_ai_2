@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
-import { Security } from "@/lib/security";
+import { Security } from "@/firewall/security";
 
 
 export async function POST(req: NextRequest) {

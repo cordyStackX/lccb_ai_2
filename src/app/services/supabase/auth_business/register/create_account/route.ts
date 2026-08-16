@@ -4,7 +4,7 @@ import { Fetch_to } from "@/utilities";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import bcrypt from "bcrypt";
 import nodemailer from "nodemailer";
-import { rateLimit } from "@/lib/rate_limit";
+import { rateLimit } from "@/firewall/rate_limit";
 
 export async function POST(req: NextRequest) {
 

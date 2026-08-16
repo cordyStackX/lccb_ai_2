@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
 import bcrypt from "bcrypt";
-import { rateLimit } from "@/lib/rate_limit";
+import { rateLimit } from "@/firewall/rate_limit";
 
 const LoginAttempts = new Map<string, { attempts: number; cooldownUntil: number }>();
 

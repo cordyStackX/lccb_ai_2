@@ -4,7 +4,15 @@ import { Fetch_to } from "@/utilities";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import bcrypt from "bcrypt";
 import nodemailer from "nodemailer";
-import { rateLimit } from "@/lib/rate_limit";
+import { rateLimit } from "@/firewall/rate_limit";
+
+const formatSchoolId = (value: string) => {
+    const digits = value.replace(/\D/g, '').slice(0, 7);
+
+    return digits
+        .replace(/^(\d{3})(\d)/, '$1-$2')
+        .replace(/^(\d{3})-(\d{2})(\d)/, '$1-$2-$3');
+};
 
 const formatSchoolId = (value: string) => {
     const digits = value.replace(/\D/g, '').slice(0, 7);

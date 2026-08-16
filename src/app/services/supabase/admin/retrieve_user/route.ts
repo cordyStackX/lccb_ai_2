@@ -1,7 +1,11 @@
 import { NextResponse, NextRequest } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
+import { Security } from "@/firewall/security";
 
 export async function POST(req: NextRequest) {
+
+    const auth = await Security(req);
+    if(auth?.error) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     
     try {
         const { page = 1, limit = 30, search = "", year = "", role = "" } = await req

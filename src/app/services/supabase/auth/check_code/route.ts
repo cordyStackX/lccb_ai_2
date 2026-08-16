@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { attemptMap, cooldownMap, CodeStore } from "@/lib/code_store";
-import { rateLimit } from "@/lib/rate_limit";
+import { rateLimit } from "@/firewall/rate_limit";
 
 const COOLDOWN_MS = 60 * 3000; // 3 minute
 

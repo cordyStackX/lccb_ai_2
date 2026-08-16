@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
-import { Security } from "@/lib/security";
+import { Security } from "@/firewall/security";
 import { Fetch_to } from "@/utilities";
 import api_links from "@/config/conf/json_config/Api_links.json";
 
