@@ -10,3 +10,5 @@ export { default as ManageUser } from "./manage_user";
 export { default as Setting } from "./setting";
 
 export { default as Embeded_code } from "./embeded_code";
+
+export { default as PendingUser } from "./pending_user";

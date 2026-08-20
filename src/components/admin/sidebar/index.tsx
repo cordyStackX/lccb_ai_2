@@ -39,6 +39,19 @@ const NAV_ITEMS = [
         ),
     },
     {
+        key: "pending_user",
+        label: "Pending user",
+        path: "/admin/pending_user",
+        icon: (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <circle cx="9" cy="8" r="3" stroke="currentColor" strokeWidth="2"/>
+                <path d="M4 19c.7-3 2.3-4.5 5-4.5s4.3 1.5 5 4.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <circle cx="17" cy="16" r="4" stroke="currentColor" strokeWidth="2"/>
+                <path d="M17 14v2l1.5 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+        ),
+    },
+    {
         key: "document",
         label: "Documents",
         path: "/admin/document",

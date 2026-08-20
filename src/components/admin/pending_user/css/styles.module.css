@@ -1,0 +1,452 @@
+.container {
+    width: 100%;
+    height: 100vh;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    display: flex;
+    flex-flow: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 0 1rem;
+}
+
+.header_cons {
+    color: var(--foreground);
+    width: 100%;
+    height: 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3rem 0;
+}
+.header_cons svg {
+    width: 40px;
+    height: 40px;
+    margin: 0 1rem;
+}
+.header_cons span {
+    display: flex;
+    align-items: center;
+}
+
+/* ---------- Card ---------- */
+.status {
+    width: 100%;
+    height: auto;
+    padding: 1rem;
+    border-radius: 8px;
+    color: var(--default-color-black);
+    margin-bottom: 2.5rem;
+}
+
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: auto;
+    padding: 1rem;
+}
+.sectionTitleGroup {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.sectionTitleGroup h2 {
+    margin: 0;
+}
+.sectionActions {
+    display: flex;
+    gap: 0.5rem;
+}
+.sectionDescription {
+    padding: 0 1rem;
+    margin: -0.5rem 0 0.5rem 0;
+    font-size: 0.85rem;
+    color: var(--default-color-gray);
+    font-weight: 400;
+}
+
+/* ---------- Search ---------- */
+.search {
+    width: 100%;
+    padding: 1rem;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.search input {
+    flex: 1 1 220px;
+    padding: 0.5rem 1rem;
+    margin: 0;
+    background: transparent;
+    border: 2px solid var(--default-color-gray);
+    outline: none;
+    color: var(--default-color-black);
+    font-size: 1rem;
+    border-radius: 8px;
+}
+.search select {
+    padding: 0.5rem 0.8rem;
+    background: transparent;
+    border: 2px solid var(--default-color-gray);
+    outline: none;
+    color: var(--default-color-black);
+    font-size: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+
+/* ---------- Table ---------- */
+.tableScroll {
+    width: 100%;
+    overflow-x: auto;
+    padding: 0 1rem;
+}
+.status table {
+    width: 100%;
+    min-width: 780px;
+    height: auto;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--default-color-white-2);
+    box-shadow: 0 4px 20px var(--fx-color-bg);
+    border-collapse: collapse;
+    margin: 5px 0 0 0;
+}
+.status th {
+    border-bottom: 2px solid var(--default-color-gray);
+    padding: 1rem;
+    white-space: nowrap;
+}
+.status td {
+    padding: 1rem;
+    height: auto;
+    background: var(--default-color-white);
+    text-align: center;
+    color: var(--default-color-black);
+}
+.status td select {
+    width: 130px;
+    padding: 0.5rem 0.5rem;
+    cursor: pointer;
+    margin: 0 auto;
+    background: transparent;
+    border: transparent;
+    color: var(--default-color-black);
+    outline: none;
+    font-size: 15px;
+    text-align: center;
+}
+
+/* ---------- Pagination ---------- */
+.pagination {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+}
+.pageInfo {
+    color: var(--foreground);
+    font-weight: 600;
+}
+.pageButton {
+    cursor: pointer;
+    padding: 0.5rem 0.9rem;
+    background: var(--default-color-white);
+    border: 2px solid var(--default-color-gray);
+    color: var(--foreground);
+    border-radius: 8px;
+}
+.pageButton:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+    .container {
+        padding: 4.5rem 0.75rem 0.75rem 0.75rem; /* clears fixed burger button */
+    }
+
+    .header_cons {
+        height: auto;
+        padding: 0 0 1.5rem 0;
+    }
+
+    .sectionHeader {
+        flex-flow: column;
+        align-items: flex-start;
+        gap: 0.6rem;
+    }
+    .sectionActions {
+        width: 100%;
+    }
+    .button_download {
+        width: 100%;
+        text-align: center;
+    }
+
+    .search {
+        flex-flow: column;
+        align-items: stretch;
+        gap: 0.6rem;
+    }
+    @media (max-width: 900px) {
+    .search {
+        flex-flow: column;
+        align-items: stretch;
+        gap: 0.6rem;
+    }
+    .search input,
+    .search select {
+        flex: none;  
+        width: 100%;
+        height: auto;
+    }
+}
+
+    .tableScroll {
+        padding: 0 0.5rem;
+    }
+
+    .pagination {
+        justify-content: space-between;
+    }
+}
+
+@media (max-width: 480px) {
+    .header_cons svg {
+        width: 30px;
+        height: 30px;
+        margin: 0 0.6rem 0 0;
+    }
+    .header_cons h1 {
+        font-size: 1.2rem;
+    }
+    .sectionTitleGroup h2 {
+        font-size: 1rem;
+    }
+    .sectionDescription {
+        padding: 0 0.5rem;
+    }
+}
+
+/* ---------- Actions column ---------- */
+/* ---------- Actions column ---------- */
+.button_view {
+    padding: 0.45rem 1rem;
+    border-radius: 8px;
+    color: var(--default-color-black);
+    cursor: pointer;
+    border: 2px solid var(--default-color-gray);
+    background: transparent;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: transform 300ms ease, background-color 200ms ease;
+}
+.button_view:hover {
+    background-color: var(--secondary);
+    color: var(--default-color-white);
+}
+.button_view:active {
+    transform: scale(0.92);
+}
+
+/* ---------- Modal footer (Accept / Decline) ---------- */
+.modalFooter {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--default-color-white-2);
+}
+.button_accept,
+.button_decline {
+    padding: 0.55rem 1.4rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: 2px solid transparent;
+    transition: transform 200ms ease, background-color 200ms ease;
+}
+.button_accept {
+    background-color: var(--default-color-green);
+    color: var(--default-color-white);
+}
+.button_accept:hover {
+    opacity: 0.9;
+}
+.button_decline {
+    background: transparent;
+    border-color: var(--default-color-red);
+    color: var(--default-color-red);
+}
+.button_decline:hover {
+    background-color: var(--default-color-red);
+    color: var(--default-color-white);
+}
+.button_accept:active,
+.button_decline:active {
+    transform: scale(0.94);
+}
+
+/* ---------- Responsive: modal footer ---------- */
+@media (max-width: 480px) {
+    .modalFooter {
+        flex-direction: column-reverse;
+    }
+    .button_accept,
+    .button_decline {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* ---------- View modal ---------- */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 50;
+    padding: 1.5rem;
+}
+.modalCard {
+    width: min(480px, 100%);
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--default-color-white);
+    border-radius: 12px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+}
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem 1.5rem;
+    border-bottom: 1px solid var(--default-color-white-2);
+}
+.modalHeader h3 {
+    margin: 0;
+    font-size: 1rem;
+    word-break: break-word;
+}
+.modalClose {
+    background: none;
+    border: none;
+    font-size: 1.6rem;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--default-color-gray);
+    padding: 0 0.25rem;
+}
+.modalClose:hover {
+    color: var(--default-color-red);
+}
+.modalBody {
+    padding: 1.5rem;
+    overflow-y: auto;
+    color: var(--default-color-black);
+}
+.detailRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--default-color-white-2);
+}
+.detailRow:last-child {
+    border-bottom: none;
+}
+.detailLabel {
+    font-weight: 700;
+    color: var(--default-color-gray);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.modalSelect {
+    cursor: pointer;
+    padding: 0.4rem 0.7rem;
+    border-radius: 8px;
+    border: 1px solid var(--default-color-white-2);
+    background: var(--default-color-white);
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+/* ---------- Responsive: modal ---------- */
+@media (max-width: 480px) {
+    .modalOverlay {
+        padding: 0.75rem;
+        align-items: flex-end;
+    }
+    .modalCard {
+        width: 100%;
+        max-height: 85vh;
+        border-radius: 12px 12px 0 0;
+    }
+    .detailRow {
+        flex-flow: column;
+        align-items: flex-start;
+        gap: 0.3rem;
+    }
+    .modalSelect {
+        width: 100%;
+    }
+}
+
+/* ---------- Skeleton loading ---------- */
+.skeletonBar {
+    display: block;
+    height: 0.85rem;
+    border-radius: 6px;
+    margin: 0 auto;
+    background: linear-gradient(
+        90deg,
+        var(--default-color-white-2) 25%,
+        var(--fx-color-bg) 50%,
+        var(--default-color-white-2) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+}
+.skeletonShort {
+    width: 60%;
+}
+.skeletonMedium {
+    width: 75%;
+}
+.skeletonLong {
+    width: 90%;
+}
+.skeletonIconSm {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    margin: 0 0.35rem;
+    background: linear-gradient(
+        90deg,
+        var(--default-color-white-2) 25%,
+        var(--fx-color-bg) 50%,
+        var(--default-color-white-2) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+}
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}

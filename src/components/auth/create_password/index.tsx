@@ -25,6 +25,7 @@ export default function Create_Password() {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showPassword2, setShowPassword2] = useState(false);
+    const [success, setSuccess] = useState(false);
 
     usePreventExit(true);
 
@@ -81,9 +82,7 @@ export default function Create_Password() {
 
             if (autosignin_response.success) {
                 localStorage.clear();
-                
-                await Fetch_to(api_link.jwt.auth, { email: form.email });
-                router.push("/chat");
+                setSuccess(true);
             } else {
                 alert(responds.message);
                 router.push("/auth/signin");
@@ -100,9 +99,34 @@ export default function Create_Password() {
         <section className={`${styles.container} `}>
             <div className={`${styles.wrapper} `}>
                 {loading ? (
-                    <div className={`${styles.form_styles} `}>
-                        <React_Spinners status="Activating Your Account..." />
-                    </div>
+                    <>
+                        {success ? (
+                            <div>
+                                <svg
+                                width="120"
+                                height="120"
+                                viewBox="0 0 120 120"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                                >
+                                <circle cx="60" cy="60" r="50" stroke="currentColor" strokeWidth="4" />
+                                <path
+                                    d="M60 35V65"
+                                    stroke="currentColor"
+                                    strokeWidth="5"
+                                    strokeLinecap="round"
+                                />
+                                <circle cx="60" cy="82" r="3" fill="currentColor" />
+                                </svg>
+                                <h2>Account is under review</h2>
+                                <button>Go Back to log in page</button>
+                            </div>
+                        ) : (
+                            <div className={`${styles.form_styles} `}>
+                                <React_Spinners status="Activating Your Account..." />
+                            </div>
+                        )}
+                    </>
                 ) : (
                     <form className={styles.form_styles} onSubmit={handleSubmit}>
                         <section className={`${styles.info} `}>

@@ -6,22 +6,6 @@ import bcrypt from "bcrypt";
 import nodemailer from "nodemailer";
 import { rateLimit } from "@/firewall/rate_limit";
 
-const formatSchoolId = (value: string) => {
-    const digits = value.replace(/\D/g, '').slice(0, 7);
-
-    return digits
-        .replace(/^(\d{3})(\d)/, '$1-$2')
-        .replace(/^(\d{3})-(\d{2})(\d)/, '$1-$2-$3');
-};
-
-const formatSchoolId = (value: string) => {
-    const digits = value.replace(/\D/g, '').slice(0, 7);
-
-    return digits
-        .replace(/^(\d{3})(\d)/, '$1-$2')
-        .replace(/^(\d{3})-(\d{2})(\d)/, '$1-$2-$3');
-};
-
 export async function POST(req: NextRequest) {
 
     const rate = rateLimit(req, { windowMs: 1000, max: 5, keyPrefix: "create_account" });
@@ -45,8 +29,6 @@ export async function POST(req: NextRequest) {
         
         const cleanEmail = email.trim().toLowerCase();
 
-        const cleanId = formatSchoolId(id);
-
         const cleanAssign_by = "admin";
 
         const checkCodeUrl = new URL(api_link.checkcode, req.nextUrl.origin).toString();
@@ -69,7 +51,7 @@ export async function POST(req: NextRequest) {
 
         const { error } = await supabaseServer
         .from("auth")
-        .insert([{ id: cleanId, email: cleanEmail, password: String(hashed), f_name: cleanName, year: year, status: status, role: role, assign_by: cleanAssign_by, department: department }]);
+        .insert([{ id: id, email: cleanEmail, password: String(hashed), f_name: cleanName, year: year, status: status, role: role, assign_by: cleanAssign_by, department: department }]);
 
         await supabaseServer
         .from("system_logs")

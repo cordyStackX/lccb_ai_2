@@ -124,6 +124,7 @@ export default function Setting({ email, f_name } : SettingProps) {
 
     const handleSaveBranding = async () => {
         let response;
+        if (!schoolName) return SweetAlert2("Error", `Enter Business/School Name`, "error", true, "Confirm", false, "", false);
         setSavingBranding(true);
         try {
 

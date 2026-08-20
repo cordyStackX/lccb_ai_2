@@ -142,10 +142,11 @@ export default function SignIn() {
                                 {showPassword ? "Hide" : "Show"}
                             </button>
                         </div>
-                        <p><Link href={"/auth/forgot-password"} onClick={() => {Progress(true);}}>Forgot Password?</Link></p>
+                        
                         {message && (
                             <p className={status ?  "error" : "success"}>{message}</p>
                         )}
+                        <p><Link href={"/auth/forgot-password"} onClick={() => {Progress(true);}}>Forgot Password?</Link></p>
                         <span className={`${styles.checkbox} `}>
                             <input type="checkbox" required />
                             <p>I agree to the <Link href={"/privacy"} onClick={() => {Progress(true);}}>Privacy Policy</Link> & <Link href={"/terms"} onClick={() => {Progress(true);}} >Terms of Conditions</Link></p>
