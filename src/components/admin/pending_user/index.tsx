@@ -2,7 +2,7 @@
 import styles from "./css/styles.module.css";
 import { 
     Fetch_to, 
-    // Popup_info 
+    Popup_info 
 } from "@/utilities";
 import { useEffect, useState } from "react";
 import api_link from "@/config/conf/json_config/fetch_url.json";
@@ -13,10 +13,16 @@ type ManageUserDataProps = {
     f_name?: string;
     id?: number;
     status?: string;
-    year?: string;
     role?: string;
     department?: string;
+    auth_student?: AuthStudent[];
 }
+
+type AuthStudent = {
+    year?: string;
+    department?: string;
+    school_id?: string;
+};
 
 type System_logs = {
     request?: string;
@@ -27,6 +33,8 @@ type System_logs = {
 
 const PAGE_SIZE = 30;
 
+const DECLINE_REASONS = [" Wrong ID", " Wrong Name", " Wrong Year Level", " Wrong Department", " Wrong Role"];
+
 export default function PendingUser() {
     const [data, setData] = useState<ManageUserDataProps[]>([]);
     const [refresh, setRefresh] = useState(false);
@@ -34,11 +42,14 @@ export default function PendingUser() {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
-    // const [isLoadState, setIsLoadState] = useState(false);
-    // const [isLoadStateDone, setIsLoadStateDone] = useState(false);
-    // const [isLoadError, setIsLoadError] = useState(false);
-    // const [isLoadStatus, setIsLoadStatus] = useState("");
+    const [isLoadState, setIsLoadState] = useState(false);
+    const [isLoadStateDone, setIsLoadStateDone] = useState(false);
+    const [isLoadError, setIsLoadError] = useState(false);
+    const [isLoadStatus, setIsLoadStatus] = useState("");
     const [viewingUser, setViewingUser] = useState<ManageUserDataProps | null>(null);
+    const [showDeclinePanel, setShowDeclinePanel] = useState(false);
+    const [selectedReasons, setSelectedReasons] = useState<string[]>([]);
+    const [customReason, setCustomReason] = useState("");
 
     useEffect(() => {
         const RetrieveUserData = async () => {
@@ -49,6 +60,7 @@ export default function PendingUser() {
                 search: "",
                 year: "",
                 role: "Student",
+                status: "under_review",
             });
             if (response.success) {
                 setData(response.data.message);
@@ -90,28 +102,43 @@ export default function PendingUser() {
     // NOTE: kept for whenever you want to wire Accept/Decline to a real
     // status update call. Not attached to any button below on purpose —
     // layout only, per request.
-    // const handleStatusChange = async (target: ManageUserDataProps, newStatus: string) => {
-    //     setIsLoadState(true);
-    //     setIsLoadStateDone(true);
-    //     setIsLoadStatus("Updating Please Wait...");
-    //     const response = await Fetch_to(api_link.admin.update_user_status, { id: target.id, status: newStatus });
-    //     if (response.success) {
-    //         setIsLoadStateDone(false);
-    //         setIsLoadStatus(response.data.message);
-    //         setTimeout(() => setIsLoadState(false), 3000);
-    //         setViewingUser((prev) => (prev ? { ...prev, status: newStatus } : prev));
-    //         setRefresh(!refresh);
-    //     } else {
-    //         setIsLoadStateDone(false);
-    //         setIsLoadStatus(response.message);
-    //         setIsLoadError(true);
-    //         setTimeout(() => setIsLoadState(false), 3000);
-    //     }
-    // };
+    const handleStatusChange = async (target: ManageUserDataProps, newStatus: string) => {
+        setIsLoadState(true);
+        setIsLoadStateDone(true);
+        setIsLoadStatus("Updating Please Wait...");
+        const response = await Fetch_to(api_link.admin.update_user_status, { email: target.email, status: newStatus, reason: `${selectedReasons}. ${customReason}` });
+        if (response.success) {
+            setIsLoadStateDone(false);
+            setIsLoadStatus(response.data.message);
+            setTimeout(() => setIsLoadState(false), 3000);
+            setViewingUser(null);
+            setRefresh(!refresh);
+        } else {
+            setIsLoadStateDone(false);
+            setViewingUser(null);
+            setIsLoadStatus(response.message);
+            setIsLoadError(true);
+            setTimeout(() => setIsLoadState(false), 3000);
+        }
+    };
+
+    const toggleReason = (reason: string) => {
+        setSelectedReasons((prev) =>
+            prev.includes(reason) ? prev.filter((r) => r !== reason) : [...prev, reason]
+        );
+    };
+
+
+    const formatSchoolId = (id?: string) => {
+        if (!id) return " - ";
+        const digits = String(id).replace(/\D/g, ""); // strip any non-digits just in case
+        if (digits.length !== 9) return digits; // fallback if it doesn't match expected length
+        return `${digits.slice(0, 2)}-${digits.slice(2, 6)}-${digits.slice(6)}`;
+    };
 
     return (
         <section className={styles.container}>
-            {/* {isLoadState ? (
+            {isLoadState ? (
                 isLoadStateDone ? (
                     <Popup_info status={isLoadStatus} bg_color="var(--primary)" states={true} load={true} error={false} />
                 ) : (
@@ -122,7 +149,7 @@ export default function PendingUser() {
                     )
                 )
 
-            ) : null} */}
+            ) : null}
             <header className={styles.header_cons}>
                 <span>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -140,6 +167,16 @@ export default function PendingUser() {
                     <span className={styles.sectionTitleGroup}>
                         <h2>All Users</h2>
                     </span>
+                    <div className={styles.sectionActions}>
+                        <button
+                            className={styles.button_download}
+                            disabled={refresh}
+                            style={{ opacity: refresh ? 0.5 : 1 }}
+                            onClick={() => setRefresh(!refresh)}
+                        >
+                            Refresh
+                        </button>
+                    </div>
                 </div>
                 <p className={styles.sectionDescription}>
                     Confirm Student ID if Matches 
@@ -153,15 +190,18 @@ export default function PendingUser() {
                                 <th>Name</th>
                                 <th>Role</th>
                                 <th>Gmail</th>
+                                <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {isLoading ? (
-                                Array.from({ length: 8 }).map((_, i) => (
+                                Array.from({ length: 4 }).map((_, i) => (
                                     <tr key={`skeleton-${i}`}>
-                                        <td><span className={`${styles.skeletonBar} ${styles.skeletonMedium}`} /></td>
                                         <td><span className={`${styles.skeletonBar} ${styles.skeletonShort}`} /></td>
+                                        <td><span className={`${styles.skeletonBar} ${styles.skeletonMedium}`} /></td>
+                                        <td><span className={`${styles.skeletonBar} ${styles.skeletonMedium}`} /></td>
+                                        <td><span className={`${styles.skeletonBar} ${styles.skeletonMedium}`} /></td>
                                         <td><span className={`${styles.skeletonBar} ${styles.skeletonLong}`} /></td>
                                         <td>
                                             <span className={styles.skeletonIconSm} />
@@ -171,14 +211,20 @@ export default function PendingUser() {
                             ) : data && data.length > 0 ? (
                                 data.map((row, index) => (
                                     <tr key={index}>
-                                        <td> {row.id} </td>
+                                        <td> {formatSchoolId(row.auth_student?.[0].school_id)} </td>
                                         <td> {row.f_name} </td>
                                         <td> {row.role} </td>
                                         <td> {row.email} </td>
+                                        <td> {row.status} </td>
                                         <td>
                                             <button
                                                 className={styles.button_view}
-                                                onClick={() => setViewingUser(row)}
+                                                onClick={() => {
+                                                    setViewingUser(row);
+                                                    setShowDeclinePanel(false);
+                                                    setSelectedReasons([]);
+                                                    setCustomReason("");
+                                                }}
                                                 title="View details"
                                             >
                                                 View
@@ -188,7 +234,7 @@ export default function PendingUser() {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={4} style={{ textAlign: "center", padding: "2rem" }}>
+                                    <td colSpan={6} style={{ textAlign: "center", padding: "2rem" }}>
                                         No User Found
                                     </td>
                                 </tr>
@@ -226,15 +272,31 @@ export default function PendingUser() {
                         <div className={styles.modalBody}>
                             <div className={styles.detailRow}>
                                 <span className={styles.detailLabel}>Id</span>
-                                <span>{viewingUser.id || " - "}</span>
+                                <span>
+                                    {viewingUser.role === "Business"
+                                        ? viewingUser.id
+                                        : formatSchoolId(viewingUser.auth_student?.[0]?.school_id)}
+                                </span>
                             </div>
-                            <div className={styles.detailRow}>
-                                <span className={styles.detailLabel}>Name</span>
+                           <div className={styles.detailRow}>
+                                <span className={styles.detailLabel}>{viewingUser.role === "Business" ? "Business Name" : "FullName"}</span>
                                 <span>{viewingUser.f_name || " - "}</span>
                             </div>
                             <div className={styles.detailRow}>
+                                <span className={styles.detailLabel}>Year Level</span>
+                                <span>
+                                    {viewingUser.role === "Business"
+                                        ? "N/A"
+                                        : viewingUser.auth_student?.[0]?.year}
+                                </span>
+                            </div>
+                            <div className={styles.detailRow}>
                                 <span className={styles.detailLabel}>Department</span>
-                                <span>{viewingUser.department || " - "}</span>
+                                <span>
+                                    {viewingUser.role === "Business"
+                                        ? "N/A"
+                                        : viewingUser.auth_student?.[0]?.department}
+                                </span>
                             </div>
                             <div className={styles.detailRow}>
                                 <span className={styles.detailLabel}>Role</span>
@@ -253,17 +315,61 @@ export default function PendingUser() {
                                 <span>{getUploadedCount(viewingUser.email)}</span>
                             </div>
                         </div>
-                        <div className={styles.modalFooter}>
-                            <button className={styles.button_decline}>
-                                Decline
-                            </button>
-                            <button className={styles.button_accept}>
-                                Accept
-                            </button>
-                        </div>
+                       {showDeclinePanel ? (
+                            <div className={styles.modalBody_decline}>
+                                <p className={styles.sectionTitleGroup}>Select reason(s) for declining</p>
+                                <div className={styles.reasonList}>
+                                    {DECLINE_REASONS.map((reason) => (
+                                        <label
+                                            key={reason}
+                                            className={`${styles.reasonOption} ${selectedReasons.includes(reason) ? styles.reasonOptionChecked : ""}`}
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedReasons.includes(reason)}
+                                                onChange={() => toggleReason(reason)}
+                                            />
+                                            <span>{reason}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                                <div className={styles.reasonOtherRow}>
+                                    <span className={styles.detailLabel}>Other</span>
+                                    <input
+                                        className={styles.reasonOtherInput}
+                                        type="text"
+                                        placeholder="Additional notes (optional)"
+                                        value={customReason}
+                                        onChange={(e) => setCustomReason(e.target.value)}
+                                    />
+                                </div>
+                                <div className={styles.modalFooter}>
+                                    <button className={styles.button_accept} onClick={() => setShowDeclinePanel(false)}>
+                                        Back
+                                    </button>
+                                    <button
+                                        className={styles.button_decline}
+                                        disabled={selectedReasons.length === 0 && !customReason.trim()}
+                                        onClick={() => handleStatusChange(viewingUser!, "decline")}
+                                    >
+                                        Confirm Decline
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className={styles.modalFooter}>
+                                <button className={styles.button_decline} onClick={() => setShowDeclinePanel(true)}>
+                                    Decline
+                                </button>
+                                <button className={styles.button_accept} onClick={() => handleStatusChange(viewingUser!, "active")}>
+                                    Accept
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
+            
         </section>
     );
 }

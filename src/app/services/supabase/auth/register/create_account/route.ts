@@ -5,10 +5,11 @@ import api_link from "@/config/conf/json_config/fetch_url.json";
 import bcrypt from "bcrypt";
 import nodemailer from "nodemailer";
 import { rateLimit } from "@/firewall/rate_limit";
+import { encryptText } from "@/firewall/encryptions";
 
 export async function POST(req: NextRequest) {
 
-    const rate = rateLimit(req, { windowMs: 1000, max: 5, keyPrefix: "create_account" });
+    const rate = rateLimit(req, { windowMs: 60_000, max: 5, keyPrefix: "create_account" });
     if (!rate.allowed) {
         const retryAfterSeconds = Math.ceil((rate.resetAt - Date.now()) / 1000);
         return NextResponse.json(
@@ -46,13 +47,26 @@ export async function POST(req: NextRequest) {
 
         const hashed = await bcrypt.hash(password, 10);
 
+        const hashed_id = encryptText(id, process.env.API_KEY || "");
 
         const status = "under_review";
 
-        const { error } = await supabaseServer
+        const { data, error } = await supabaseServer
         .from("auth")
-        .insert([{ id: id, email: cleanEmail, password: String(hashed), f_name: cleanName, year: year, status: status, role: role, assign_by: cleanAssign_by, department: department }]);
+        .insert([{ email: cleanEmail, password: String(hashed), f_name: cleanName, status: status, role: role, assign_by: cleanAssign_by }])
+        .select();
 
+        if (data) {
+            const { error } = await supabaseServer
+            .from("auth_student")
+            .insert([{ year: year, department: department, school_id: String(hashed_id), email: cleanEmail }]);
+
+            if (error) {
+                console.error("Supabase Query Error: ", error);
+                return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
+            }
+        }
+        
         await supabaseServer
         .from("system_logs")
         .insert({ request: email });
@@ -74,7 +88,7 @@ export async function POST(req: NextRequest) {
         const mailOption = {
             from: process.env.GMAIL_USERNAME,
             to: cleanEmail,
-            subject: `Welcome to LACO AI`,
+            subject: `Welcome to LACO AI — Account Under Review`,
             html: `
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f5; padding:40px 0; font-family:Arial, Helvetica, sans-serif;">
                 <tr>
@@ -82,25 +96,28 @@ export async function POST(req: NextRequest) {
                         <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:12px; overflow:hidden; box-shadow:0 4px 16px rgba(0,0,0,0.08);">
                             <tr>
                                 <td style="background:linear-gradient(135deg, #017d93, #3fa5b7); padding:36px 24px; text-align:center;">
-                                    <div style="font-size:40px; line-height:1; margin-bottom:8px;">🎉</div>
-                                    <h1 style="margin:0; color:#ffffff; font-size:24px; font-weight:700;">Welcome to LACO AI</h1>
+                                    <div style="font-size:40px; line-height:1; margin-bottom:8px;">✅</div>
+                                    <h1 style="margin:0; color:#ffffff; font-size:24px; font-weight:700;">Account Created</h1>
                                 </td>
                             </tr>
                             <tr>
                                 <td style="padding:32px 32px 8px 32px; text-align:center;">
-                                    <p style="margin:0 0 16px 0; font-size:15px; color:#808080;">Your account has been created for</p>
+                                    <p style="margin:0 0 16px 0; font-size:15px; color:#808080;">Congrats! Your account has been created for</p>
                                     <p style="margin:0 0 24px 0; font-size:16px; font-weight:600; color:#213b94; background-color:#f0f6f7; display:inline-block; padding:8px 16px; border-radius:6px;">
                                         ${cleanEmail}
                                     </p>
+                                    <p style="margin:0 0 12px 0; font-size:15px; line-height:1.6; color:#3c3c3c;">
+                                        Your account is currently <strong>under review</strong>. We're verifying your details and will notify you by email once it's approved.
+                                    </p>
                                     <p style="margin:0 0 28px 0; font-size:15px; line-height:1.6; color:#3c3c3c;">
-                                        You're all set! You can now upload PDF documents and ask LACO AI questions to get instant explanations and insights.
+                                        Once approved, you'll be able to upload PDF documents and ask LACO AI questions to get instant explanations, insights and your latest grades.
                                     </p>
                                 </td>
                             </tr>
                             <tr>
                                 <td style="padding:0 32px 36px 32px; text-align:center;">
                                     <a href="${process.env.APP_URL}" style="display:inline-block; background-color:#213b94; color:#ffffff; text-decoration:none; font-size:15px; font-weight:600; padding:12px 28px; border-radius:8px;">
-                                        Get Started
+                                        Check Status
                                     </a>
                                 </td>
                             </tr>

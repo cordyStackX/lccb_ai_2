@@ -61,7 +61,6 @@ export default function Create_Password() {
                 const autosignin_response = await Fetch_to(api_link.signin, {email: form.email, password: form.password});
                 if (autosignin_response.success) {
                     localStorage.clear();
-                    
                     await Fetch_to(api_link.jwt.auth, { email: form.email });
                     router.push("/admin_business/dashboard");
                 } else {
@@ -101,7 +100,7 @@ export default function Create_Password() {
                 {loading ? (
                     <>
                         {success ? (
-                            <div>
+                            <div className={styles.under_review}>
                                 <svg
                                 width="120"
                                 height="120"
@@ -119,7 +118,7 @@ export default function Create_Password() {
                                 <circle cx="60" cy="82" r="3" fill="currentColor" />
                                 </svg>
                                 <h2>Account is under review</h2>
-                                <button>Go Back to log in page</button>
+                                <Link href={"/auth/signin"}>Go Back to Log in page {">>"} </Link>
                             </div>
                         ) : (
                             <div className={`${styles.form_styles} `}>

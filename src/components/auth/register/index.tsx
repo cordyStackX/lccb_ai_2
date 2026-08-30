@@ -12,11 +12,11 @@ import {
     React_Spinners,
     Progress
 } from "@/utilities";
-
+import { Turnstile } from "@marsidev/react-turnstile";
 
 export default function SignUp() {
     const router = useRouter();
-
+    const [turnstileToken, setTurnstileToken] = useState("");
     const [form, setForm] = useState({
         id: "", email: "", name: "", year: "", role: "", assign_by: "", department: ""
     });
@@ -25,17 +25,11 @@ export default function SignUp() {
     const [loading, setLoading] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
     const [ifNotMinors, setIfNotMinors] = useState(false);
-    const [ifTeaher, setIfTeacher] = useState(false);
 
     usePreventExit(isDirty);
 
     useEffect(() => {
         Progress(false);
-        if (form.role == "Teacher") {
-            setIfTeacher(true);
-        } else {
-            setIfTeacher(false);
-        }
         if (form.year === "College") {
             setIfNotMinors(true);
         } else {
@@ -51,7 +45,7 @@ export default function SignUp() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        const responds = await Fetch_to(api_link.signup.checkEmail, { email: form.email, assign_by: form.assign_by, role: form.role, year: form.year });
+        const responds = await Fetch_to(api_link.signup.checkEmail, { email: form.email, assign_by: form.assign_by, role: form.role, year: form.year, turnstileToken });
         if (responds.success) {
             localStorage.setItem("id", form.id);
             localStorage.setItem("email", form.email);
@@ -249,13 +243,14 @@ export default function SignUp() {
                                 ) : null}
                             </select>
                         </div>
-
+                        
+                        <Turnstile
+                            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                            onSuccess={(token) => setTurnstileToken(token)}
+                        />
                         {message && (
                             <p className={status ?  "error" : "success"}>{message}</p>
                         )}
-                        {ifTeaher ? (
-                            <p className="neutral">For Security purposes Teacher{"'"}s, need to contact the admin to activate your account <br /> {process.env.NEXT_PUBLIC_GMAIL_USERNAME} </p>
-                        ) : null}
                         <section className={`${styles.buttons} `}>
                             <button>Register</button>
                         </section>

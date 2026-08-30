@@ -3,7 +3,7 @@ import { supabaseServer } from "@/lib/supabase-server";
 import { Security } from "@/firewall/security";
 import { Fetch_to } from "@/utilities";
 import { encryptPDF } from "@pdfsmaller/pdf-encrypt-lite";
-import { encryptText } from "@/lib/encryptions";
+import { encryptText } from "@/firewall/encryptions";
 import api_links from "@/config/conf/json_config/Api_links.json";
 
 export async function POST(req: NextRequest) {

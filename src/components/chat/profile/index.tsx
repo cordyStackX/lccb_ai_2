@@ -16,9 +16,10 @@ interface Index {
     role: string
     year: string
     profilePic: string
+    department: string
 }
 
-export default function Profile({ showProfile, setShowProfile, email, name, role, year, profilePic, setGlobalRefresh }: Index) {
+export default function Profile({ showProfile, setShowProfile, email, name, role, year, profilePic, setGlobalRefresh, department }: Index) {
     const router = useRouter();
     const profilePicRef = useRef<HTMLInputElement>(null);
     const [form, setForm] = useState({
@@ -156,6 +157,7 @@ export default function Profile({ showProfile, setShowProfile, email, name, role
                         <span>
                             <h4>Role: {role} </h4>
                             <h4>Year Level: {year} </h4>
+                            <h4>Department: {department} </h4>
                         </span>
                         {/* Hidden Input for Profile Picture */}
                         <input

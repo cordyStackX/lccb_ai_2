@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
 import { rateLimit } from "@/firewall/rate_limit";
+import { verifyTurnstile } from "@/firewall/turnstile";
 
 export async function POST(req: NextRequest) {
 
-    const rate = rateLimit(req, { windowMs: 1000, max: 5, keyPrefix: "check_status" });
+    const rate = rateLimit(req, { windowMs: 60_000, max: 5, keyPrefix: "check_status" });
     if (!rate.allowed) {
         const retryAfterSeconds = Math.ceil((rate.resetAt - Date.now()) / 1000);
         return NextResponse.json(
@@ -13,7 +14,13 @@ export async function POST(req: NextRequest) {
         );
     }
 
-    const { email } = await req.json();
+    const { email, turnstileToken } = await req.json();
+
+    const turnstile = await verifyTurnstile(turnstileToken);
+    if (!turnstile.success) {
+        return NextResponse.json({ success: false, error: "Verification failed" }, { status: 400 });
+    }
+
 
     if (!email) return NextResponse.json({ success: false, error: "Email is required" }, { status: 404 });
 
@@ -37,7 +44,7 @@ export async function POST(req: NextRequest) {
     if (data.status === "active") {
         return NextResponse.json({ success: true, message: data.role }, { status: 200 });
     } else if (data.status === "under_review") {
-        return NextResponse.json({ success: false, error: "Account is Under Review by Admin" }, { status: 409 });
+        return NextResponse.json({ success: false, error: "Account is Under Review" }, { status: 409 });
     }
 
     return NextResponse.json({ success: false, error: "Account Has Been Suspended" }, { status: 409 });

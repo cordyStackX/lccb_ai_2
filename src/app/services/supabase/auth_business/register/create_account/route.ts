@@ -8,7 +8,7 @@ import { rateLimit } from "@/firewall/rate_limit";
 
 export async function POST(req: NextRequest) {
 
-    const rate = rateLimit(req, { windowMs: 1000, max: 5, keyPrefix: "create_account" });
+    const rate = rateLimit(req, { windowMs: 60_000, max: 5, keyPrefix: "create_account" });
     if (!rate.allowed) {
         const retryAfterSeconds = Math.ceil((rate.resetAt - Date.now()) / 1000);
         return NextResponse.json(
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
 
     try {
 
-        const { email, password, c_password, name, year, role } = await req.json();
+        const { email, password, c_password, name, role } = await req.json();
 
         if (!email || !password || !c_password) return NextResponse.json({ success: false, error: "You Rejected Invalid Info" }, { status: 404 });
 
@@ -48,12 +48,27 @@ export async function POST(req: NextRequest) {
 
         const status = role === "Business" ? "active" : "suspend";
 
-        const { error } = await supabaseServer
+        const { data, error } = await supabaseServer
         .from("auth")
-        .insert([{ email: cleanEmail, password: String(hashed), f_name: cleanName, year: year, status: status, role: role, assign_by: cleanAssign_by, current_plan: "Free Trial", current_limit: "10000", current_pdf_limit: "2", current_pdf_limit_per_mb: "10" }]);
+        .insert([{ email: cleanEmail, password: String(hashed), f_name: cleanName, status: status, role: role, assign_by: cleanAssign_by,  }])
+        .select();
 
-        await supabaseServer.from("setting").insert([{ state: "open", target: "suspend", email: cleanEmail }]);
+        if (data) {
 
+            const { error } =  await supabaseServer
+            .from("auth_business")
+            .insert([{ current_plan: "Free Trial", current_limit: "10000", current_pdf_limit: "2", current_pdf_limit_per_mb: "10", email: cleanEmail }]);
+
+            await supabaseServer.from("setting").insert([{ state: "open", target: "suspend", email: cleanEmail }]);
+
+            if (error) {
+                console.error("Supabase Query Error: ", error);
+                return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
+            }
+
+        }
+
+        
         if (error) {
             console.error("Supabase Query Error: ", error);
             return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });

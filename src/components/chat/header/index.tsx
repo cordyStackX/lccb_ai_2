@@ -14,7 +14,7 @@ type HeaderProps = {
     setShowProfile: Dispatch<SetStateAction<boolean>>;
     name: string;
     email: string;
-    profilePic: string
+    profilePic: string;
 }
 
 

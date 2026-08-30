@@ -11,9 +11,15 @@ type ManageUserDataProps = {
     f_name?: string;
     id?: number;
     status?: string;
-    year?: string;
     role?: string;
+    auth_student?: AuthStudent[];
 }
+
+type AuthStudent = {
+    year?: string;
+    department?: string;
+    school_id?: string;
+};
 
 type System_logs = {
     request?: string;
@@ -112,7 +118,7 @@ export default function ManageUser() {
         setIsLoadState(true);
         setIsLoadStateDone(true);
         setIsLoadStatus("Updating Please Wait...");
-        const response = await Fetch_to(api_link.admin.update_user_status, { id: target.id, status: newStatus });
+        const response = await Fetch_to(api_link.admin.update_user_status, { email: target.email, status: newStatus });
         if (response.success) {
             setIsLoadStateDone(false);
             setIsLoadStatus(response.data.message);
@@ -125,6 +131,13 @@ export default function ManageUser() {
             setIsLoadError(true);
             setTimeout(() => setIsLoadState(false), 3000);
         }
+    };
+
+    const formatSchoolId = (id?: string) => {
+        if (!id) return " - ";
+        const digits = String(id).replace(/\D/g, ""); // strip any non-digits just in case
+        if (digits.length !== 9) return digits; // fallback if it doesn't match expected length
+        return `${digits.slice(0, 2)}-${digits.slice(2, 6)}-${digits.slice(6)}`;
     };
 
     return (
@@ -169,7 +182,7 @@ export default function ManageUser() {
                     </div>
                 </div>
                 <p className={styles.sectionDescription}>
-                    View, filter, and manage registered students and teachers
+                    View, filter, and manage registered students, teachers, and business
                 </p>
 
                 <section className={styles.search}>
@@ -218,7 +231,7 @@ export default function ManageUser() {
                             <tr>
                                 <th>Name</th>
                                 <th>Role</th>
-                                <th>Gmail</th>
+                                <th>Email</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -304,7 +317,31 @@ export default function ManageUser() {
                         <div className={styles.modalBody}>
                             <div className={styles.detailRow}>
                                 <span className={styles.detailLabel}>Id</span>
-                                <span>{viewingUser.id || " - "}</span>
+                                <span>
+                                    {viewingUser.role === "Business"
+                                        ? viewingUser.id
+                                        : formatSchoolId(viewingUser.auth_student?.[0]?.school_id)}
+                                </span>
+                            </div>
+                            <div className={styles.detailRow}>
+                                <span className={styles.detailLabel}>{viewingUser.role === "Business" ? "Business Name" : "FullName"}</span>
+                                <span>{viewingUser.f_name || " - "}</span>
+                            </div>
+                            <div className={styles.detailRow}>
+                                <span className={styles.detailLabel}>Year Level</span>
+                                <span>
+                                    {viewingUser.role === "Business"
+                                        ? "N/A"
+                                        : viewingUser.auth_student?.[0]?.year}
+                                </span>
+                            </div>
+                            <div className={styles.detailRow}>
+                                <span className={styles.detailLabel}>Department</span>
+                                <span>
+                                    {viewingUser.role === "Business"
+                                        ? "N/A"
+                                        : viewingUser.auth_student?.[0]?.department}
+                                </span>
                             </div>
                             <div className={styles.detailRow}>
                                 <span className={styles.detailLabel}>Role</span>

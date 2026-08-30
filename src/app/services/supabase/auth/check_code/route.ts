@@ -7,7 +7,7 @@ const COOLDOWN_MS = 60 * 3000; // 3 minute
 
 export async function POST(req: NextRequest) {
 
-    const rate = rateLimit(req, { windowMs: 1000, max: 5, keyPrefix: "check_code" });
+    const rate = rateLimit(req, { windowMs: 60_000, max: 5, keyPrefix: "check_code" });
     if (!rate.allowed) {
         const retryAfterSeconds = Math.ceil((rate.resetAt - Date.now()) / 1000);
         return NextResponse.json(

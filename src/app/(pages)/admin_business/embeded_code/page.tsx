@@ -8,16 +8,17 @@ import api_link from "@/config/conf/json_config/fetch_url.json";
 export default function Embeded_codePage() {
     const router = useRouter();
     const [nav, setNav] = useState("");
-    const [email, setEmail] = useState("");
-    const [name, setName] = useState("");
+    const [data, setData] = useState({
+        email: "", f_name: ""
+    });
 
     useEffect(() => {
         async function check() {
             const response = await Fetch_to(api_link.jwt.verify);
             if (!response.success) return router.push("/");
             Progress(false);
-            setEmail(response.data.message.final_data.data[0].email);
-            setName(response.data.message.final_data.data[0].f_name);
+            const result = response.data.message.final_data.data;
+            setData(prev => ({ ...prev, f_name: result[0].f_name, email: result[0].email }));
         }
         check();
     }, []);
@@ -28,8 +29,8 @@ export default function Embeded_codePage() {
 
     return(
         <main className="admin">
-            <Sidebar nav={nav} email={email} f_name={name} />
-            <Embeded_code email={email} />
+            <Sidebar nav={nav} email={data.email} f_name={data.f_name} />
+            <Embeded_code email={data.email} />
         </main>
     );
 }

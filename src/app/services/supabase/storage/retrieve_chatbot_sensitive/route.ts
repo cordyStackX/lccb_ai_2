@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
 // import { Security } from "@/lib/security";
-import { decryptText } from "@/lib/encryptions";
+import { decryptText } from "@/firewall/encryptions";
 
 export async function POST(req: NextRequest) {
 

@@ -22,6 +22,7 @@ export default function ChatContent() {
     const [name, setName] = useState("");
     const [role, setRole] = useState("");
     const [year, setYear] = useState("");
+    const [department, serDepartment] = useState("");
     const [profilePic, setProfilePic] = useState("");
     const [showProfile, setShowProfile] = useState(false);
     const [currentPdf, setCurrentPdf] = useState<number | undefined>();
@@ -31,11 +32,12 @@ export default function ChatContent() {
         async function check() {
             const response = await Fetch_to(api_link.jwt.verify);
             if (!response.success) return router.push("/");
-            const result = response.data.message.final_data.data[0];
-            setEmail(result.email);
-            setName(result.f_name);
-            setRole(result.role);
+            const result = response.data.message.final_data;
+            setEmail(result.data[0].email);
+            setName(result.data[0].f_name);
+            setRole(result.data[0].role);
             setYear(result.year);
+            serDepartment(result.department);
             if (result.status === "suspend") {
                 alert("Account SUSPENDED please contact admin");
                 router.push("/auth/signin");
@@ -67,7 +69,7 @@ export default function ChatContent() {
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center"}}>
                 <Sidebars currentMsg={currentMsg} isOpen={isOpen} emailRes={email} setCurrentPdf={setCurrentPdf} globalRefresh={globalRefresh} setGlobalMessages={setGlobalMessages} globalRefreshMsg={globalRefreshMsg} setCurrentMsg={setCurrentMsg} />
                 <Main setCurrentMsg={setCurrentMsg} currentMsg={currentMsg} emailRes={email} currentPdf={currentPdf} setGlobalRefresh={setGlobalRefresh} f_name={name} globalMessages={globalMessages} setGlobalRefreshMsg={setGlobalRefreshMsg} setGlobalMessages={setGlobalMessages} />
-                <Profile showProfile={showProfile} setShowProfile={setShowProfile} email={email} name={name} role={role} year={year} profilePic={profilePic} setGlobalRefresh={setGlobalRefresh} />
+                <Profile department={department} showProfile={showProfile} setShowProfile={setShowProfile} email={email} name={name} role={role} year={year} profilePic={profilePic} setGlobalRefresh={setGlobalRefresh} />
             </div> 
         </main>
     );

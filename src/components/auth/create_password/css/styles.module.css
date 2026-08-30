@@ -136,3 +136,13 @@
     cursor: pointer;
     flex-shrink: 0; 
 }
+.under_review {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-flow: column;
+}
+.under_review a {
+    margin: 10px 0;
+    color: var(--default-color-blue);
+}

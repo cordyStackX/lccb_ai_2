@@ -12,10 +12,11 @@ import {
     React_Spinners,
     Progress
 } from "@/utilities";
+import { Turnstile } from "@marsidev/react-turnstile";
 
-export default function SignIn() {
+export default function SignUp() {
     const router = useRouter();
-
+    const [turnstileToken, setTurnstileToken] = useState("");
     const [form, setForm] = useState({
         email: "", password: "", role: ""
     });
@@ -39,7 +40,7 @@ export default function SignIn() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        const status = await Fetch_to(api_link.check_status, { email: form.email });
+        const status = await Fetch_to(api_link.check_status, { email: form.email, turnstileToken });
 
         if (!status.success) {
             setMessage(status.message || "Somethings Went Wrong");
@@ -142,7 +143,10 @@ export default function SignIn() {
                                 {showPassword ? "Hide" : "Show"}
                             </button>
                         </div>
-                        
+                        <Turnstile
+                            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                            onSuccess={(token) => setTurnstileToken(token)}
+                        />
                         {message && (
                             <p className={status ?  "error" : "success"}>{message}</p>
                         )}
