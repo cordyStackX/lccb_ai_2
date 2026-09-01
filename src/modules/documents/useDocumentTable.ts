@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Fetch_to, Fetch_toFile } from "@/utilities";
 
 export interface DocFile {
@@ -23,7 +23,6 @@ interface NotifyHandlers {
 }
 
 const PAGE_SIZE = 30;
-const UNDO_DELAY_MS = 5000;
 
 export function useDocumentTable(
     endpoints: DocumentTableEndpoints,
@@ -38,11 +37,8 @@ export function useDocumentTable(
     const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
 
-    // ids currently "pending delete" (hidden, countdown running)
-    const [pendingDeleteIds, setPendingDeleteIds] = useState<Set<number>>(new Set());
     // ids currently selected via checkboxes for bulk actions
     const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
-    const deleteTimers = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
 
     useEffect(() => {
         if (!email) return;
@@ -67,14 +63,6 @@ export function useDocumentTable(
         retrieveDocs();
 
     }, [refresh, page, search, endpoints.retrieve, email]);
-
-    // clear any pending timers on unmount so we don't call setState after unmount
-    useEffect(() => {
-        return () => {
-            deleteTimers.current.forEach((timer) => clearTimeout(timer));
-            deleteTimers.current.clear();
-        };
-    }, []);
 
     const triggerUpload = () => fileRef.current?.click();
 
@@ -133,39 +121,18 @@ export function useDocumentTable(
         notify?.onError?.(response.message || "Download failed");
     };
 
-    // Actually calls the delete endpoint for a batch of docs (fires after the undo window expires)
-    const commitDelete = async (docs: DocFile[]) => {
-        const results = await Promise.all(
-            docs.map((doc) => Fetch_to(endpoints.delete, { id: doc.id, filePath: doc.file }))
-        );
-        const failed = results.filter((r) => !r.success);
-
-        setPendingDeleteIds((prev) => {
-            const next = new Set(prev);
-            docs.forEach((doc) => { if (doc.id !== undefined) next.delete(doc.id); });
-            return next;
-        });
-
-        if (failed.length > 0) {
-            notify?.onError?.(`${failed.length} file(s) failed to delete`);
-            setRefresh(true); // pull the real state back since some rows didn't actually delete
-        } else {
-            notify?.onSuccess?.(docs.length > 1 ? "Files deleted" : "File deleted");
-            setRefresh(true);
-        }
-    };
-
-    // Starts the undo countdown for one or more docs. Rows disappear immediately;
-    // the real delete only happens if undoDelete() isn't called within UNDO_DELAY_MS.
-    const deleteFiles = (docs: DocFile[]) => {
+    // Deletes immediately — no undo window. Confirmation is expected to happen
+    // upstream (e.g. a SweetAlert2 confirm) before this is called.
+    const deleteFiles = async (docs: DocFile[]) => {
         const validDocs = docs.filter((d): d is DocFile & { id: number } => d.id !== undefined);
         if (validDocs.length === 0) return;
 
-        setPendingDeleteIds((prev) => {
-            const next = new Set(prev);
-            validDocs.forEach((doc) => next.add(doc.id));
-            return next;
-        });
+        notify?.onStart?.(validDocs.length > 1 ? "Deleting files, please wait..." : "Deleting file, please wait...");
+
+        const results = await Promise.all(
+            validDocs.map((doc) => Fetch_to(endpoints.delete, { id: doc.id, filePath: doc.file }))
+        );
+        const failed = results.filter((r) => !r.success);
 
         setSelectedIds((prev) => {
             const next = new Set(prev);
@@ -173,33 +140,17 @@ export function useDocumentTable(
             return next;
         });
 
-        const timer = setTimeout(() => {
-            validDocs.forEach((doc) => deleteTimers.current.delete(doc.id));
-            commitDelete(validDocs);
-        }, UNDO_DELAY_MS);
+        if (failed.length > 0) {
+            notify?.onError?.(`${failed.length} file(s) failed to delete`);
+        } else {
+            notify?.onSuccess?.(validDocs.length > 1 ? "Files deleted" : "File deleted");
+        }
 
-        // one shared timer id stored per doc so undo can cancel precisely
-        validDocs.forEach((doc) => deleteTimers.current.set(doc.id, timer));
+        setRefresh(true);
     };
 
     // single-file convenience wrapper (keeps old call sites working)
     const deleteFile = (doc: DocFile) => deleteFiles([doc]);
-
-    const undoDelete = (ids: number[]) => {
-        ids.forEach((id) => {
-            const timer = deleteTimers.current.get(id);
-            if (timer) {
-                clearTimeout(timer);
-                deleteTimers.current.delete(id);
-            }
-        });
-        setPendingDeleteIds((prev) => {
-            const next = new Set(prev);
-            ids.forEach((id) => next.delete(id));
-            return next;
-        });
-        notify?.onSuccess?.(ids.length > 1 ? "Deletion undone" : "Deletion undone");
-    };
 
     const toggleSelect = (id?: number) => {
         if (id === undefined) return;
@@ -228,15 +179,9 @@ export function useDocumentTable(
         deleteFiles(docsToDelete);
     };
 
-    // rows to actually render: exclude anything mid-undo-countdown
-    const visibleData = useMemo(
-        () => data.filter((doc) => doc.id === undefined || !pendingDeleteIds.has(doc.id)),
-        [data, pendingDeleteIds]
-    );
-
     return {
         fileRef,
-        data: visibleData,
+        data,
         search,
         setSearch,
         page,
@@ -250,8 +195,6 @@ export function useDocumentTable(
         downloadFile,
         deleteFile,
         deleteFiles,
-        undoDelete,
-        pendingDeleteIds,
         selectedIds,
         toggleSelect,
         toggleSelectAll,

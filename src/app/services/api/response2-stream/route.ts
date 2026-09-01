@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     const cleanEmail = String(email).trim().toLowerCase();
 
     const { data: planRow, error: planError } = await supabaseServer
-        .from("auth")
+        .from("auth_business")
         .select("current_plan, current_limit")
         .eq("email", cleanEmail)
         .maybeSingle();

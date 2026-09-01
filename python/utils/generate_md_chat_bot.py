@@ -29,12 +29,11 @@ def _build_chatbot_context(data):
     if len(rows.data) < 1:
         return None, (jsonify({"success": False, "error": "No Data was setup"}), 404)
 
-    user = supabase.table("auth").select("year, role").eq("email", email).single().execute()
+    user = supabase.table("auth").select("role").eq("email", email).single().execute()
     if not user.data:
         return None, (jsonify({"success": False, "error": "User not found"}), 404)
 
     role = "admin"
-    year = "admin2026"
 
     summaries = []
     for item in rows.data:
@@ -104,9 +103,8 @@ def _build_chatbot_context(data):
 
     systemRole = system_role.format(
         role=role,
-        year=year,
         name=f_name,
-        user_id="null",
+        user_id="null Need Login",
         method="chat_bot",
         chat_bot_name=chatbot_name
     )

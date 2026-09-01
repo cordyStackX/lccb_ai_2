@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
         if (uploadError) {
             console.error("Supabase Upload Error: ", uploadError);
             uploadedResults.push({ originalName: file.name, success: false, message: "Failed to upload PDF" });
-            continue;
+            return;
         }
 
         const { error: insertError } = await supabaseServer
@@ -94,32 +94,88 @@ export async function POST(req: NextRequest) {
         if (insertError) {
             console.error("Supabase Insert Error: ", insertError);
             uploadedResults.push({ originalName: file.name, filePath, success: false, message: "Failed to save PDF record" });
-            continue;
+            return;
         }
 
         const response1 = await Fetch_to(`${apiUrl}download-file`, { token: apikey, filePath2: filePath });
         if (!response1.success) {
             uploadedResults.push({ originalName: file.name, filePath, success: false, message: "3rd party failed to read the data" });
-            continue;
+            return;
         }
 
         const response = await Fetch_to(`${apiUrl}generate_md_summary`, {
-            prompt: "Create a tables. make sure all details are provided",
-            token: apikey,
-            email: cleanEmail,
-            filePath: filePath,
-            table: "chatbot_pdf_file_private"
-        });
+            prompt: `You will receive a student grade PDF.
+
+          Extract ALL student academic information from the PDF.
+
+          Return ONLY Markdown tables. Do not provide summaries, explanations, introductions, conclusions, or any other text.
+
+          IMPORTANT:
+          - Create ONE separate Markdown table for EACH STUDENT found in the PDF.
+          - NEVER combine multiple students into one table.
+          - Each student's table must contain ONLY that student's information.
+          - Extract ALL available information from the PDF.
+          - Do not omit any course, subject, grade, unit, remark, or other academic record.
+          - Do not merge rows.
+          - Do not summarize.
+          - Do not calculate or infer information.
+          - Do not guess missing or unreadable values.
+          - If a value cannot be found or read reliably, use "N/A".
+
+          EVERY STUDENT TABLE MUST INCLUDE THESE COLUMNS:
+
+          | Student ID | Student Name | School | Semester | Course Code | Course Title | Units | Grade | Remarks |
+
+          REQUIRED IDENTIFICATION:
+          - Student ID MUST be extracted from the PDF when present.
+          - Student Name MUST be extracted from the PDF.
+          - School MUST be extracted from the PDF.
+          - Semester MUST be extracted from the PDF.
+          - Repeat Student ID, Student Name, School, and Semester on every course row for that student.
+          - If Student ID is missing or unreadable, use "N/A".
+          - NEVER use the student's name, course, year level, section, or other information as a substitute for Student ID.
+          - NEVER invent or generate a Student ID.
+
+          COURSE RECORDS:
+          - Include every course found for each student.
+          - One course = one row.
+          - Preserve the values as they appear in the PDF.
+          - If Course Code, Course Title, Units, Grade, or Remarks is missing/unreadable, use "N/A".
+
+          MULTIPLE STUDENTS:
+          - Detect every student in the PDF.
+          - Create a completely separate table for each student.
+          - Do not place records belonging to different students in the same table.
+          - Do not omit any student.
+
+          DO NOT OUTPUT:
+          - Summary
+          - GWA calculation
+          - Average calculation
+          - Total units calculation
+          - Ranking
+          - Performance analysis
+          - Explanations
+          - Additional headers
+          - Additional prose
+
+          OUTPUT ONLY THE MARKDOWN TABLES.`,
+              
+              token: apikey,
+              email: cleanEmail,
+              filePath: filePath,
+              table: "chatbot_pdf_file_private"
+          });
 
         if (!response.success) {
             uploadedResults.push({ originalName: file.name, filePath, success: false, message: "Failed to create summary" });
-            continue;
+            return;
         }
 
         const pdfPassword = process.env.PDF_ENCRYPT_PASSWORD;
         if (!pdfPassword) {
             uploadedResults.push({ originalName: file.name, filePath, success: false, message: "PDF password not configured" });
-            continue;
+            return;
         }
 
         const encryptedSummary = encryptText(response.data.markdown, pdfPassword);

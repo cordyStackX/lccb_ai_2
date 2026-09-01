@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { data: planRow, error: planError } = await supabaseServer
-        .from("auth")
+        .from("auth_business")
         .select("current_plan, current_limit, current_pdf_limit, current_pdf_limit_per_mb, created_at")
         .eq("email", cleanEmail)
         .maybeSingle();

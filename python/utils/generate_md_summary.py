@@ -31,14 +31,13 @@ def generate_md_summary():
         if not row.data:
             return jsonify({"success": False, "error": "PDF not found"}), 404
 
-        user = supabase.table("auth").select("year, role").eq("email", email).single().execute()
+        user = supabase.table("auth").select("id, role").eq("email", email).single().execute()
         if not user.data:
             return jsonify({"success": False, "error": "User not found"}), 404
 
         file_name = row.data["file_name"]
         tmp_path = f"/tmp/{email}_{file_name}"
         role = user.data["role"]
-        year = user.data["year"]
 
         # --- Check if file exists in tmp/ directory ---
         if not os.path.exists(tmp_path):
@@ -142,9 +141,8 @@ Respond with ONLY comma-separated numbers (e.g., \"1,3,4\"). If all chunks seem 
 
         systemRole = system_role.format(
             role=role,
-            year=year,
             name="admin",
-            user_id="admin_summaries",
+            user_id=1,
             method="summaries",
             chat_bot_name=""
         )

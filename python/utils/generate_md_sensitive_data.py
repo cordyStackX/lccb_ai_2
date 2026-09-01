@@ -2,7 +2,33 @@ import sys
 import json
 from flask import request, jsonify, Response, stream_with_context
 from .context import EXPECTED_API_KEY, client, supabase, PDF_ENCRYPT_PASSWORD
-from .encryptions import decrypt_text
+import hashlib
+import base64
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+
+def decrypt_text(payload: str, password: str) -> str:
+    data = base64.b64decode(payload)
+
+    salt = data[0:16]
+    iv = data[16:28]
+    auth_tag = data[28:44]
+    encrypted = data[44:]
+
+    # Must match Node's crypto.scryptSync defaults: N=16384, r=8, p=1, dklen=32
+    key = hashlib.scrypt(
+        password.encode("utf-8"),
+        salt=salt,
+        n=16384,
+        r=8,
+        p=1,
+        dklen=32,
+    )
+
+    aesgcm = AESGCM(key)
+    # Python's AESGCM expects ciphertext + tag concatenated together
+    decrypted = aesgcm.decrypt(iv, encrypted + auth_tag, None)
+
+    return decrypted.decode("utf-8")
 
 def _build_prompt_context(data):
     received_token = data.get("token")
@@ -26,15 +52,21 @@ def _build_prompt_context(data):
     if not rows.data:
         return None, (jsonify({"success": False, "error": "No summaries found"}), 404)
 
-    user = supabase.table("auth").select("year, role, id").eq("email", email).single().execute()
-    if not user.data["id"]:
+    user = supabase.table("auth_student").select("school_id").eq("email", email).single().execute()
+    if not user.data["school_id"]:
         return None, (jsonify({"success": False, "error": "User not found"}), 404)
 
-    role = user.data["role"]
-    year = user.data["year"]
-    user_id = user.data["id"]
+    raw_school_id = user.data["school_id"]
+    try:
+        user_id = decrypt_text(raw_school_id, EXPECTED_API_KEY) if raw_school_id else None
+    except Exception as e:
+        print(f"🔥 Failed to decrypt school_id: {e}", file=sys.stderr)
+        user_id = None
 
-    print(role, year, user_id)
+    # NOTE: 'role' was undefined here before — this print was crashing with
+    # a NameError on every call. If you need role, either select it from
+    # auth_student in the query above (add it to .select(...)) or drop it.
+    print(user_id)
 
     summaries = []
     for item in rows.data:
@@ -42,7 +74,7 @@ def _build_prompt_context(data):
         if not raw_summary:
             continue
         try:
-            summary_text = decrypt_text(raw_summary, PDF_ENCRYPT_PASSWORD)
+            summary_text = decrypt_text(raw_summary, PDF_ENCRYPT_PASSWORD or "")
         except Exception as e:
             print(f"🔥 Failed to decrypt summary for {item.get('file_name')}: {e}", file=sys.stderr)
             continue
@@ -109,11 +141,10 @@ def _build_prompt_context(data):
         )
 
     systemRole = system_role.format(
-        role=role,
-        year=year,
+        role="student",
         name=f_name,
         method=method,
-        user_id=user_id,
+        user_id=raw_school_id,
         chat_bot_name=""
     )
 
@@ -126,6 +157,7 @@ def generate_md_sensitive_data():
         context, error = _build_prompt_context(data)
         if error:
             return error
+        assert context is not None 
 
         response = client.chat.completions.create(
             model="gpt-4.1-mini",
@@ -151,6 +183,7 @@ def generate_md_sensitive_data_stream():
         context, error = _build_prompt_context(data)
         if error:
             return error
+        assert context is not None 
 
         def event_stream():
             try:
