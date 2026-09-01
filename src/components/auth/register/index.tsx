@@ -116,6 +116,7 @@ export default function SignUp() {
                             onChange={handleChange}
                             placeholder="School Id"
                             style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
+                            max={8}
                             required
                             />
                         </div>

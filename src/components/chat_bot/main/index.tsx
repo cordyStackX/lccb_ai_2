@@ -331,7 +331,14 @@ export default function Chat_bot({ email } : Chat_botProps) {
                                         <p>{msg.ask}</p>
                                     </div>
                                 </div>
-                                <div ref={chatEndRef} className={`${styles.ai_response} ${msg.respond ? styles.fadeIn : ""}`}>
+                                <div
+                                    ref={chatEndRef}
+                                    className={`${styles.ai_response} ${
+                                        msg.respond || (index === messages.length - 1 && loading)
+                                            ? styles.fadeIn
+                                            : ""
+                                    }`}
+                                >
                                     {msg.respond ? (
                                         <div className={styles.plushie_talk}>
                                             <Image
@@ -354,7 +361,7 @@ export default function Chat_bot({ email } : Chat_botProps) {
                                                 height={50}
                                                 title="plushie"
                                             />
-                                            <div className={styles.thinking}>
+                                            <div className={styles.thinking} aria-label="Thinking">
                                                 <span className={styles.dot} />
                                                 <span className={styles.dot} />
                                                 <span className={styles.dot} />

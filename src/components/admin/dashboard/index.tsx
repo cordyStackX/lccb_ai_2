@@ -1,8 +1,8 @@
 "use client";
 import styles from "./css/styles.module.css";
 import {
-    Area,
-    AreaChart,
+    Bar,
+    BarChart,
     CartesianGrid,
     Cell,
     Legend,
@@ -13,274 +13,68 @@ import {
     XAxis,
     YAxis,
 } from "recharts";
-import { useEffect, useState } from "react";
-import { Fetch_to } from "@/utilities";
-import  api_link from "@/config/conf/json_config/fetch_url.json";
-
-interface ManageUserDataProps {
-    created_at?: string;
-    email?: string;
-    f_name?: string;
-    id?: number;
-    status?: string;
-    year?: string;
-}
-
-interface System_logs {
-    request?: string;
-    created_at?: string;
-    uploaded_pdf: number;
-    api_request: number;
-}
+import { useState } from "react";
 
 interface WeeklyPoint {
     name: string;
     value: number;
 }
 
-type GraphRange = "day" | "week" | "year";
+type ChartRange = "week" | "year";
 
 type DashboardProps = {
     email: string;
 }
 
 export default function Dashboard({ email } : DashboardProps) {
-    const [data, setData] = useState<ManageUserDataProps[]>([]);
-    const [system_logs, setSystem_logs] = useState<System_logs[]>([]);
-    const [graphRange, setGraphRange] = useState<GraphRange>("week");
-    const [animatedStats, setAnimatedStats] = useState({
-        accounts: 0,
-        uploadedPdf: 0,
-        userApi: 0,
-        chatbotApi: 0,
-    });
-
-    useEffect(() => {
-        const RetrieveUserData = async () => {
-            const response = await Fetch_to(api_link.admin.retrieve_user, { email });
-            const response2 = await Fetch_to(api_link.admin.system_logs, { email });
-            if (response.success && response2.success) {
-                setData(response.data.message ?? []);
-                setSystem_logs(response2.data.message ?? []);
-            }
-        };
-        RetrieveUserData();
-
-    }, [email]);
-
-    function getDayOfWeek(dateString: string) {
-        return new Date(dateString).getDay(); // 0 Sun, 1 Mon, ...
-    }
-
-    function getMonth(dateString: string) {
-        return new Date(dateString).getMonth(); // 0 Jan, 1 Feb, ...
-    }
-
-    function isInCurrentWeek(dateString: string) {
-        const date = new Date(dateString);
-        const now = new Date();
-        const startOfWeek = new Date(now);
-        startOfWeek.setHours(0, 0, 0, 0);
-        startOfWeek.setDate(now.getDate() - now.getDay());
-        const endOfWeek = new Date(startOfWeek);
-        endOfWeek.setDate(startOfWeek.getDate() + 6);
-        endOfWeek.setHours(23, 59, 59, 999);
-        return date >= startOfWeek && date <= endOfWeek;
-    }
-
-    function isInCurrentYear(dateString: string) {
-        const date = new Date(dateString);
-        const now = new Date();
-        return date.getFullYear() === now.getFullYear();
-    }
-
-    function isInCurrentDay(dateString: string) {
-        const date = new Date(dateString);
-        const now = new Date();
-        return (
-            date.getFullYear() === now.getFullYear()
-            && date.getMonth() === now.getMonth()
-            && date.getDate() === now.getDate()
-        );
-    }
-
-    function getHour(dateString: string) {
-        return new Date(dateString).getHours();
-    }
-
-    const userSeries = graphRange === "day"
-        ? Array.from({ length: 24 }, () => 0)
-        : graphRange === "week"
-            ? Array.from({ length: 7 }, () => 0)
-            : Array.from({ length: 12 }, () => 0);
-
-    const pdfSeries = [...userSeries];
-    const apiSeries = [...userSeries];
-
-    data.forEach((user) => {
-        if (!user.created_at) return;
-
-        if (graphRange === "week" && isInCurrentWeek(user.created_at)) {
-            userSeries[getDayOfWeek(user.created_at)] += 1;
-        }
-        if (graphRange === "year" && isInCurrentYear(user.created_at)) {
-            userSeries[getMonth(user.created_at)] += 1;
-        }
-    });
-
-    system_logs.forEach((entry) => {
-        if (!entry.created_at) return;
-        if (graphRange === "day" && isInCurrentDay(entry.created_at)) {
-            const hour = getHour(entry.created_at);
-            pdfSeries[hour] += entry.uploaded_pdf ?? 0;
-            apiSeries[hour] += entry.api_request ?? 0;
-        }
-        if (graphRange === "week" && isInCurrentWeek(entry.created_at)) {
-            const day = getDayOfWeek(entry.created_at);
-            pdfSeries[day] += entry.uploaded_pdf ?? 0;
-            apiSeries[day] += entry.api_request ?? 0;
-        }
-        if (graphRange === "year" && isInCurrentYear(entry.created_at)) {
-            const month = getMonth(entry.created_at);
-            pdfSeries[month] += entry.uploaded_pdf ?? 0;
-            apiSeries[month] += entry.api_request ?? 0;
-        }
-    });
-
-    const toPeriodSet = (series: number[]): WeeklyPoint[] => {
-
-        if (graphRange === "week") {
-            return [
-                { name: "Sun", value: series[0] },
-                { name: "Mon", value: series[1] },
-                { name: "Tue", value: series[2] },
-                { name: "Wed", value: series[3] },
-                { name: "Thu", value: series[4] },
-                { name: "Fri", value: series[5] },
-                { name: "Sat", value: series[6] },
-            ];
-        }
-
-        return [
-            { name: "Jan", value: series[0] },
-            { name: "Feb", value: series[1] },
-            { name: "Mar", value: series[2] },
-            { name: "Apr", value: series[3] },
-            { name: "May", value: series[4] },
-            { name: "Jun", value: series[5] },
-            { name: "Jul", value: series[6] },
-            { name: "Aug", value: series[7] },
-            { name: "Sep", value: series[8] },
-            { name: "Oct", value: series[9] },
-            { name: "Nov", value: series[10] },
-            { name: "Dec", value: series[11] },
-        ];
-    };
-
-    const UserSet = toPeriodSet(userSeries);
-    const Pdf_set = toPeriodSet(pdfSeries);
-    const Api_logs = toPeriodSet(apiSeries);
-    const currentDate = new Date().toLocaleDateString("en-US", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-    });
-
-    const getApiCount = (email?: string) => {
-        if (!email) return 0;
-        return system_logs.reduce((total, log) => {
-            if (log.request === email) {
-                return total + Number(log.api_request ?? 0);
-            }
-            return total;
-        }, 0);
-    };
-
-    const topApiUsers = [...data]
-        .filter((user) => user.email)
-        .map((user) => ({
-            email: user.email as string,
-            count: getApiCount(user.email),
-        }))
-        .filter((user) => user.count > 0)
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 20);
-
-    const { uploadedPdfCount, apiRequestCount } = system_logs.reduce(
-        (totals, log) => {
-            totals.uploadedPdfCount += Number(log.uploaded_pdf ?? 0);
-            totals.apiRequestCount += Number(log.api_request ?? 0);
-            return totals;
-        },
-        { uploadedPdfCount: 0, apiRequestCount: 0 }
-    );
-
-    useEffect(() => {
-        const durationMs = 3000;
-        const start = performance.now();
-        const startValues = { ...animatedStats };
-        const targetValues = {
-            accounts: data.length,
-            uploadedPdf: uploadedPdfCount,
-            userApi: apiRequestCount,
-            chatbotApi: apiRequestCount,
-        };
-
-        let rafId = 0;
-
-        const animate = (now: number) => {
-            const progress = Math.min((now - start) / durationMs, 1);
-            const easeOut = 1 - Math.pow(1 - progress, 3);
-
-            setAnimatedStats({
-                accounts: Math.round(startValues.accounts + (targetValues.accounts - startValues.accounts) * easeOut),
-                uploadedPdf: Math.round(startValues.uploadedPdf + (targetValues.uploadedPdf - startValues.uploadedPdf) * easeOut),
-                userApi: Math.round(startValues.userApi + (targetValues.userApi - startValues.userApi) * easeOut),
-                chatbotApi: Math.round(startValues.chatbotApi + (targetValues.chatbotApi - startValues.chatbotApi) * easeOut),
-            });
-
-            if (progress < 1) {
-                rafId = requestAnimationFrame(animate);
-            }
-        };
-
-        rafId = requestAnimationFrame(animate);
-        return () => cancelAnimationFrame(rafId);
-    }, [data.length, uploadedPdfCount, apiRequestCount]);
-
-    const usagePieData = [
-        { name: "PDF Uploads", value: uploadedPdfCount },
-        { name: "User Logs", value: apiRequestCount },
-        { name: "ChatBot", value: apiRequestCount },
-        { name: "Registered Accounts", value: data.length },
+    void email;
+    const [chartRange, setChartRange] = useState<ChartRange>("week");
+    const weeklyChartData: WeeklyPoint[] = [
+        { name: "2026-01-01", value: 0 }, { name: "2026-01-02", value: 0 }, { name: "2026-01-03", value: 0 },
+        { name: "2026-01-04", value: 0 }, { name: "2026-01-05", value: 0 }, { name: "2026-01-06", value: 0 },
+        { name: "2026-01-07", value: 0 },
+    ];
+    const yearlyChartData: WeeklyPoint[] = [
+        { name: "2026-01-01", value: 0 }, { name: "2026-02-01", value: 0 }, { name: "2026-03-01", value: 0 },
+        { name: "2026-04-01", value: 0 }, { name: "2026-05-01", value: 0 }, { name: "2026-06-01", value: 0 },
+        { name: "2026-07-01", value: 0 }, { name: "2026-08-01", value: 0 }, { name: "2026-09-01", value: 0 },
+        { name: "2026-10-01", value: 0 }, { name: "2026-11-01", value: 0 }, { name: "2026-12-01", value: 0 },
+    ];
+    const emptyChartData = chartRange === "week" ? weeklyChartData : yearlyChartData;
+    const departmentPieData = [
+        { name: "SARFAID", value: 0 },
+        { name: "SBIT", value: 0 },
+        { name: "SHTM", value: 0 },
+        { name: "SHTM", value: 0 },
+    ];
+    const accountTypePieData = [
+        { name: "Students", value: 0 },
+        { name: "Teachers", value: 0 },
+    ];
+    const businessAccountPieData = [
+        { name: "Business Accounts", value: 0 },
     ];
     const pieColors = ["#2563eb", "#f59e0b", "#16c784", "#ff0800"];
 
-    const renderCryptoChart = (title: string, chartData: WeeklyPoint[], chartId: string, trendLabel: string) => {
-        const firstValue = chartData[0]?.value ?? 0;
-        const lastValue = chartData[chartData.length - 1]?.value ?? 0;
-        const isUp = lastValue >= firstValue;
-        const strokeColor = isUp ? "#1642c7" : "#d4294e";
-        const gradientTop = isUp ? "rgba(22, 122, 199, 0.45)" : "rgba(234, 57, 75, 0.45)";
-        const gradientBottom = isUp ? "rgba(22, 199, 132, 0.03)" : "rgba(234, 57, 67, 0.03)";
+    const renderHistogram = (title: string, chartData: WeeklyPoint[], chartId: string) => {
+        const strokeColor = "#1642c7";
 
         return (
             <section className={styles.graph}>
                 <div className={styles.chartHeader}>
                     <h2>{title}</h2>
-                    <span className={isUp ? styles.trendUp : styles.trendDown}>
-                        {isUp ? `${trendLabel} up` : `${trendLabel} down`}
+                    <span className={styles.trendUp}>
+                        Analysis pending
                     </span>
                 </div>
                 <div className={styles.info2}>
                     <div className={styles.chartShell}>
                         <ResponsiveContainer width="100%" height={270}>
-                            <AreaChart data={chartData} margin={{ top: 8, right: 20, left: 4, bottom: 0 }}>
+                            <BarChart data={chartData} margin={{ top: 8, right: 20, left: 4, bottom: 0 }}>
                                 <defs>
                                     <linearGradient id={chartId} x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor={gradientTop} />
-                                        <stop offset="100%" stopColor={gradientBottom} />
+                                        <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.9} />
+                                        <stop offset="100%" stopColor="#1642c7" stopOpacity={0.5} />
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid stroke="rgba(16, 56, 108, 0.5)" strokeDasharray="5 5" />
@@ -296,21 +90,51 @@ export default function Dashboard({ email } : DashboardProps) {
                                     formatter={(value) => [`${value}`, "Count"]}
                                     labelStyle={{ color: "#101113" }}
                                 />
-                                <Area
-                                    type="monotone"
+                                <Bar
                                     dataKey="value"
-                                    stroke={strokeColor}
-                                    strokeWidth={3}
                                     fill={`url(#${chartId})`}
-                                    activeDot={{ r: 6 }}
+                                    radius={[6, 6, 0, 0]}
                                 />
-                            </AreaChart>
+                            </BarChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
             </section>
         );
     };
+
+    const renderPieChart = (title: string, pieData: { name: string; value: number }[]) => (
+        <div className={styles.pieCard}>
+            <h3>{title}</h3>
+            <div className={styles.pieShell}>
+                <ResponsiveContainer width="100%" height={260}>
+                    <PieChart>
+                        <Pie
+                            data={pieData}
+                            dataKey="value"
+                            nameKey="name"
+                            innerRadius={55}
+                            outerRadius={90}
+                            paddingAngle={1}
+                        >
+                            {pieData.map((entry, index) => (
+                                <Cell key={`cell-${title}-${entry.name}-${index}`} fill={pieColors[index % pieColors.length]} />
+                            ))}
+                        </Pie>
+                        <Tooltip
+                            contentStyle={{
+                                background: "rgba(186, 199, 229, 0.94)",
+                                border: "1px solid rgba(22, 122, 199, 0.4)",
+                                borderRadius: "8px",
+                                color: "#000000",
+                            }}
+                        />
+                        <Legend />
+                    </PieChart>
+                </ResponsiveContainer>
+            </div>
+        </div>
+    );
 
     return(
         <section className={styles.container}>
@@ -331,7 +155,7 @@ export default function Dashboard({ email } : DashboardProps) {
             <section className={styles.status}>
                 <div className={styles.statusHeader}>
                     <h2>System Usage Overview</h2>
-                    <p>{currentDate}</p>
+                    <p>Analysis will be available soon</p>
                 </div>
                 <div className={styles.info}>
                     <div>
@@ -346,7 +170,7 @@ export default function Dashboard({ email } : DashboardProps) {
                                 </svg>
                             </span>
                             
-                            <p> {animatedStats.accounts} </p>
+                            <p>0</p>
                         </span>
                         
                     </div>
@@ -361,11 +185,11 @@ export default function Dashboard({ email } : DashboardProps) {
                                 </svg>
                             </span>
                             
-                            <p> {animatedStats.uploadedPdf} </p>
+                            <p>0</p>
                         </span>
                     </div>
                     <div>
-                        <h3>User API Requested</h3>
+                        <h3>User API Usage</h3>
                         
                         <span className={styles.icons}>
                             <span>
@@ -377,14 +201,15 @@ export default function Dashboard({ email } : DashboardProps) {
                                 </svg>
                             </span>
                             
-                            <p> {animatedStats.userApi} </p>
+                            <p>0</p>
                         </span>
                     </div>
                     <div>
-                        <h3>Chatbot API Requested</h3>
+                        <h3>Chatbot API Usage</h3>
                         
                         <span className={styles.icons}>
                             <span>
+                                
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <rect x="3" y="5" width="18" height="18" rx="4" stroke="currentColor" strokeWidth="2"/>
                                 <circle cx="9" cy="11" r="2" fill="currentColor"/>
@@ -393,7 +218,67 @@ export default function Dashboard({ email } : DashboardProps) {
                                 </svg>
                             </span>
                             
-                            <p> {animatedStats.chatbotApi} </p>
+                            <p>0</p>
+                        </span>
+                    </div>
+                    <div>
+                        <h3>BUSINESS ACCOUNT</h3>
+                        
+                        <span className={styles.icons}>
+                            <span>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <rect x="3" y="7" width="18" height="12" rx="2" stroke="currentColor" strokeWidth="2"/>
+                                    <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18M10 12h4v2h-4z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            </span>
+                            
+                            <p>0</p>
+                        </span>
+                    </div>
+                    <div>
+                        <h3>BUSINESS ACCOUNT (PENDING PAYOUT)</h3>
+                        
+                        <span className={styles.icons}>
+                            <span>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <rect x="3" y="6" width="18" height="13" rx="2" stroke="currentColor" strokeWidth="2"/>
+                                    <path d="M3 10h18M7 14h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                    <circle cx="18" cy="18" r="3" fill="var(--background_linear_1)" stroke="currentColor" strokeWidth="2"/>
+                                    <path d="M18 16.5v1.7l1.1.7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                                </svg>
+                            </span>
+                            
+                            <p>0</p>
+                        </span>
+                    </div>
+                    <div>
+                        <h3>SCHOOL ACCOUNT</h3>
+                        
+                        <span className={styles.icons}>
+                            <span>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="m3 10 9-5 9 5-9 5-9-5Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+                                    <path d="M7 12.2V16c2.8 2 7.2 2 10 0v-3.8M21 10v5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            </span>
+                            
+                            <p>0</p>
+                        </span>
+                    </div>
+                    <div>
+                        <h3>SCHOOL ACCOUNT (PENDING APPROVAL)</h3>
+                        
+                        <span className={styles.icons}>
+                            <span>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="m3 9 9-5 9 5-9 5-9-5Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+                                    <path d="M7 11.2V14c1.2.9 2.9 1.4 5 1.4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                    <circle cx="18" cy="17" r="4" fill="var(--background_linear_1)" stroke="currentColor" strokeWidth="2"/>
+                                    <path d="m16.3 17 1.1 1.1 2.3-2.4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            </span>
+                            
+                            <p>0</p>
                         </span>
                     </div>
                 </div>
@@ -402,50 +287,24 @@ export default function Dashboard({ email } : DashboardProps) {
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
                             <h3 className={styles.reportTitle}>Reports</h3>
                             <select
-                                value={graphRange}
-                                onChange={(e) => setGraphRange(e.target.value as GraphRange)}
+                                value={chartRange}
+                                onChange={(event) => setChartRange(event.target.value as ChartRange)}
+                                aria-label="Report range"
                             >
                                 <option value="week">Week</option>
                                 <option value="year">Year</option>
                             </select>
                         </div>
 
-                        {renderCryptoChart(`Registered Accounts`, UserSet, "activeAccountsTrend", graphRange)}
-                        {renderCryptoChart(`Number of PDF`, Pdf_set, "pdfTrend", graphRange)}
-                        {renderCryptoChart(`AI API Requested`, Api_logs, "apiTrend", graphRange)}
+                        {renderHistogram("Registered Accounts", emptyChartData, "activeAccountsHistogram")}
+                        {renderHistogram("Number of PDF", emptyChartData, "pdfHistogram")}
+                        {renderHistogram("AI API Usage", emptyChartData, "apiHistogram")}
                     </div>
                     <div className={styles.records}>
                         <h3 className={styles.reportTitle}>Overall Usage</h3>
-                        <div className={styles.pieCard}>
-                            <h3>Usage Breakdown</h3>
-                            <div className={styles.pieShell}>
-                                <ResponsiveContainer width="100%" height={260}>
-                                    <PieChart>
-                                        <Pie
-                                            data={usagePieData}
-                                            dataKey="value"
-                                            nameKey="name"
-                                            innerRadius={55}
-                                            outerRadius={90}
-                                            paddingAngle={1}
-                                        >
-                                            {usagePieData.map((entry, index) => (
-                                                <Cell key={`cell-${entry.name}`} fill={pieColors[index % pieColors.length]} />
-                                            ))}
-                                        </Pie>
-                                        <Tooltip
-                                            contentStyle={{
-                                                background: "rgba(186, 199, 229, 0.94)",
-                                                border: "1px solid rgba(22, 122, 199, 0.4)",
-                                                borderRadius: "8px",
-                                                color: "#000000",
-                                            }}
-                                        />
-                                        <Legend />
-                                    </PieChart>
-                                </ResponsiveContainer>
-                            </div>
-                        </div>
+                        {renderPieChart("Department Breakdown", departmentPieData)}
+                        {renderPieChart("Student and Teacher Breakdown", accountTypePieData)}
+                        {renderPieChart("Business Account Breakdown", businessAccountPieData)}
                         <h3 className={styles.reportTitle}>Most Top 20 users by Laco AI usage</h3>
                         <div className={styles.tableScroll}>
                             <table className={styles.rankings}>
@@ -457,19 +316,9 @@ export default function Dashboard({ email } : DashboardProps) {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {topApiUsers.length > 0 ? (
-                                        topApiUsers.map((user, index) => (
-                                            <tr key={index}>
-                                                <td>{index + 1}</td>
-                                                <td>{user.email}</td>
-                                                <td>{user.count}</td>
-                                            </tr>
-                                        ))
-                                    ) : (
-                                        <tr>
-                                            <td colSpan={3}>No Data</td>
-                                        </tr>
-                                    )}
+                                    <tr>
+                                        <td colSpan={3}>Analysis pending</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>

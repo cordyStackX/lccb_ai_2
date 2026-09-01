@@ -3,7 +3,9 @@
     display: flex;
     gap: 0.35rem;
     align-items: center;
-    padding: 1rem 0;
+    width: auto !important;
+    margin-left: 3.4rem !important;
+    padding: 1rem 0 !important;
 }
 .dot {
     width: 7px;
