@@ -147,7 +147,7 @@
     display: none;
     position: fixed;
     top: 1rem;
-    right: 1rem;
+    left: 1rem;
     z-index: 1100;
     width: 42px;
     height: 42px;
@@ -176,6 +176,9 @@
 }
 .burgerBarOpenBot {
     transform: translateY(-7px) rotate(-45deg);
+}
+.hide_burger {
+  display: none;
 }
 
 /* ---------- Backdrop (hidden on desktop) ---------- */

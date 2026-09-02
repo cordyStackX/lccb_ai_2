@@ -215,11 +215,13 @@ export async function POST(req: NextRequest) {
         }
 
         let questions: string[];
+        
         try {
             const raw = response_suggest.data.markdown.trim()
                 .replace(/^```json\s*/i, '')
                 .replace(/```$/i, '');
             questions = JSON.parse(raw);
+            console.log(questions);
         } catch {
             uploadedResults.push({ originalName: file.name, filePath, success: false, message: "Failed to parse questions" });
             continue;

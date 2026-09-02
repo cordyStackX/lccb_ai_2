@@ -125,7 +125,7 @@ export default function Sidebar({ nav }: SidebarProps) {
             {/* Burger button — only visible on mobile via CSS */}
             <button
                 type="button"
-                className={styles.burger}
+                className={is_open ? styles.hide_burger : styles.burger}
                 aria-label={is_open ? "Close menu" : "Open menu"}
                 aria-expanded={is_open}
                 onClick={() => setIs_open((prev) => !prev)}
