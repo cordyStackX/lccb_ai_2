@@ -7,16 +7,17 @@ import { Fetch_to, SweetAlert2, Fetch_toFile, Popup_info } from "@/utilities";
 import Swal from "sweetalert2";
 
 type SettingProps = {
-    email: string;
-    f_name: string;
+  email: string;
+  f_name: string;
+  business_name: string;
 }
 
-export default function Setting({ email, f_name } : SettingProps) {
+export default function Setting({ email, f_name, business_name } : SettingProps) {
     const router = useRouter();
     const [suspensionState, setSuspensionState] = useState("off");
     const [loading, setLoading] = useState(true);
-
     const [schoolName, setSchoolName] = useState("");
+    const [BusinessName, setBusinessName] = useState("");
     const [logoPreview, setLogoPreview] = useState<string | null>(null);
     const [logoFile, setLogoFile] = useState<File | null>(null);
     const [savingBranding, setSavingBranding] = useState(false);
@@ -36,7 +37,6 @@ export default function Setting({ email, f_name } : SettingProps) {
 
                 if (response.success) {
                     setSuspensionState(response.data?.message[0]?.state || "off");
-                    
                 }
 
             } catch (e) {
@@ -213,10 +213,7 @@ export default function Setting({ email, f_name } : SettingProps) {
 
                         <div className={styles.brandingFields}>
                             <div>
-                                <p>School / Company name</p>
-                                <span className={styles.hint}>
-                                    Shown across the admin panel and login screen
-                                </span>
+                                <p>FullName</p>
                             </div>
                             <input
                                 type="text"
@@ -226,12 +223,26 @@ export default function Setting({ email, f_name } : SettingProps) {
                                 onChange={(e) => setSchoolName(e.target.value)}
                                 disabled={loadingBranding}
                             />
+                            <div>
+                                <p>Business name</p>
+                                <span className={styles.hint}>
+                                    Shown across the admin panel and login screen
+                                </span>
+                            </div>
+                            <input
+                                type="text"
+                                className={styles.nameInput}
+                                placeholder={business_name ? business_name : "e.g. Laco Learning Institute"}
+                                value={BusinessName}
+                                onChange={(e) => setBusinessName(e.target.value)}
+                                disabled={loadingBranding}
+                            />
                             <button
                                 className={styles.primaryButton}
                                 onClick={handleSaveBranding}
                                 disabled={savingBranding || loadingBranding}
                             >
-                                {savingBranding ? "Saving..." : "Save Branding"}
+                                {savingBranding ? "Saving..." : "Save"}
                             </button>
                         </div>
                     </div>

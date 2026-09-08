@@ -9,7 +9,7 @@ export default function ManageUserPage() {
     const router = useRouter();
     const [nav, setNav] = useState("");
     const [data, setData] = useState({
-        email: "", f_name: ""
+        email: "", f_name: "", business_name: ""
     });
 
     useEffect(() => {
@@ -17,8 +17,8 @@ export default function ManageUserPage() {
             const response = await Fetch_to(api_link.jwt.verify);
             if (!response.success) return router.push("/");
             Progress(false);
-            const result = response.data.message.final_data.data;
-            setData(prev => ({ ...prev, f_name: result[0].f_name, email: result[0].email }));
+            const result = response.data.message.final_data;
+            setData(prev => ({ ...prev, f_name: result.f_name, email: result.email, business_name: result.business_name }));
         }
         check();
     }, []);
@@ -30,7 +30,7 @@ export default function ManageUserPage() {
     return (
         <main className="admin">
             <Sidebar nav={nav} email={data.email} f_name={data.f_name} />
-            <Setting f_name={data.f_name} email={data.email} />
+            <Setting f_name={data.f_name} email={data.email} business_name={data.business_name} />
         </main>
     );
 }

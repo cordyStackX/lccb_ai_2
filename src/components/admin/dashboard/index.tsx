@@ -1,8 +1,8 @@
 "use client";
 import styles from "./css/styles.module.css";
 import {
-    Bar,
-    BarChart,
+    AreaChart,
+    Area,
     CartesianGrid,
     Cell,
     Legend,
@@ -57,50 +57,53 @@ export default function Dashboard({ email } : DashboardProps) {
     const pieColors = ["#2563eb", "#f59e0b", "#16c784", "#ff0800"];
 
     const renderHistogram = (title: string, chartData: WeeklyPoint[], chartId: string) => {
-        const strokeColor = "#1642c7";
+    const strokeColor = "#1642c7";
 
-        return (
-            <section className={styles.graph}>
-                <div className={styles.chartHeader}>
-                    <h2>{title}</h2>
-                    <span className={styles.trendUp}>
-                        Analysis pending
-                    </span>
-                </div>
-                <div className={styles.info2}>
-                    <div className={styles.chartShell}>
-                        <ResponsiveContainer width="100%" height={270}>
-                            <BarChart data={chartData} margin={{ top: 8, right: 20, left: 4, bottom: 0 }}>
-                                <defs>
-                                    <linearGradient id={chartId} x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.9} />
-                                        <stop offset="100%" stopColor="#1642c7" stopOpacity={0.5} />
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid stroke="rgba(16, 56, 108, 0.5)" strokeDasharray="5 5" />
-                                <XAxis dataKey="name" tick={{ fill: "#3b5b9a", fontSize: 12 }} axisLine={false} tickLine={false} />
-                                <YAxis tick={{ fill: "#4c5f85", fontSize: 12 }} axisLine={false} tickLine={false} allowDecimals={false} />
-                                <Tooltip
-                                    contentStyle={{
-                                        background: "rgba(175, 188, 219, 0.94)",
-                                        border: `1px solid ${strokeColor}`,
-                                        borderRadius: "8px",
-                                        color: "#000000",
-                                    }}
-                                    formatter={(value) => [`${value}`, "Count"]}
-                                    labelStyle={{ color: "#101113" }}
-                                />
-                                <Bar
-                                    dataKey="value"
-                                    fill={`url(#${chartId})`}
-                                    radius={[6, 6, 0, 0]}
-                                />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
-                </div>
-            </section>
-        );
+    return (
+      <section className={styles.graph}>
+          <div className={styles.chartHeader}>
+              <h2>{title}</h2>
+              <span className={styles.trendUp}>
+                  Analysis pending
+              </span>
+          </div>
+          <div className={styles.info2}>
+              <div className={styles.chartShell}>
+                  <ResponsiveContainer width="100%" height={270}>
+                      <AreaChart data={chartData} margin={{ top: 8, right: 20, left: 4, bottom: 0 }}>
+                          <defs>
+                              <linearGradient id={chartId} x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.55} />
+                                  <stop offset="100%" stopColor="#1642c7" stopOpacity={0.05} />
+                              </linearGradient>
+                          </defs>
+                          <CartesianGrid stroke="rgba(16, 56, 108, 0.5)" strokeDasharray="5 5" vertical={false} />
+                          <XAxis dataKey="name" tick={{ fill: "#3b5b9a", fontSize: 12 }} axisLine={false} tickLine={false} />
+                          <YAxis tick={{ fill: "#4c5f85", fontSize: 12 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                          <Tooltip
+                              contentStyle={{
+                                  background: "rgba(175, 188, 219, 0.94)",
+                                  border: `1px solid ${strokeColor}`,
+                                  borderRadius: "8px",
+                                  color: "#000000",
+                              }}
+                              formatter={(value) => [`${value}`, "Count"]}
+                              labelStyle={{ color: "#101113" }}
+                          />
+                          <Area
+                              type="monotone"
+                              dataKey="value"
+                              stroke={strokeColor}
+                              strokeWidth={2}
+                              fill={`url(#${chartId})`}
+                              activeDot={{ r: 5, fill: strokeColor, stroke: "#fff", strokeWidth: 2 }}
+                          />
+                      </AreaChart>
+                  </ResponsiveContainer>
+              </div>
+          </div>
+      </section>
+    );
     };
 
     const renderPieChart = (title: string, pieData: { name: string; value: number }[]) => (

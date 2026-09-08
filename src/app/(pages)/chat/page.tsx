@@ -33,9 +33,9 @@ export default function ChatContent() {
             const response = await Fetch_to(api_link.jwt.verify);
             if (!response.success) return router.push("/");
             const result = response.data.message.final_data;
-            setEmail(result.data[0].email);
-            setName(result.data[0].f_name);
-            setRole(result.data[0].role);
+            setEmail(result.email);
+            setName(result.f_name);
+            setRole(result.role);
             setYear(result.year);
             serDepartment(result.department);
             if (result.status === "suspend") {

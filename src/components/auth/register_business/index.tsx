@@ -19,7 +19,7 @@ export default function SignUpBusiness() {
     const router = useRouter();
     const [turnstileToken, setTurnstileToken] = useState("");
     const [form, setForm] = useState({
-        email: "", name: "", year: "", role: "Business", assign_by: "", institutions: "", specify_institutions: ""
+        email: "", name: "", year: "", business_name: "", role: "Business", assign_by: "", institutions: "", specify_institutions: ""
     });
     const [status, setStatus] = useState(false);
     const [message, setMessage] = useState("");
@@ -55,6 +55,8 @@ export default function SignUpBusiness() {
             localStorage.setItem("year", form.year);
             localStorage.setItem("role", form.role);
             localStorage.setItem("assign_by", form.assign_by);
+            localStorage.setItem("business_name", form.business_name);
+            localStorage.setItem("institutions", showOthers ? form.specify_institutions : form.institutions);
             const responds = await Fetch_to(api_link.checkcode, { email: form.email, key: "register" });
             if(!responds.success) {
                 setMessage(responds.message || "Somethings Went Wrong");
@@ -130,6 +132,27 @@ export default function SignUpBusiness() {
                             id="name" 
                             autoComplete="name"
                             value={form.name}
+                            onChange={handleChange}
+                            placeholder="Full Name"
+                            style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
+                            required
+                            />
+                        </div>
+                        <div className={styles.input_holder}>
+                            <span>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="2"/>
+                                <circle cx="9" cy="10" r="2" stroke="currentColor" strokeWidth="2"/>
+                                <path d="M6 16c1.5-2 4.5-2 6 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                <path d="M13 9h5M13 12h5M13 15h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                </svg>
+                            </span>
+                            <input 
+                            type="text" 
+                            name="business_name" 
+                            id="business_name" 
+                            autoComplete="business_name"
+                            value={form.business_name}
                             onChange={handleChange}
                             placeholder="Business Name"
                             style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}

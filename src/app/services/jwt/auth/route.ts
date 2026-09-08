@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
     if (user.role === "Business") {
         const { data: data_business, error: err_business } = await supabaseServer
             .from("auth_business")
-            .select("current_plan, current_limit, current_pdf_limit, current_pdf_limit_per_mb")
+            .select("current_plan, current_limit, current_pdf_limit, current_pdf_limit_per_mb, institutions, business_name")
             .eq("email", email)
             .limit(1);
 
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
         roleData = data_business?.[0] ?? null;
     }
 
-    const final_data = {data, ...user, ...roleData };
+    const final_data = {...user, ...roleData };
 
     console.log(final_data);
 

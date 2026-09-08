@@ -1,9 +1,9 @@
 "use client";
 import styles from "./css/styles.module.css";
 import {
-    Area,
     AreaChart,
     CartesianGrid,
+    Area,
     Cell,
     Legend,
     Pie,
@@ -68,7 +68,7 @@ const PRICING_TIERS = [
         tagline: "For MSME's business and power users",
         features: [
             "250 PDF uploads / month",
-            "500,000 API requests / month",
+            "1,500,000 API requests / month",
             "100MB per upload",
             "Customize chatbot",
             "Embedded link access",
@@ -289,20 +289,15 @@ export default function Dashboard({ email, current_limit, current_pdf_limit, cur
     ];
     const pieColors = ["#2563eb", "#f59e0b", "#16c784", "#ff0800"];
 
-    const renderCryptoChart = (title: string, chartData: WeeklyPoint[], chartId: string, trendLabel: string) => {
-        const firstValue = chartData[0]?.value ?? 0;
-        const lastValue = chartData[chartData.length - 1]?.value ?? 0;
-        const isUp = lastValue >= firstValue;
-        const strokeColor = isUp ? "#1642c7" : "#d4294e";
-        const gradientTop = isUp ? "rgba(22, 122, 199, 0.45)" : "rgba(234, 57, 75, 0.45)";
-        const gradientBottom = isUp ? "rgba(22, 199, 132, 0.03)" : "rgba(234, 57, 67, 0.03)";
+   const renderHistogram = (title: string, chartData: WeeklyPoint[], chartId: string) => {
+        const strokeColor = "#1642c7";
 
         return (
             <section className={styles.graph}>
                 <div className={styles.chartHeader}>
                     <h2>{title}</h2>
-                    <span className={isUp ? styles.trendUp : styles.trendDown}>
-                        {isUp ? `${trendLabel} up` : `${trendLabel} down`}
+                    <span className={styles.trendUp}>
+                        Analysis pending
                     </span>
                 </div>
                 <div className={styles.info2}>
@@ -311,11 +306,11 @@ export default function Dashboard({ email, current_limit, current_pdf_limit, cur
                             <AreaChart data={chartData} margin={{ top: 8, right: 20, left: 4, bottom: 0 }}>
                                 <defs>
                                     <linearGradient id={chartId} x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor={gradientTop} />
-                                        <stop offset="100%" stopColor={gradientBottom} />
+                                        <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.55} />
+                                        <stop offset="100%" stopColor="#1642c7" stopOpacity={0.05} />
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid stroke="rgba(16, 56, 108, 0.5)" strokeDasharray="5 5" />
+                                <CartesianGrid stroke="rgba(16, 56, 108, 0.5)" strokeDasharray="5 5" vertical={false} />
                                 <XAxis dataKey="name" tick={{ fill: "#3b5b9a", fontSize: 12 }} axisLine={false} tickLine={false} />
                                 <YAxis tick={{ fill: "#4c5f85", fontSize: 12 }} axisLine={false} tickLine={false} allowDecimals={false} />
                                 <Tooltip
@@ -332,9 +327,9 @@ export default function Dashboard({ email, current_limit, current_pdf_limit, cur
                                     type="monotone"
                                     dataKey="value"
                                     stroke={strokeColor}
-                                    strokeWidth={3}
+                                    strokeWidth={2}
                                     fill={`url(#${chartId})`}
-                                    activeDot={{ r: 6 }}
+                                    activeDot={{ r: 5, fill: strokeColor, stroke: "#fff", strokeWidth: 2 }}
                                 />
                             </AreaChart>
                         </ResponsiveContainer>
@@ -434,8 +429,8 @@ export default function Dashboard({ email, current_limit, current_pdf_limit, cur
                             </select>
                         </div>
 
-                        {renderCryptoChart(`Number of PDF`, Pdf_set, "pdfTrend", graphRange)}
-                        {renderCryptoChart(`AI API Requested`, Api_logs, "apiTrend", graphRange)}
+                        {renderHistogram("Number of PDF", Pdf_set, "pdfHistogram")}
+                        {renderHistogram("AI API Usage", Api_logs, "apiHistogram")}
                     </div>
                     <div className={styles.records}>
                         <h3 className={styles.reportTitle}>Overall Usage</h3>

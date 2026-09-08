@@ -19,8 +19,8 @@ export default function DashboardPage() {
             Progress(false);
             const result = response.data.message.final_data;
             setData(prev => ({ ...prev, 
-                email: result.data[0].email,
-                name: result.data[0].f_name,
+                email: result.email,
+                name: result.f_name,
                 current_limit: result.current_limit,
                 current_pdf_limit: result.current_pdf_limit,
                 current_pdf_limit_per_mb: result.current_pdf_limit_per_mb,

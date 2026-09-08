@@ -18,7 +18,7 @@ export default function Create_Password() {
     const router = useRouter();
 
     const [form, setForm] = useState({
-        email: "", password: "", c_password: "", name: "", year: "", role: "", id: "", department: ""
+        email: "", password: "", c_password: "", name: "", year: "", role: "", id: "", department: "", institutions: "", business_name: ""
     });
     const [status, setStatus] = useState(false);
     const [message, setMessage] = useState("");
@@ -45,7 +45,18 @@ export default function Create_Password() {
             const saveRole = localStorage.getItem("role");
             const saveId = localStorage.getItem("id");
             const saveDepartment = localStorage.getItem("department");
-            setForm(prev => ({ ...prev, email: saveEmail || "", name: saveName || "", year: saveYear || "", role: saveRole || "", id: saveId || "", department: saveDepartment || "" }));
+            const saveIntitutions = localStorage.getItem("institutions");
+            const saveBusiness_name = localStorage.getItem("business_name");
+            setForm(prev => ({ ...prev, 
+              email: saveEmail || "", 
+              name: saveName || "", 
+              year: saveYear || "", 
+              role: saveRole || "", 
+              id: saveId || "", 
+              department: saveDepartment || "",
+              institutions: saveIntitutions || "",
+              business_name: saveBusiness_name || ""
+            }));
         };
         checkCode();
     }, []);

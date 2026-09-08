@@ -17,7 +17,7 @@ export default function ManageUserPage() {
             const response = await Fetch_to(api_link.jwt.verify);
             if (!response.success) return router.push("/");
             Progress(false);
-            const result = response.data.message.final_data.data;
+            const result = response.data.message.final_data;
             setData(prev => ({ ...prev, f_name: result[0].f_name, email: result[0].email }));
         }
         check();

@@ -15,7 +15,7 @@ export default function Chat_botPage() {
             const response = await Fetch_to(api_link.jwt.verify);
             if (!response.success) return router.push("/");
             Progress(false);
-            setEmail(response.data.message.final_data.data[0].email);
+            setEmail(response.data.message.final_data.email);
         }
         check();
     }, []);
