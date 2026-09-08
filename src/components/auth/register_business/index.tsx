@@ -19,17 +19,25 @@ export default function SignUpBusiness() {
     const router = useRouter();
     const [turnstileToken, setTurnstileToken] = useState("");
     const [form, setForm] = useState({
-        email: "", name: "", year: "", role: "Business", assign_by: ""
+        email: "", name: "", year: "", role: "Business", assign_by: "", institutions: "", specify_institutions: ""
     });
     const [status, setStatus] = useState(false);
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
+    const [showOthers, setShowOthers] = useState(false);
 
     usePreventExit(isDirty);
 
     useEffect(() => {
         Progress(false);
+
+        if (form.institutions === "Others (specify)") {
+          setShowOthers(true);
+        } else {
+          setShowOthers(false);
+        }
+
     }, [form]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -128,6 +136,75 @@ export default function SignUpBusiness() {
                             required
                             />
                         </div>
+
+                        <div className={styles.input_holder}>
+                            <span>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 21h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                    <path d="M5 21V9l7-4 7 4v12" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+                                    <path d="M9 21v-5h6v5" stroke="currentColor" strokeWidth="2"/>
+                                    <path d="M9 11h.01M15 11h.01M9 14h.01M15 14h.01"
+                                        stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                </svg>
+                            </span>
+                            <select 
+                            id="institutions"
+                            name="institutions"
+                            value={form.institutions}
+                            onChange={handleChange}
+                            style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
+                            required
+                            >
+                                <option value="">Select Your Institutions</option>
+                                <option value="Sole Proprietorship">Sole Proprietorship</option>
+                                <option value="Partnership">Partnership</option>
+                                <option value="Corporation (Stock)">Corporation (Stock)</option>
+                                <option value="Corporation (Non-Stock)">Corporation (Non-Stock)</option>
+                                <option value="One Person Corporation (OPC)">One Person Corporation (OPC)</option>
+                                <option value="Cooperative">Cooperative</option>
+                                <option value="Non-Governmental Organization (NGO)">Non-Governmental Organization (NGO)</option>
+                                <option value="Government Agency / Government-Owned or Controlled Corporation (GOCC)">Government Agency / Government-Owned or Controlled Corporation (GOCC)</option>
+                                <option value="Foundation">Foundation</option>
+                                <option value="Association">Association</option>
+                                <option value="Foreign-Owned Enterprise / Branch Office">Foreign-Owned Enterprise / Branch Office</option>
+                                <option value="Representative Office">Representative Office</option>
+                                <option value="Regional Headquarters (RHQ) / Regional Operating Headquarters (ROHQ)">Regional Headquarters (RHQ) / Regional Operating Headquarters (ROHQ)</option>
+                                <option value="Joint Venture">Joint Venture</option>
+                                <option value="Micro, Small, and Medium Enterprise (MSME)">Micro, Small, and Medium Enterprise (MSME)</option>
+                                <option value="Educational Institution (Private)">Educational Institution (Private)</option>
+                                <option value="Educational Institution (Public/State)">Educational Institution (Public/State)</option>
+                                <option value="Religious Organization">Religious Organization</option>
+                                <option value="Others (specify)">Others (specify)</option>
+                            </select>
+                        </div>
+
+                        {showOthers ? (
+                          <div className={styles.input_holder}>
+                            <span>
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                  xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M3 21h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                  <path d="M5 21V9l7-4 7 4v12" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+                                  <path d="M9 21v-5h6v5" stroke="currentColor" strokeWidth="2"/>
+                                  <path d="M9 11h.01M15 11h.01M9 14h.01M15 14h.01"
+                                      stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                              </svg>
+                            </span>
+                            <input 
+                            type="text" 
+                            name="specify_institutions" 
+                            id="specify_institutions" 
+                            autoComplete="specify_institutions"
+                            value={form.specify_institutions}
+                            onChange={handleChange}
+                            placeholder="What Institutions"
+                            style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
+                            required
+                            />
+                        </div>
+                        ) : null}
+
                         <Turnstile
                             siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
                             onSuccess={(token) => setTurnstileToken(token)}

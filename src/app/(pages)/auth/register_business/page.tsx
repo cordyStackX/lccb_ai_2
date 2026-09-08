@@ -1,9 +1,10 @@
 "use client";
-import { SignUpBusiness } from "@/components/auth";
+// import { SignUpBusiness } from "@/components/auth";
 import { Fetch_to } from "@/utilities";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { Under_Development } from "@/app/under-develop";
 
 export default function SignupContent() {
     const router = useRouter();
@@ -21,7 +22,8 @@ export default function SignupContent() {
 
     return(
         <main className="auth_page">
-            <SignUpBusiness />
+            {/* <SignUpBusiness /> */}
+            < Under_Development />
         </main>
     );
 
