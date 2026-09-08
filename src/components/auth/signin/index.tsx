@@ -146,6 +146,7 @@ export default function SignUp() {
                         <Turnstile
                             siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
                             onSuccess={(token) => setTurnstileToken(token)}
+                            options={{ theme: "light" }}
                         />
                         {message && (
                             <p className={status ?  "error" : "success"}>{message}</p>
