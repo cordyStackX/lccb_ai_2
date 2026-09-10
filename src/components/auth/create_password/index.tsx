@@ -72,7 +72,6 @@ export default function Create_Password() {
                 const autosignin_response = await Fetch_to(api_link.signin, {email: form.email, password: form.password});
                 if (autosignin_response.success) {
                     localStorage.clear();
-                    await Fetch_to(api_link.jwt.auth, { email: form.email });
                     router.push("/admin_business/dashboard");
                 } else {
                     alert(responds.message);

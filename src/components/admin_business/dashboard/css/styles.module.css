@@ -469,6 +469,160 @@
     background-color: var(--fx-color-bg);
 }
 
+/* ---------- Pro payment details modal ---------- */
+.paymentOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1010;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background-color: rgba(10, 15, 30, 0.62);
+    backdrop-filter: blur(4px);
+}
+
+.paymentCard {
+    width: min(500px, 100%);
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 1.8rem;
+    border-radius: 16px;
+    background-color: var(--default-color-white);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.paymentCard .modalHeader {
+    margin-bottom: 0.65rem;
+}
+
+.paymentEyebrow {
+    margin: 0 0 0.25rem;
+    color: var(--primary);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.paymentIntro,
+.uiOnlyNote {
+    color: var(--default-color-gray);
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+
+.paymentIntro {
+    margin: 0 0 1.35rem;
+}
+
+.qrPayment {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0 0 1.35rem;
+    padding: 0.9rem;
+    border: 1px solid var(--default-color-white-2);
+    border-radius: 10px;
+    background-color: var(--fx-color-bg);
+}
+
+.qrPayment img {
+    width: 120px;
+    height: 120px;
+    border-radius: 6px;
+    background: var(--default-color-white);
+}
+
+.qrPayment h3 {
+    margin: 0 0 0.35rem;
+    color: var(--foreground);
+    font-size: 0.95rem;
+}
+
+.qrPayment p {
+    margin: 0;
+    color: var(--default-color-gray);
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
+.paymentForm {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.paymentForm label {
+    margin-top: 0.45rem;
+    color: var(--foreground);
+    font-size: 0.86rem;
+    font-weight: 600;
+}
+
+.paymentForm input,
+.paymentForm select {
+    width: 100%;
+    min-height: 43px;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--default-color-white-2);
+    border-radius: 8px;
+    outline: none;
+    background-color: var(--default-color-white);
+    color: var(--foreground);
+    font: inherit;
+}
+
+.paymentForm input:focus,
+.paymentForm select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(22, 122, 199, 0.14);
+}
+
+.paymentActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.cancelPaymentBtn,
+.submitPaymentBtn {
+    cursor: pointer;
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    font-size: 0.86rem;
+    font-weight: 600;
+}
+
+.cancelPaymentBtn {
+    border: 1px solid var(--default-color-white-2);
+    background: var(--default-color-white);
+    color: var(--foreground);
+}
+
+.submitPaymentBtn {
+    border: 1px solid var(--primary);
+    background: var(--primary);
+    color: var(--default-color-white);
+}
+
+.submitPaymentBtn:hover {
+    background: var(--secondary);
+}
+
+.uiOnlyNote {
+    margin: 1rem 0 0;
+    font-size: 0.76rem;
+    font-style: italic;
+}
+.refundError {
+    margin: 0.45rem 0 0;
+    color: var(--default-color-red);
+    font-size: 0.86rem;
+}
+
+
 /* ---------- Usage limit bars ---------- */
 .limitBars {
     width: 100%;
@@ -616,6 +770,27 @@
     .graph {
         padding: 1rem;
         height: 400px;
+    }
+
+    .paymentOverlay {
+        padding: 1rem;
+    }
+    .paymentCard {
+        padding: 1.25rem;
+    }
+    .qrPayment {
+        align-items: flex-start;
+    }
+    .qrPayment img {
+        width: 100px;
+        height: 100px;
+    }
+    .paymentActions {
+        flex-direction: column-reverse;
+    }
+    .cancelPaymentBtn,
+    .submitPaymentBtn {
+        width: 100%;
     }
 
     .rankings th,

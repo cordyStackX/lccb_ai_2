@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
 import { Security } from "@/firewall/security";
 import { rateLimit } from "@/firewall/rate_limit";
+import { auth_jwt } from "@/firewall/jwt_auth";
 
 export async function POST(req:NextRequest) {
 
@@ -32,6 +33,8 @@ export async function POST(req:NextRequest) {
             console.error("Supabase Query Error: ", error);
             return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
         }
+
+        await auth_jwt(email);
 
         return NextResponse.json({ success: true, message: "Successfully Update" }, { status: 200 });
 

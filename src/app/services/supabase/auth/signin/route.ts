@@ -95,11 +95,13 @@ export async function POST(req: NextRequest) {
                     { status: 409 }
                 );
             }
-
+            
             // === CORRECT PASSWORD ===
             state.attempts = 0;
             state.cooldownUntil = 0;
             LoginAttempts.set(email, state);
+
+            
 
             return NextResponse.json({ success: true }, { status: 200 });
         } else {

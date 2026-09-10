@@ -10,6 +10,8 @@ export async function POST(req: NextRequest) {
 
     const { email } = await req.json();
 
+    if (!email) return NextResponse.json({ success: false, error: "Email not Exist" }, { status: 404 });
+
     const cleanEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
 
     if (!cleanEmail) return NextResponse.json({ success: false, error: "Email not found" }, { status: 404 });

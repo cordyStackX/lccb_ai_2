@@ -18,7 +18,6 @@
 	},
 	"update" : "/services/supabase/auth/update",
 	"jwt" : {
-		"auth" : "/services/jwt/auth",
 		"deauth" : "/services/jwt/deauth",
 		"verify" : "/services/jwt/verify"
 	},
@@ -56,6 +55,13 @@
 		"system_logs" : "/services/supabase/admin/system_logs",
 		"get_suspension_state" : "/services/supabase/admin/get-suspension-state",
 		"set_suspension_state" : "/services/supabase/admin/suspension-state",
-		"update_chatbot" : "/services/supabase/admin/update_chatbot"
-	}
+		"update_chatbot" : "/services/supabase/admin/update_chatbot",
+    "pending_payment" : "/services/supabase/admin/pending_payment"
+	},
+  "payment" : {
+    "retrieve" : "/services/supabase/payments/retrieve",
+    "paying" : "/services/supabase/payments/paying",
+    "refund" : "/services/supabase/payments/refund",
+    "resubmit" : "/services/supabase/payments/resubmit"
+  }
 }

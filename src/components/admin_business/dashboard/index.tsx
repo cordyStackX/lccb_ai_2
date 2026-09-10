@@ -14,8 +14,10 @@ import {
     YAxis,
 } from "recharts";
 import { useEffect, useState } from "react";
-import { Fetch_to } from "@/utilities";
+import Image from "next/image";
+import { Fetch_to, Progress } from "@/utilities";
 import  api_link from "@/config/conf/json_config/fetch_url.json";
+import { useRouter } from "next/navigation";
 
 
 type System_logs = {
@@ -63,12 +65,12 @@ const PRICING_TIERS = [
     {
         id: "pro",
         name: "Pro",
-        price: "₱599",
+        price: "₱799",
         period: "/month",
         tagline: "For MSME's business and power users",
         features: [
-            "250 PDF uploads / month",
-            "1,500,000 API requests / month",
+            "250 PDF uploads limit",
+            "1,000,000 API requests / week",
             "100MB per upload",
             "Customize chatbot",
             "Embedded link access",
@@ -106,6 +108,7 @@ const getUsagePercent = (used: number, max: number) => {
 type GraphRange = "day" | "week" | "year";
 
 export default function Dashboard({ email, current_limit, current_pdf_limit, current_plan } : DashboardProps) {
+    const router = useRouter();
     const [system_logs, setSystem_logs] = useState<System_logs[]>([]);
     const [files, setFiles] = useState<CurrentFiles[]>([]);
     const [graphRange, setGraphRange] = useState<GraphRange>("week");
@@ -115,6 +118,16 @@ export default function Dashboard({ email, current_limit, current_pdf_limit, cur
         currentFile: 0,
     });
     const [showPricing, setShowPricing] = useState(false);
+    const [showPaymentDetails, setShowPaymentDetails] = useState(false);
+    const [payment_info, setPaymentInfo] = useState({
+      account_number: "", method: "", specify_method: ""
+    });
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState("");
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        setPaymentInfo({ ...payment_info, [e.target.name]: e.target.value });
+    };
 
     useEffect(() => {
         const Retrieve = async () => {
@@ -129,10 +142,6 @@ export default function Dashboard({ email, current_limit, current_pdf_limit, cur
             }
         };
         Retrieve();
-        const Retrieve2 = async () => {
-            
-        };
-        Retrieve2();
     }, [email]);
 
 
@@ -288,6 +297,25 @@ export default function Dashboard({ email, current_limit, current_pdf_limit, cur
         { name: "API Request", value: apiRequestCount },
     ];
     const pieColors = ["#2563eb", "#f59e0b", "#16c784", "#ff0800"];
+
+    const Submit = async() => {
+      setLoading(true);
+
+      const response = await Fetch_to(api_link.payment.paying, { 
+        email: email,
+        account_number: payment_info.account_number,
+        method: payment_info.method === "Other" ? payment_info.specify_method : payment_info.method
+      });
+
+      if (response.success) {
+        router.push("/admin_business/pending_payment");
+        Progress(true);
+      } else {
+        setMessage(response.message);
+        setLoading(false);
+      }
+
+    };
 
    const renderHistogram = (title: string, chartData: WeeklyPoint[], chartId: string) => {
         const strokeColor = "#1642c7";
@@ -561,12 +589,108 @@ export default function Dashboard({ email, current_limit, current_pdf_limit, cur
                                     <button
                                         type="button"
                                         className={tier.highlight ? styles.tierCtaPrimary : styles.tierCtaSecondary}
+                                        onClick={() => {
+                                            if (tier.id === "pro") setShowPaymentDetails(true);
+                                        }}
                                     >
                                         {tier.cta}
                                     </button>
                                 </div>
                             ))}
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {showPaymentDetails && (
+                <div
+                    className={styles.paymentOverlay}
+                    onClick={() => setShowPaymentDetails(false)}
+                >
+                    <div
+                        className={styles.paymentCard}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="payment-details-title"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className={styles.modalHeader}>
+                            <div>
+                                <p className={styles.paymentEyebrow}>Pro Plan · ₱799/month</p>
+                                <h2 id="payment-details-title">Payment details</h2>
+                            </div>
+                            <button
+                                type="button"
+                                className={styles.closeBtn}
+                                onClick={() => setShowPaymentDetails(false)}
+                                aria-label="Close payment details"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <p className={styles.paymentIntro}>
+                            Enter your payment credential to request a Pro plan upgrade.
+                        </p>
+                        <div className={styles.qrPayment}>
+                            <Image
+                                src="/QR_Gcash.png"
+                                alt="Payment QR code"
+                                width={180}
+                                height={180}
+                                priority
+                            />
+                            <div>
+                                <h3>Scan to pay</h3>
+                                <p>Use your preferred payment app to scan this QR code.</p>
+                            </div>
+                        </div>
+                        <form className={styles.paymentForm} onSubmit={(e) => e.preventDefault()}>
+                            <label htmlFor="payment-method">Payment method</label>
+                            <select
+                                id="method"
+                                name="method"
+                                value={payment_info.method}
+                                onChange={handleChange}
+                            >
+                                <option value="">Select a payment method</option>
+                                <option value="Gcash">GCash</option>
+                                <option value="Paymaya">PayMaya</option>
+                                <option value="Maribank">MariBank</option>
+                                <option value="Gotyme">GoTyme</option>
+                                <option value="Other">Other bank</option>
+                            </select>
+
+                            {payment_info.method === "Other" && (
+                                <>
+                                    <label htmlFor="specify_method">Bank name</label>
+                                    <input id="specify_method" name="specify_method" type="text" value={payment_info.specify_method} onChange={handleChange} placeholder="Specify your bank" />
+                                </>
+                            )}
+
+                            <label htmlFor="account-number">Account number</label>
+                            <input
+                                name="account_number" 
+                                id="account_number" 
+                                autoComplete="account_number"
+                                value={payment_info.account_number}
+                                type="text"
+                                inputMode="numeric"
+                                placeholder="Enter your account number"
+                                onChange={handleChange}
+                            />
+                            {message && <p className={styles.refundError} role="alert">{message}</p>}
+
+                            <div className={styles.paymentActions}>
+                                <button type="button" className={styles.cancelPaymentBtn} onClick={() => setShowPaymentDetails(false)}>
+                                    Cancel
+                                </button>
+                                <button type="submit" disabled={loading} style={{ opacity: loading ? "0.5" : "1" }} className={styles.submitPaymentBtn} onClick={() => Submit()}>
+                                    {loading ? "Submiting..." : "Submit payment details"}
+                                </button>
+                            </div>
+                        </form>
+                        <p className={styles.uiOnlyNote}>This form is for display only and does not submit payment information.</p>
                     </div>
                 </div>
             )}

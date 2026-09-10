@@ -3,7 +3,7 @@ import styles from "./css/styles.module.css";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import api_link from "@/config/conf/json_config/fetch_url.json";
-import { Fetch_to, SweetAlert2, Fetch_toFile, Popup_info } from "@/utilities";
+import { Fetch_to, SweetAlert2, Fetch_toFile, Popup_info, Progress } from "@/utilities";
 import Swal from "sweetalert2";
 
 type SettingProps = {
@@ -68,6 +68,7 @@ export default function Setting({ email, f_name, business_name } : SettingProps)
     const ChangePassword = async () => {
         localStorage.setItem("email", email);
         const response = await Fetch_to(api_link.checkcode, { email: email });
+        Progress(true);
         if (!response.success) return alert(response.message || "Something went wrong to the server find a developer to fix this problem");
         router.push("/auth/confirm-email-forgot-pwd");
     };
@@ -146,7 +147,6 @@ export default function Setting({ email, f_name, business_name } : SettingProps)
         } finally {
             setSavingBranding(false);
             SweetAlert2("Success", response?.data.message, "success", true, "Confirm", false, "");
-            await Fetch_to(api_link.jwt.auth, { email: email });
         }
     };
 

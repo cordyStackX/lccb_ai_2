@@ -16,7 +16,7 @@ export default function Confirm_email_signin() {
     const router = useRouter();
 
     const [form, setForm] = useState({
-        code: "", email: "", role: ""
+        code: "", email: "", role: "", password: ""
     });
     const [status, setStatus] = useState(false);
     const [message, setMessage] = useState("");
@@ -29,7 +29,7 @@ export default function Confirm_email_signin() {
    useEffect(() => {
         const saveEmail = localStorage.getItem("email");
         const saveRole = localStorage.getItem("role");
-        setForm(prev => ({ ...prev, email: saveEmail || "", role: saveRole || "" }));
+        setForm(prev => ({ ...prev, email: saveEmail || "", role: saveRole || ""}));
     }, []);
 
     const confirmExit = useConfirmExit({
@@ -62,7 +62,6 @@ export default function Confirm_email_signin() {
                 setLoading(false);
                 return;
             }
-            await Fetch_to(api_link.jwt.auth, { email: form.email });
             if (form.role === "Business") return router.push("/admin_business/dashboard");
             if (form.email.endsWith("@admin.com")) return router.push("/admin/dashboard");
             router.push("/chat");

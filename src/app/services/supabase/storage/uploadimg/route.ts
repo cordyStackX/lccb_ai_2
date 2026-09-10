@@ -2,7 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
 import { Security } from "@/firewall/security";
 import { imageSize } from "image-size";
-
+import { auth_jwt } from "@/firewall/jwt_auth";
 
 export async function POST(req: NextRequest) {
 
@@ -108,6 +108,8 @@ export async function POST(req: NextRequest) {
         }
 
         console.log("Upload successful: ", dbResult);
+
+        await auth_jwt(email);
 
         return NextResponse.json({ 
             success: true, 

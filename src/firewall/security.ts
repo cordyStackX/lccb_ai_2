@@ -124,7 +124,7 @@ export async function Security(req: NextRequest) {
             };
         }
 
-        return { error: false };
+        return { error: false, email: decoded.email };
 
     } catch (err) {
         console.error("Security error:", err);

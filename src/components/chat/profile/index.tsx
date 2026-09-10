@@ -100,7 +100,6 @@ export default function Profile({ showProfile, setShowProfile, email, name, role
             // await Fetch_to(api_link.jwt.deauth);
             const alert2 = await SweetAlert2("Updated", "Complete", "success", true, "Okay", false, "");
             if (alert2.isConfirmed) { setGlobalRefresh(true); }
-            await Fetch_to(api_link.jwt.auth, { email: email });
             setSelectedFile(null); // Clear selected file after successful upload
             if (profilePicRef.current) {
                 profilePicRef.current.value = "";

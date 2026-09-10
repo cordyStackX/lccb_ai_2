@@ -12,3 +12,5 @@ export { default as Setting } from "./setting";
 export { default as Embeded_code } from "./embeded_code";
 
 export { default as PendingUser } from "./pending_user";
+
+export { default as PendingPayments } from "./pending_payments";

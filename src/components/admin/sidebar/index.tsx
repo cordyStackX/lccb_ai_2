@@ -76,6 +76,20 @@ const NAV_ITEMS = [
         ),
     },
     {
+        key: "pending_payment",
+        label: "Payment Status",
+        path: "/admin/pending_payment",
+        icon: (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="5" width="14" height="14" rx="2" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+              <path d="M2 9.5H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M5 14.5H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              <circle cx="18" cy="16" r="5" fill="white" stroke="currentColor" strokeWidth="2" />
+              <path d="M18 13.5V16L19.5 17.2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+        ),
+    },
+    {
         key: "setting",
         label: "Setting",
         path: "/admin/setting",

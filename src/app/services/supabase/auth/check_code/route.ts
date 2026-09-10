@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { attemptMap, cooldownMap, CodeStore } from "@/lib/code_store";
 import { rateLimit } from "@/firewall/rate_limit";
+import { auth_jwt } from "@/firewall/jwt_auth";
 
 const COOLDOWN_MS = 60 * 3000; // 3 minute
 
@@ -143,6 +144,7 @@ export async function POST(req: NextRequest) {
             );
         }
 
+        await auth_jwt(cleanEmail);
 
         CodeStore.set(cleanEmail, {
             code: code,
@@ -150,6 +152,7 @@ export async function POST(req: NextRequest) {
             confirm_code: code
         });
 
+        
         // Code correct
         return NextResponse.json({ success: true }, { status: 200 });
     }
