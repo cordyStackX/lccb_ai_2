@@ -4,6 +4,7 @@ import { Fetch_to } from "@/utilities";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import bcrypt from "bcrypt";
 import nodemailer from "nodemailer";
+import { auth_jwt } from "@/firewall/jwt_auth";
 import { rateLimit } from "@/firewall/rate_limit";
 
 export async function POST(req: NextRequest) {
@@ -134,6 +135,8 @@ export async function POST(req: NextRequest) {
         };
 
         await transporter.sendMail(mailOption);
+
+        await auth_jwt(email);
 
         return NextResponse.json({ success: true }, { status: 200 });
 

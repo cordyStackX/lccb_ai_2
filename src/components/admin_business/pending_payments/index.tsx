@@ -30,7 +30,7 @@ const getStatusStyle = (status?: string | null) => {
         return styles.statusDeclined;
     }
 
-    if (["success", "successful", "paid", "active", "completed", "complete"].includes(normalizedStatus)) {
+    if (["success", "successful", "paid", "active", "completed", "complete", "refunded"].includes(normalizedStatus)) {
         return styles.statusSuccess;
     }
 

@@ -74,7 +74,7 @@ export default function SignUp() {
             <div className={`${styles.wrapper} `}>
                 {loading ? (
                     <div style={{ height: "100dvh" }}>
-                        <React_Spinners status="Registering Your Account..."/>
+                        <React_Spinners status="Confirming Your Account..."/>
                     </div>
                 ) : (
                     <form className={styles.form_styles} onSubmit={handleSubmit}>

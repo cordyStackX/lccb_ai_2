@@ -65,7 +65,7 @@ export async function auth_jwt(email: string) {
 
     const final_data = { ...user, ...roleData };
 
-    const token = jwt.sign({ final_data }, process.env.JWT_SECRET || "", { expiresIn: "30d" });
+    const token = jwt.sign({ final_data }, process.env.JWT_SECRET || "", { expiresIn: "7d" });
 
     const cookieStore = await cookies();
     cookieStore.set({
@@ -75,7 +75,7 @@ export async function auth_jwt(email: string) {
         secure: true,
         sameSite: "strict",
         path: "/",
-        maxAge: 60 * 60 * 24 * 30,
+        maxAge: 60 * 60 * 24 * 7,
     });
 
     return { error: false, role: user.role };

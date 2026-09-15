@@ -16,7 +16,7 @@ export default function Privacy() {
             <div className={styles.content}>
                 <Link href="/" style={{ color: "blue" }} > {"<<"} Go Back</Link>
                 <h1>Privacy Policy</h1>
-                <p className={styles.updated}>Last Updated: August 1, 2026</p>
+                <p className={styles.updated}>Last Updated: September 15, 2026</p>
                 
                 <div className={styles.notice}>
                     <h2>⚠️ Important Notice</h2>
@@ -35,6 +35,11 @@ export default function Privacy() {
                     <ul>
                         <li><strong>Academic (La Consolacion College Bacolod only):</strong> Full access to sensitive student data, including grades, is available exclusively to LCCB. Other schools or institutions seeking full system access must contact us directly to negotiate a separate agreement.</li>
                         <li><strong>Business:</strong> Businesses may sign up for general PDF document analysis under a Free or Enterprise tier (see Section 3.5). This tier is not intended for sensitive or confidential data.</li>
+                    </ul>
+                    <h3>2.1 Account Approval Process</h3>
+                    <ul>
+                        <li><strong>Student and Teacher (LCCB academic) accounts</strong> are subject to admin review before activation. Your account will remain under review until an administrator approves it.</li>
+                        <li><strong>Business accounts</strong> (Free Trial, Pro, Enterprise) do not require admin approval to sign up and access the platform. However, payments submitted for Pro or Enterprise plans are still reviewed by an administrator (see Section 8).</li>
                     </ul>
                 </section>
 
@@ -106,6 +111,7 @@ export default function Privacy() {
                         <li>Rate limiting to prevent spam and abuse (1 request per second per IP)</li>
                         <li>CSRF protection and origin validation</li>
                         <li>Enforcing tier limits (Free vs. Enterprise) for business accounts</li>
+                        <li>Reviewing and processing business plan payments, refund requests, and resubmissions</li>
                         <li>Debugging and system performance monitoring</li>
                     </ul>
                 </section>
@@ -118,6 +124,7 @@ export default function Privacy() {
                         <li>Profile pictures stored in Supabase public storage buckets</li>
                         <li>PDF files stored in Supabase storage buckets</li>
                         <li>Passwords encrypted using industry-standard hashing</li>
+                        <li>Payment account numbers are encrypted at rest and only decrypted for authorized admin review; account numbers are masked when a refund is requested</li>
                         <li>JWT tokens with secret key encryption for session management</li>
                         <li>API endpoints protected with JWT authentication and rate limiting</li>
                         <li>CSRF protection via origin header validation</li>
@@ -148,12 +155,26 @@ export default function Privacy() {
                 </section>
 
                 <section className={styles.section}>
-                    <h2>8. Data Retention</h2>
+                    <h2>8. Payments and Refunds</h2>
                     <ul>
-                        <li><strong>Account data:</strong> Retained until you request deletion by contacting the admin (see Section 9)</li>
+                        <li>Business accounts on the Pro or Enterprise plan submit payment details, including an account/payment method identifier, for manual admin verification</li>
+                        <li>Submitted account numbers are encrypted before being stored; only administrators can review them for verification purposes</li>
+                        <li>Each payment is assigned a status: <strong>pending</strong> (awaiting review), <strong>success</strong> (approved), <strong>decline</strong> (rejected, with a reason), or <strong>refunded</strong></li>
+                        <li>You will receive an email notification when you submit a payment, resubmit updated payment details, request a refund, and when an admin approves, declines, or refunds your payment</li>
+                        <li>Only one pending payment is allowed per account at a time; you must wait for a decision, or resubmit details if requested, before submitting again</li>
+                        <li>Requesting a refund masks your stored account number and marks the payment as <strong>refund_requested</strong> pending admin processing</li>
+                        <li>Declined payments may include a reason from the admin explaining why verification failed</li>
+                    </ul>
+                </section>
+
+                <section className={styles.section}>
+                    <h2>9. Data Retention</h2>
+                    <ul>
+                        <li><strong>Account data:</strong> Retained until you request deletion by contacting the admin (see Section 10)</li>
                         <li><strong>Profile pictures:</strong> Stored until replaced or account deleted</li>
                         <li><strong>PDF files:</strong> Stored in database and storage bucket until manually deleted via context menu</li>
                         <li><strong>Chat history:</strong> Stored indefinitely in your account until manually cleared</li>
+                        <li><strong>Payment records:</strong> Retained for accounting and dispute-resolution purposes, with account numbers encrypted or masked</li>
                         <li><strong>API logs:</strong> Retained for debugging, research, and admin monitoring purposes</li>
                         <li><strong>Authentication tokens:</strong> JWT tokens expire based on configured session duration</li>
                         <li><strong>Rate limit data:</strong> Stored temporarily in memory; old entries auto-cleaned</li>
@@ -162,7 +183,7 @@ export default function Privacy() {
                 </section>
 
                 <section className={styles.section}>
-                    <h2>9. Account Security, Password Recovery, and Deletion</h2>
+                    <h2>10. Account Security, Password Recovery, and Deletion</h2>
                     <ul>
                         <li>You retain full control over your own account password</li>
                         <li>Password recovery is self-service via OTP (One-Time Password) sent to your registered email, through <code>/auth/forgot-password</code></li>
@@ -172,7 +193,7 @@ export default function Privacy() {
                 </section>
 
                 <section className={styles.section}>
-                    <h2>10. Your Rights</h2>
+                    <h2>11. Your Rights</h2>
                     <p>You have the right to:</p>
                     <ul>
                         <li>Access your personal data through your profile settings</li>
@@ -187,9 +208,10 @@ export default function Privacy() {
                 </section>
 
                 <section className={styles.section}>
-                    <h2>11. User Roles and Permissions</h2>
-                    <h3>11.1 Students and Teachers (LCCB)</h3>
+                    <h2>12. User Roles and Permissions</h2>
+                    <h3>12.1 Students and Teachers (LCCB)</h3>
                     <ul>
+                        <li>Accounts require admin review and approval before activation</li>
                         <li>Can upload and manage their own PDF documents</li>
                         <li>Can chat with AI about their PDFs and their own academic records</li>
                         <li>Can search and filter their PDF library</li>
@@ -197,27 +219,30 @@ export default function Privacy() {
                         <li>Students under 13 require Guardian or Parent supervision</li>
                     </ul>
 
-                    <h3>11.2 Administrators</h3>
+                    <h3>12.2 Administrators</h3>
                     <ul>
                         <li>Full access to user management features</li>
+                        <li>Review and approve student/teacher account registrations</li>
                         <li>Can create, update, and manage user accounts (cannot reset user passwords — recovery is OTP-only)</li>
                         <li>Handle account deletion requests received via admin email</li>
+                        <li>Review, approve, decline, or refund business payments</li>
                         <li>Can view and manage API usage logs</li>
                         <li>Can assign teacher roles to users</li>
                         <li>Can monitor system health and performance</li>
                     </ul>
 
-                    <h3>11.3 Business Accounts</h3>
+                    <h3>12.3 Business Accounts</h3>
                     <ul>
+                        <li>Sign-up does not require admin approval</li>
                         <li>Free Trial: 2 PDF uploads, 10,000 API requests, 10MB per upload limit, 1 month free trial</li>
-                        <li>Pro tier (₱599/month): 250 PDF uploads/month, 500,000 API requests/month, 100MB per upload</li>
-                        <li>Enterprise tier (custom): full feature access, limits scale with OpenAI API budget, can handle sensitive PDF files, dedicated user management</li>
+                        <li>Pro tier (₱599/month): 250 PDF uploads/month, 500,000 API requests/month, 100MB per upload — payment requires admin verification</li>
+                        <li>Enterprise tier (custom): full feature access, limits scale with OpenAI API budget, can handle sensitive PDF files, dedicated user management — payment requires admin verification</li>
                         <li>Free Trial and Pro accounts must not upload sensitive or password-containing PDFs</li>
                     </ul>
                 </section>
 
                 <section className={styles.section}>
-                    <h2>12. Children&apos;s Privacy</h2>
+                    <h2>13. Children&apos;s Privacy</h2>
                     <p>Users under 13 years of age are <strong>not permitted to sign up or use LACO AI without direct parental supervision and consent</strong>.</p>
                     <ul>
                         <li>A parent or legal guardian must provide consent before a child under 13 creates an account or uses the Service</li>
@@ -229,7 +254,7 @@ export default function Privacy() {
                 </section>
 
                 <section className={styles.section}>
-                    <h2>13. No Illegal Activities</h2>
+                    <h2>14. No Illegal Activities</h2>
                     <p>This platform is strictly for lawful use. We:</p>
                     <ul>
                         <li>Do not engage in any illegal activities</li>
@@ -240,12 +265,12 @@ export default function Privacy() {
                 </section>
 
                 <section className={styles.section}>
-                    <h2>14. Changes to This Privacy Policy</h2>
+                    <h2>15. Changes to This Privacy Policy</h2>
                     <p>We may update this Privacy Policy at any time. Changes will be posted on this page with an updated revision date.</p>
                 </section>
 
                 <section className={styles.section}>
-                    <h2>15. Contact Information</h2>
+                    <h2>16. Contact Information</h2>
                     <p>For questions about this Privacy Policy, account deletion requests, or negotiating full-system access for other schools, please contact the admin.</p>
                     <p><strong>Project Owner:</strong> cordyStackX</p>
                     <p><strong>License:</strong> Apache License 2.0</p>

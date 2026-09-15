@@ -132,7 +132,7 @@ export default function Create_Password() {
                             </div>
                         ) : (
                             <div className={`${styles.form_styles} `}>
-                                <React_Spinners status="Activating Your Account..." />
+                                <React_Spinners status="Creating Your Account..." />
                             </div>
                         )}
                     </>

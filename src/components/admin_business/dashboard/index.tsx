@@ -304,7 +304,8 @@ export default function Dashboard({ email, current_limit, current_pdf_limit, cur
       const response = await Fetch_to(api_link.payment.paying, { 
         email: email,
         account_number: payment_info.account_number,
-        method: payment_info.method === "Other" ? payment_info.specify_method : payment_info.method
+        method: payment_info.method === "Other" ? payment_info.specify_method : payment_info.method,
+        plan_type: "Pro",
       });
 
       if (response.success) {

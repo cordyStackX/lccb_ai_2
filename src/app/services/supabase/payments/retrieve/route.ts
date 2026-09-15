@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Security } from "@/firewall/security";
 import { supabaseServer } from "@/lib/supabase-server";
+import { decryptText } from "@/firewall/encryptions";
 
 export async function POST(params: NextRequest) {
-  
+
   const auth = await Security(params);
-  if(auth?.error) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+  if (auth?.error) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
 
   const { email, page, limit, search } = await params.json();
 
@@ -40,9 +41,22 @@ export async function POST(params: NextRequest) {
       return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
     }
 
+    const decryptedData = (data ?? []).map((row) => {
+      let account_number = row.account_number;
+      try {
+        account_number = row.account_number
+          ? decryptText(row.account_number, process.env.API_KEY || "")
+          : row.account_number;
+      } catch (decryptErr) {
+        console.error("Decrypt Error for row:", row.id, decryptErr);
+        account_number = null;
+      }
+      return { ...row, account_number };
+    });
+
     return NextResponse.json({
       success: true,
-      message: data,
+      message: decryptedData,
       page: currentPage,
       limit: pageLimit,
       totalPages: Math.max(1, Math.ceil((count ?? 0) / pageLimit)),

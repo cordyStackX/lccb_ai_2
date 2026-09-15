@@ -15,11 +15,9 @@ export async function POST(req: NextRequest) {
     if(auth?.error) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     
     try {
-        const { email, page = 1, limit = 30, search = "", year = "", role = "", status = "" } = await req
+        const {page = 1, limit = 30, search = "", year = "", role = "", status = "" } = await req
         .json()
         .catch(() => ({ page: 1, limit: 30, search: "", year: "", role: "", status: "" }));
-
-        if (!email) return NextResponse.json({ success: false, error: "Email not Exist" }, { status: 404 });
 
         const currentPage = Math.max(1, Number(page) || 1);
         const statusFilter = String(status || "").trim();

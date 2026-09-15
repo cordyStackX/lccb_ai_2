@@ -12,6 +12,7 @@ type Payment = {
     email?: string | null;
     id?: string | number | null;
     method?: string | null;
+    plan_type?: string | null;
     reason?: string | null;
     status?: string | null;
     vat?: string | number | null;
@@ -39,7 +40,7 @@ const getStatusStyle = (status?: string | null) => {
         return styles.statusDeclined;
     }
 
-    if (["success", "successful", "paid", "active", "completed", "complete"].includes(normalizedStatus)) {
+    if (["success", "successful", "paid", "active", "completed", "complete", "refunded"].includes(normalizedStatus)) {
         return styles.statusSuccess;
     }
 
@@ -47,7 +48,10 @@ const getStatusStyle = (status?: string | null) => {
 };
 
 const isPending = (status?: string | null) =>
-    !["decline", "declined", "failed", "failure", "rejected", "success", "successful", "paid", "active", "completed", "complete"].includes(status?.trim().toLowerCase() ?? "pending");
+    !["decline", "declined", "failed", "failure", "rejected", "success", "successful", "paid", "active", "completed", "complete", "refund_requested", "refunded"].includes(status?.trim().toLowerCase() ?? "pending");
+
+const isRefundRequested = (status?: string | null) =>
+    status?.trim().toLowerCase() === "refund_requested";
 
 const formatStatus = (status?: string | null) => {
     if (!status) return "Pending";
@@ -133,17 +137,26 @@ export default function PendingPayments({ email }: PendingPaymentsProps) {
         );
     };
 
-    const updateDisplayedPayment = (status: "success" | "declined", reason?: string) => {
+    const updateDisplayedPayment = async(status: "success" | "declined" | "refunded", reason?: string) => {
         if (!viewingPayment) return;
 
-        // Persistence belongs in the payment-status route that you will add.
-        // This keeps the admin UI responsive and makes the expected payload clear.
-        const updatedPayment = { ...viewingPayment, status, reason: reason ?? null };
-        setPayments((currentPayments) => currentPayments.map((payment) =>
-            viewingPayment.id != null
-                ? payment.id === viewingPayment.id ? updatedPayment : payment
-                : payment === viewingPayment ? updatedPayment : payment
-        ));
+        const paymentEmail = viewingPayment.email?.trim();
+        if (!paymentEmail) {
+            alert("The selected payment does not have an email address.");
+            return;
+        }
+
+        const response = await Fetch_to(api_link.admin.update_payment, {
+            status,
+            reason,
+            email: paymentEmail,
+        });
+
+        if (response.success) {
+          setRefreshKey((key) => key + 1);
+        } else {
+          alert(response.message);
+        }
         setViewingPayment(null);
         setShowDeclinePanel(false);
     };
@@ -208,6 +221,7 @@ export default function PendingPayments({ email }: PendingPaymentsProps) {
                                 <th>Account Number</th>
                                 <th>Amount</th>
                                 <th>Method</th>
+                                <th>Plan</th>
                                 <th>VAT</th>
                                 <th>Status</th>
                                 <th>Actions</th>
@@ -217,7 +231,7 @@ export default function PendingPayments({ email }: PendingPaymentsProps) {
                             {isLoading ? (
                                 Array.from({ length: 4 }).map((_, index) => (
                                     <tr key={`skeleton-${index}`}>
-                                        {Array.from({ length: 7 }).map((__, columnIndex) => (
+                                        {Array.from({ length: 8 }).map((__, columnIndex) => (
                                             <td key={columnIndex}><span className={`${styles.skeletonBar} ${styles.skeletonMedium}`} /></td>
                                         ))}
                                         <td><span className={styles.skeletonIconSm} /></td>
@@ -231,13 +245,14 @@ export default function PendingPayments({ email }: PendingPaymentsProps) {
                                         <td>{payment.account_number ?? "—"}</td>
                                         <td>{payment.amount ?? "—"}</td>
                                         <td>{payment.method ?? "—"}</td>
+                                        <td>{payment.plan_type ?? "—"}</td>
                                         <td>{payment.vat ?? "—"}</td>
                                         <td><span className={`${styles.statusBadge} ${getStatusStyle(payment.status)}`}>{formatStatus(payment.status)}</span></td>
                                         <td><button className={styles.button_view} onClick={() => openPayment(payment)}>View</button></td>
                                     </tr>
                                 ))
                             ) : (
-                                <tr><td colSpan={8} className={styles.emptyState}>{error || "No payments found."}</td></tr>
+                                <tr><td colSpan={9} className={styles.emptyState}>{error || "No payments found."}</td></tr>
                             )}
                         </tbody>
                     </table>
@@ -263,6 +278,7 @@ export default function PendingPayments({ email }: PendingPaymentsProps) {
                                 <div className={styles.detailRow}><span className={styles.detailLabel}>Account Number</span><span>{viewingPayment.account_number ?? "—"}</span></div>
                                 <div className={styles.detailRow}><span className={styles.detailLabel}>Amount</span><span>{viewingPayment.amount ?? "—"}</span></div>
                                 <div className={styles.detailRow}><span className={styles.detailLabel}>Method</span><span>{viewingPayment.method ?? "—"}</span></div>
+                                <div className={styles.detailRow}><span className={styles.detailLabel}>Plan</span><span>{viewingPayment.plan_type ?? "—"}</span></div>
                                 <div className={styles.detailRow}><span className={styles.detailLabel}>VAT</span><span>{viewingPayment.vat ?? "—"}</span></div>
                                 <div className={styles.detailRow}><span className={styles.detailLabel}>Date</span><span>{formatPaymentDate(viewingPayment.created_at)}</span></div>
                                 <div className={styles.detailRow}><span className={styles.detailLabel}>Status</span><span className={`${styles.statusBadge} ${getStatusStyle(viewingPayment.status)}`}>{formatStatus(viewingPayment.status)}</span></div>
@@ -270,7 +286,7 @@ export default function PendingPayments({ email }: PendingPaymentsProps) {
                             </div>
                         )}
 
-                        {isPending(viewingPayment.status) && (showDeclinePanel ? (
+                        {(isPending(viewingPayment.status) || isRefundRequested(viewingPayment.status)) && (showDeclinePanel ? (
                             <div className={styles.modalBody_decline}>
                                 <p className={styles.declineTitle}>Select reason(s) for declining</p>
                                 <div className={styles.reasonList}>
@@ -293,7 +309,11 @@ export default function PendingPayments({ email }: PendingPaymentsProps) {
                         ) : (
                             <div className={styles.modalFooter}>
                                 <button className={styles.button_decline} onClick={() => setShowDeclinePanel(true)}>Decline</button>
-                                <button className={styles.button_accept} onClick={() => updateDisplayedPayment("success")}>Approve</button>
+                                {isRefundRequested(viewingPayment.status) ? (
+                                    <button className={styles.button_accept} onClick={() => updateDisplayedPayment("refunded")}>Accept Refund</button>
+                                ) : (
+                                    <button className={styles.button_accept} onClick={() => updateDisplayedPayment("success")}>Approve</button>
+                                )}
                             </div>
                         ))}
                     </div>

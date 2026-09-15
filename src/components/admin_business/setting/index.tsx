@@ -69,7 +69,7 @@ export default function Setting({ email, f_name, business_name } : SettingProps)
         localStorage.setItem("email", email);
         const response = await Fetch_to(api_link.checkcode, { email: email });
         Progress(true);
-        if (!response.success) return alert(response.message || "Something went wrong to the server find a developer to fix this problem");
+        if (!response.success) return alert(response.message || "Something went wrong to the server find a developer to fix this problem"); Progress(false);
         router.push("/auth/confirm-email-forgot-pwd");
     };
 

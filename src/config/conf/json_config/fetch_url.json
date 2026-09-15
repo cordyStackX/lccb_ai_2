@@ -56,7 +56,8 @@
 		"get_suspension_state" : "/services/supabase/admin/get-suspension-state",
 		"set_suspension_state" : "/services/supabase/admin/suspension-state",
 		"update_chatbot" : "/services/supabase/admin/update_chatbot",
-    "pending_payment" : "/services/supabase/admin/pending_payment"
+    "pending_payment" : "/services/supabase/admin/pending_payment",
+    "update_payment" : "/services/supabase/admin/update_payment"
 	},
   "payment" : {
     "retrieve" : "/services/supabase/payments/retrieve",
