@@ -23,10 +23,6 @@ const nextConfig: NextConfig = {
             value: "nosniff",
           },
           {
-            key: "X-Frame-Options",
-            value: "DENY",
-          },
-          {
             key: "Referrer-Policy",
             value: "strict-origin-when-cross-origin",
           },
@@ -39,8 +35,8 @@ const nextConfig: NextConfig = {
               "img-src 'self' data: blob: http://localhost:8000",
               "font-src 'self' data:",
               "connect-src 'self' http://localhost:8000 https://challenges.cloudflare.com",
-              "frame-src https://challenges.cloudflare.com",
-              "frame-ancestors 'none'",
+              "frame-src 'self' https://challenges.cloudflare.com",
+              "frame-ancestors 'self' https://the-site-embedding-this.com",
             ].join("; "),
           },
         ],
