@@ -11,6 +11,12 @@ const nextConfig: NextConfig = {
         port: "8000",
         pathname: "/storage/v1/object/public/**",
       },
+      {
+        // Profile pictures are served from Supabase Storage in production.
+        protocol: "https",
+        hostname: "*.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
     ],
   },
   async headers() {
