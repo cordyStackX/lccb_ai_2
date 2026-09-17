@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import setting from "@/config/conf/json_config/Metadata.json"; 
 
+
 export default function MetadataUtils() {
   const metadata: Metadata = {
     title: setting.title,
