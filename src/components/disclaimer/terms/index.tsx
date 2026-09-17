@@ -15,11 +15,11 @@ export default function Terms() {
             <div className={styles.content}>
                 <Link href="/" style={{ color: "blue" }} > {"<<"} Go Back</Link>
                 <h1>Terms and Conditions</h1>
-                <p className={styles.updated}>Last Updated: September 15, 2026</p>
+                <p className={styles.updated}>Last Updated: September 17, 2026</p>
 
                 <div className={styles.notice}>
                     <h2>⚠️ Important Notice</h2>
-                    <p>LACO AI is an AI-powered platform providing information about schools, businesses, and student academic records. Full sensitive-data access, including student grades, is currently exclusive to <strong>La Consolacion College Bacolod (LCCB)</strong>. Other schools seeking full system access must contact us to negotiate a separate agreement. Businesses may use general document analysis features under a Free or Enterprise tier.</p>
+                    <p>LACO AI is an AI-powered platform providing information about schools, businesses, and student academic records. Full sensitive-data access, including student grades, is currently exclusive to <strong>La Consolacion College Bacolod (LCCB)</strong>. Other schools seeking full system access must contact us to negotiate a separate agreement. Businesses may use general document analysis features under Free Trial, Pro, or Enterprise tiers.</p>
                 </div>
 
                 <section className={styles.section}>
@@ -34,7 +34,7 @@ export default function Terms() {
                         <li>LACO AI provides AI-powered information services covering schools, businesses, and academic records</li>
                         <li>Full sensitive academic data access (including student grades) is available exclusively to <strong>La Consolacion College Bacolod (LCCB)</strong></li>
                         <li>Other schools or institutions seeking full system access must contact us to negotiate access</li>
-                        <li>Businesses may sign up for general PDF document analysis under a Free or Enterprise tier</li>
+                        <li>Businesses may sign up for general PDF document analysis under a Free Trial, Pro, or Enterprise tier</li>
                         <li>The Service is subject to bugs, errors, downtime, and ongoing development</li>
                         <li>Provided &quot;AS IS&quot; without warranties beyond what is stated in these Terms</li>
                         <li>May be modified, suspended, or discontinued with reasonable notice where practicable</li>
@@ -95,8 +95,8 @@ export default function Terms() {
                     <ul>
                         <li>Sign up and use the platform immediately without admin approval</li>
                         <li>Free Trial: 2 PDF uploads, 10,000 API requests, 10MB per upload, 1 month free</li>
-                        <li>Pro (₱599/month): 250 PDF uploads/month, 500,000 API requests/month, 100MB per upload</li>
-                        <li>Enterprise (custom pricing): full LACO AI feature access, limits scale with your OpenAI API budget, can handle sensitive PDF files, dedicated user manager</li>
+                        <li>Pro (₱799/month): 250 PDF uploads/month, 1,000,000 API requests/month, 100MB per upload</li>
+                        <li>Enterprise (₱1,999/year): 10,000 PDF uploads/year, 5,000,000 API requests/year, 500MB per upload</li>
                     </ul>
                 </section>
 
@@ -126,11 +126,11 @@ export default function Terms() {
                     <ul>
                         <li>Business accounts upgrading to the Pro or Enterprise plan must submit payment details (payment method and account/payment identifier) for admin review</li>
                         <li>Account/payment identifiers are encrypted before storage and are only decrypted for authorized admin verification</li>
-                        <li>Each payment moves through one of the following statuses: <strong>pending</strong> (submitted, awaiting review), <strong>success</strong> (approved and plan activated), <strong>decline</strong> (rejected, optionally with a reason), or <strong>refunded</strong></li>
+                        <li>Each payment moves through one of the following statuses: <strong>pending</strong> (submitted, awaiting review), <strong>success</strong> (approved and plan activated), <strong>declined</strong> (rejected, optionally with a reason), <strong>refund_requested</strong> (awaiting refund review), or <strong>refunded</strong> (refund processed)</li>
                         <li>Only one pending payment is permitted per account at a time; a new submission is blocked while a prior one is still pending</li>
                         <li>You will receive an email confirmation whenever you submit a payment, resubmit updated payment details, request a refund, and whenever an admin approves, declines, or refunds your payment</li>
                         <li>If your payment is resubmitted, any prior decline reason is cleared and the payment returns to pending status for a fresh review</li>
-                        <li>Requesting a refund marks the payment as <strong>refund_requested</strong>, masks the stored account number, and is subject to admin processing before funds are returned</li>
+                        <li>Requesting a refund marks the payment as <strong>refund_requested</strong>, re-encrypts the submitted account number, and is subject to admin processing before funds are returned</li>
                         <li>We are not responsible for delays in payment review, and reserve the right to decline any payment that cannot be verified</li>
                     </ul>
                 </section>
@@ -138,6 +138,7 @@ export default function Terms() {
                 <section className={styles.section}>
                     <h2>7. Public Documents Warning (Business/General Uploads)</h2>
                     <p>PDF documents uploaded by businesses or general users are treated as Public Documents and must not contain passwords, credentials, or other sensitive information.</p>
+                    <p><strong>Web-link conversion is available only for Public Documents.</strong> Do not submit links that expose private, restricted, password-protected, or confidential content.</p>
                     <p><strong>La Consolacion College Bacolod is not liable for any damages arising from sensitive data uploaded into Public Documents by businesses or general users.</strong></p>
                 </section>
 
@@ -156,7 +157,7 @@ export default function Terms() {
                         <li>JWT tokens may expire, requiring re-authentication</li>
                         <li>Search functionality limited to file names only</li>
                         <li>Chat history persists indefinitely unless manually cleared</li>
-                        <li>Free Trial business accounts limited to 2 PDF uploads (10MB each); Pro limited to 250/month (100MB each); Enterprise scales with OpenAI API budget</li>
+                        <li>Free Trial business accounts are limited to 2 PDF uploads (10MB each); Pro is limited to 250 PDF uploads and 1,000,000 API requests per month (100MB each); Enterprise is limited to 10,000 PDF uploads and 5,000,000 API requests per year (500MB each)</li>
                     </ul>
                 </section>
 
@@ -188,7 +189,7 @@ export default function Terms() {
                     <ul>
                         <li>Your data is handled according to our Privacy Policy</li>
                         <li>Sensitive data and document summaries are encrypted</li>
-                        <li>Payment account numbers are encrypted at rest and masked upon refund request</li>
+                        <li>Payment account numbers are encrypted at rest, including when payment details are resubmitted or a refund is requested</li>
                         <li>PDF files are stored in Supabase storage buckets until you manually delete them</li>
                         <li>Profile pictures stored until replaced or account deleted</li>
                         <li>Chat conversations stored indefinitely in your account</li>

@@ -27,8 +27,8 @@ export async function POST(params: NextRequest) {
     return NextResponse.json({ success: false, error: "Invalid plan type" }, { status: 400 });
   }
 
-  const amount = 799;
-  const vat = 85.61;
+  const amount = plan_type === "Enterprise" ? 1999 : 799;
+  const vat = Number((amount - amount / 1.12).toFixed(2));
   const status = "pending";
 
   try { 

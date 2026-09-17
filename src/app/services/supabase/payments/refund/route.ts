@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Security } from "@/firewall/security";
 import { supabaseServer } from "@/lib/supabase-server";
+import { encryptText } from "@/firewall/encryptions";
 import nodemailer from "nodemailer";
 
 export async function POST(request: NextRequest) {
@@ -18,7 +19,7 @@ export async function POST(request: NextRequest) {
     try {
         const { data, error } = await supabaseServer
             .from("payments")
-            .update({ status: "refund_requested", account_number: account_number, method })
+            .update({ status: "refund_requested", account_number: encryptText(account_number, process.env.API_KEY || ""), method })
             .eq("id", paymentId)
             .eq("email", email)
             .neq("status", "refund_requested")

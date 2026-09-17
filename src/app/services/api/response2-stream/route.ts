@@ -41,12 +41,35 @@ export async function POST(req: NextRequest) {
 
     const { current_plan, current_limit } = planRow;
 
-    if (current_plan === "Free Trial" || current_plan === "Pro") {
+    if (["Free Trial", "Pro", "Enterprise"].includes(current_plan)) {
+        const now = new Date();
+        let usagePeriodStart: string;
+
+        if (current_plan === "Pro") {
+            // Pro API allowance resets at the start of each calendar month.
+            usagePeriodStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
+        } else if (current_plan === "Enterprise") {
+            // Enterprise API allowance resets at the start of each calendar year.
+            usagePeriodStart = new Date(Date.UTC(now.getUTCFullYear(), 0, 1)).toISOString();
+        } else {
+            // The Free Trial allowance starts when the business account was created.
+            const { data: trial, error: trialError } = await supabaseServer
+                .from("auth_business")
+                .select("created_at")
+                .eq("email", cleanEmail)
+                .maybeSingle();
+
+            if (trialError || !trial?.created_at) {
+                return NextResponse.json({ success: false, error: "Failed to fetch account plan" }, { status: 500 });
+            }
+            usagePeriodStart = new Date(trial.created_at).toISOString();
+        }
 
         const { data: logRows, error: logError } = await supabaseServer
             .from("system_logs")
             .select("api_request")
-            .eq("request", cleanEmail);
+            .eq("request", cleanEmail)
+            .gte("created_at", usagePeriodStart);
 
         if (logError) {
             console.error("Supabase Query Error: ", logError);

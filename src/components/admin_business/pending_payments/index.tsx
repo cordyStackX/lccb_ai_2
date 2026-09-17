@@ -276,7 +276,7 @@ export default function PendingPayments({ email }: PendingPaymentsProps) {
                                             <button
                                                 type="button"
                                                 className={styles.refundButton}
-                                                disabled={payment.id == null || requestingRefundId != null || payment.status?.trim().toLowerCase() === "refund_requested" || payment.status?.trim().toLowerCase() === "success"}
+                                                disabled={payment.id == null || requestingRefundId != null || payment.status?.trim().toLowerCase() === "refund_requested" || payment.status?.trim().toLowerCase() === "success" || payment.status?.trim().toLowerCase() === "refunded"}
                                                 onClick={() => openResubmitDialog(payment)}
                                             >
                                                 {payment.status?.trim().toLowerCase() === "refund_requested" ? "Refund requested" : "Update request"}

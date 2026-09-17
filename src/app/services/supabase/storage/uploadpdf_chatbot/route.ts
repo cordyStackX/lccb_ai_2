@@ -25,16 +25,6 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, error: `Invalid PDF file: ${invalidFiles.map((file) => file.name).join(", ")}` }, { status: 400 });
     }
 
-    const { data: limit_pdf, error: limit_pdfErr } = await supabaseServer
-        .from("chatbot_pdf_file")
-        .select("*")
-        .eq("email", email);
-    
-    if (limit_pdfErr) {
-        console.error("Supabase Query Error: ", limit_pdfErr);
-        return NextResponse.json({ success: false, error: "Failed to fetch account plan" }, { status: 500 });
-    }
-
     const { data: planRow, error: planError } = await supabaseServer
         .from("auth_business")
         .select("current_plan, current_limit, current_pdf_limit, current_pdf_limit_per_mb, created_at")
@@ -48,7 +38,9 @@ export async function POST(req: NextRequest) {
 
     const { current_plan, current_limit, current_pdf_limit, current_pdf_limit_per_mb, created_at } = planRow;
 
-    if (current_plan === "Free Trial" || current_plan === "Pro") {
+    if (["Free Trial", "Pro", "Enterprise"].includes(current_plan)) {
+        const now = new Date();
+        let usagePeriodStart: string;
 
         if (current_plan === "Free Trial") {
             const trialStart = new Date(created_at);
@@ -61,12 +53,31 @@ export async function POST(req: NextRequest) {
                     { status: 403 }
                 );
             }
+            usagePeriodStart = trialStart.toISOString();
+        } else if (current_plan === "Pro") {
+            // Pro allowances reset at the beginning of each calendar month.
+            usagePeriodStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
+        } else {
+            // Enterprise allowances reset at the beginning of each calendar year.
+            usagePeriodStart = new Date(Date.UTC(now.getUTCFullYear(), 0, 1)).toISOString();
+        }
+
+        const { data: limitPdf, error: limitPdfError } = await supabaseServer
+            .from("chatbot_pdf_file")
+            .select("id")
+            .eq("email", cleanEmail)
+            .gte("created_at", usagePeriodStart);
+
+        if (limitPdfError) {
+            console.error("Supabase Query Error: ", limitPdfError);
+            return NextResponse.json({ success: false, error: "Failed to fetch document usage" }, { status: 500 });
         }
 
         const { data: logRows, error: logError } = await supabaseServer
             .from("system_logs")
             .select("api_request, uploaded_pdf")
-            .eq("request", cleanEmail);
+            .eq("request", cleanEmail)
+            .gte("created_at", usagePeriodStart);
 
         if (logError) {
             console.error("Supabase Query Error: ", logError);
@@ -76,7 +87,7 @@ export async function POST(req: NextRequest) {
         const totalApiRequest = (logRows ?? []).reduce((sum, row) => sum + (row.api_request ?? 0), 0);
 
 
-        if (limit_pdf.length + files.length > Number(current_pdf_limit)) {
+        if ((limitPdf?.length ?? 0) + files.length > Number(current_pdf_limit)) {
             return NextResponse.json(
                 { success: false, error: "Current plan already reach limit, upgrade plan now" },
                 { status: 403 }

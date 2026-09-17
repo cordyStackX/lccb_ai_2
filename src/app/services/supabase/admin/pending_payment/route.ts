@@ -40,7 +40,10 @@ export async function POST(params: NextRequest) {
       query = query.in("status", statusFilters[paymentFilter]);
     }
 
-    const { data, error, count } = await query.range(from, to);
+    const { data, error, count } = await query
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
+      .range(from, to);
 
     if (error) {
       console.error("Supabase Query Error: ", error);

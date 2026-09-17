@@ -6,11 +6,19 @@ import nodemailer from "nodemailer";
 const VALID_STATUSES = ["success", "declined", "refunded"] as const;
 type PaymentEmailStatus = (typeof VALID_STATUSES)[number];
 
-const PRO_PLAN_LIMITS = {
-  current_plan: "Pro",
-  current_pdf_limit: "250",
-  current_limit: "1000000",
-  current_pdf_limit_per_mb: "100",
+const BUSINESS_PLAN_LIMITS = {
+  pro: {
+    current_plan: "Pro",
+    current_pdf_limit: "250",
+    current_limit: "1000000",
+    current_pdf_limit_per_mb: "100",
+  },
+  enterprise: {
+    current_plan: "Enterprise",
+    current_pdf_limit: "10000",
+    current_limit: "5000000",
+    current_pdf_limit_per_mb: "500",
+  },
 } as const;
 
 const STATUS_CONTENT: Record<PaymentEmailStatus, { icon: string; heading: string; subject: string; body: string }> = {
@@ -141,10 +149,11 @@ export async function POST(params: NextRequest) {
       return NextResponse.json({ success: false, error: "This payment has already been processed or was not found" }, { status: 409 });
     }
 
-    if (status === "success" && payment.plan_type?.trim().toLowerCase() === "pro") {
+    const planLimits = BUSINESS_PLAN_LIMITS[payment.plan_type?.trim().toLowerCase() as keyof typeof BUSINESS_PLAN_LIMITS];
+    if (status === "success" && planLimits) {
       const { data: business, error: businessError } = await supabaseServer
         .from("auth_business")
-        .update(PRO_PLAN_LIMITS)
+        .update(planLimits)
         .eq("email", payment.email)
         .select("email")
         .maybeSingle();

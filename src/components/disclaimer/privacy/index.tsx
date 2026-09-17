@@ -16,7 +16,7 @@ export default function Privacy() {
             <div className={styles.content}>
                 <Link href="/" style={{ color: "blue" }} > {"<<"} Go Back</Link>
                 <h1>Privacy Policy</h1>
-                <p className={styles.updated}>Last Updated: September 15, 2026</p>
+                <p className={styles.updated}>Last Updated: September 17, 2026</p>
                 
                 <div className={styles.notice}>
                     <h2>⚠️ Important Notice</h2>
@@ -34,7 +34,7 @@ export default function Privacy() {
                     <p>LACO AI operates under two distinct scopes:</p>
                     <ul>
                         <li><strong>Academic (La Consolacion College Bacolod only):</strong> Full access to sensitive student data, including grades, is available exclusively to LCCB. Other schools or institutions seeking full system access must contact us directly to negotiate a separate agreement.</li>
-                        <li><strong>Business:</strong> Businesses may sign up for general PDF document analysis under a Free or Enterprise tier (see Section 3.5). This tier is not intended for sensitive or confidential data.</li>
+                        <li><strong>Business:</strong> Businesses may sign up for general PDF document analysis under the Free Trial, Pro, or Enterprise tier (see Section 3.5). This tier is not intended for sensitive or confidential data.</li>
                     </ul>
                     <h3>2.1 Account Approval Process</h3>
                     <ul>
@@ -91,9 +91,9 @@ export default function Privacy() {
                     <h3>3.5 Business Accounts</h3>
                     <ul>
                         <li><strong>Free Trial:</strong> 2 PDF uploads, 10,000 API requests, 10MB per upload, 1 month free</li>
-                        <li><strong>Pro (₱599/month):</strong> 250 PDF uploads/month, 500,000 API requests/month, 100MB per upload</li>
-                        <li><strong>Enterprise (custom pricing):</strong> Full LACO AI feature access, limits scale with your OpenAI API budget, customizable OpenAI version, dedicated user management, can handle sensitive PDF files</li>
-                        <li>Business PDF uploads under Free Trial and Pro tiers are treated as Public Documents and should not contain sensitive information (see Section 6)</li>
+                        <li><strong>Pro (₱799/month):</strong> 250 PDF uploads/month, 1,000,000 API requests/month, 100MB per upload</li>
+                        <li><strong>Enterprise (₱1,999/year):</strong> 10,000 PDF uploads/year, 5,000,000 API requests/year, 500MB per upload</li>
+                        <li>Business PDF uploads under all tiers are treated as Public Documents and should not contain sensitive information (see Section 6)</li>
                     </ul>
                 </section>
 
@@ -110,7 +110,7 @@ export default function Privacy() {
                         <li>Admin features: user management, API logs, and system monitoring</li>
                         <li>Rate limiting to prevent spam and abuse (1 request per second per IP)</li>
                         <li>CSRF protection and origin validation</li>
-                        <li>Enforcing tier limits (Free vs. Enterprise) for business accounts</li>
+                        <li>Enforcing Free Trial, Pro, and Enterprise tier limits for business accounts</li>
                         <li>Reviewing and processing business plan payments, refund requests, and resubmissions</li>
                         <li>Debugging and system performance monitoring</li>
                     </ul>
@@ -124,7 +124,7 @@ export default function Privacy() {
                         <li>Profile pictures stored in Supabase public storage buckets</li>
                         <li>PDF files stored in Supabase storage buckets</li>
                         <li>Passwords encrypted using industry-standard hashing</li>
-                        <li>Payment account numbers are encrypted at rest and only decrypted for authorized admin review; account numbers are masked when a refund is requested</li>
+                        <li>Payment account numbers are encrypted at rest and only decrypted for authorized admin review</li>
                         <li>JWT tokens with secret key encryption for session management</li>
                         <li>API endpoints protected with JWT authentication and rate limiting</li>
                         <li>CSRF protection via origin header validation</li>
@@ -138,6 +138,7 @@ export default function Privacy() {
                 <section className={styles.section}>
                     <h2>6. Public Documents and Sensitive Data Warning</h2>
                     <p><strong>Business and general users:</strong> PDF documents uploaded outside the LCCB academic scope are treated as Public Documents. Do not upload documents containing passwords, credentials, or other sensitive information into Public Documents.</p>
+                    <p><strong>Web-link conversion:</strong> The feature that converts a web link into a PDF is available only for Public Documents. Do not submit links that expose private, restricted, password-protected, or confidential content.</p>
                     <p>La Consolacion College Bacolod is not responsible for any damages, losses, or consequences resulting from sensitive data uploaded into Public Documents by businesses or general users.</p>
                 </section>
 
@@ -159,10 +160,10 @@ export default function Privacy() {
                     <ul>
                         <li>Business accounts on the Pro or Enterprise plan submit payment details, including an account/payment method identifier, for manual admin verification</li>
                         <li>Submitted account numbers are encrypted before being stored; only administrators can review them for verification purposes</li>
-                        <li>Each payment is assigned a status: <strong>pending</strong> (awaiting review), <strong>success</strong> (approved), <strong>decline</strong> (rejected, with a reason), or <strong>refunded</strong></li>
+                        <li>Each payment is assigned a status: <strong>pending</strong> (awaiting review), <strong>success</strong> (approved and plan activated), <strong>declined</strong> (rejected, with a reason), <strong>refund_requested</strong> (awaiting refund review), or <strong>refunded</strong> (refund processed)</li>
                         <li>You will receive an email notification when you submit a payment, resubmit updated payment details, request a refund, and when an admin approves, declines, or refunds your payment</li>
                         <li>Only one pending payment is allowed per account at a time; you must wait for a decision, or resubmit details if requested, before submitting again</li>
-                        <li>Requesting a refund masks your stored account number and marks the payment as <strong>refund_requested</strong> pending admin processing</li>
+                        <li>Requesting a refund re-encrypts the submitted account number and marks the payment as <strong>refund_requested</strong> pending admin processing</li>
                         <li>Declined payments may include a reason from the admin explaining why verification failed</li>
                     </ul>
                 </section>
@@ -174,7 +175,7 @@ export default function Privacy() {
                         <li><strong>Profile pictures:</strong> Stored until replaced or account deleted</li>
                         <li><strong>PDF files:</strong> Stored in database and storage bucket until manually deleted via context menu</li>
                         <li><strong>Chat history:</strong> Stored indefinitely in your account until manually cleared</li>
-                        <li><strong>Payment records:</strong> Retained for accounting and dispute-resolution purposes, with account numbers encrypted or masked</li>
+                        <li><strong>Payment records:</strong> Retained for accounting and dispute-resolution purposes, with account numbers encrypted</li>
                         <li><strong>API logs:</strong> Retained for debugging, research, and admin monitoring purposes</li>
                         <li><strong>Authentication tokens:</strong> JWT tokens expire based on configured session duration</li>
                         <li><strong>Rate limit data:</strong> Stored temporarily in memory; old entries auto-cleaned</li>
@@ -235,9 +236,9 @@ export default function Privacy() {
                     <ul>
                         <li>Sign-up does not require admin approval</li>
                         <li>Free Trial: 2 PDF uploads, 10,000 API requests, 10MB per upload limit, 1 month free trial</li>
-                        <li>Pro tier (₱599/month): 250 PDF uploads/month, 500,000 API requests/month, 100MB per upload — payment requires admin verification</li>
-                        <li>Enterprise tier (custom): full feature access, limits scale with OpenAI API budget, can handle sensitive PDF files, dedicated user management — payment requires admin verification</li>
-                        <li>Free Trial and Pro accounts must not upload sensitive or password-containing PDFs</li>
+                        <li>Pro tier (₱799/month): 250 PDF uploads/month, 1,000,000 API requests/month, 100MB per upload — payment requires admin verification</li>
+                        <li>Enterprise tier (₱1,999/year): 10,000 PDF uploads/year, 5,000,000 API requests/year, 500MB per upload — payment requires admin verification</li>
+                        <li>All business tiers use Public Documents and must not upload sensitive or password-containing PDFs; web-link conversion is also limited to Public Documents</li>
                     </ul>
                 </section>
 
