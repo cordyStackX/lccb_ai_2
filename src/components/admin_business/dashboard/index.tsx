@@ -2,6 +2,7 @@
 import styles from "./css/styles.module.css";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { Fetch_to, Progress } from "@/utilities";
 import apiLink from "@/config/conf/json_config/fetch_url.json";
 import { useRouter } from "next/navigation";
@@ -86,7 +87,7 @@ export default function Dashboard({ email, current_plan, current_limit, current_
     const [error, setError] = useState("");
     const [showUpgrade, setShowUpgrade] = useState(false);
     const [showPayment, setShowPayment] = useState(false);
-    const [payment, setPayment] = useState({ method: "", accountNumber: "" });
+    const [payment, setPayment] = useState({ method: "", otherBank: "", accountNumber: "" });
     const [paymentError, setPaymentError] = useState("");
     const [submitting, setSubmitting] = useState(false);
 
@@ -114,12 +115,13 @@ export default function Dashboard({ email, current_plan, current_limit, current_
     }, [email]);
 
     const submitUpgrade = async () => {
-        if (!payment.method || !payment.accountNumber.trim()) {
-            setPaymentError("Please select a payment method and enter your account number.");
+        const paymentMethod = payment.method === "Other" ? payment.otherBank.trim() : payment.method;
+        if (!paymentMethod || !payment.accountNumber.trim()) {
+            setPaymentError("Please select a payment method, specify the other bank if needed, and enter your account number.");
             return;
         }
         setSubmitting(true); setPaymentError("");
-        const response = await Fetch_to(apiLink.payment.paying, { email, account_number: payment.accountNumber.trim(), method: payment.method, plan_type: "Pro" });
+        const response = await Fetch_to(apiLink.payment.paying, { email, account_number: payment.accountNumber.trim(), method: paymentMethod, plan_type: "Pro" });
         if (response.success) { Progress(true); router.push("/admin_business/pending_payment"); return; }
         setPaymentError(response.message || "Unable to submit payment details."); setSubmitting(false);
     };
@@ -141,6 +143,6 @@ export default function Dashboard({ email, current_plan, current_limit, current_
             <div className={styles.businessCharts}><UsageTrend title="PDF uploads" data={pdfHistory} color="#2563eb"/><UsageTrend title="AI requests" data={apiHistory} color="#7c3aed"/></div>
         </section>
         {showUpgrade && <div className={styles.modalOverlay} onClick={() => setShowUpgrade(false)}><div className={styles.modalCard} onClick={(event) => event.stopPropagation()}><div className={styles.modalHeader}><h2>Choose your plan</h2><button className={styles.closeBtn} onClick={() => setShowUpgrade(false)} aria-label="Close">✕</button></div><div className={styles.tiersGrid}>{PRICING_TIERS.map((tier) => <article key={tier.id} className={`${styles.tierCard} ${tier.highlight ? styles.tierHighlight : ""}`}>{tier.highlight && <span className={styles.popularBadge}>Most popular</span>}<h3>{tier.name}</h3><p className={styles.tierPrice}>{tier.price}<span>{tier.period}</span></p><p className={styles.tierTagline}>{tier.tagline}</p><ul className={styles.tierFeatures}>{tier.features.map((feature) => <li key={feature}>{feature}</li>)}</ul><button className={tier.highlight ? styles.tierCtaPrimary : styles.tierCtaSecondary} disabled={current_plan === tier.name} onClick={() => { if (tier.id === "pro") { setShowUpgrade(false); setShowPayment(true); } }}>{current_plan === tier.name ? "Current Plan" : tier.cta}</button></article>)}</div></div></div>}
-        {showPayment && <div className={styles.paymentOverlay} onClick={() => setShowPayment(false)}><div className={styles.paymentCard} onClick={(event) => event.stopPropagation()}><div className={styles.modalHeader}><div><p className={styles.paymentEyebrow}>Pro plan · ₱799/month</p><h2>Payment details</h2></div><button className={styles.closeBtn} onClick={() => setShowPayment(false)} aria-label="Close">✕</button></div><p className={styles.paymentIntro}>Enter the payment details used for your Pro plan payment.</p><div className={styles.paymentForm}><label htmlFor="payment-method">Payment method</label><select id="payment-method" value={payment.method} onChange={(event) => setPayment((current) => ({ ...current, method: event.target.value }))}><option value="">Select a payment method</option><option value="Gcash">GCash</option><option value="Paymaya">PayMaya</option><option value="Maribank">MariBank</option><option value="Gotyme">GoTyme</option></select><label htmlFor="account-number">Account number</label><input id="account-number" value={payment.accountNumber} inputMode="numeric" onChange={(event) => setPayment((current) => ({ ...current, accountNumber: event.target.value }))} placeholder="Enter your account number"/>{paymentError && <p className={styles.refundError}>{paymentError}</p>}<div className={styles.paymentActions}><button className={styles.cancelPaymentBtn} onClick={() => setShowPayment(false)}>Cancel</button><button className={styles.submitPaymentBtn} disabled={submitting} onClick={submitUpgrade}>{submitting ? "Submitting…" : "Submit payment details"}</button></div></div></div></div>}
+        {showPayment && <div className={styles.paymentOverlay} onClick={() => setShowPayment(false)}><div className={styles.paymentCard} onClick={(event) => event.stopPropagation()}><div className={styles.modalHeader}><div><p className={styles.paymentEyebrow}>Pro plan · ₱799/month</p><h2>Payment details</h2></div><button className={styles.closeBtn} onClick={() => setShowPayment(false)} aria-label="Close">✕</button></div><p className={styles.paymentIntro}>Scan the QR code to pay, then enter the details from the payment account you used.</p><div className={styles.qrPayment}><Image src="/QR_Gcash.png" alt="InstaPay payment QR code" width={120} height={120}/><div><h3>Scan to pay</h3><p>Use your preferred banking or e-wallet app to scan this InstaPay QR code.</p></div></div><div className={styles.paymentForm}><label htmlFor="payment-method">Payment method</label><select id="payment-method" value={payment.method} onChange={(event) => setPayment((current) => ({ ...current, method: event.target.value, otherBank: event.target.value === "Other" ? current.otherBank : "" }))}><option value="">Select a payment method</option><option value="Gcash">GCash</option><option value="Paymaya">PayMaya</option><option value="Maribank">MariBank</option><option value="Gotyme">GoTyme</option><option value="Other">Other bank</option></select>{payment.method === "Other" && <><label htmlFor="other-bank">Bank name</label><input id="other-bank" value={payment.otherBank} onChange={(event) => setPayment((current) => ({ ...current, otherBank: event.target.value }))} placeholder="Specify your bank"/></>}<label htmlFor="account-number">Account number</label><input id="account-number" value={payment.accountNumber} inputMode="numeric" onChange={(event) => setPayment((current) => ({ ...current, accountNumber: event.target.value }))} placeholder="Enter your account number"/>{paymentError && <p className={styles.refundError}>{paymentError}</p>}<div className={styles.paymentActions}><button className={styles.cancelPaymentBtn} onClick={() => setShowPayment(false)}>Cancel</button><button className={styles.submitPaymentBtn} disabled={submitting} onClick={submitUpgrade}>{submitting ? "Submitting…" : "Submit payment details"}</button></div></div></div></div>}
     </section>;
 }
