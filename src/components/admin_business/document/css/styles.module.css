@@ -9,6 +9,24 @@
     padding: 0 1rem;
 }
 
+.processingJourney { position: fixed; z-index: 60; top: 1.25rem; right: 1.25rem; width: min(370px, calc(100vw - 2rem)); padding: 1.15rem; color: var(--foreground); background: var(--default-color-white); border: 1px solid var(--default-color-white-2); border-radius: 14px; box-shadow: 0 16px 45px rgba(0, 0, 0, 0.22); animation: journeyEnter 260ms ease-out; }
+.journeyHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.journeyHeader h3 { margin: 0.2rem 0 0; font-size: 0.95rem; overflow-wrap: anywhere; }
+.journeyEyebrow { color: var(--primary); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.journeyClose { border: 0; background: transparent; color: var(--default-color-gray); font-size: 1.5rem; line-height: 1; cursor: pointer; }
+.journeyStatus { min-height: 2.7rem; margin: 1rem 0 0.65rem; color: var(--default-color-gray); font-size: 0.88rem; line-height: 1.45; }
+.journeySteps { display: grid; gap: 0.7rem; margin: 0; padding: 0; list-style: none; }
+.journeySteps li { display: flex; align-items: center; gap: 0.65rem; color: var(--default-color-gray); font-size: 0.86rem; transition: color 180ms ease; }
+.journeyMarker { display: inline-grid; place-items: center; flex: 0 0 1.45rem; width: 1.45rem; height: 1.45rem; border: 1px solid var(--default-color-gray); border-radius: 50%; font-size: 0.72rem; font-weight: 700; }
+.journeyActive { color: var(--foreground) !important; font-weight: 700; }
+.journeyActive .journeyMarker { color: var(--default-color-white); background: var(--primary); border-color: var(--primary); animation: journeyPulse 1.2s ease-in-out infinite; }
+.journeyComplete { color: var(--foreground) !important; }
+.journeyComplete .journeyMarker { color: var(--default-color-white); background: var(--default-color-green); border-color: var(--default-color-green); }
+.journeyError { color: var(--default-color-red) !important; font-weight: 700; }
+.journeyError .journeyMarker { color: var(--default-color-white); background: var(--default-color-red); border-color: var(--default-color-red); }
+@keyframes journeyEnter { from { opacity: 0; transform: translateX(1rem); } to { opacity: 1; transform: translateX(0); } }
+@keyframes journeyPulse { 50% { transform: scale(1.12); box-shadow: 0 0 0 5px color-mix(in srgb, var(--primary) 20%, transparent); } }
+
 .status {
     flex: 1 1 0;
     min-width: 320px;
@@ -275,6 +293,7 @@
     z-index: 50;
     padding: 1.5rem;
 }
+.reviewOverlay { justify-content: flex-end; padding: 0; }
 .modalCard {
     width: min(1200px, 100%);
     max-height: 80vh;
@@ -285,6 +304,24 @@
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
     overflow: hidden;
 }
+.reviewCard { width: min(720px, 100%); height: 100vh; max-height: 100vh; border-radius: 0; }
+.linkDialog { width: min(560px, 100%); background: var(--default-color-white); border-radius: 12px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25); overflow: hidden; }
+.linkInput { width: 100%; padding: 0.75rem; border: 1px solid var(--default-color-gray); border-radius: 8px; color: var(--foreground); background: var(--default-color-white); font: inherit; }
+.qaEditor { text-align: left; }
+.qaHelp { margin: 0 0 1rem; color: var(--default-color-gray); }
+.qaRow { display: grid; gap: 0.45rem; padding: 1rem; margin-bottom: 1rem; border: 1px solid var(--default-color-white-2); border-radius: 10px; background: var(--fx-color-bg); }
+.qaRow label { font-weight: 700; font-size: 0.85rem; }
+.answerLabel { display: flex; align-items: center; justify-content: space-between; }
+.magicButton { display: inline-grid; place-items: center; min-width: 30px; height: 30px; padding: 0; color: var(--primary); border: 1px solid var(--default-color-gray); border-radius: 6px; background: var(--default-color-white); cursor: pointer; }
+.magicButton:hover:not(:disabled) { color: var(--default-color-white); background: var(--primary); }
+.magicButton:disabled, .generateQuestions:disabled, .addQuestion:disabled, .removeQuestion:disabled { cursor: not-allowed; opacity: 0.55; }
+.qaRow input, .qaRow textarea { width: 100%; padding: 0.7rem; color: var(--foreground); border: 1px solid var(--default-color-gray); border-radius: 7px; background: var(--default-color-white); font: inherit; }
+.qaRow textarea { resize: vertical; line-height: 1.5; }
+.qaActions { display: flex; flex-wrap: wrap; gap: 0.65rem; }
+.addQuestion, .removeQuestion, .generateQuestions { width: fit-content; padding: 0.5rem 0.75rem; border-radius: 7px; cursor: pointer; }
+.addQuestion, .removeQuestion { border: 1px solid var(--default-color-gray); background: transparent; }
+.removeQuestion { color: var(--default-color-red); }
+.generateQuestions { color: var(--default-color-white); border: 1px solid var(--primary); background: var(--primary); }
 .modalHeader {
     display: flex;
     justify-content: space-between;

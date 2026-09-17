@@ -6,6 +6,13 @@ import nodemailer from "nodemailer";
 const VALID_STATUSES = ["success", "declined", "refunded"] as const;
 type PaymentEmailStatus = (typeof VALID_STATUSES)[number];
 
+const PRO_PLAN_LIMITS = {
+  current_plan: "Pro",
+  current_pdf_limit: "250",
+  current_limit: "1000000",
+  current_pdf_limit_per_mb: "100",
+} as const;
+
 const STATUS_CONTENT: Record<PaymentEmailStatus, { icon: string; heading: string; subject: string; body: string }> = {
   success: {
     icon: "✅",
@@ -100,9 +107,11 @@ export async function POST(params: NextRequest) {
   const auth = await Security(params);
   if(auth?.error) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
 
-  const { email, status, reason } = await params.json();
+  const { paymentId, email, status, reason } = await params.json();
 
-  if (!email) return NextResponse.json({ success: false, error: "Email not Exist" }, { status: 404 });
+  if (!paymentId || !email) {
+    return NextResponse.json({ success: false, error: "Payment not found" }, { status: 404 });
+  }
 
   if (!VALID_STATUSES.includes(status)) {
     return NextResponse.json({ success: false, error: "Invalid status" }, { status: 400 });
@@ -110,14 +119,50 @@ export async function POST(params: NextRequest) {
 
   try {
 
-    const { error } = await supabaseServer
-    .from("payments")
-    .update({ status: status, reason: reason ?? null })
-    .eq("email", email);
+    // A pending payment can be approved or declined; only a refund request can
+    // be marked as refunded. This also prevents a previous payment for the same
+    // customer from being changed when an admin reviews a newer one.
+    const expectedCurrentStatus = status === "refunded" ? "refund_requested" : "pending";
+    const { data: payment, error } = await supabaseServer
+      .from("payments")
+      .update({ status, reason: reason ?? null })
+      .eq("id", paymentId)
+      .eq("email", email)
+      .eq("status", expectedCurrentStatus)
+      .select("id, email, plan_type")
+      .maybeSingle();
 
     if (error) {
       console.error("Supabase Query Error: ", error);
       return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
+    }
+
+    if (!payment) {
+      return NextResponse.json({ success: false, error: "This payment has already been processed or was not found" }, { status: 409 });
+    }
+
+    if (status === "success" && payment.plan_type?.trim().toLowerCase() === "pro") {
+      const { data: business, error: businessError } = await supabaseServer
+        .from("auth_business")
+        .update(PRO_PLAN_LIMITS)
+        .eq("email", payment.email)
+        .select("email")
+        .maybeSingle();
+
+      if (businessError || !business) {
+        console.error("Business plan update error:", businessError);
+        const { error: rollbackError } = await supabaseServer
+          .from("payments")
+          .update({ status: "pending" })
+          .eq("id", payment.id)
+          .eq("status", "success");
+
+        if (rollbackError) {
+          console.error("Payment approval rollback error:", rollbackError);
+        }
+
+        return NextResponse.json({ success: false, error: "The business plan could not be activated, so the payment approval was reverted" }, { status: 500 });
+      }
     }
 
     try {

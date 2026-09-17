@@ -20,6 +20,9 @@ interface NotifyHandlers {
     onStart?: (message: string) => void;
     onSuccess?: (message: string) => void;
     onError?: (message: string) => void;
+    onUploadStart?: (files: File[]) => void;
+    onUploadSuccess?: () => void;
+    onUploadError?: (message: string) => void;
 }
 
 const PAGE_SIZE = 30;
@@ -36,6 +39,7 @@ export function useDocumentTable(
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
+    const [lastUploadedDoc, setLastUploadedDoc] = useState<DocFile | null>(null);
 
     // ids currently selected via checkboxes for bulk actions
     const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
@@ -79,15 +83,31 @@ export function useDocumentTable(
             return;
         }
 
-        notify?.onStart?.("Summarizing, please wait...");
+        notify?.onUploadStart?.(files);
 
         const response = await Fetch_toFile(endpoints.upload, files, { email });
 
         if (response.success) {
-            notify?.onSuccess?.("Successfully uploaded");
+            notify?.onUploadSuccess?.();
+            const uploaded = response.data?.uploaded;
+            if (Array.isArray(uploaded)) {
+                const firstSuccessful = uploaded.find((item: unknown) => {
+                    const document = item as { success?: unknown; id?: unknown };
+                    return document.success === true && typeof document.id === "number";
+                }) as { id: number; originalName?: string; filePath?: string; summary?: string; suggest?: string } | undefined;
+                if (firstSuccessful) {
+                    setLastUploadedDoc({
+                        id: firstSuccessful.id,
+                        file_name: firstSuccessful.originalName,
+                        file: firstSuccessful.filePath,
+                        summary: firstSuccessful.summary,
+                        suggest: firstSuccessful.suggest,
+                    });
+                }
+            }
             setRefresh(true);
         } else {
-            notify?.onError?.(response.message || "Upload failed");
+            notify?.onUploadError?.(response.message || "Upload failed");
         }
 
         if (fileRef.current) fileRef.current.value = "";
@@ -188,6 +208,7 @@ export function useDocumentTable(
         setPage,
         totalPages,
         isLoading,
+        lastUploadedDoc,
         refresh,
         setRefresh,
         triggerUpload,

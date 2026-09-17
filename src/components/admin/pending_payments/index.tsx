@@ -141,14 +141,15 @@ export default function PendingPayments({ email }: PendingPaymentsProps) {
         if (!viewingPayment) return;
 
         const paymentEmail = viewingPayment.email?.trim();
-        if (!paymentEmail) {
-            alert("The selected payment does not have an email address.");
+        if (!viewingPayment.id || !paymentEmail) {
+            alert("The selected payment is missing its ID or email address.");
             return;
         }
 
         const response = await Fetch_to(api_link.admin.update_payment, {
             status,
             reason,
+            paymentId: viewingPayment.id,
             email: paymentEmail,
         });
 

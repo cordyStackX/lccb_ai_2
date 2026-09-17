@@ -26,8 +26,9 @@ def generate_md_summary():
         if not email:
             return jsonify({"success": False, "error": "Email not found"}), 400
 
-        # --- Get file name from Supabase ---
-        row = supabase.table(table).select("file_name").eq("file", file).single().execute()
+        # The page cache is built during upload. It preserves coverage of long PDFs
+        # instead of relying on a few arbitrary four-page chunks.
+        row = supabase.table(table).select("file_name, cache").eq("file", file).single().execute()
         if not row.data:
             return jsonify({"success": False, "error": "PDF not found"}), 404
 
@@ -46,24 +47,25 @@ def generate_md_summary():
                 "error": "File not found in tmp/. Please download it first using /download-file",
             }), 404
 
-        # --- Read PDF and create chunks ---
-        reader = PdfReader(tmp_path)
+        cache = row.data.get("cache")
+        cached_pages = cache.get("pages") if isinstance(cache, dict) else None
+        if isinstance(cached_pages, list) and cached_pages:
+            chunks = [
+                {"text": str(page.get("summary", "")).strip(), "pages": str(page.get("page", ""))}
+                for page in cached_pages
+                if isinstance(page, dict) and str(page.get("summary", "")).strip()
+            ]
+        else:
+            # Backward-compatible fallback for PDFs uploaded before the cache column.
+            reader = PdfReader(tmp_path)
+            chunks = [
+                {"text": (page.extract_text() or "").strip(), "pages": str(index)}
+                for index, page in enumerate(reader.pages, start=1)
+                if (page.extract_text() or "").strip()
+            ]
 
-        # Create chunks (4 pages per chunk for 8-page PDF = 4 chunks)
-        chunks = []
-        chunk_size = 4  # pages per chunk
-
-        for i in range(0, len(reader.pages), chunk_size):
-            chunk_text = ""
-            chunk_pages = reader.pages[i : i + chunk_size]
-            for page in chunk_pages:
-                chunk_text += page.extract_text() or ""
-
-            if chunk_text.strip():  # only add non-empty chunks
-                chunks.append({
-                    "text": chunk_text,
-                    "pages": f"{i+1}-{min(i+chunk_size, len(reader.pages))}",
-                })
+        if not chunks:
+            return jsonify({"success": False, "error": "No readable text was found in the PDF"}), 422
 
         # --- Read Txt prompt template ---
         with open("python/python_txt_file/prompt.md", "r", encoding="utf-8") as f:
@@ -78,8 +80,8 @@ def generate_md_summary():
         if not system_role:
             return jsonify({ "success" : False, "message" : "template not found" }), 404
 
-        # --- Step 1: Find relevant chunks using embeddings/quick scan ---
-        # For efficiency, we'll use a lightweight approach: ask GPT which chunks are relevant
+        # Use every cached page for document-wide tasks (such as suggested questions).
+        # For a targeted answer, choose the relevant page summaries first.
         chunk_summaries = "\n\n".join([
             f"Chunk {idx+1} (Pages {chunk['pages']}):\n{chunk['text'][:500]}..."
             for idx, chunk in enumerate(chunks)
@@ -92,17 +94,20 @@ Here are summaries of document chunks:
 Which chunks (by number) are most relevant to answer this question? 
 Respond with ONLY comma-separated numbers (e.g., \"1,3,4\"). If all chunks seem relevant, say \"ALL\"."""
 
-        relevance_response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "You are a document analyst. Identify relevant document sections."},
-                {"role": "user", "content": relevance_prompt},
-            ],
-            temperature=0.3,
-            max_tokens=50,
-        )
-
-        relevant_indices_str = relevance_response.choices[0].message.content.strip()
+        document_wide_task = "generate questions" in prompt.lower() or "every single question" in prompt.lower()
+        if document_wide_task:
+            relevant_indices_str = "ALL"
+        else:
+            relevance_response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": "You are a document analyst. Identify relevant document sections."},
+                    {"role": "user", "content": relevance_prompt},
+                ],
+                temperature=0.3,
+                max_tokens=50,
+            )
+            relevant_indices_str = relevance_response.choices[0].message.content.strip()
 
         # --- Step 2: Use only relevant chunks ---
         if relevant_indices_str.upper() == "ALL":

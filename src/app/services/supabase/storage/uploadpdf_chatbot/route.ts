@@ -142,7 +142,7 @@ export async function POST(req: NextRequest) {
     const bucketName = "chatbot_pdfs";
     const apiUrl = process.env.RENDER_API || api_links.python_links;
     const apikey = process.env.API_KEY;
-    const uploadedResults: Array<{ originalName: string; filePath?: string; success: boolean; message?: string }> = [];
+    const uploadedResults: Array<{ id?: number; originalName: string; filePath?: string; suggest?: string; summary?: string; success: boolean; message?: string }> = [];
 
     if (!apikey) return NextResponse.json({ success: false, error: "API is not Valid" }, { status: 401 });
 
@@ -175,6 +175,17 @@ export async function POST(req: NextRequest) {
         const response1 = await Fetch_to(`${apiUrl}download-file`, { token: apikey, filePath: filePath });
         if (!response1.success) {
             uploadedResults.push({ originalName: file.name, filePath, success: false, message: "3rd party failed to read the data" });
+            continue;
+        }
+
+        const cacheResponse = await Fetch_to(`${apiUrl}generate-pdf-cache`, {
+            token: apikey,
+            email: cleanEmail,
+            filePath,
+            table: "chatbot_pdf_file",
+        });
+        if (!cacheResponse.success) {
+            uploadedResults.push({ originalName: file.name, filePath, success: false, message: cacheResponse.message || "Failed to summarize every PDF page" });
             continue;
         }
         
@@ -241,9 +252,12 @@ export async function POST(req: NextRequest) {
 
         Only write "Not specified in document" if you have checked the full document and genuinely found NO related information anywhere, even partial or indirect.
 
-        Create a markdown table with columns "Question" and "Answer". The table MUST have exactly ${questions.length} rows, one per question, in the same order listed above.
+        Return a JSON array with exactly ${questions.length} objects, one per question, in the same order listed above. Each object MUST use exactly these keys: "question" and "answer".
 
-        Respond with ONLY the raw markdown table. No preamble, no explanation.`,
+        Respond with ONLY the raw JSON array. No markdown fences, no preamble, no explanation.
+
+        Correct format:
+        [{"question":"What are the requirements for enrollment?","answer":"The document requires ..."}]`,
             token: apikey,
             email: cleanEmail,
             filePath: filePath,
@@ -255,12 +269,52 @@ export async function POST(req: NextRequest) {
             continue;
         }
 
-        await supabaseServer
+        let questionsAndAnswers: Array<{ question: string; answer: string }>;
+        try {
+            const raw = response.data.markdown.trim()
+                .replace(/^```json\s*/i, '')
+                .replace(/```$/i, '');
+            const parsed: unknown = JSON.parse(raw);
+            if (!Array.isArray(parsed) || parsed.length !== questions.length || !parsed.every((item) => {
+                if (!item || typeof item !== "object") return false;
+                const pair = item as { question?: unknown; answer?: unknown };
+                return typeof pair.question === "string" && typeof pair.answer === "string";
+            })) {
+                throw new Error("Invalid question and answer array");
+            }
+            questionsAndAnswers = parsed as Array<{ question: string; answer: string }>;
+        } catch {
+            uploadedResults.push({ originalName: file.name, filePath, success: false, message: "Failed to parse questions and answers" });
+            continue;
+        }
+
+        const summary = JSON.stringify(questionsAndAnswers);
+
+        const { error: updateError } = await supabaseServer
             .from("chatbot_pdf_file")
-            .update([{ summary: response.data.markdown, suggest: response_suggest.data.markdown }])
+            .update({ summary, suggest: response_suggest.data.markdown })
             .eq("file", filePath);
 
-        uploadedResults.push({ originalName: file.name, filePath, success: true });
+        if (updateError) {
+            console.error("Supabase Update Error: ", updateError);
+            uploadedResults.push({ originalName: file.name, filePath, success: false, message: "Failed to save questions and answers" });
+            continue;
+        }
+
+        const { data: savedDocument } = await supabaseServer
+            .from("chatbot_pdf_file")
+            .select("id")
+            .eq("file", filePath)
+            .maybeSingle();
+
+        uploadedResults.push({
+            id: savedDocument?.id,
+            originalName: file.name,
+            filePath,
+            suggest: response_suggest.data.markdown,
+            summary,
+            success: true,
+        });
     }
 
     const successCount = uploadedResults.filter((result) => result.success).length;

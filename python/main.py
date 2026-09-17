@@ -6,6 +6,9 @@ from utils import (
     generate_md_chatbot, generate_md_chatbot_stream,
     generate_md_summary, generate_tts,
     generate_voice_md, generate_voice_md_stream, generate_voice_md_stream_pdf,
+    convert_link_chatbot, convert_link_to_pdf_chatbot, generate_link_chatbot,
+    generate_pdf_cache,
+    dashboard_analysis,
 )
 
 # -----------------------------------------
@@ -69,6 +72,31 @@ def generate_voice_md_stream_route():
 @app.route("/generate-voice-md-stream-pdf", methods=["POST"])
 def generate_voice_md_stream_pdf_route():
     return generate_voice_md_stream_pdf()
+
+
+@app.route("/convert-link-chatbot", methods=["POST"])
+def convert_link_chatbot_route():
+    return convert_link_chatbot()
+
+
+@app.route("/convert-link-to-pdf-chatbot", methods=["POST"])
+def convert_link_to_pdf_chatbot_route():
+    return convert_link_to_pdf_chatbot()
+
+
+@app.route("/generate-link-chatbot", methods=["POST"])
+def generate_link_chatbot_route():
+    return generate_link_chatbot()
+
+
+@app.route("/generate-pdf-cache", methods=["POST"])
+def generate_pdf_cache_route():
+    return generate_pdf_cache()
+
+
+@app.route("/dashboard-analysis", methods=["POST"])
+def dashboard_analysis_route():
+    return dashboard_analysis()
 
 
 # -----------------------------------------
