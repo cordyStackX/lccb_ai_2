@@ -412,7 +412,7 @@
     }
     .graph {
         padding: 1rem;
-        height: 400px;
+        height: auto;
     }
 
     .rankings th,

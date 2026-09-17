@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { SweetAlert2, Fetch_to, Progress } from "@/utilities";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import Swal from "sweetalert2";
+import { display } from "html2canvas/dist/types/css/property-descriptors/display";
 
 interface SidebarProps {
     nav: string;
@@ -137,6 +138,7 @@ export default function Sidebar({ nav, email, f_name }: SidebarProps) {
             <button
                 type="button"
                 className={styles.burger}
+                style={{ display: is_open ? "none" : ""}}
                 aria-label={is_open ? "Close menu" : "Open menu"}
                 aria-expanded={is_open}
                 onClick={() => setIs_open((prev) => !prev)}
