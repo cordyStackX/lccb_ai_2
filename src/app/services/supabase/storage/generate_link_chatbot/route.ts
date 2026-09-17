@@ -117,8 +117,8 @@ export async function POST(req: NextRequest) {
             token, email: cleanEmail, filePath, table: "chatbot_pdf_file",
             prompt: `Answer every question below using only the document. Return ONLY a raw JSON array with exactly ${questions.length} objects in the same order. Every object must have exactly "question" and "answer" string keys.\n\n${questions.map((question, index) => `${index + 1}. ${question}`).join("\n")}`,
         });
-        const questionsAndAnswers = answers.success ? parseQuestionAnswers(answers.data?.markdown, questions.length) : null;
-        if (!questionsAndAnswers) return fail(answers.message || "Failed to create answers");
+        const generatedQuestionAnswers = answers.success ? parseQuestionAnswers(answers.data?.markdown, questions.length) : null;
+        const questionsAndAnswers = generatedQuestionAnswers ?? questions.map((question) => ({ question, answer: "" }));
 
         const summary = JSON.stringify(questionsAndAnswers);
         const { error: updateError } = await supabaseServer.from("chatbot_pdf_file")
