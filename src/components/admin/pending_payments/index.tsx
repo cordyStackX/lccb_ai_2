@@ -86,6 +86,7 @@ export default function PendingPayments({ email }: PendingPaymentsProps) {
     const [showDeclinePanel, setShowDeclinePanel] = useState(false);
     const [selectedReasons, setSelectedReasons] = useState<string[]>([]);
     const [customReason, setCustomReason] = useState("");
+    const [isUpdating, setIsUpdating] = useState(false);
 
     useEffect(() => {
         let isCurrentRequest = true;
@@ -123,6 +124,7 @@ export default function PendingPayments({ email }: PendingPaymentsProps) {
     }, [email, page, paymentFilter, refreshKey]);
 
     const openPayment = (payment: Payment) => {
+        if (isUpdating) return;
         setViewingPayment(payment);
         setShowDeclinePanel(false);
         setSelectedReasons([]);
@@ -138,7 +140,7 @@ export default function PendingPayments({ email }: PendingPaymentsProps) {
     };
 
     const updateDisplayedPayment = async(status: "success" | "declined" | "refunded", reason?: string) => {
-        if (!viewingPayment) return;
+        if (!viewingPayment || isUpdating) return;
 
         const paymentEmail = viewingPayment.email?.trim();
         if (!viewingPayment.id || !paymentEmail) {
@@ -146,6 +148,7 @@ export default function PendingPayments({ email }: PendingPaymentsProps) {
             return;
         }
 
+        setIsUpdating(true);
         const response = await Fetch_to(api_link.admin.update_payment, {
             status,
             reason,
@@ -154,12 +157,13 @@ export default function PendingPayments({ email }: PendingPaymentsProps) {
         });
 
         if (response.success) {
-          setRefreshKey((key) => key + 1);
+            setRefreshKey((key) => key + 1);
+            setViewingPayment(null);
+            setShowDeclinePanel(false);
         } else {
-          alert(response.message);
+            alert(response.message);
         }
-        setViewingPayment(null);
-        setShowDeclinePanel(false);
+        setIsUpdating(false);
     };
 
     const declineReason = [...selectedReasons, customReason.trim()].filter(Boolean).join(". ");
@@ -267,11 +271,11 @@ export default function PendingPayments({ email }: PendingPaymentsProps) {
             </div>
 
             {viewingPayment && (
-                <div className={styles.modalOverlay} onClick={() => setViewingPayment(null)}>
+                <div className={styles.modalOverlay} onClick={() => !isUpdating && setViewingPayment(null)}>
                     <div className={styles.modalCard} onClick={(event) => event.stopPropagation()}>
                         <div className={styles.modalHeader}>
                             <h3>Payment details</h3>
-                            <button className={styles.modalClose} onClick={() => setViewingPayment(null)} aria-label="Close payment details">×</button>
+                            <button className={styles.modalClose} disabled={isUpdating} onClick={() => setViewingPayment(null)} aria-label="Close payment details">×</button>
                         </div>
                         {!showDeclinePanel && (
                             <div className={styles.modalBody}>
@@ -303,17 +307,17 @@ export default function PendingPayments({ email }: PendingPaymentsProps) {
                                     <input className={styles.reasonOtherInput} type="text" placeholder="Additional details" value={customReason} onChange={(event) => setCustomReason(event.target.value)} />
                                 </label>
                                 <div className={styles.modalFooter}>
-                                    <button className={styles.button_accept} onClick={() => setShowDeclinePanel(false)}>Back</button>
-                                    <button className={styles.button_decline} disabled={!declineReason} onClick={() => updateDisplayedPayment("declined", declineReason)}>Confirm Decline</button>
+                                    <button className={styles.button_accept} disabled={isUpdating} onClick={() => setShowDeclinePanel(false)}>Back</button>
+                                    <button className={styles.button_decline} disabled={!declineReason || isUpdating} onClick={() => updateDisplayedPayment("declined", declineReason)}>{isUpdating ? "Declining…" : "Confirm Decline"}</button>
                                 </div>
                             </div>
                         ) : (
                             <div className={styles.modalFooter}>
-                                <button className={styles.button_decline} onClick={() => setShowDeclinePanel(true)}>Decline</button>
+                                <button className={styles.button_decline} disabled={isUpdating} onClick={() => setShowDeclinePanel(true)}>Decline</button>
                                 {isRefundRequested(viewingPayment.status) ? (
-                                    <button className={styles.button_accept} onClick={() => updateDisplayedPayment("refunded")}>Accept Refund</button>
+                                    <button className={styles.button_accept} disabled={isUpdating} onClick={() => updateDisplayedPayment("refunded")}>{isUpdating ? "Processing…" : "Accept Refund"}</button>
                                 ) : (
-                                    <button className={styles.button_accept} onClick={() => updateDisplayedPayment("success")}>Approve</button>
+                                    <button className={styles.button_accept} disabled={isUpdating} onClick={() => updateDisplayedPayment("success")}>{isUpdating ? "Approving…" : "Approve"}</button>
                                 )}
                             </div>
                         ))}
