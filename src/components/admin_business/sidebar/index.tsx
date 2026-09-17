@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import { SweetAlert2, Fetch_to, Progress } from "@/utilities";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import Swal from "sweetalert2";
-import { display } from "html2canvas/dist/types/css/property-descriptors/display";
 
 interface SidebarProps {
     nav: string;
