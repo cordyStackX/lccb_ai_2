@@ -164,7 +164,7 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
         const response = await Fetch_to(api_link.storage.update_chatbot_questions, { id: viewingDoc.id, email, questionsAndAnswers });
         setIsSaving(false);
         if (!response.success) {
-            await SweetAlert2("Unable to save", response.message || "Please try again.", "error", false, "OK", false, "");
+            await SweetAlert2("Unable to save", response.message || "Please try again.", "error", true, "OK", false, "");
             return;
         }
         setRefresh(true);
@@ -177,7 +177,7 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
         const response = await Fetch_to(api_link.storage.generate_chatbot_qa, { id: viewingDoc.id, email, action: "questions" });
         setIsGeneratingQuestions(false);
         if (!response.success || !Array.isArray(response.data?.questions)) {
-            await SweetAlert2("Unable to generate questions", response.message || "Please try again.", "error", false, "OK", false, "");
+            await SweetAlert2("Unable to generate questions", response.message || "Please try again.", "error", true, "OK", false, "");
             return;
         }
         setQuestionsAndAnswers(response.data.questions.map((question: unknown) => ({ question: typeof question === "string" ? question : "", answer: "" })));
@@ -189,7 +189,7 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
         const response = await Fetch_to(api_link.storage.generate_chatbot_qa, { id: viewingDoc.id, email, action: "answer", question: questionsAndAnswers[index].question });
         setGeneratingAnswerIndex(null);
         if (!response.success || typeof response.data?.answer !== "string") {
-            await SweetAlert2("Unable to generate answer", response.message || "Please try again.", "error", false, "OK", false, "");
+            await SweetAlert2("Unable to generate answer", response.message || "Please try again.", "error", true, "OK", false, "");
             return;
         }
         updateQuestionAnswer(index, "answer", response.data.answer);
@@ -204,7 +204,7 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
         setIsUploadingLink(false);
         if (!response.success || !response.data?.link) {
             onLinkJourneyError(response.message || "We could not process this web page.");
-            await SweetAlert2("Unable to add web page", response.message || "Please check the URL and try again.", "error", false, "OK", false, "");
+            await SweetAlert2("Unable to add web page", response.message || "Please check the URL and try again.", "error", true, "OK", false, "");
             return;
         }
         onLinkJourneySuccess();

@@ -85,6 +85,7 @@ export default function Sidebar({ nav, email, f_name }: SidebarProps) {
     const router = useRouter();
     const [nav_status, setNav_status] = useState("");
     const [is_open, setIs_open] = useState(false);
+    const [profileImage, setProfileImage] = useState(image_src.admin);
 
     useEffect(() => {
         setNav_status(nav);
@@ -94,6 +95,25 @@ export default function Sidebar({ nav, email, f_name }: SidebarProps) {
     useEffect(() => {
         setIs_open(false);
     }, [nav]);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const fetchProfileImage = async () => {
+            const response = await Fetch_to(api_link.storage.fetchimg, { email });
+            const fileLink = response.success ? response.data?.message?.[0]?.file_link : null;
+
+            if (isMounted) {
+                setProfileImage(typeof fileLink === "string" && fileLink ? fileLink : image_src.admin);
+            }
+        };
+
+        fetchProfileImage();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [email]);
 
     const handle_logout = async () => {
         const alert2 = await SweetAlert2("Signning Out", "Are you sure want to sign out?", "warning", true, "Yes", true, "No");
@@ -134,12 +154,13 @@ export default function Sidebar({ nav, email, f_name }: SidebarProps) {
             <aside className={`${styles.container} ${is_open ? styles.containerOpen : ""}`}>
                 <figure className={styles.admin}>
                     <Image
-                        src={image_src.admin}
-                        alt="admin"
-                        title="admin"
+                        src={profileImage}
+                        alt={`${f_name}'s profile`}
+                        title={`${f_name}'s profile`}
                         width={56}
                         height={56}
                         className={styles.avatar}
+                        onError={() => setProfileImage(image_src.admin)}
                     />
                     <span>
                         <figcaption> {f_name} </figcaption>
