@@ -160,6 +160,134 @@
     border-top: none;
 }
 
+/* ---------- QR code ---------- */
+.qrCodeSection {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0 1rem 1.5rem;
+    padding: 1rem 1.1rem;
+    border-radius: 10px;
+}
+.qrCodeSection .sectionLabel {
+    margin: 0;
+}
+.qrCodeCopy {
+    min-width: 0;
+}
+.qrCodeDescription {
+    margin: 0.35rem 0 0;
+    color: var(--default-color-gray);
+    font-size: 0.85rem;
+}
+.generateQrButton {
+    flex: 0 0 auto;
+    padding: 0.65rem 1rem;
+    border: none;
+    border-radius: 7px;
+    background: var(--primary);
+    color: var(--default-color-white);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 200ms ease, transform 150ms ease;
+}
+.generateQrButton:hover {
+    background: var(--secondary);
+}
+.generateQrButton:active {
+    transform: scale(0.97);
+}
+.generateQrButton:disabled {
+    cursor: wait;
+    opacity: 0.6;
+}
+.qrModalOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: rgba(18, 22, 31, 0.62);
+    backdrop-filter: blur(4px);
+}
+.qrModal {
+    width: min(100%, 390px);
+    padding: 1.25rem;
+    border-radius: 14px;
+    background: var(--default-color-white);
+    box-shadow: 0 24px 70px rgba(18, 22, 31, 0.28);
+    box-sizing: border-box;
+}
+.qrModalHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+.qrModalHeader h3 {
+    margin: 0;
+    color: var(--default-color-black);
+    font-size: 1.05rem;
+}
+.qrModalHeader p {
+    margin: 0.3rem 0 0;
+    color: var(--default-color-gray);
+    font-size: 0.82rem;
+}
+.closeQrButton {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 auto;
+    border: 1px solid var(--default-color-white-2);
+    border-radius: 7px;
+    background: transparent;
+    color: var(--default-color-gray);
+    font-size: 1.35rem;
+    line-height: 1;
+    cursor: pointer;
+}
+.closeQrButton:hover {
+    background: var(--fx-color-bg);
+    color: var(--default-color-black);
+}
+.qrCodeImage {
+    display: block;
+    width: 256px;
+    height: 256px;
+    max-width: 100%;
+    padding: 0.75rem;
+    background: var(--default-color-white);
+    border-radius: 8px;
+    box-sizing: border-box;
+    margin: 0 auto 1rem;
+}
+.downloadQrButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    background: var(--primary);
+    color: var(--default-color-white);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    width: 100%;
+    box-sizing: border-box;
+    transition: background-color 200ms ease, transform 150ms ease;
+}
+.downloadQrButton:hover {
+    background: var(--secondary);
+}
+.downloadQrButton:active {
+    transform: scale(0.95);
+}
 /* ---------- Live preview ---------- */
 .previewShell {
     width: 100%;

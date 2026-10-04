@@ -124,29 +124,54 @@ export default function Setting({ email, f_name, business_name } : SettingProps)
     };
 
     const handleSaveBranding = async () => {
-        let response;
         setSavingBranding(true);
         try {
+            let saved = false;
 
             if (logoFile) {
                 // Logo + name together via the multipart helper
-                response = await Fetch_toFile(
+                const response = await Fetch_toFile(
                     api_link.storage.uploadimg,
                     logoFile,
                     { email: email }
                 );
-
+                if (!response.success) throw new Error(response.message || "Logo upload failed");
+                saved = true;
             }
 
-            if (schoolName) {
-                response = await Fetch_to(api_link.update, { name: schoolName, email: email });
+            if (schoolName.trim()) {
+                const response = await Fetch_to(api_link.update, { name: schoolName.trim(), email: email });
+                if (!response.success) throw new Error(response.message || "Full name update failed");
+                saved = true;
             }
 
+            if (BusinessName.trim()) {
+                const response = await Fetch_to(api_link.business.update, {
+                    business_name: BusinessName.trim(),
+                    email: email
+                });
+                if (!response.success) throw new Error(response.message || "Business name update failed");
+                saved = true;
+            }
+
+            if (!saved) {
+                throw new Error("Please enter a name, business name, or select a logo before saving");
+            }
+
+            await SweetAlert2("Success", "Branding updated successfully", "success", true, "Confirm", false, "");
         } catch (e) {
-            SweetAlert2("Error", `${e}`, "error", true, "Confirm", false, "", false);
+            await SweetAlert2(
+                "Error",
+                e instanceof Error ? e.message : "Unable to update branding",
+                "error",
+                true,
+                "Confirm",
+                false,
+                "",
+                false
+            );
         } finally {
             setSavingBranding(false);
-            SweetAlert2("Success", response?.data.message, "success", true, "Confirm", false, "");
         }
     };
 

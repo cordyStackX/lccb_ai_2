@@ -17,20 +17,36 @@ export async function POST(req:NextRequest) {
     const auth = await Security(req);
     if(auth?.error) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
 
-    const { name, email } = await req.json();
+    const { name, business_name, email } = await req.json();
 
-    if (!name && !email) return NextResponse.json({ success: false, error: "Name and Email is Empty" }, { status: 404 });
+    if (!email || (!name && !business_name)) {
+        return NextResponse.json({ success: false, error: "Name, business name, and email are required" }, { status: 404 });
+    }
 
     try {
 
-        const { error } = await supabaseServer
-        .from("auth")
-        .update({ f_name: name })
-        .eq("email", email);
+        if (name) {
+            const { error } = await supabaseServer
+                .from("auth")
+                .update({ f_name: name })
+                .eq("email", email);
 
-        if (error) {
-            console.error("Supabase Query Error: ", error);
-            return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
+            if (error) {
+                console.error("Supabase Query Error: ", error);
+                return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
+            }
+        }
+
+        if (business_name) {
+            const { error } = await supabaseServer
+                .from("auth_business")
+                .update({ business_name: business_name })
+                .eq("email", email);
+
+            if (error) {
+                console.error("Supabase Query Error: ", error);
+                return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
+            }
         }
 
         return NextResponse.json({ success: true, message: "Successfully Update" }, { status: 200 });

@@ -1,8 +1,10 @@
 "use client";
 import styles from "./css/styles.module.css";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { Fetch_to, Popup_info } from "@/utilities";
 import api_link from "@/config/conf/json_config/fetch_url.json";
+import QRCode from "qrcode";
 
 type Embeded_codeProps = {
     email: string;
@@ -22,6 +24,8 @@ export default function Embeded_code({ email } : Embeded_codeProps) {
     const [isLoadError, setIsLoadError] = useState(false);
     const [isLoadStatus, setIsLoadStatus] = useState("");
     const [iframeKey, setIframeKey] = useState(0);
+    const [qrCodeDataUrl, setQrCodeDataUrl] = useState("");
+    const [isQrModalOpen, setIsQrModalOpen] = useState(false);
 
     const refreshIframe = () => {
         setIframeKey((prev) => prev + 1);
@@ -46,6 +50,25 @@ export default function Embeded_code({ email } : Embeded_codeProps) {
     };
 
     const embedUrl = `${origin}/chat_bot?email=${email}`;
+
+    useEffect(() => {
+        if (!origin) return;
+
+        QRCode.toDataURL(embedUrl, { width: 256, margin: 2 })
+            .then(setQrCodeDataUrl)
+            .catch((error) => console.error("QR code generation failed:", error));
+    }, [embedUrl, origin]);
+
+    useEffect(() => {
+        if (!isQrModalOpen) return;
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Escape") setIsQrModalOpen(false);
+        };
+
+        document.addEventListener("keydown", handleKeyDown);
+        return () => document.removeEventListener("keydown", handleKeyDown);
+    }, [isQrModalOpen]);
 
     const snippet = `<iframe
     src="${embedUrl}"
@@ -253,6 +276,69 @@ export default function Embeded_code({ email } : Embeded_codeProps) {
                         <code>{embedUrl}</code>
                     </pre>
                 </div>
+
+                <div className={styles.qrCodeSection}>
+                    <div className={styles.qrCodeCopy}>
+                        <h3 className={styles.sectionLabel}>QR Code</h3>
+                        <p className={styles.qrCodeDescription}>
+                            Generate a scannable QR code for the chatbot link.
+                        </p>
+                    </div>
+                    <button
+                        className={styles.generateQrButton}
+                        type="button"
+                        onClick={() => setIsQrModalOpen(true)}
+                        disabled={!qrCodeDataUrl}
+                    >
+                        Generate QR Code
+                    </button>
+                </div>
+
+                {isQrModalOpen && qrCodeDataUrl ? (
+                    <div
+                        className={styles.qrModalOverlay}
+                        role="presentation"
+                        onClick={() => setIsQrModalOpen(false)}
+                    >
+                        <div
+                            className={styles.qrModal}
+                            role="dialog"
+                            aria-modal="true"
+                            aria-labelledby="qr-modal-title"
+                            onClick={(event) => event.stopPropagation()}
+                        >
+                            <div className={styles.qrModalHeader}>
+                                <div>
+                                    <h3 id="qr-modal-title">Chatbot QR Code</h3>
+                                    <p>Scan to open your chatbot.</p>
+                                </div>
+                                <button
+                                    className={styles.closeQrButton}
+                                    type="button"
+                                    onClick={() => setIsQrModalOpen(false)}
+                                    aria-label="Close QR code window"
+                                >
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <Image
+                                className={styles.qrCodeImage}
+                                src={qrCodeDataUrl}
+                                width={256}
+                                height={256}
+                                unoptimized
+                                alt="QR code for the chatbot link"
+                            />
+                            <a
+                                className={styles.downloadQrButton}
+                                href={qrCodeDataUrl}
+                                download="chatbot-link.png"
+                            >
+                                Download PNG
+                            </a>
+                        </div>
+                    </div>
+                ) : null}
 
                 <h3 className={styles.sectionLabel}>Live Preview</h3>
                 <div className={styles.previewShell}>

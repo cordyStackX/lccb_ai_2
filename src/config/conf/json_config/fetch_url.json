@@ -14,7 +14,8 @@
 		"signup" : {
 			"checkEmail" : "/services/supabase/auth_business/register/check_email",
 			"createAccount" : "/services/supabase/auth_business/register/create_account"
-		}
+		},
+		"update" : "/services/supabase/auth_business/update"
 	},
 	"update" : "/services/supabase/auth/update",
 	"jwt" : {
