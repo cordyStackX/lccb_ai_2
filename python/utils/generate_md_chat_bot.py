@@ -2,6 +2,7 @@ import sys
 import json
 from flask import request, jsonify, Response, stream_with_context
 from .context import EXPECTED_API_KEY, client, supabase
+from .prompt_loader import load_business_prompt, load_prompt_template
 
 
 def _build_chatbot_context(data):
@@ -33,8 +34,6 @@ def _build_chatbot_context(data):
     if not user.data:
         return None, (jsonify({"success": False, "error": "User not found"}), 404)
 
-    role = "admin"
-
     summaries = []
     for item in rows.data:
         summary_text = (item.get("summary") or "").strip()
@@ -45,11 +44,8 @@ def _build_chatbot_context(data):
     if not summaries:
         return None, (jsonify({"success": False, "error": "PDF summaries not found"}), 404)
 
-    with open("python/python_txt_file/prompt.md", "r", encoding="utf-8") as f:
-        template = f.read()
-
-    with open("python/python_txt_file/system.md", "r", encoding="utf-8") as f:
-        system_role = f.read()
+    template = load_prompt_template()
+    system_role = load_business_prompt()
 
     if not template:
         return None, (jsonify({"success": False, "message": "template not found"}), 404)
@@ -102,7 +98,7 @@ def _build_chatbot_context(data):
         )
 
     systemRole = system_role.format(
-        role=role,
+        role="Business",
         name=f_name,
         user_id="null Need Login",
         method="chat_bot",

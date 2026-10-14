@@ -5,8 +5,6 @@
 
 @use "./_form";
 
-@use "./_fx_effect";
-
 @use "./_keyframes";
 
 @use "./_plushie_talk";
@@ -17,7 +15,7 @@
 
 .container {
     width: 100%;
-    height: 100dvh;
+    height: calc(100svh - 72px);
     position: relative;
     overflow: hidden;
     color: var(--foreground);
@@ -25,4 +23,298 @@
     justify-content: center;
     align-items: center;
     flex-flow: column;
+    min-width: 0;
+    overflow: visible;
+    background: #f4f7f9;
+}
+
+.chat {
+    height: calc(100% - 118px);
+    margin: 0;
+    padding: 0.75rem 1rem 7rem;
+}
+
+.response {
+    width: min(860px, 100%);
+    margin: 1.25rem auto;
+}
+
+.user_respones div {
+    margin: 0 0.75rem;
+    border-radius: 12px 12px 3px 12px;
+    box-shadow: 0 4px 12px rgba(5, 101, 185, 0.16);
+}
+
+.ai_response {
+    line-height: 1.6rem;
+    padding: 0 0 0.35rem 0.75rem;
+}
+
+.form_contain {
+    width: min(900px, calc(100% - 2rem));
+    position: absolute !important;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    z-index: 20;
+    overflow: visible;
+    margin-inline: auto;
+    border-radius: 12px;
+}
+
+.form_welcome {
+    top: 63%;
+    bottom: auto;
+}
+
+.form_active {
+    top: auto;
+}
+
+.form_active .ask {
+    margin-bottom: 0.5rem;
+}
+
+.ask {
+    border-radius: 12px;
+    background: var(--default-color-white);
+    border: 1px solid var(--default-color-white-2);
+    box-shadow: 0 2px 10px var(--fx-color-bg);
+    transition: box-shadow 220ms ease, border-color 220ms ease;
+}
+
+.ask:focus-within {
+    border-color: var(--secondary);
+    box-shadow: 0 0 0 3px var(--fx-color-bg);
+}
+
+.ask::before {
+    display: none;
+}
+
+.sendButton {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--primary);
+    box-shadow: none;
+}
+
+.sendButton:hover:not(:disabled) {
+    background: var(--secondary);
+    box-shadow: 0 0 8px 1px var(--fx-color);
+}
+
+.expandableInput {
+    min-height: 44px;
+    padding: 0.7rem 0.75rem;
+    font-size: 15px;
+    line-height: 1.5;
+    font-weight: 400;
+    overflow-y: hidden;
+}
+
+.expandableInput::placeholder {
+    color: #848484;
+    opacity: 1;
+}
+
+.welcome_intro {
+    width: min(620px, calc(100% - 2rem));
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 1rem;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    z-index: 1;
+}
+
+@media (max-width: 720px) {
+    .container {
+        height: calc(100svh - 64px);
+    }
+
+    .chat {
+        height: calc(100% - 106px);
+        padding: 1rem 0.25rem 6.5rem;
+    }
+
+    .form_contain {
+        width: calc(100% - 1rem);
+    }
+
+    .ask {
+        padding: 0.75rem 1rem;
+    }
+
+    .welcome_intro {
+        top: 36%;
+        padding: 1rem;
+    }
+
+    .form_welcome {
+        top: 64%;
+    }
+}
+
+/* Keep the student composer identical to the public chatbot input bar. */
+.ask {
+    width: min(900px, 90dvw);
+    min-height: 58px;
+    border-radius: 14px;
+    padding: 0.5rem 0.75rem;
+    margin: 1.3rem 1rem;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 0.5rem;
+    overflow: visible;
+}
+
+.expandableInput {
+    flex: 1;
+    min-height: 44px;
+    max-height: 150px;
+    padding: 0.7rem 3rem 0.7rem 0.75rem;
+    font-size: 15px;
+    line-height: 1.5;
+    font-weight: 400;
+    overflow-y: hidden;
+}
+
+.sendButton {
+    position: absolute;
+    right: 12px;
+    bottom: 10px;
+}
+
+.typeahead {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(100% + 8px);
+    background: var(--default-color-white);
+    border: 1px solid var(--default-color-white-2);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px var(--fx-color-bg);
+    overflow: hidden;
+    z-index: 30;
+}
+
+.typeaheadItem {
+    display: block;
+    width: 100%;
+    padding: 0.7rem 1rem;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--default-color-white-2);
+    color: var(--foreground);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.85rem;
+    text-align: left;
+    transition: background 160ms ease, color 160ms ease, padding-left 160ms ease;
+}
+
+.typeaheadItem:last-child {
+    border-bottom: none;
+}
+
+.typeaheadItem:hover {
+    background: var(--fx-color-bg);
+    color: var(--primary);
+    padding-left: 1.3rem;
+}
+
+.thinking {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.35rem;
+    width: auto !important;
+    margin-left: 3.4rem !important;
+    margin-right: 0 !important;
+    padding: 0.75rem 0 !important;
+}
+
+.dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--secondary);
+    animation: bounce 1.1s infinite ease-in-out;
+}
+
+.dot:nth-child(2) { animation-delay: 0.15s; }
+.dot:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+    30% { transform: translateY(-5px); opacity: 1; }
+}
+
+.chat > div,
+.chat .response,
+.chat .user_respones,
+.chat .ai_response {
+    padding-bottom: 0;
+}
+
+.chat .response {
+    margin-top: 0.35rem;
+    margin-bottom: 0.35rem;
+}
+
+.chat .user_respones {
+    margin-top: 0.35rem;
+    margin-bottom: 0.35rem;
+}
+
+.chat .plushie_talk > div {
+    margin: 0;
+    padding: 0.25rem 0 0.5rem;
+}
+
+.chat .plushie_talk img {
+    bottom: 8px;
+}
+
+/* Match the public chatbot conversation proportions. */
+.chat {
+    padding: 0.5rem 1rem 8rem;
+    scrollbar-width: none;
+}
+
+.chat .response {
+    width: min(800px, 100%);
+    margin: 1rem auto;
+}
+
+.chat .user_respones {
+    margin: 2rem 0;
+}
+
+.chat .user_respones div {
+    width: min(500px, 70%);
+    padding: 1rem;
+    margin: 0 1rem;
+    background: var(--primary);
+    border-radius: 12px 12px 2px 12px;
+    box-shadow: 0 4px 14px rgba(33, 59, 148, 0.25);
+}
+
+.chat .ai_response {
+    padding: 0 0 2rem;
+    line-height: 2.2rem;
+}
+
+@media (max-width: 720px) {
+    .ask {
+        width: 90dvw;
+        margin: 1rem 0.5rem;
+    }
 }

@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Fetch_to } from "@/utilities";
 import api_link from "@/config/conf/json_config/fetch_url.json";
+import styles from "./css/styles.module.css";
 
 export default function ChatContent() {
     const router = useRouter();
@@ -66,9 +67,9 @@ export default function ChatContent() {
     return(
         <main className="chat_page">
             <Header isOpen={isOpen} setOpen={setOpen} setShowProfile={setShowProfile} name={name} email={email} profilePic={profilePic}/>
-            <div style={{ display: "flex", justifyContent: "center", alignItems: "center"}}>
+            <div className={styles.layout}>
                 <Sidebars currentMsg={currentMsg} isOpen={isOpen} emailRes={email} setCurrentPdf={setCurrentPdf} globalRefresh={globalRefresh} setGlobalMessages={setGlobalMessages} globalRefreshMsg={globalRefreshMsg} setCurrentMsg={setCurrentMsg} />
-                <Main setCurrentMsg={setCurrentMsg} currentMsg={currentMsg} emailRes={email} currentPdf={currentPdf} setGlobalRefresh={setGlobalRefresh} f_name={name} globalMessages={globalMessages} setGlobalRefreshMsg={setGlobalRefreshMsg} setGlobalMessages={setGlobalMessages} />
+                <Main setCurrentMsg={setCurrentMsg} currentMsg={currentMsg} emailRes={email} currentPdf={currentPdf} f_name={name} globalMessages={globalMessages} setGlobalRefreshMsg={setGlobalRefreshMsg} setGlobalMessages={setGlobalMessages} />
                 <Profile department={department} showProfile={showProfile} setShowProfile={setShowProfile} email={email} name={name} role={role} year={year} profilePic={profilePic} setGlobalRefresh={setGlobalRefresh} />
             </div> 
         </main>

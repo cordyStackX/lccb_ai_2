@@ -1,0 +1,14 @@
+.layout {
+    width: 100%;
+    min-height: 100svh;
+    padding-top: 72px;
+    display: flex;
+    align-items: stretch;
+    background: #f4f7f9;
+}
+
+@media (max-width: 720px) {
+    .layout {
+        padding-top: 64px;
+    }
+}

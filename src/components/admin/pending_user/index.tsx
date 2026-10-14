@@ -103,6 +103,8 @@ export default function PendingUser() {
     // status update call. Not attached to any button below on purpose —
     // layout only, per request.
     const handleStatusChange = async (target: ManageUserDataProps, newStatus: string) => {
+        if (isLoadState) return;
+
         setIsLoadState(true);
         setIsLoadStateDone(true);
         setIsLoadStatus("Updating Please Wait...");
@@ -361,7 +363,11 @@ export default function PendingUser() {
                                 <button className={styles.button_decline} onClick={() => setShowDeclinePanel(true)}>
                                     Decline
                                 </button>
-                                <button className={styles.button_accept} onClick={() => handleStatusChange(viewingUser!, "active")}>
+                                <button
+                                    className={styles.button_accept}
+                                    onClick={() => handleStatusChange(viewingUser!, "active")}
+                                    disabled={isLoadState}
+                                >
                                     Accept
                                 </button>
                             </div>

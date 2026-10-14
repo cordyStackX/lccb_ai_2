@@ -4,6 +4,7 @@ import json
 from flask import request, jsonify, Response, stream_with_context
 from PyPDF2 import PdfReader
 from .context import EXPECTED_API_KEY, client, supabase
+from .prompt_loader import load_prompt_template, load_system_prompt
 
 
 def _build_prompt_context(data):
@@ -64,11 +65,8 @@ def _build_prompt_context(data):
                 "pages": f"{i+1}-{min(i+chunk_size, len(reader.pages))}",
             })
 
-    with open("python/python_txt_file/prompt.md", "r", encoding="utf-8") as f:
-        template = f.read()
-
-    with open("python/python_txt_file/system.md", "r", encoding="utf-8") as f:
-        system_role = f.read()
+    template = load_prompt_template()
+    system_role = load_system_prompt()
 
     if not template:
         return None, (jsonify({"success": False, "message": "template not found"}), 404)

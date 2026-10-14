@@ -38,12 +38,14 @@ export default function Sidebars({ currentMsg, isOpen, emailRes, setCurrentPdf, 
     const [activeView, setActiveView] = useState<"pdf" | "chat">("pdf");
     const [data, setData] = useState<PdfFile[]>([]);
     const [selectedPdfId, setSelectedPdfId] = useState<number | undefined>();
+    const [selectedPdfIds, setSelectedPdfIds] = useState<number[]>([]);
     const [selectedMsgId, setSelectedMsgId] = useState<number | undefined>();
     const fileRef = useRef<HTMLInputElement>(null);
     const [refresh, setRefresh] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [showNoData, setShowNoData] = useState(false);
     const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>([]);
+    const [selectedHistoryIds, setSelectedHistoryIds] = useState<number[]>([]);
     const [showNoHistory, setShowNoHistory] = useState(false);
     const [historyOffset, setHistoryOffset] = useState(0);
     const [historyHasMore, setHistoryHasMore] = useState(true);
@@ -65,6 +67,8 @@ export default function Sidebars({ currentMsg, isOpen, emailRes, setCurrentPdf, 
         x: 0,
         y: 0,
     });
+    const visibleHistoryIds = chatHistory.flatMap((chat) => chat.id === undefined ? [] : [chat.id]);
+    const allVisibleHistorySelected = visibleHistoryIds.length > 0 && visibleHistoryIds.every((id) => selectedHistoryIds.includes(id));
 
     useEffect(() => {
         if (profile) setProfile(false);
@@ -165,6 +169,8 @@ export default function Sidebars({ currentMsg, isOpen, emailRes, setCurrentPdf, 
     const filteredPdfs = data.filter(pdf => 
         pdf.file_name?.toLowerCase().includes(searchQuery.toLowerCase())
     );
+    const visiblePdfIds = filteredPdfs.flatMap((pdf) => pdf.id === undefined ? [] : [pdf.id]);
+    const allVisiblePdfsSelected = visiblePdfIds.length > 0 && visiblePdfIds.every((id) => selectedPdfIds.includes(id));
 
     const UploadPdf = () => {
         fileRef.current?.click();
@@ -266,6 +272,68 @@ export default function Sidebars({ currentMsg, isOpen, emailRes, setCurrentPdf, 
         }
     };
 
+    const togglePdfSelection = (id?: number) => {
+        if (id === undefined) return;
+        setSelectedPdfIds((selected) =>
+            selected.includes(id)
+                ? selected.filter((selectedId) => selectedId !== id)
+                : [...selected, id]
+        );
+    };
+
+    const toggleAllVisiblePdfs = () => {
+        setSelectedPdfIds((selected) => {
+            if (allVisiblePdfsSelected) {
+                return selected.filter((id) => !visiblePdfIds.includes(id));
+            }
+            return Array.from(new Set([...selected, ...visiblePdfIds]));
+        });
+    };
+
+    const handleDeleteSelectedPdfs = async () => {
+        if (selectedPdfIds.length === 0) return;
+
+        const result = await SweetAlert2(
+            "Delete selected PDFs",
+            `Are you sure you want to delete ${selectedPdfIds.length} PDF${selectedPdfIds.length === 1 ? "" : "s"}?`,
+            "warning",
+            true,
+            "Yes, delete them",
+            true,
+            "Cancel"
+        );
+
+        if (!result.isConfirmed) return;
+
+        setIsLoadState(true);
+        setIsLoadStateDone(true);
+        setIsLoadStatus("Deleting selected PDFs...");
+
+        const responses = await Promise.all(
+            selectedPdfIds.map((id) => {
+                const pdf = data.find((item) => item.id === id);
+                return Fetch_to(api_link.storage.deletepdf, {
+                    filePath: pdf?.file,
+                    id,
+                });
+            })
+        );
+
+        Swal.close();
+        if (responses.every((response) => response.success)) {
+            setIsLoadStateDone(false);
+            setIsLoadStatus("Selected PDFs deleted successfully");
+            setSelectedPdfIds([]);
+            setTimeout(() => setIsLoadState(false), 3000);
+            setRefresh((value) => !value);
+        } else {
+            setIsLoadStateDone(false);
+            setIsLoadError(true);
+            setIsLoadStatus("Some PDFs could not be deleted");
+            setTimeout(() => setIsLoadState(false), 3000);
+        }
+    };
+
     const handleDeleteHistory = async () => {
         if (!historyMenu.id) return;
 
@@ -296,6 +364,64 @@ export default function Sidebars({ currentMsg, isOpen, emailRes, setCurrentPdf, 
             setRefresh((value) => !value);
         } else {
             SweetAlert2("Error", `${response.message}`, "error", true, "Confirm", false, "", false);
+        }
+    };
+
+    const toggleHistorySelection = (id?: number) => {
+        if (id === undefined) return;
+        setSelectedHistoryIds((selected) =>
+            selected.includes(id)
+                ? selected.filter((selectedId) => selectedId !== id)
+                : [...selected, id]
+        );
+    };
+
+    const toggleAllVisibleHistory = () => {
+        setSelectedHistoryIds((selected) => {
+            if (allVisibleHistorySelected) {
+                return selected.filter((id) => !visibleHistoryIds.includes(id));
+            }
+            return Array.from(new Set([...selected, ...visibleHistoryIds]));
+        });
+    };
+
+    const handleDeleteSelectedHistory = async () => {
+        if (selectedHistoryIds.length === 0) return;
+
+        const result = await SweetAlert2(
+            "Delete selected chats",
+            `Are you sure you want to delete ${selectedHistoryIds.length} chat${selectedHistoryIds.length === 1 ? "" : "s"}?`,
+            "warning",
+            true,
+            "Yes, delete them",
+            true,
+            "Cancel"
+        );
+
+        if (!result.isConfirmed) return;
+
+        setIsLoadState(true);
+        setIsLoadStateDone(true);
+        setIsLoadStatus("Deleting selected chats...");
+
+        const responses = await Promise.all(
+            selectedHistoryIds.map((id) =>
+                Fetch_to(api_link.delete_responses, { email: emailRes, id })
+            )
+        );
+
+        Swal.close();
+        if (responses.every((response) => response.success)) {
+            setIsLoadStateDone(false);
+            setIsLoadStatus("Selected chats deleted successfully");
+            setSelectedHistoryIds([]);
+            setTimeout(() => setIsLoadState(false), 3000);
+            setRefresh((value) => !value);
+        } else {
+            setIsLoadStateDone(false);
+            setIsLoadError(true);
+            setIsLoadStatus("Some chats could not be deleted");
+            setTimeout(() => setIsLoadState(false), 3000);
         }
     };
 
@@ -359,7 +485,25 @@ export default function Sidebars({ currentMsg, isOpen, emailRes, setCurrentPdf, 
 
                 <section className={`${styles.chat_history}`} style={{ display: activeView === "chat" ? "flex" : "none" }}>
                     <div className={styles.history_base}>
-                        <h3>Chat History</h3>
+                        <div className={styles.history_header}>
+                            <label className={styles.select_all}>
+                                <input
+                                    type="checkbox"
+                                    checked={allVisibleHistorySelected}
+                                    onChange={toggleAllVisibleHistory}
+                                    disabled={visibleHistoryIds.length === 0}
+                                />
+                                <span>Chat History</span>
+                            </label>
+                            <button
+                                type="button"
+                                className={styles.delete_selected}
+                                disabled={selectedHistoryIds.length === 0}
+                                onClick={handleDeleteSelectedHistory}
+                            >
+                                Delete selected{selectedHistoryIds.length > 0 ? ` (${selectedHistoryIds.length})` : ""}
+                            </button>
+                        </div>
                         <div className={styles.history_container} onScroll={handleHistoryScroll}>
                             {chatHistory.length > 0 ? (
                                 chatHistory.map((chat, index) => {
@@ -381,6 +525,13 @@ export default function Sidebars({ currentMsg, isOpen, emailRes, setCurrentPdf, 
                                                 setSelectedMsgId(chat.id);
                                             }}
                                         >
+                                            <input
+                                                type="checkbox"
+                                                checked={chat.id !== undefined && selectedHistoryIds.includes(chat.id)}
+                                                onChange={() => toggleHistorySelection(chat.id)}
+                                                onClick={(event) => event.stopPropagation()}
+                                                aria-label={`Select ${firstMessage}`}
+                                            />
                                             <span className={styles.history_icon}>
                                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                                                     <path
@@ -441,7 +592,25 @@ export default function Sidebars({ currentMsg, isOpen, emailRes, setCurrentPdf, 
 
                 
                     <div className={styles.pdf_base} style={{ display: activeView === "pdf" ? "block" : "none" }}>
-                        <h3>PDF Documents</h3>
+                        <div className={styles.pdf_header}>
+                            <label className={styles.select_all}>
+                                <input
+                                    type="checkbox"
+                                    checked={allVisiblePdfsSelected}
+                                    onChange={toggleAllVisiblePdfs}
+                                    disabled={visiblePdfIds.length === 0}
+                                />
+                                <span>PDF Documents</span>
+                            </label>
+                            <button
+                                type="button"
+                                className={styles.delete_selected}
+                                disabled={selectedPdfIds.length === 0}
+                                onClick={handleDeleteSelectedPdfs}
+                            >
+                                Delete selected{selectedPdfIds.length > 0 ? ` (${selectedPdfIds.length})` : ""}
+                            </button>
+                        </div>
                         <div className={styles.pdf_container} onScroll={handleScroll}>
                             {data && data.length > 0 ? (
                                 filteredPdfs.length > 0 ? (
@@ -451,6 +620,13 @@ export default function Sidebars({ currentMsg, isOpen, emailRes, setCurrentPdf, 
                                         // onContextMenu={(e) => handleClick(e, pdf.id, pdf.file)}
                                         style={{ backgroundColor: pdf.id === selectedPdfId ? "var(--fx-color)" : ""}}
                                         >
+                                            <input
+                                                type="checkbox"
+                                                checked={pdf.id !== undefined && selectedPdfIds.includes(pdf.id)}
+                                                onChange={() => togglePdfSelection(pdf.id)}
+                                                onClick={(event) => event.stopPropagation()}
+                                                aria-label={`Select ${pdf.file_name || "PDF"}`}
+                                            />
                                             <Image
                                             src={image_src.pdf_icon}
                                             alt="Icons"

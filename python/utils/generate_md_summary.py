@@ -3,6 +3,7 @@ import sys
 from flask import request, jsonify
 from PyPDF2 import PdfReader
 from .context import EXPECTED_API_KEY, client, supabase
+from .prompt_loader import load_prompt_template, load_system_prompt
 
 
 def generate_md_summary():
@@ -68,11 +69,8 @@ def generate_md_summary():
             return jsonify({"success": False, "error": "No readable text was found in the PDF"}), 422
 
         # --- Read Txt prompt template ---
-        with open("python/python_txt_file/prompt.md", "r", encoding="utf-8") as f:
-            template = f.read()
-
-        with open("python/python_txt_file/system.md", "r", encoding="utf-8") as f:
-            system_role = f.read()
+        template = load_prompt_template()
+        system_role = load_system_prompt()
 
         if not template:
             return jsonify({ "success" : False, "message" : "template not found" }), 404

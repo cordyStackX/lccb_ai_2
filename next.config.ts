@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ["192.168.1.46"],
+  allowedDevOrigins: [""],
   poweredByHeader: false, // removes the "X-Powered-By" header
   images: {
     remotePatterns: [

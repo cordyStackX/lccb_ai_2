@@ -2,6 +2,7 @@ import sys
 import json
 from flask import request, jsonify, Response, stream_with_context
 from .context import EXPECTED_API_KEY, client, supabase, PDF_ENCRYPT_PASSWORD
+from .prompt_loader import load_prompt_template, load_system_prompt
 import hashlib
 import base64
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
@@ -84,11 +85,8 @@ def _build_prompt_context(data):
     if not summaries:
         return None, (jsonify({"success": False, "error": "PDF summaries not found"}), 404)
 
-    with open("python/python_txt_file/prompt.md", "r", encoding="utf-8") as f:
-        template = f.read()
-
-    with open("python/python_txt_file/system.md", "r", encoding="utf-8") as f:
-        system_role = f.read()
+    template = load_prompt_template()
+    system_role = load_system_prompt()
 
     if not template:
         return None, (jsonify({"success": False, "message": "template not found"}), 404)

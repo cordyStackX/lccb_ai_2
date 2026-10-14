@@ -4,17 +4,21 @@
     padding: 0.4rem;
     position: fixed;
     color: var(--foreground);
-    background-color: var(--default-color-white);
+    background-color: rgba(233, 233, 233, 0.94);
     z-index: 3;
     top: 0;
     justify-content: space-between;
     display: flex;
     align-items: center;
-    box-shadow: 0 0 2px 1px var(--default-color-gray);
+    border-bottom: 1px solid rgba(33, 59, 148, 0.14);
+    box-shadow: 0 4px 18px rgba(24, 24, 24, 0.08);
+    backdrop-filter: blur(14px);
 }
 .container h1 {
-    margin: 0 3rem;
-    font-size: clamp(1rem, 0.5rem + 1vw, 2rem);
+    margin: 0 auto 0 1rem;
+    color: var(--primary);
+    font-size: clamp(1rem, 0.5rem + 1vw, 1.35rem);
+    letter-spacing: 0.02em;
 }
 .chevron {
     transform: rotate(0deg);
@@ -23,7 +27,7 @@
     transform: rotate(180deg);
 }
 .profile {
-    margin-right: 1rem;
+    margin-right: 0.75rem;
     overflow: hidden;
     cursor: pointer;
     display: flex;
@@ -39,7 +43,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    border: 1px solid var(--primary);
+    border: 2px solid var(--default-color-white);
+    box-shadow: 0 0 0 1px rgba(33, 59, 148, 0.2);
 }
 .user_info_menu {
     position: fixed;
@@ -47,13 +52,14 @@
     top: 65px;
     width: min(100%, 310px);
     height: auto;
-    background-color: var(--default-color-white);
+    background-color: #f7f9fa;
     display: none;
     justify-content: left;
     align-items: center;
     flex-flow: column;
     padding: 2rem 1rem 0 1rem;
-    box-shadow: 0 0 2px 1px var(--default-color-gray);
+    box-shadow: 0 12px 32px rgba(24, 24, 24, 0.16);
+    border: 1px solid rgba(33, 59, 148, 0.14);
     border-radius: 8px;
     overflow: hidden;
 }
