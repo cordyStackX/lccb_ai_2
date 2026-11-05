@@ -70,8 +70,7 @@ export function useDocumentTable(
 
     const triggerUpload = () => fileRef.current?.click();
 
-    const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = e.target.files ? Array.from(e.target.files) : [];
+    const handleFiles = async (files: File[]) => {
         if (files.length === 0) return;
 
         const hasInvalid = files.some(
@@ -111,6 +110,10 @@ export function useDocumentTable(
         }
 
         if (fileRef.current) fileRef.current.value = "";
+    };
+
+    const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        await handleFiles(e.target.files ? Array.from(e.target.files) : []);
     };
 
     const downloadFile = async (doc: DocFile) => {
@@ -213,6 +216,7 @@ export function useDocumentTable(
         setRefresh,
         triggerUpload,
         handleFile,
+        handleFiles,
         downloadFile,
         deleteFile,
         deleteFiles,

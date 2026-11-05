@@ -124,7 +124,7 @@ function parseQuestionAnswers(summary?: string): QuestionAnswer[] {
 function DocumentTableSection({ title, description, sensitive, email, table, onLinkJourneyStart, onLinkJourneySuccess, onLinkJourneyError }: DocumentTableSectionProps) {
     const {
         fileRef, data, search, setSearch, page, setPage, totalPages,
-        isLoading, refresh, setRefresh, triggerUpload, handleFile,
+        isLoading, refresh, setRefresh, triggerUpload, handleFile, handleFiles,
         downloadFile, deleteFile, deleteSelected,
         selectedIds, toggleSelect, toggleSelectAll, lastUploadedDoc,
     } = table;
@@ -135,6 +135,9 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
     const [isGeneratingQuestions, setIsGeneratingQuestions] = useState(false);
     const [generatingAnswerIndex, setGeneratingAnswerIndex] = useState<number | null>(null);
     const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
+    const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+    const [isPdfDialogOpen, setIsPdfDialogOpen] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
     const [webLink, setWebLink] = useState("");
     const [isUploadingLink, setIsUploadingLink] = useState(false);
 
@@ -272,10 +275,9 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
                             <DeleteIcon /> Delete {selectedCount} selected
                         </button>
                     )}
-                    <button className={styles.button_upload} onClick={triggerUpload}>
-                        Upload PDF File
+                    <button className={`${styles.button_upload} ${styles.addDocumentButton}`} onClick={() => setIsAddDialogOpen(true)}>
+                        <span aria-hidden="true">＋</span> Add document
                     </button>
-                    {!sensitive && <button className={styles.button_upload} onClick={() => setIsLinkDialogOpen(true)}>Add web link</button>}
                 </span>
             </span>
             {description && <p className={styles.sectionDescription}>{description}</p>}
@@ -305,7 +307,10 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
                 accept="application/pdf"
                 multiple
                 style={{ display: "none" }}
-                onChange={handleFile}
+                onChange={(event) => {
+                    if (event.target.files?.length) setIsPdfDialogOpen(false);
+                    handleFile(event);
+                }}
             />
 
             <div className={styles.tableScroll}>
@@ -417,6 +422,42 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
                             >
                                 <DownloadIcon /> Download
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isAddDialogOpen && (
+                <div className={styles.modalOverlay} onClick={() => setIsAddDialogOpen(false)}>
+                    <div className={styles.addDialog} role="dialog" aria-modal="true" aria-labelledby="add-document-title" onClick={(event) => event.stopPropagation()}>
+                        <div className={styles.modalHeader}>
+                            <div><span className={styles.dialogEyebrow}>DOCUMENT LIBRARY</span><h3 id="add-document-title">Add a document</h3></div>
+                            <button className={styles.modalClose} onClick={() => setIsAddDialogOpen(false)} aria-label="Close">&times;</button>
+                        </div>
+                        <p className={styles.addDialogIntro}>Choose how you’d like to add content to {sensitive ? "your sensitive documents" : "your library"}.</p>
+                        <div className={styles.addChoices}>
+                            <button className={styles.addChoice} onClick={() => { setIsAddDialogOpen(false); setIsPdfDialogOpen(true); }}>
+                                <span className={styles.choiceIcon}>PDF</span><span><strong>Upload a PDF</strong><small>Choose a file from your device</small></span><span className={styles.choiceArrow}>›</span>
+                            </button>
+                            {!sensitive && <button className={styles.addChoice} onClick={() => { setIsAddDialogOpen(false); setIsLinkDialogOpen(true); }}>
+                                <span className={`${styles.choiceIcon} ${styles.linkChoiceIcon}`} aria-hidden="true">↗</span><span><strong>Add a web link</strong><small>Turn a public webpage into a document</small></span><span className={styles.choiceArrow}>›</span>
+                            </button>}
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isPdfDialogOpen && (
+                <div className={styles.modalOverlay} onClick={() => { setIsPdfDialogOpen(false); setIsDragging(false); }}>
+                    <div className={styles.pdfDialog} role="dialog" aria-modal="true" aria-labelledby="upload-pdf-title" onClick={(event) => event.stopPropagation()}>
+                        <div className={styles.modalHeader}>
+                            <div><span className={styles.dialogEyebrow}>UPLOAD DOCUMENT</span><h3 id="upload-pdf-title">Upload a PDF</h3></div>
+                            <button className={styles.modalClose} onClick={() => { setIsPdfDialogOpen(false); setIsDragging(false); }} aria-label="Close">&times;</button>
+                        </div>
+                        <div className={`${styles.dropZone} ${isDragging ? styles.dropZoneActive : ""}`} onDragOver={(event) => { event.preventDefault(); setIsDragging(true); }} onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setIsDragging(false); }} onDrop={(event) => { event.preventDefault(); setIsDragging(false); void handleFiles(Array.from(event.dataTransfer.files)); setIsPdfDialogOpen(false); }}>
+                            <span className={styles.uploadIcon} aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M24 32V8m0 0-9 9m9-9 9 9M10 28v10a3 3 0 0 0 3 3h22a3 3 0 0 0 3-3V28" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg></span>
+                            <strong>Drag and drop your PDF here</strong>
+                            <span className={styles.dropHint}>or choose a file from your device</span>
+                            <button className={styles.browseButton} onClick={triggerUpload}>Browse files</button>
+                            <small>PDF files only</small>
                         </div>
                     </div>
                 </div>

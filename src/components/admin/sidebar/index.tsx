@@ -2,7 +2,7 @@
 import styles from "./css/styles.module.css";
 import Image from "next/image";
 import image_src from "@/config/images_links/assets.json";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { SweetAlert2, Fetch_to, Progress } from "@/utilities";
 import api_link from "@/config/conf/json_config/fetch_url.json";
@@ -15,6 +15,7 @@ interface SidebarProps {
 const NAV_ITEMS = [
     {
         key: "dashboard",
+        group: "Workspace",
         label: "Dashboard",
         path: "/admin/dashboard",
         icon: (
@@ -28,7 +29,8 @@ const NAV_ITEMS = [
     },
     {
         key: "manage_user",
-        label: "Manage User",
+        group: "User management",
+        label: "Manage users",
         path: "/admin/manageuser",
         icon: (
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -40,7 +42,8 @@ const NAV_ITEMS = [
     },
     {
         key: "pending_user",
-        label: "Pending user",
+        group: "User management",
+        label: "Pending users",
         path: "/admin/pending_user",
         icon: (
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -53,6 +56,7 @@ const NAV_ITEMS = [
     },
     {
         key: "document",
+        group: "Knowledge base",
         label: "Documents",
         path: "/admin/document",
         icon: (
@@ -65,7 +69,8 @@ const NAV_ITEMS = [
     },
     {
         key: "embeded_code",
-        label: "Embeded Code",
+        group: "Knowledge base",
+        label: "Embed code",
         path: "/admin/embeded_code",
         icon: (
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -77,6 +82,7 @@ const NAV_ITEMS = [
     },
     {
         key: "pending_payment",
+        group: "Billing",
         label: "Payment Status",
         path: "/admin/pending_payment",
         icon: (
@@ -91,7 +97,8 @@ const NAV_ITEMS = [
     },
     {
         key: "setting",
-        label: "Setting",
+        group: "System",
+        label: "Settings",
         path: "/admin/setting",
         icon: (
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -108,6 +115,22 @@ export default function Sidebar({ nav }: SidebarProps) {
     const router = useRouter();
     const [nav_status, setNav_status] = useState("");
     const [is_open, setIs_open] = useState(false);
+    const [is_expanded, setIs_expanded] = useState(false);
+    const collapseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const expandSidebar = () => {
+        if (collapseTimer.current) clearTimeout(collapseTimer.current);
+        setIs_expanded(true);
+    };
+
+    const scheduleSidebarCollapse = () => {
+        if (collapseTimer.current) clearTimeout(collapseTimer.current);
+        collapseTimer.current = setTimeout(() => setIs_expanded(false), 180);
+    };
+
+    useEffect(() => () => {
+        if (collapseTimer.current) clearTimeout(collapseTimer.current);
+    }, []);
 
     useEffect(() => {
         setNav_status(nav);
@@ -154,7 +177,15 @@ export default function Sidebar({ nav }: SidebarProps) {
                 <div className={styles.backdrop} onClick={() => setIs_open(false)} />
             )}
 
-            <aside className={`${styles.container} ${is_open ? styles.containerOpen : ""}`}>
+            <aside
+                className={`${styles.container} ${is_open ? styles.containerOpen : ""} ${is_expanded ? styles.containerExpanded : ""}`}
+                onMouseEnter={expandSidebar}
+                onMouseLeave={scheduleSidebarCollapse}
+                onFocusCapture={expandSidebar}
+                onBlurCapture={(event) => {
+                    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) scheduleSidebarCollapse();
+                }}
+            >
                 <figure className={styles.admin}>
                     <Image
                         src={image_src.admin}
@@ -171,17 +202,23 @@ export default function Sidebar({ nav }: SidebarProps) {
                 </figure>
 
                 <section className={styles.options}>
-                    {NAV_ITEMS.map((item) => (
-                        <button
-                            key={item.key}
-                            disabled={nav_status === item.key}
-                            className={`${styles.navButton} ${nav_status === item.key ? styles.navButtonActive : ""}`}
-                            onClick={() => {router.push(item.path); Progress(true);}}
-                        >
-                            <span className={styles.navIndicator} />
-                            {item.icon}
-                            {item.label}
-                        </button>
+                    {NAV_ITEMS.map((item, index) => (
+                        <div className={styles.navGroup} key={item.key}>
+                            {(index === 0 || NAV_ITEMS[index - 1].group !== item.group) && (
+                                <span className={styles.navGroupLabel}>{item.group}</span>
+                            )}
+                            <button
+                                disabled={nav_status === item.key}
+                                aria-label={item.label}
+                                title={is_expanded ? undefined : item.label}
+                                className={`${styles.navButton} ${nav_status === item.key ? styles.navButtonActive : ""}`}
+                                onClick={() => {router.push(item.path); Progress(true);}}
+                            >
+                                <span className={styles.navIndicator} />
+                                {item.icon}
+                                <span className={styles.navLabel}>{item.label}</span>
+                            </button>
+                        </div>
                     ))}
                 </section>
 
@@ -192,7 +229,7 @@ export default function Sidebar({ nav }: SidebarProps) {
                             <path d="M10 17V7a2 2 0 0 1 2-2h7v14h-7a2 2 0 0 1-2-2z" />
                             <path d="M15 12H3m0 0l3-3m-3 3l3 3" />
                         </svg>
-                        Sign Out
+                        <span className={styles.logoutLabel}>Sign Out</span>
                     </button>
                 </section>
             </aside>

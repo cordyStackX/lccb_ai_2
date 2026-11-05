@@ -2,10 +2,12 @@ import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase-server";
+import AdminShell from "@/components/admin/AdminShell";
 
 type SessionToken = {
   final_data?: {
     email?: string;
+    f_name?: string;
     role?: string;
   };
 };
@@ -33,5 +35,9 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
     redirect("/forbidden");
   }
 
-  return children;
+  return (
+    <AdminShell email={email} f_name={session!.final_data?.f_name ?? ""}>
+      {children}
+    </AdminShell>
+  );
 }

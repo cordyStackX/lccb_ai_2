@@ -1,33 +1,9 @@
 "use client";
-import { Chat_bot, Sidebar } from "@/components/admin";
-import { useState, useEffect } from "react";
-import { Fetch_to, Progress } from "@/utilities";
-import { useRouter } from "next/navigation";
-import api_link from "@/config/conf/json_config/fetch_url.json";
 
-export default function Chat_botPage() {
-    const router = useRouter();
-    const [nav, setNav] = useState("");
-    const [email, setEmail] = useState("");
+import { Chat_bot } from "@/components/admin";
+import { useAdminSession } from "@/components/admin/AdminShell";
 
-    useEffect(() => {
-        async function check() {
-            const response = await Fetch_to(api_link.jwt.verify);
-            if (!response.success) return router.push("/");
-            Progress(false);
-            setEmail(response.data.message.final_data.email);
-        }
-        check();
-    }, []);
-
-    useEffect(() => {
-        setNav("document");
-    }, [nav]);
-
-    return (
-        <main className="admin">
-            <Sidebar nav={nav} />
-            <Chat_bot email={email} />
-        </main>
-    );
+export default function DocumentsPage() {
+    const { email } = useAdminSession();
+    return <Chat_bot email={email} />;
 }

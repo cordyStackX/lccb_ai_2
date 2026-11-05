@@ -448,3 +448,21 @@
         padding: 0 0.5rem 0.75rem 0.5rem;
     }
 }
+
+/* Shared admin visual hierarchy */
+.container { box-sizing: border-box; min-height: 100vh; background: #e2e5eb; color: var(--foreground); }
+.header_cons { height: auto; padding: 0.5rem 0 1.5rem; }
+.header_cons svg { width: 30px; height: 30px; margin: 0 0.8rem 0 0; color: var(--primary); }
+.header_cons h1 { margin: 0; font-size: clamp(1.45rem, 2vw, 1.85rem); font-weight: 700; letter-spacing: -0.035em; }
+.status { box-sizing: border-box; background: #e9ebef; border: 1px solid #cbd1db; border-radius: 14px; box-shadow: 0 2px 8px rgba(20,35,65,.04), 0 12px 28px rgba(20,35,65,.035); padding: 1.25rem; }
+.sectionHeader { padding: 0; margin-bottom: 0.45rem; }
+.sectionTitleGroup h2 { font-size: 1.15rem; letter-spacing: -0.02em; }
+.sectionDescription { padding: 0; margin: 0.35rem 0 1rem; line-height: 1.5; }
+.sectionLabel { color: var(--primary); }
+.sizeField input, .detailsField input, .detailsField textarea { border-color: #cbd1db; border-radius: 8px; background: #e9ebef; }
+.sizeField input:focus, .detailsField input:focus, .detailsField textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 12%, transparent); }
+.qrCodeSection { border: 1px solid #cbd1db; background: #e2e5eb; }
+.generateQrButton, .saveInfoButton { background: var(--primary); border-radius: 8px; }
+.generateQrButton:hover, .saveInfoButton:hover { background: var(--secondary); }
+.qrModal { background: #e9ebef; }
+@media (max-width: 900px) { .container { padding-top: 4.5rem; } }
