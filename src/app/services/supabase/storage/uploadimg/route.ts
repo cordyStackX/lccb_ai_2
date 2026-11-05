@@ -17,13 +17,13 @@ export async function POST(req: NextRequest) {
 
     const filename = file.name;
     const fileBuffer = Buffer.from(await file.arrayBuffer());
-    let dimensions: ReturnType<typeof imageSize>;
+    let width: number | undefined;
+    let height: number | undefined;
     try {
-        dimensions = imageSize(fileBuffer);
+        ({ width, height } = imageSize(fileBuffer));
     } catch {
         return NextResponse.json({ success: false, error: "The selected file is not a supported image" }, { status: 400 });
     }
-    const { width, height } = dimensions;
 
     if (!width || !height || width < 256 || height < 256) {
         return NextResponse.json(
