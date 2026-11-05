@@ -8,8 +8,9 @@
     display: flex;
     justify-content: flex-start;
     align-items: flex-start;
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
     margin-left: 0;
     color: var(--default-color-black);
     background: transparent;
@@ -17,7 +18,7 @@
     border-radius: 0;
     padding: 1.5rem 0;
     isolation: isolate;
-    z-index: 2;
+    z-index: 100;
 }
 .container::before {
     content: "";

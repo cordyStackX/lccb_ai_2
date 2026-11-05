@@ -9,19 +9,21 @@ export async function POST(req: NextRequest) {
     const auth = await Security(req);
     if(auth?.error) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     
-    const form = (await req.formData()) as unknown as globalThis.FormData;
-    const file = form.get("file") as File;
-    const email = form.get("email") as string;
+    const form = await req.formData();
+    const file = form.get("file");
+    const cleanEmail = auth.email.trim().toLowerCase();
 
-    const cleanEmail = email.trim().toLowerCase();
-
-    if (!file) return NextResponse.json({ success: false, error: "Image Not Detected" }, { status: 404 });
-
-    if (!cleanEmail) return NextResponse.json({ success: false, error: "Email not found" }, { status: 404 });
+    if (!(file instanceof File)) return NextResponse.json({ success: false, error: "Image not detected" }, { status: 400 });
 
     const filename = file.name;
     const fileBuffer = Buffer.from(await file.arrayBuffer());
-    const { width, height } = imageSize(fileBuffer);
+    let dimensions: ReturnType<typeof imageSize>;
+    try {
+        dimensions = imageSize(fileBuffer);
+    } catch {
+        return NextResponse.json({ success: false, error: "The selected file is not a supported image" }, { status: 400 });
+    }
+    const { width, height } = dimensions;
 
     if (!width || !height || width < 256 || height < 256) {
         return NextResponse.json(
@@ -31,7 +33,8 @@ export async function POST(req: NextRequest) {
     }
 
     const bucketName = "profile_pics";
-    const filePath = `uploads/${cleanEmail}_${file.name}`;
+    const safeFilename = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-120) || "logo";
+    const filePath = `uploads/${cleanEmail}/${crypto.randomUUID()}-${safeFilename}`;
 
     // Check if user already has a profile picture
     const { data: existingData, error: queryError } = await supabaseServer
@@ -43,19 +46,6 @@ export async function POST(req: NextRequest) {
     if (queryError && queryError.code !== "PGRST116") { // PGRST116 means no rows found
         console.error("Supabase Query Error: ", queryError);
         return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
-    }
-
-    // If existing profile picture, delete old file from storage
-    if (existingData) {
-        const oldFilePath = existingData.file_link.split('/').slice(-2).join('/'); // Extract path from URL
-        const { error: deleteError } = await supabaseServer.storage
-            .from(bucketName)
-            .remove([oldFilePath]);
-        
-        if (deleteError) {
-            console.warn("Failed to delete old profile picture: ", deleteError);
-            // Continue anyway - we'll update the record
-        }
     }
 
     // Upload new file
@@ -91,6 +81,7 @@ export async function POST(req: NextRequest) {
 
             if (updateError) {
                 console.error("Supabase Update Error: ", updateError);
+                await supabaseServer.storage.from(bucketName).remove([filePath]);
                 return NextResponse.json({ success: false, error: "Failed to update image data" }, { status: 500 });
             }
             dbResult = updateData;
@@ -102,14 +93,33 @@ export async function POST(req: NextRequest) {
 
             if (insertError) {
                 console.error("Supabase Insert Error: ", insertError);
+                await supabaseServer.storage.from(bucketName).remove([filePath]);
                 return NextResponse.json({ success: false, error: "Failed to save image data" }, { status: 500 });
             }
             dbResult = insertData;
         }
 
+        // Remove the previous image only after the new image and database row are saved.
+        if (existingData?.file_link) {
+            try {
+                const oldUrl = new URL(existingData.file_link);
+                const bucketMarker = `/storage/v1/object/public/${bucketName}/`;
+                const markerIndex = oldUrl.pathname.indexOf(bucketMarker);
+                if (markerIndex >= 0) {
+                    const oldFilePath = decodeURIComponent(oldUrl.pathname.slice(markerIndex + bucketMarker.length));
+                    if (oldFilePath && oldFilePath !== filePath) {
+                        const { error: deleteError } = await supabaseServer.storage.from(bucketName).remove([oldFilePath]);
+                        if (deleteError) console.warn("Failed to remove previous profile image:", deleteError);
+                    }
+                }
+            } catch (error) {
+                console.warn("Failed to parse previous profile image URL:", error);
+            }
+        }
+
         console.log("Upload successful: ", dbResult);
 
-        await auth_jwt(email);
+        await auth_jwt(cleanEmail);
 
         return NextResponse.json({ 
             success: true, 

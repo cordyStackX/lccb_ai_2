@@ -17,10 +17,18 @@
 }
 
 .admin {
+    --admin-sidebar-width: max(4rem, min(6vw, 5rem));
     background: var(--default-color-white); 
     width: 100%;
+    padding-left: var(--admin-sidebar-width);
     display: flex;
     justify-content: center;
     align-items: flex-start;
     position: relative;
+}
+
+@media (max-width: 900px) {
+    .admin {
+        padding-left: 0;
+    }
 }

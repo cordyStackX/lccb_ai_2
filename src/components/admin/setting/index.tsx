@@ -16,7 +16,7 @@ export default function Setting({ email, f_name } : SettingProps) {
     const [suspensionState, setSuspensionState] = useState("off");
     const [loading, setLoading] = useState(true);
 
-    const [schoolName, setSchoolName] = useState("");
+    const [schoolName, setSchoolName] = useState(f_name);
     const [logoPreview, setLogoPreview] = useState<string | null>(null);
     const [logoFile, setLogoFile] = useState<File | null>(null);
     const [savingBranding, setSavingBranding] = useState(false);
@@ -26,6 +26,10 @@ export default function Setting({ email, f_name } : SettingProps) {
     const [isLoadStateDone, setIsLoadStateDone] = useState(false);
     const [isLoadError, setIsLoadError] = useState(false);
     const [isLoadStatus, setIsLoadStatus] = useState("");
+
+    useEffect(() => {
+        setSchoolName(f_name);
+    }, [f_name]);
 
     useEffect(() => {
         // Fetch current suspension state
@@ -124,30 +128,50 @@ export default function Setting({ email, f_name } : SettingProps) {
     };
 
     const handleSaveBranding = async () => {
-        let response;
-        if (!schoolName) return SweetAlert2("Error", `Enter Business/School Name`, "error", true, "Confirm", false, "", false);
+        const trimmedName = schoolName.trim();
+        const nameChanged = trimmedName !== f_name.trim();
+        if (!logoFile && !nameChanged) {
+            await SweetAlert2("Nothing to save", "Choose a new logo or change your display name first.", "info", true, "OK", false, "");
+            return;
+        }
+
         setSavingBranding(true);
         try {
-
             if (logoFile) {
-                // Logo + name together via the multipart helper
-                response = await Fetch_toFile(
+                const uploadResponse = await Fetch_toFile(
                     api_link.storage.uploadimg,
                     logoFile,
                     { email: email }
                 );
-
+                if (!uploadResponse.success) {
+                    throw new Error(uploadResponse.message || "Logo upload failed");
+                }
             }
 
-            if (schoolName) {
-                response = await Fetch_to(api_link.update, { name: schoolName, email: email });
+            if (nameChanged) {
+                const nameResponse = await Fetch_to(api_link.update, { name: trimmedName, email: email });
+                if (!nameResponse.success) {
+                    throw new Error(nameResponse.message || "Display name update failed");
+                }
             }
 
+            setLogoFile(null);
+            if (fileInputRef.current) fileInputRef.current.value = "";
+            router.refresh();
+            await SweetAlert2("Success", "Your settings have been updated.", "success", true, "Confirm", false, "");
         } catch (e) {
-            SweetAlert2("Error", `${e}`, "error", true, "Confirm", false, "", false);
+            await SweetAlert2(
+                "Unable to save branding",
+                e instanceof Error ? e.message : "Please try again.",
+                "error",
+                true,
+                "Confirm",
+                false,
+                "",
+                false
+            );
         } finally {
             setSavingBranding(false);
-            SweetAlert2("Success", response?.data.message, "success", true, "Confirm", false, "");
         }
     };
 
@@ -214,23 +238,22 @@ export default function Setting({ email, f_name } : SettingProps) {
 
                         <div className={styles.brandingFields}>
                             <div>
-                                <p>School / Company name</p>
+                                <p>Admin display name</p>
                                 <span className={styles.hint}>
-                                    Shown across the admin panel and login screen
+                                    Update the name shown for this admin account
                                 </span>
                             </div>
                             <input
                                 type="text"
                                 className={styles.nameInput}
-                                placeholder={f_name ? f_name : "e.g. Laco Learning Institute"}
+                                placeholder="Enter your display name"
                                 value={schoolName}
                                 onChange={(e) => setSchoolName(e.target.value)}
-                                disabled={loadingBranding}
                             />
                             <button
                                 className={styles.primaryButton}
                                 onClick={handleSaveBranding}
-                                disabled={savingBranding || loadingBranding}
+                                disabled={savingBranding}
                             >
                                 {savingBranding ? "Saving..." : "Save Branding"}
                             </button>

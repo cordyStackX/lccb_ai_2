@@ -18,15 +18,18 @@ export async function POST(req:NextRequest) {
     const auth = await Security(req);
     if(auth?.error) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
 
-    const { name, email } = await req.json();
+    const { name } = await req.json();
+    const email = auth.email;
 
-    if (!name && !email) return NextResponse.json({ success: false, error: "Name and Email is Empty" }, { status: 404 });
+    if (typeof name !== "string" || !name.trim()) {
+        return NextResponse.json({ success: false, error: "Name is required" }, { status: 400 });
+    }
 
     try {
 
         const { error } = await supabaseServer
         .from("auth")
-        .update({ f_name: name })
+        .update({ f_name: name.trim() })
         .eq("email", email);
 
         if (error) {
@@ -34,7 +37,13 @@ export async function POST(req:NextRequest) {
             return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
         }
 
-        await auth_jwt(email);
+        const refreshedSession = await auth_jwt(email);
+        if (refreshedSession.error) {
+            return NextResponse.json(
+                { success: false, error: "Name was updated, but the session could not be refreshed" },
+                { status: 500 }
+            );
+        }
 
         return NextResponse.json({ success: true, message: "Successfully Update" }, { status: 200 });
 
