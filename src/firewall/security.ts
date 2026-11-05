@@ -109,22 +109,29 @@ export async function Security(req: NextRequest) {
         cleanupRetryMap(now);
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-            email: string
+            email?: string;
+            final_data?: { email?: string };
         };
+        const email = decoded.email ?? decoded.final_data?.email;
+        if (!email) {
+            return {
+                error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
+            };
+        }
 
-        const { error } = await supabaseServer
+        const { data: user, error } = await supabaseServer
         .from("auth")
-        .select("status")
-        .eq("email", decoded.email)
-        .limit(1);
+        .select("role, status")
+        .eq("email", email)
+        .maybeSingle();
 
-        if (error) {
+        if (error || user?.status !== "active") {
             return {
                 error: NextResponse.json({ error: "Unauthorized" }, { status: 402 }),
             };
         }
 
-        return { error: false, email: decoded.email };
+        return { error: false, email, role: user?.role ?? null };
 
     } catch (err) {
         console.error("Security error:", err);

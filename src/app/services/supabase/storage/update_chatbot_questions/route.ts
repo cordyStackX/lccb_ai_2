@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
 import { Security } from "@/firewall/security";
 
-type QuestionAnswer = { question: string; answer: string };
+type QuestionAnswer = { question: string; answer: string; page?: number };
 
 function isQuestionAnswer(value: unknown): value is QuestionAnswer {
     if (!value || typeof value !== "object") return false;
@@ -11,7 +11,8 @@ function isQuestionAnswer(value: unknown): value is QuestionAnswer {
         && typeof item.answer === "string"
         && item.question.trim().endsWith("?")
         && item.question.trim().length <= 300
-        && item.answer.trim().length > 0;
+        && item.answer.trim().length > 0
+        && (item.page === undefined || Number.isInteger(item.page));
 }
 
 export async function POST(req: NextRequest) {
@@ -26,13 +27,14 @@ export async function POST(req: NextRequest) {
         if (!Number.isInteger(documentId) || documentId <= 0 || !cleanEmail) {
             return NextResponse.json({ success: false, error: "Document id and email are required" }, { status: 400 });
         }
-        if (!Array.isArray(questionsAndAnswers) || questionsAndAnswers.length === 0 || questionsAndAnswers.length > 8 || !questionsAndAnswers.every(isQuestionAnswer)) {
-            return NextResponse.json({ success: false, error: "Provide 1 to 8 questions and answers" }, { status: 400 });
+        if (!Array.isArray(questionsAndAnswers) || questionsAndAnswers.length === 0 || !questionsAndAnswers.every(isQuestionAnswer)) {
+            return NextResponse.json({ success: false, error: "Provide valid questions and answers" }, { status: 400 });
         }
 
-        const normalized = questionsAndAnswers.map(({ question, answer }: QuestionAnswer) => ({
+        const normalized = questionsAndAnswers.map(({ question, answer, page }: QuestionAnswer) => ({
             question: question.trim(),
             answer: answer.trim(),
+            ...(Number.isInteger(page) ? { page } : {}),
         }));
         const suggest = normalized.map(({ question }) => question);
 

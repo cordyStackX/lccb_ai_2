@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     if (email && decoded.final_data?.role === "Business") {
       const { data: business, error } = await supabaseServer
         .from("auth_business")
-        .select("current_plan, current_limit, current_pdf_limit, current_pdf_limit_per_mb, institutions, business_name")
+        .select("current_plan, current_limit, current_page_limit, institutions, business_name, created_at, plan_started_at, plan_expires_at")
         .eq("email", email)
         .maybeSingle();
 

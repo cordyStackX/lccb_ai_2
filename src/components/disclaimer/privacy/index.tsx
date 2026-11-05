@@ -16,7 +16,7 @@ export default function Privacy() {
             <div className={styles.content}>
                 <Link href="/" style={{ color: "blue" }} > {"<<"} Go Back</Link>
                 <h1>Privacy Policy</h1>
-                <p className={styles.updated}>Last Updated: September 17, 2026</p>
+                <p className={styles.updated}>Last Updated: November 5, 2026</p>
                 
                 <div className={styles.notice}>
                     <h2>⚠️ Important Notice</h2>
@@ -82,17 +82,20 @@ export default function Privacy() {
 
                     <h3>3.4 Academic Data (LCCB Only)</h3>
                     <ul>
-                        <li>Student grades and related academic records</li>
+                        <li>Student ID, student name, school email, year level, and department used to register and match academic records</li>
+                        <li>Student grades and other academic information extracted from sensitive PDFs uploaded by an administrator</li>
                         <li>Admin users have access to user management features</li>
                         <li>Admin activity logs (user creation, status updates, deletions)</li>
                         <li>API usage logs accessible by admins</li>
                     </ul>
+                    <h4>How sensitive academic records are collected</h4>
+                    <p>An authorized administrator uploads a restricted PDF. The system reads its pages and uses AI to extract student IDs and associated academic information. It matches each extracted ID against registered student accounts. Records are filed in that student&apos;s private bookshelf only when the ID matches one unique registered account. Records with missing, invalid, unregistered, or ambiguous IDs are skipped. If an account is registered later, an administrator can recheck the already uploaded PDFs to match and file its records without uploading those PDFs again.</p>
 
                     <h3>3.5 Business Accounts</h3>
                     <ul>
-                        <li><strong>Free Trial:</strong> 2 PDF uploads, 10,000 API requests, 10MB per upload, 1 month free</li>
-                        <li><strong>Pro (₱799/month):</strong> 250 PDF uploads/month, 1,000,000 API requests/month, 100MB per upload</li>
-                        <li><strong>Enterprise (₱1,999/year):</strong> 10,000 PDF uploads/year, 5,000,000 API requests/year, 500MB per upload</li>
+                        <li><strong>Free Trial:</strong> up to 50 PDF pages and 10,000 API requests during the 1 month trial</li>
+                        <li><strong>Pro (₱249/month):</strong> up to 5,000 PDF pages per account and unlimited API requests</li>
+                        <li><strong>Enterprise (₱1,499/year):</strong> up to 10,000 PDF pages per account and unlimited API requests</li>
                         <li>Business PDF uploads under all tiers are treated as Public Documents and should not contain sensitive information (see Section 6)</li>
                     </ul>
                 </section>
@@ -103,8 +106,9 @@ export default function Privacy() {
                     <ul>
                         <li>User authentication via JWT tokens and email verification</li>
                         <li>Role-based access control (Admin, Teacher, Student)</li>
-                        <li>Processing PDF documents with OpenAI (gpt-4o-mini) for information retrieval and chat</li>
-                        <li>Generating AI-powered responses to user questions, including academic records for LCCB students</li>
+                        <li>Processing public PDFs for document analysis and question answering</li>
+                        <li>Processing administrator-uploaded sensitive PDFs with AI to extract academic records and match them to registered student IDs</li>
+                        <li>Answering a student&apos;s academic questions using only bookshelf records whose student ID matches that student&apos;s registered ID</li>
                         <li>Storing and managing profile pictures</li>
                         <li>Enabling search and filtering of uploaded PDFs</li>
                         <li>Admin features: user management, API logs, and system monitoring</li>
@@ -120,7 +124,10 @@ export default function Privacy() {
                     <h2>5. Data Storage and Security</h2>
                     <ul>
                         <li>User data stored in Supabase PostgreSQL database with row-level security</li>
-                        <li>Sensitive data and document summaries are encrypted at rest</li>
+                        <li>Sensitive PDF files are password-encrypted before being stored, and extracted bookshelf record contents are encrypted before database storage</li>
+                        <li>Student IDs in student account records are stored as plaintext identifiers; they are used by the server to match PDF records and are not treated as encrypted values</li>
+                        <li>Sensitive PDF and bookshelf access is handled through server-side routes with role and account checks; student chat is limited to records matched to the authenticated student&apos;s registered ID</li>
+                        <li>Raw PDF pages and extracted record contents are decrypted in the backend when needed for extraction or authorized record display</li>
                         <li>Profile pictures stored in Supabase public storage buckets</li>
                         <li>PDF files stored in Supabase storage buckets</li>
                         <li>Passwords encrypted using industry-standard hashing</li>
@@ -147,12 +154,12 @@ export default function Privacy() {
                     <p>We use the following third-party services:</p>
                     <ul>
                         <li><strong>Supabase:</strong> PostgreSQL database, authentication, and file storage services</li>
-                        <li><strong>OpenAI (gpt-4o-mini):</strong> AI-powered chat responses and document analysis</li>
+                        <li><strong>OpenAI:</strong> AI processing of public documents, sensitive PDF pages for record extraction, and student questions with only the matched student records supplied as chat context</li>
                         <li><strong>Render:</strong> Python API hosting for backend services</li>
                         <li><strong>Vercel/GitHub Pages:</strong> Next.js application deployment</li>
                         <li><strong>Next.js:</strong> React framework for the web application</li>
                     </ul>
-                    <p>These services have their own privacy policies and terms of service. We are not responsible for their data handling practices, security measures, or service availability.</p>
+                    <p>When an administrator submits a sensitive PDF, its pages and content are sent to OpenAI for extraction. When a student asks about academic records, only records matched to that student&apos;s registered ID are included in the AI request. These providers process information under their own terms and privacy practices.</p>
                 </section>
 
                 <section className={styles.section}>
@@ -174,6 +181,7 @@ export default function Privacy() {
                         <li><strong>Account data:</strong> Retained until you request deletion by contacting the admin (see Section 10)</li>
                         <li><strong>Profile pictures:</strong> Stored until replaced or account deleted</li>
                         <li><strong>PDF files:</strong> Stored in database and storage bucket until manually deleted via context menu</li>
+                        <li><strong>Sensitive academic PDFs and bookshelf records:</strong> Retained until an administrator deletes the PDF or the related account is deleted; deleting a sensitive PDF also removes its associated bookshelf entries</li>
                         <li><strong>Chat history:</strong> Stored indefinitely in your account until manually cleared</li>
                         <li><strong>Payment records:</strong> Retained for accounting and dispute-resolution purposes, with account numbers encrypted</li>
                         <li><strong>API logs:</strong> Retained for debugging, research, and admin monitoring purposes</li>
@@ -213,8 +221,8 @@ export default function Privacy() {
                     <h3>12.1 Students and Teachers (LCCB)</h3>
                     <ul>
                         <li>Accounts require admin review and approval before activation</li>
-                        <li>Can upload and manage their own PDF documents</li>
-                        <li>Can chat with AI about their PDFs and their own academic records</li>
+                        <li>Can upload and manage their own public PDF documents</li>
+                        <li>Can chat with AI about their own PDFs and academic records matched to their registered student ID</li>
                         <li>Can search and filter their PDF library</li>
                         <li>Can update their profile and recover their password via OTP</li>
                         <li>Students under 13 require Guardian or Parent supervision</li>
@@ -224,6 +232,7 @@ export default function Privacy() {
                     <ul>
                         <li>Full access to user management features</li>
                         <li>Review and approve student/teacher account registrations</li>
+                        <li>Upload, recheck, and delete sensitive academic PDFs and review the resulting student bookshelf records</li>
                         <li>Can create, update, and manage user accounts (cannot reset user passwords — recovery is OTP-only)</li>
                         <li>Handle account deletion requests received via admin email</li>
                         <li>Review, approve, decline, or refund business payments</li>
@@ -235,9 +244,9 @@ export default function Privacy() {
                     <h3>12.3 Business Accounts</h3>
                     <ul>
                         <li>Sign-up does not require admin approval</li>
-                        <li>Free Trial: 2 PDF uploads, 10,000 API requests, 10MB per upload limit, 1 month free trial</li>
-                        <li>Pro tier (₱799/month): 250 PDF uploads/month, 1,000,000 API requests/month, 100MB per upload — payment requires admin verification</li>
-                        <li>Enterprise tier (₱1,999/year): 10,000 PDF uploads/year, 5,000,000 API requests/year, 500MB per upload — payment requires admin verification</li>
+                        <li>Free Trial: up to 50 PDF pages and 10,000 API requests during the 1 month trial</li>
+                        <li>Pro tier (₱249/month): up to 5,000 PDF pages per account and unlimited API requests — payment requires admin verification</li>
+                        <li>Enterprise tier (₱1,499/year): up to 10,000 PDF pages per account and unlimited API requests — payment requires admin verification</li>
                         <li>All business tiers use Public Documents and must not upload sensitive or password-containing PDFs; web-link conversion is also limited to Public Documents</li>
                     </ul>
                 </section>

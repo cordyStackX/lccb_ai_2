@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
 import { Security } from "@/firewall/security";
-import { decryptText } from "@/firewall/encryptions";
+import { decryptStudentId } from "@/firewall/encryptions";
 
 type StudentRecord = {
     year?: string;
@@ -70,12 +70,7 @@ export async function POST(req: NextRequest) {
 
         const decryptStudent = (student: StudentRecord) => {
             if (!student?.school_id) return student;
-            try {
-                return { ...student, school_id: decryptText(student.school_id, process.env.API_KEY || "") };
-            } catch (decryptErr) {
-                console.error("Decrypt Error:", decryptErr);
-                return { ...student, school_id: null };
-            }
+            return { ...student, school_id: decryptStudentId(student.school_id, process.env.API_KEY || "") };
         };
 
         const sanitizedData = (data ?? []).map((row) => {

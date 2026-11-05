@@ -1,915 +1,149 @@
-# LACO AI - Intelligent PDF Analysis System
+# LACO AI — Beta 1.0.0
 
-**Developing Area**: [Development Page](https://lccb-ai-2-git-developingarea-cordystackg.vercel.app/)
+**First beta release** of LACO AI, an AI-powered document assistant for La Consolacion College Bacolod (LCCB), with a separate business workspace for general document analysis.
 
-**Author**: [cordyStackX](https://github.com/cordyStackX) | **Year**: 2025
+[![Release](https://img.shields.io/badge/release-Beta%201.0.0-blue)](https://github.com/cordyStackX/lccb_ai_2/releases)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
 
-![Beta Version](https://img.shields.io/badge/version-beta-yellow)
-![License](https://img.shields.io/badge/license-Apache%202.0-blue)
-![Educational](https://img.shields.io/badge/purpose-educational-green)
+> **Beta software:** Features and behavior may change. AI-generated content can be incomplete or incorrect. Verify academic information against official school records. Do not upload confidential information to Public Documents.
 
-## 🎯 Project Overview
+## Overview
 
-**LACO AI** is an advanced AI-powered PDF analysis, summarization, and chatbot system designed for La Consolacion College Bacolod (LCCB), with a separate tier for general Business use. Admins upload documents under two distinct categories:
+LACO AI lets users add PDFs, ask questions about document content, and review generated summaries and question-and-answer suggestions. The application keeps general **Public Documents** separate from restricted **Sensitive Documents** used for student academic records.
 
-- **Public PDF** — safe, non-sensitive documents that power the embeddable chatbot widget, available to Business accounts and anonymous site visitors.
-- **Sensitive PDF** — protected academic data (including student records and grades), restricted to verified LCCB roles (Admin, Teacher, Student) with email-based identity verification.
+### Public documents
 
-This educational project leverages cutting-edge artificial intelligence to transform how students, educators, and businesses interact with documents — while keeping sensitive institutional data walled off from public-facing chat surfaces.
+Public PDFs support general document analysis and the embeddable chatbot. They must not contain student records, credentials, or other information that should remain private.
 
-### ⚠️ Beta Version Notice
-This is a **BETA VERSION** for educational and research purposes only. Not intended for production or commercial use.
+### Sensitive student records
 
----
+Authorized administrators can upload restricted academic PDFs. The system extracts student IDs and record content, then files each record in a student bookshelf only when the ID matches one unique registered student account. If an ID is not registered yet, an administrator can register the student and choose **Check all PDFs** to rescan already uploaded PDFs—no reupload is needed.
 
-## ✨ Key Features
+Student academic chat requires an authenticated student account. Before a request reaches the chat AI, the backend filters bookshelf records to the student’s own registered ID. Sensitive PDFs and extracted bookshelf contents are encrypted at rest. Student IDs in account records are stored as plaintext identifiers for matching. PDF pages are sent to OpenAI for extraction; student chat sends only that student’s matched records as context.
 
-### 📄 Intelligent PDF Processing
-- **Two PDF Tiers**: Admins categorize every upload as either **Public PDF** (safe for the chatbot widget and Business/general use) or **Sensitive PDF** (protected academic data, LCCB-only)
-- **Smart Summarization**: Automatically generate concise summaries of lengthy PDF documents
-- **Context-Aware Analysis**: AI understands document structure and extracts key information
-- **Multi-PDF Support**: Upload and manage multiple documents simultaneously
-- **Search & Filter**: Find PDFs quickly by filename
-- **Right-Click Management**: Delete PDFs easily via context menu
+## Features
 
-### 💬 Interactive AI Chat
-- **Ask Questions**: Query your documents and receive accurate, context-based answers
-- **Embeddable Chatbot Widget**: `/chat_bot` serves anonymous, third-party site visitors using **Public PDF data only** — Sensitive PDFs are never exposed through this surface
-- **Real-time Responses**: Powered by OpenAI (gpt-4o-mini) for instant, intelligent feedback
-- **Conversation Memory**: Maintains chat history for continuous dialogue
-- **PDF Context**: Select specific PDFs to chat about with AI assistance
-- **Streaming Responses**: Real-time AI response generation
+- PDF upload, processing progress, search, review, and management
+- Per-page PDF extraction and AI-generated summaries and question-and-answer suggestions
+- Separate Public and Sensitive document areas
+- Student bookshelf that groups extracted records by verified student ID
+- **Check all PDFs** to match stored academic PDFs against newly registered student accounts
+- Student chat restricted to records matching the authenticated student’s ID
+- Admin tools for user approvals, payments, logs, and sensitive document management
+- Business plans with account-level page allowances:
+  - **Free Trial:** 50 PDF pages and 10,000 API requests during the one-month trial
+  - **Pro:** ₱249/month, 5,000 PDF pages per account, unlimited API requests
+  - **Enterprise:** ₱1,499/year, 10,000 PDF pages per account, unlimited API requests
 
-### 👥 User Management & Roles
-- **Role-Based Access**: Admin, Teacher, and Student permissions (LCCB, Sensitive PDF scope)
-- **Business Accounts**: Separate tier for general document analysis using Public PDFs only
-  - **Free Tier**: 1 PDF upload
-  - **Enterprise Tier** (paid): up to 20 PDF uploads
-- **Admin Dashboard**: User management, PDF categorization (Public/Sensitive), API logs, system monitoring
-- **Teacher Supervision**: Monitor and filter content for students under 13
-- **Student Accounts**: Independent access for users 13 and older
-- **Profile Management**: Update name, upload profile pictures, change passwords
+## Technology
 
-### 🔒 Security & Privacy
-- **Public vs Sensitive Separation**: Sensitive PDFs (academic/grade data) are never served through the public chatbot widget or to Business accounts
-- **Persistent Storage**: PDFs stored securely until manually deleted via right-click context menu
-- **Profile Pictures**: Upload and manage profile pictures with automatic updates
-- **Encrypted Authentication**: Secure JWT-based user authentication with HTTP-only cookies
-- **Rate Limiting**: 1 request per second per IP to prevent spam and abuse
-- **CSRF Protection**: Origin validation and security headers
-- **No External Data Sharing**: Privacy-first approach - your documents remain confidential
-- **Email Verification**: Secure password reset with verification codes; email also serves as the identity match for sensitive record disclosure
-- **Role-Based Access**: Admin, Teacher, and Student permissions
+- **Web app:** Next.js 16, React 19, TypeScript
+- **Python API:** Flask
+- **AI:** OpenAI API
+- **Database and storage:** Supabase PostgreSQL and Supabase Storage
+- **PDF processing:** PyPDF2 and Python utilities
+- **Deployment:** Next.js can run on Vercel; the Python API can run on Render or another compatible host
 
-### 🎨 Modern User Interface
-- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
-- **Intuitive Navigation**: User-friendly dashboard and chat interface
-- **Loading States**: SweetAlert2 notifications and progress indicators
-- **Real-time Updates**: Instant feedback for user actions
+## Run locally
 
----
+### Requirements
 
-## 🛠️ Technology Stack
+- Node.js 20 or newer and pnpm
+- Python 3.11 or newer
+- Supabase project configured for the application’s tables, storage buckets, and access policies
+- OpenAI API key
 
-### Frontend
-- **Framework**: Next.js 15 (React 19)
-- **Language**: TypeScript
-- **Styling**: CSS Modules with adaptive theming
-- **State Management**: React Hooks (useState, useEffect, useRef)
-- **Routing**: Next.js App Router
+### Install dependencies
 
-### Backend
-- **API Framework**: Flask (Python) via FastAPI on Render
-- **AI Engine**: OpenAI (gpt-4o-mini)
-- **PDF Processing**: PyPDF2, Python file handling
-- **Database**: Supabase (PostgreSQL) with row-level security
-- **Authentication**: JWT tokens with HTTP-only cookies
-- **File Storage**: Supabase Storage (public and secure buckets — split by Public PDF / Sensitive PDF classification)
-- **Rate Limiting**: In-memory cooldown tracking (1 req/sec per IP)
-- **Security**: CSRF protection, origin validation, bcrypt password hashing
-
-### DevOps & Tools
-- **Package Manager**: pnpm
-- **Code Quality**: ESLint, TypeScript
-- **Version Control**: Git & GitHub
-- **Deployment**: Render (Python API), Vercel-ready (Next.js)
-
----
-
-## 🏗️ System Architecture
-
-LACO AI follows a **Service-Oriented Architecture (SOA)** for modularity and scalability.
-
-```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'fontSize':'18px', 'fontFamily':'arial', 'lineColor':'#ff4444', 'primaryBorderColor':'#ff4444'}}}%%
-flowchart TD
-    %% ===== User Interface =====
-    User["<b>USER</b><br/>👤"]
-    ChatBotVisitor["<b>WIDGET VISITOR</b><br/>🌐"]
-    
-    %% ===== Presentation Layer =====
-    UI_Pages["<b>APP PAGES</b><br/>📱<br/>(src/app)"]
-    UI_Components["<b>UI COMPONENTS</b><br/>🎨<br/>(src/components)"]
-    
-    %% ===== Authentication Layer =====
-    JWT_Service["<b>JWT SERVICE</b><br/>🔐<br/>(/services/jwt)"]
-    Auth_Service["<b>AUTH SERVICE</b><br/>✉️<br/>(Supabase Auth)"]
-    Email_Verification["<b>EMAIL VERIFY</b><br/>📧"]
-    
-    %% ===== AI Processing =====
-    AI_Response["<b>AI RESPONSE</b><br/>🤖<br/>(response)"]
-    AI_Response2["<b>AI RESPONSE V2</b><br/>🤖<br/>(response2)"]
-    OpenAI_API["<b>OpenAI API</b><br/>⭐"]
-    
-    %% ===== Storage Layer =====
-    Upload_PDF["<b>UPLOAD PDF</b><br/>📤<br/>(Public / Sensitive)"]
-    Retrieve_PDF["<b>RETRIEVE PDF</b><br/>📥"]
-    Update_PDF["<b>UPDATE PDF</b><br/>✏️"]
-    Delete_PDF["<b>DELETE PDF</b><br/>🗑️"]
-    Storage_Public[("<b>PUBLIC PDF<br/>STORAGE</b><br/>💾")]
-    Storage_Sensitive[("<b>SENSITIVE PDF<br/>STORAGE</b><br/>🔒")]
-    
-    %% ===== Admin Services =====
-    Manage_User["<b>USER MGMT</b><br/>👥"]
-    API_Logs["<b>API LOGS</b><br/>📊"]
-    Code_Logs["<b>CODE LOGS</b><br/>📋"]
-    Update_Status["<b>UPDATE STATUS</b><br/>🔄"]
-    
-    %% ===== Utilities =====
-    Security_Helper["<b>SECURITY</b><br/>🛡️"]
-    Fetch_Utils["<b>FETCH UTILS</b><br/>🔧"]
-    
-    %% ===== Flow Connections =====
-    User --> UI_Pages
-    User --> UI_Components
-    ChatBotVisitor --> UI_Pages
-    
-    UI_Pages --> JWT_Service
-    UI_Pages -->Auth_Service
-    UI_Pages -->AI_Response
-    UI_Pages --> Upload_PDF
-    
-    UI_Components -->Fetch_Utils
-    
-    JWT_Service -->Security_Helper
-    Auth_Service -->Email_Verification
-    
-    AI_Response -->OpenAI_API
-    AI_Response2 --> OpenAI_API
-    
-    Manage_User -->Auth_Service
-    Manage_User --> Update_Status
-    
-    Upload_PDF --> Storage_Public
-    Upload_PDF --> Storage_Sensitive
-    Retrieve_PDF -->Storage_Public
-    Retrieve_PDF -->Storage_Sensitive
-    Update_PDF -->Storage_Public
-    Update_PDF -->Storage_Sensitive
-    Delete_PDF -->Storage_Public
-    Delete_PDF -->Storage_Sensitive
-    
-    API_Logs -->Storage_Public
-    Code_Logs -->Storage_Public
-    
-    Storage_Public -->AI_Response
-    Storage_Sensitive -->AI_Response
-    
-    %% ===== Styling =====
-    linkStyle default stroke:#ff4444,stroke-width:3px
-    classDef userStyle fill:#e1f5ff,stroke:#01579b,stroke-width:4px,color:#000
-    classDef uiStyle fill:#fff3e0,stroke:#e65100,stroke-width:3px,color:#000
-    classDef authStyle fill:#f3e5f5,stroke:#4a148c,stroke-width:3px,color:#000
-    classDef aiStyle fill:#e8f5e9,stroke:#1b5e20,stroke-width:3px,color:#000
-    classDef storageStyle fill:#fce4ec,stroke:#880e4f,stroke-width:3px,color:#000
-    classDef adminStyle fill:#fff9c4,stroke:#f57f17,stroke-width:3px,color:#000
-    classDef utilStyle fill:#e0f2f1,stroke:#004d40,stroke-width:3px,color:#000
-    
-    class User,ChatBotVisitor userStyle
-    class UI_Pages,UI_Components uiStyle
-    class JWT_Service,Auth_Service,Email_Verification authStyle
-    class AI_Response,AI_Response2,OpenAI_API aiStyle
-    class Upload_PDF,Retrieve_PDF,Update_PDF,Delete_PDF,Storage_Public,Storage_Sensitive storageStyle
-    class Manage_User,API_Logs,Code_Logs,Update_Status adminStyle
-    class Security_Helper,Fetch_Utils utilStyle
-```
----
-
-## 📊 Use Cases
-
-### Installation & Setup
-
-#### Option 1: Automated Setup (Recommended)
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/cordyStackX/lccb_ai_2.git
-   cd lccb_ai_2
-   ```
-
-2. Run the automated setup script:
-   ```bash
-   chmod +x setup.sh
-   ./setup.sh
-   ```
-
-3. The script will:
-   - Install Node.js dependencies
-   - Set up Python virtual environment
-   - Install Python packages
-   - Configure environment variables
-   - Start both Next.js and Flask servers
-
-4. Open your browser and navigate to:
-   - **Frontend**: [http://localhost:3000](http://localhost:3000)
-   - **API**: [http://localhost:10000](http://localhost:10000)
-
-#### Option 2: Manual Setup
-
-**Frontend Setup:**
 ```bash
-# Install dependencies
 pnpm install
+python3 -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r python/python_txt_file/requirements.txt
+```
 
-# Run development server
+### Configure environment
+
+Create `.env.local` in the repository root. Keep secrets out of Git and never use a Supabase service key in browser-exposed variables.
+
+```env
+# Shared server-side configuration
+SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+SUPABASE_SECRET_KEY=YOUR_SUPABASE_SECRET_KEY
+API_KEY=YOUR_PRIVATE_API_KEY
+PDF_ENCRYPT_PASSWORD=YOUR_PRIVATE_PDF_PASSWORD
+
+# Python AI service
+OPENAI_API_KEY=YOUR_OPENAI_API_KEY
+
+# Web application
+JWT_SECRET=YOUR_JWT_SECRET
+APP_URL=http://localhost:3000
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Optional: Python API URL, including its trailing slash
+RENDER_API=http://localhost:10000/
+
+# Configure these when using email and bot verification features
+GMAIL_USERNAME=
+GMAIL_APP_PASSWORD=
+ADMIN_ALIAS=
+NEXT_PUBLIC_GMAIL_USERNAME=
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=
+TURNSTILE_SECRET_KEY=
+```
+
+Use the corresponding production URLs and secrets in your deployment provider. Configure the same `API_KEY` and `PDF_ENCRYPT_PASSWORD` for the web app and Python service.
+
+### Start the services
+
+In the repository root, start Next.js:
+
+```bash
 pnpm dev
 ```
 
-**Backend Setup:**
+In another terminal, start the Python API:
+
 ```bash
-# Navigate to Python directory
+source .venv/bin/activate
 cd python
-
-# Create virtual environment
-python3 -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run Flask server
 python main.py
 ```
 
----
+The web app uses `http://localhost:3000`. The Python API defaults to port `10000` (set `PORT` to change it). Set `RENDER_API` to the Python API URL reachable by Next.js.
 
-## 📖 User Guide
+## Sensitive data and privacy
 
-### 1. Registration & Login
-- Navigate to `/auth/signup` to create an account
-- Verify email through confirmation link
-- Login at `/auth/signin`
-- Secure JWT-based authentication with HTTP-only cookies
-- Email address doubles as your unique identifier and is used for password recovery and sensitive-record verification
+- Only authorized administrators should upload sensitive academic PDFs.
+- Uploaders must have the authority to process the records in a PDF.
+- Sensitive PDFs are processed with OpenAI to extract record information. OpenAI also receives a student’s question and the records matched to that student when answering academic questions.
+- A record without a valid ID that uniquely matches one registered student is skipped. Register the student, then use **Check all PDFs** to process stored PDFs again.
+- Student chat does not receive other students’ bookshelf records as context. Do not use the service to seek another student’s records.
+- Deleting a sensitive PDF removes its associated bookshelf records. Account and record deletion requests should be directed to the administrator.
+- Public Documents are not a place for confidential, personal, or academic records.
 
-### 2. Uploading PDFs (Admin)
-- Access the dashboard after login
-- Click "Upload New PDF" button
-- Select your PDF file (supports various sizes)
-- **Choose a category for the upload:**
-  - **Public PDF** — safe for the embeddable chatbot widget and Business accounts; must not contain sensitive or confidential data
-  - **Sensitive PDF** — protected academic/institutional data (e.g. grades, records), restricted to LCCB roles and never served to the widget
-- PDFs stored securely until you manually delete them
-- Search and filter PDFs by filename
+Read the [Privacy Policy](https://lccb-ai-2.vercel.app/privacy) and [Terms and Conditions](https://lccb-ai-2.vercel.app/terms) for more information.
 
-### 3. Managing PDFs
-- **Search**: Use the search bar to filter PDFs by name
-- **Select**: Click on a PDF to use it for AI chat
-- **Delete**: Right-click any PDF and select "Delete PDF" to remove it
-- **View Details**: See filename, file size, and Public/Sensitive category for each PDF
+## Beta 1.0.0 release highlights
 
-### 4. Chatting with AI
-- Select a PDF document from your library
-- Type your question in the chat interface
-- OpenAI analyzes the selected PDF and provides intelligent responses
-- Chat history persists for reference
+- Redesigned and standardized admin and business workspace screens.
+- Added clearer document tables, centered empty states, and document review controls.
+- Added PDF page-based business plan allowances and updated plan prices.
+- Added payment renewal dates when an administrator approves a renewal.
+- Added per-page PDF processing progress, summaries, and context-based question-and-answer generation.
+- Added sensitive student-record extraction, ID matching, encrypted bookshelf storage, and student-specific academic chat filtering.
+- Added **Check all PDFs** so administrators can match existing PDFs after students register.
 
-### 5. Chatbot Widget (`/chat_bot`)
-- Embeddable, anonymous-visitor chat surface for Business accounts and general site integrations
-- Answers are generated **only from that Business's own Public PDF uploads**
-- Never has access to Sensitive PDFs, other Business accounts' data, or system/internal information
+See [Release Notes](RELEASE_NOTES_BETA_1.0.0.md) for the release description.
 
-### 6. Profile Management
-- Click on your profile to access settings
-- **Update Name**: Edit your display name
-- **Profile Picture**: Upload and update your profile photo
-- **Change Password**: Secure password reset with email verification
-- **View Role**: See your assigned role (Admin, Teacher, or Student)
+## License and contribution
 
-### 7. Admin Features (Admin Only)
-- **User Management**: Create, update, delete user accounts
-- **PDF Categorization**: Upload and classify PDFs as Public or Sensitive
-- **API Logs**: Monitor API usage and system performance
-- **Role Assignment**: Assign Teacher or Student roles
-- **Status Control**: Activate or deactivate user accounts
----
+LACO AI is distributed under the [Apache License 2.0](LICENSE). Contributions are welcome; please open an issue to discuss substantial changes before submitting a pull request.
 
-## 🎨 Design & User Experience
+## Links
 
-### Visual Design
-- **Modern UI**: Clean, minimalist interface with adaptive theming
-- **Responsive Layout**: Optimized for all screen sizes
-- **Accessibility**: WCAG-compliant color contrast and keyboard navigation
-
-### User Flow
-1. **Landing Page** → Feature overview and project description
-2. **Authentication** → Secure signup/login with email verification
-3. **Dashboard/Chat Interface** → Upload and manage Public/Sensitive PDFs
-4. **PDF Selection** → Choose document for AI interaction
-5. **AI Chat** → Ask questions and receive OpenAI-powered responses
-6. **Chatbot Widget** → Anonymous visitors chat against Public PDFs only
-7. **Profile Management** → Update name, profile picture, password
-8. **PDF Management** → Search, filter, categorize, and delete via right-click menu
-9. **Admin Panel** (Admin only) → User management, PDF categorization, and system monitoring
-## ⚡ **How It Works**
-
-### Request Flow
-1. **User Interaction** → Frontend components (React/Next.js)
-2. **API Request** → Next.js API routes handle client requests
-3. **Rate Limiting** → Cooldown check (1 request/second per IP)
-4. **Authentication** → JWT verification, CSRF protection, origin validation (skipped for anonymous widget visitors, who are scoped to Public PDFs only)
-5. **PDF Processing** → Python Flask server downloads and processes the selected PDF (Public or Sensitive) from Supabase
-6. **AI Analysis** → OpenAI (gpt-4o-mini) analyzes content and generates a contextual response, respecting the Public/Sensitive boundary
-7. **Database Logging** → Supabase records API usage, user actions, and timestamps
-8. **Response Delivery** → AI-generated answer returned to frontend
-9. **File Management** → PDFs stored until manual deletion via context menu
-
-### Technical Workflow
-```
-User / Widget Visitor → Next.js UI → API Routes → Rate Limit Check → JWT Auth (if applicable)
-→ CSRF/Origin Validation → Flask API → Supabase Storage (Public / Sensitive bucket)
-→ PDF Download → PDF Processing → OpenAI API 
-→ AI Response → Database Log → User Display
-```
-
----
-
-## 🐛 Known Issues & Limitations
-
-### Current Limitations
-- **Beta Version**: May contain bugs and unexpected behavior
-- **Rate Limiting**: 1 request per second per IP address (HTTP 429 on excess)
-- **Large PDFs**: Very large documents may experience processing delays or timeouts
-- **OpenAI API Limits**: Subject to OpenAI API rate limits and quotas
-- **File Persistence**: PDFs stored until manual deletion (no auto-cleanup)
-- **No Offline Mode**: Requires internet connection for AI processing
-- **Search Limited**: Search only by filename, not document content
-- **Email Dependency**: Password reset requires email verification
-- **Manual Categorization**: Public/Sensitive classification is set by the admin at upload time — misclassification is the uploader's responsibility (see Privacy Policy §6)
-
-### Planned Improvements
-- [x] Enhanced PDF chunking algorithm for better context retention
-- [x] Conversation history export and management
-- [ ] Multi-language support for international users
-- [x] Advanced search within document content
-- [x] Document comparison and diff features
-- [x] Batch PDF processing
-- [x] Mobile app version
-- [x] Improved admin analytics dashboard
-- [ ] Custom AI model fine-tuning for educational content
-
----
-
-## 🤝 Contributing
-
-We welcome contributions from the community! This is an educational open-source project.
-
-### How to Contribute
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-### Development Guidelines
-- Follow existing code style and conventions
-- Write clear commit messages
-- Test your changes thoroughly
-- Update documentation as needed
-- Respect the Apache 2.0 license
-
----
-
-## 📄 License
-
-This project is licensed under the **Apache License 2.0** - see the [LICENSE](LICENSE) file for details.
-
-### Key Points
-- ✅ Free to use, modify, and distribute
-- ✅ Must include license and copyright notice
-- ✅ State significant changes made
-- ❌ No warranty provided
-- ❌ Contributors not liable for damages
-
-**Copyright © 2025 cordyStackX**
-
----
-
-## 👨‍💻 Project Information
-
-### Developer
-- **Name**: cordyStackX
-- **GitHub**: [@cordyStackX](https://github.com/cordyStackX)
-- **Repository**: [lccb_ai_2](https://github.com/cordyStackX/lccb_ai_2)
-
-### Project Stats
-- **Version**: Beta
-- **Started**: 2025
-- **Language**: TypeScript, Python
-- **Framework**: Next.js, Flask
-- **AI Model**: OpenAI (gpt-4o-mini)
-- **Database**: Supabase PostgreSQL
-- **Deployment**: Vercel (Frontend), Render (Backend API)
-
----
-
-## 📞 Support & Contact
-
-### For Questions or Issues
-- Open an issue on [GitHub Issues](https://github.com/cordyStackX/lccb_ai_2/issues)
-- Check existing documentation and README
-- Review [Privacy Policy](https://lccb-ai-2.vercel.app/privacy) and [Terms & Conditions](https://lccb-ai-2.vercel.app/terms)
-
-### Important Links
-- **Privacy Policy**: [/privacy](https://lccb-ai-2.vercel.app/privacy)
-- **Terms & Conditions**: [/terms](https://lccb-ai-2.vercel.app/terms)
-- **Security Policy**: [SECURITY.md](SECURITY.md)
-- **Apache License**: [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
-
----
-
-## 🌟 Acknowledgments
-
-- **La Consolacion College Bacolod** - Inspiration and educational purpose
-- **OpenAI** - Powerful AI processing and natural language capabilities
-- **Supabase** - Database, authentication, and storage infrastructure
-- **Next.js Team** - Excellent React framework and developer experience
-- **Vercel** - Deployment platform for Next.js applications
-- **Render** - Python API hosting platform
-- **Open Source Community** - Libraries and tools used in this project
-
----
-
-## ⚠️ Disclaimer
-
-**IMPORTANT NOTICE:**
-
-This is a **BETA VERSION** educational research project. By using this software, you acknowledge:
-
-- ✅ This is for **educational and research purposes only**
-- ✅ Not intended for production or commercial use
-- ✅ Provided "AS IS" without warranties
-- ✅ May contain bugs, errors, or unexpected behavior
-- ✅ Subject to changes or discontinuation without notice
-- ❌ Do not upload sensitive or confidential information into **Public PDFs**
-- ❌ No illegal activities supported or condoned
-- ❌ No guarantees of data security or availability
-
-**Use at your own risk. The developers and contributors are not liable for any damages or losses arising from the use of this software, including sensitive data mistakenly uploaded as a Public PDF.**
-
----
-
-## 📚 Additional Resources
-
-### Documentation
-- [Next.js Documentation](https://nextjs.org/docs)
-- [React Three Fiber](https://docs.pmnd.rs/react-three-fiber)
-- [OpenAI API Documentation](https://platform.openai.com/docs)
-- [Supabase Docs](https://supabase.com/docs)
-- [Flask Documentation](https://flask.palletsprojects.com/)
-
-### Tutorials
-- [Flask REST API Tutorial](https://flask.palletsprojects.com/)
-- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
-- [JWT Authentication Guide](https://jwt.io/introduction)
-
----
-
-✅ **Result:**  
-LACO AI is a **hybrid SOA system** combining modern web technologies with powerful AI capabilities to revolutionize document interaction for educational and business purposes — with a strict Public/Sensitive PDF boundary keeping institutional data out of public-facing surfaces.
-
-- *Frontend* acts as the **service consumer**
-- *Next.js API routes* as the **middleware layer**
-- *Python Flask* as the **AI service provider**
-- *Supabase* as the **data and storage layer**
-
----
-
-## 🔒 Security & Privacy
-
-### Data Protection
-- **Public vs Sensitive PDF Separation**: Sensitive PDFs (academic records, grades) are stored and served separately from Public PDFs; the chatbot widget and Business accounts can only ever reach Public PDF data
-- **Persistent Storage**: PDFs stored in Supabase until you manually delete them
-- **Right-Click Delete**: Easy PDF removal via context menu
-- **Profile Pictures**: Securely stored, automatically replaced when updated
-- **Encrypted Passwords**: Industry-standard bcrypt hashing
-- **JWT Authentication**: HTTP-only cookies for secure token storage
-- **API Key Protection**: All endpoints require authentication and rate limiting
-- **CSRF Protection**: Origin header validation on all requests
-- **No External Data Sharing**: Your documents processed by OpenAI per their privacy policy
-- **Rate Limiting**: Cooldown mechanism prevents spam (1 req/sec per IP)
-
-### Compliance
-- Apache License 2.0
-- Educational use only
-- No illegal activities supported
-- GDPR-conscious design (no unnecessary data retention)
-- See the [Privacy Policy](https://lccb-ai-2.vercel.app/privacy) for the full Public/Sensitive PDF data-handling terms
-
----
-
-## 🎓 Educational Purpose
-
-This project is developed strictly for:
-- ✅ Educational research and learning
-- ✅ Academic experimentation
-- ✅ Technology demonstration
-- ✅ Open-source contribution
-
-**Not intended for:**
-- ❌ Commercial use
-- ❌ Production deployment
-- ❌ Processing sensitive/confidential data through Public PDFs
-- ❌ Any illegal activities
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Node.js 18+ and pnpm
-- Python 3.11+ (3.13 recommended)
-- Ubuntu/Linux environment (WSL supported)
-- OpenAI API key
-- Supabase account with database and storage setup
-
-### Environment Variables
-Create a `.env.local` file in the project root:
-
-```env
-# OpenAI
-OPENAI_API_KEY=your_openai_api_key
-
-# API Security
-API_KEY=your_secure_api_key
-JWT_SECRET=your_jwt_secret_key
-APP_URL=http://localhost:3000
-
-# Supabase
-SUPABASE_URL=your_supabase_url
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-
-# Database
-POSTGRES_URL=your_postgres_connection_string
-
-# Optional
-RENDER_API=your_render_api_url
-PORT=10000
-```
-
-**Disclaimer:** This project does **not** collect any user data for external purposes. All data is processed securely and stored temporarily.
-
----
-
-## 📊 Project Diagrams
-
-### Data Flow Diagram (DFD)
-
-The Data Flow Diagram illustrates how data moves through the LACO AI system, from user input to AI-generated output.
-
-![Data Flow Diagram](./public/DFD.png)
-
-**Key Data Flows:**
-- Admin uploads PDF and classifies it as Public or Sensitive → routed to the matching Supabase Storage bucket (persistent until manual deletion)
-- PDF retrieval → Python Flask API
-- PDF text extraction → OpenAI API
-- AI response generation (scoped to Public data for widget/Business, Public + Sensitive for verified LCCB roles) → User interface
-- Activity logging → Supabase Database
-- Profile picture upload → Supabase public bucket
-- Rate limiting → In-memory cooldown tracking
-
----
-
-### Context Free Diagram (CFD)
-
-The Context Diagram shows the system boundaries and external entities that interact with LACO AI.
-
-![Data Flow Diagram](./public/CFD.png)
-
----
-
-**External Entities:**
-- **Users**: Students, Teachers, Administrators (LCCB, Sensitive + Public PDF access)
-- **Business Accounts / Widget Visitors**: Public PDF access only
-
----
-
-
-## Directory Tree
-
-```bash
-src
-├── app
-│   ├── favicon.ico
-│   ├── globals.css
-│   ├── layout.tsx
-│   ├── manifest.ts
-│   ├── not-found.module.css
-│   ├── not-found.tsx
-│   ├── (pages)
-│   │   ├── admin
-│   │   │   ├── chatbot
-│   │   │   │   └── page.tsx
-│   │   │   ├── dashboard
-│   │   │   │   └── page.tsx
-│   │   │   ├── manageuser
-│   │   │   │   └── page.tsx
-│   │   │   └── setting
-│   │   │       └── page.tsx
-│   │   ├── auth
-│   │   │   ├── confirm-email-forgot-pwd
-│   │   │   │   └── page.tsx
-│   │   │   ├── confirm-email-signin
-│   │   │   │   └── page.tsx
-│   │   │   ├── confirm-email-signup
-│   │   │   │   └── page.tsx
-│   │   │   ├── create-password
-│   │   │   │   └── page.tsx
-│   │   │   ├── forgot-password
-│   │   │   │   └── page.tsx
-│   │   │   ├── register
-│   │   │   │   └── page.tsx
-│   │   │   ├── signin
-│   │   │   │   └── page.tsx
-│   │   │   └── update-password
-│   │   │       └── page.tsx
-│   │   ├── chat
-│   │   │   └── page.tsx
-│   │   ├── chat_bot
-│   │   │   └── page.tsx
-│   │   ├── privacy
-│   │   │   └── page.tsx
-│   │   └── terms
-│   │       └── page.tsx
-│   ├── page.tsx
-│   ├── services
-│   │   ├── api
-│   │   │   ├── delete_responses
-│   │   │   │   └── route.ts
-│   │   │   ├── response2-stream
-│   │   │   │   └── route.ts
-│   │   │   ├── response3-stream
-│   │   │   │   └── route.ts
-│   │   │   ├── response_image-stream
-│   │   │   │   └── route.ts
-│   │   │   ├── response-stream
-│   │   │   │   └── route.ts
-│   │   │   ├── retrieve_responses
-│   │   │   │   └── route.ts
-│   │   │   ├── save_responses
-│   │   │   │   └── route.ts
-│   │   │   └── tts
-│   │   │       └── route.ts
-│   │   ├── jwt
-│   │   │   ├── auth
-│   │   │   │   └── route.ts
-│   │   │   ├── deauth
-│   │   │   │   └── route.ts
-│   │   │   └── verify
-│   │   │       └── route.ts
-│   │   └── supabase
-│   │       ├── admin
-│   │       │   ├── delete_user
-│   │       │   │   └── route.ts
-│   │       │   ├── get-suspension-state
-│   │       │   │   └── route.ts
-│   │       │   ├── retrieve_user
-│   │       │   │   └── route.ts
-│   │       │   ├── suspension-state
-│   │       │   │   └── route.ts
-│   │       │   ├── system_logs
-│   │       │   │   └── route.ts
-│   │       │   └── update_user_status
-│   │       │       └── route.ts
-│   │       ├── auth
-│   │       │   ├── check_code
-│   │       │   │   └── route.ts
-│   │       │   ├── check_status
-│   │       │   │   └── route.ts
-│   │       │   ├── forgot_password
-│   │       │   │   ├── check_email
-│   │       │   │   │   └── route.ts
-│   │       │   │   └── update_account
-│   │       │   │       └── route.ts
-│   │       │   ├── register
-│   │       │   │   ├── check_email
-│   │       │   │   │   └── route.ts
-│   │       │   │   └── create_account
-│   │       │   │       └── route.ts
-│   │       │   ├── signin
-│   │       │   │   └── route.ts
-│   │       │   └── update
-│   │       │       └── route.ts
-│   │       ├── health
-│   │       │   └── route.ts
-│   │       └── storage
-│   │           ├── deletepdf
-│   │           │   └── route.ts
-│   │           ├── deletepdf_chatbot
-│   │           │   └── route.ts
-│   │           ├── downloadpdf_chatbot
-│   │           │   └── route.ts
-│   │           ├── fetchimg
-│   │           │   └── route.ts
-│   │           ├── lbc_image_retieve
-│   │           │   └── route.ts
-│   │           ├── lbc_image_upload
-│   │           │   └── route.ts
-│   │           ├── retrieve
-│   │           │   └── route.ts
-│   │           ├── retrieve_chatbot
-│   │           │   └── route.ts
-│   │           ├── uploadimg
-│   │           │   └── route.ts
-│   │           ├── uploadpdf
-│   │           │   └── route.ts
-│   │           └── uploadpdf_chatbot
-│   │               └── route.ts
-│   └── under-develop.tsx
-├── components
-│   ├── admin
-│   │   ├── chat_bot
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── dashboard
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── index.ts
-│   │   ├── manage_user
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── setting
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   └── sidebar
-│   │       ├── css
-│   │       │   └── styles.module.css
-│   │       └── index.tsx
-│   ├── auth
-│   │   ├── confirm_email_forgot_pwd
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── confirm_email_register
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── confirm_email_signin
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── create_password
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── forgot_password
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── index.ts
-│   │   ├── register
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── signin
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   └── update_password
-│   │       ├── css
-│   │       │   └── styles.module.css
-│   │       └── index.tsx
-│   ├── chat
-│   │   ├── header
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── index.ts
-│   │   ├── main
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── profile
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   └── sidebars
-│   │       ├── css
-│   │       │   └── styles.module.css
-│   │       └── index.tsx
-│   ├── chat_bot
-│   │   ├── index.ts
-│   │   └── main
-│   │       ├── css
-│   │       │   └── styles.module.css
-│   │       └── index.tsx
-│   ├── disclaimer
-│   │   ├── index.ts
-│   │   ├── privacy
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   └── terms
-│   │       ├── css
-│   │       │   └── styles.module.css
-│   │       └── index.tsx
-│   ├── landpage
-│   │   ├── banner
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── chat_bot
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── content_1
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── content_2
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── content_3
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── content_4
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── footer
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   ├── header
-│   │   │   ├── css
-│   │   │   │   └── styles.module.css
-│   │   │   └── index.tsx
-│   │   └── index.ts
-│   └── pwa_register
-│       └── index.ts
-├── config
-│   ├── conf
-│   │   ├── css_config
-│   │   │   ├── animations.css
-│   │   │   ├── background_colors.css
-│   │   │   ├── config.css
-│   │   │   └── status.css
-│   │   └── json_config
-│   │       ├── Api_links.json
-│   │       ├── fetch_url.json
-│   │       └── Metadata.json
-│   └── images_links
-│       └── assets.json
-├── global.d.ts
-├── lib
-│   ├── code_store.ts
-│   ├── rate_limit.ts
-│   ├── security.ts
-│   └── supabase-server.ts
-├── modules
-│   ├── chat
-│   │   ├── handle_submit.ts
-│   │   ├── startRecording.ts
-│   │   ├── StreamVoiceToText.ts
-│   │   └── voice_tts.ts
-│   ├── formula
-│   │   ├── Use_scroll_deg.ts
-│   │   └── Use_scroll.ts
-│   └── index.ts
-├── sources
-│   └── suggestion.json
-└── utilities
-    ├── Confirm_Exit.ts
-    ├── CopyToClipboard.ts
-    ├── DownloadAsPDF.ts
-    ├── Fetch_toFile.ts
-    ├── Fetch_to.ts
-    ├── index.ts
-    ├── InView.ts
-    ├── Meta_data.ts
-    ├── Popup_info
-    │   ├── css
-    │   │   └── styles.module.css
-    │   └── index.tsx
-    ├── Prevent_Exit.ts
-    ├── Progress.ts
-    ├── React_Spinners.tsx
-    ├── SweetAlert2.ts
-    └── useSpeechToText.ts
-```
+- [Repository](https://github.com/cordyStackX/lccb_ai_2)
+- [Releases](https://github.com/cordyStackX/lccb_ai_2/releases)
+- [Issues](https://github.com/cordyStackX/lccb_ai_2/issues)
+- [Development preview](https://lccb-ai-2-git-developingarea-cordystackg.vercel.app/)

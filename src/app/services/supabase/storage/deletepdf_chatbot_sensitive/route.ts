@@ -6,10 +6,17 @@ export async function POST(req: NextRequest) {
 
     const auth = await Security(req);
     if(auth?.error) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    if (auth.role?.toLowerCase() !== "admin") return NextResponse.json({ success: false, error: "Only administrators can delete sensitive documents" }, { status: 403 });
     
     const { id, filePath } = await req.json();
 
     if (!id || !filePath) return NextResponse.json({ success: false, error: "File Not Found" }, { status: 409 });
+
+    const { data: document, error: lookupError } = await supabaseServer.from("chatbot_pdf_file_private")
+        .select("id, file, email").eq("id", id).maybeSingle();
+    if (lookupError || !document || document.file !== filePath || document.email?.toLowerCase() !== auth.email?.toLowerCase()) {
+        return NextResponse.json({ success: false, error: "Sensitive document not found" }, { status: 404 });
+    }
 
     const { data: storage, error: setError } = await supabaseServer.storage
     .from("chatbot_pdfs")

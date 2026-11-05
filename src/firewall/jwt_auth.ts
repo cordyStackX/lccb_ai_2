@@ -2,7 +2,7 @@
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { supabaseServer } from "@/lib/supabase-server";
-import { decryptText } from "@/firewall/encryptions";
+import { decryptStudentId } from "@/firewall/encryptions";
 
 export async function auth_jwt(email: string) {
     const { data, error } = await supabaseServer
@@ -45,14 +45,14 @@ export async function auth_jwt(email: string) {
         }
 
         const { school_id, ...rest } = data_student[0];
-        const de_hashed = decryptText(school_id, process.env.API_KEY || "");
+        const de_hashed = decryptStudentId(school_id, process.env.API_KEY || "");
         roleData = { ...rest, school_id: de_hashed };
     }
 
     if (user.role === "Business") {
         const { data: data_business, error: err_business } = await supabaseServer
             .from("auth_business")
-            .select("current_plan, current_limit, current_pdf_limit, current_pdf_limit_per_mb, institutions, business_name")
+            .select("current_plan, current_limit, current_page_limit, institutions, business_name, created_at, plan_started_at, plan_expires_at")
             .eq("email", email)
             .limit(1);
 

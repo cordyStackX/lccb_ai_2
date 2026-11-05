@@ -8,6 +8,9 @@ from utils import (
     generate_voice_md, generate_voice_md_stream, generate_voice_md_stream_pdf,
     convert_link_chatbot, convert_link_to_pdf_chatbot, generate_link_chatbot,
     generate_pdf_cache,
+    count_pdf_pages,
+    generate_pdf_qa,
+    extract_sensitive_records,
     dashboard_analysis,
 )
 
@@ -92,6 +95,21 @@ def generate_link_chatbot_route():
 @app.route("/generate-pdf-cache", methods=["POST"])
 def generate_pdf_cache_route():
     return generate_pdf_cache()
+
+
+@app.route("/generate-pdf-qa", methods=["POST"])
+def generate_pdf_qa_route():
+    return generate_pdf_qa()
+
+
+@app.route("/extract-sensitive-records", methods=["POST"])
+def extract_sensitive_records_route():
+    return extract_sensitive_records()
+
+
+@app.route("/count-pdf-pages", methods=["POST"])
+def count_pdf_pages_route():
+    return count_pdf_pages()
 
 
 @app.route("/dashboard-analysis", methods=["POST"])

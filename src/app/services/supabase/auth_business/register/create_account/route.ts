@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
 
             const { error } =  await supabaseServer
             .from("auth_business")
-            .insert([{ current_plan: "Free Trial", current_limit: "10000", current_pdf_limit: "2", current_pdf_limit_per_mb: "10", email: cleanEmail, institutions: institutions, business_name: business_name }]);
+            .insert([{ current_plan: "Free Trial", current_limit: 10000, current_page_limit: 50, email: cleanEmail, institutions: institutions, business_name: business_name }]);
 
             await supabaseServer.from("setting").insert([{ state: "open", target: "suspend", email: cleanEmail }]);
 

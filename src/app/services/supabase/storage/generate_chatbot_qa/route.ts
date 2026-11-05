@@ -3,18 +3,7 @@ import { supabaseServer } from "@/lib/supabase-server";
 import { Security } from "@/firewall/security";
 import { Fetch_to } from "@/utilities";
 import apiLinks from "@/config/conf/json_config/Api_links.json";
-
-function parseQuestions(markdown: unknown): string[] | null {
-    if (typeof markdown !== "string") return null;
-    try {
-        const questions: unknown = JSON.parse(markdown.trim().replace(/^```json\s*/i, "").replace(/```$/i, ""));
-        if (!Array.isArray(questions) || questions.length === 0 || questions.length > 8) return null;
-        const clean = questions.map((question) => typeof question === "string" ? question.trim() : "");
-        return clean.every((question) => question.length > 0 && question.endsWith("?")) ? clean : null;
-    } catch {
-        return null;
-    }
-}
+import { isBusinessPlanExpired } from "@/lib/business_plan_usage";
 
 export async function POST(req: NextRequest) {
     try {
@@ -27,8 +16,18 @@ export async function POST(req: NextRequest) {
         if (!Number.isInteger(documentId) || !cleanEmail || (action !== "questions" && action !== "answer")) {
             return NextResponse.json({ success: false, error: "Invalid generation request" }, { status: 400 });
         }
+        if (auth.email?.trim().toLowerCase() !== cleanEmail) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 403 });
         if (action === "answer" && (!question || typeof question !== "string")) {
             return NextResponse.json({ success: false, error: "A question is required" }, { status: 400 });
+        }
+
+        if (auth.role?.toLowerCase() !== "admin") {
+            const { data: plan, error: planError } = await supabaseServer.from("auth_business")
+                .select("current_plan, created_at, plan_expires_at").eq("email", cleanEmail).maybeSingle();
+            if (planError || !plan) return NextResponse.json({ success: false, error: "Failed to fetch account plan" }, { status: 500 });
+            if (isBusinessPlanExpired(plan.current_plan, plan.created_at, plan.plan_expires_at)) {
+                return NextResponse.json({ success: false, error: "Your plan has expired. Please renew or upgrade to continue." }, { status: 403 });
+            }
         }
 
         const { data: document, error: documentError } = await supabaseServer
@@ -55,11 +54,21 @@ export async function POST(req: NextRequest) {
         });
         if (!cache.success) return NextResponse.json({ success: false, error: cache.message || "Could not prepare the PDF page cache" }, { status: 422 });
 
-        const prompt = action === "questions"
-            ? `Read this PDF and generate questions a user might realistically ask about it.
-Rules: generate one question per distinct topic, up to 8; do not include answers, numbering, duplicates, or markdown; every question must end in a question mark.
-Respond ONLY with a raw JSON array of strings.`
-            : `Answer this question using only the PDF: ${question.trim()}
+        if (action === "questions") {
+            const generatedQa = await Fetch_to(`${apiUrl}generate-pdf-qa`, {
+                token,
+                email: cleanEmail,
+                filePath: document.file,
+                table: "chatbot_pdf_file",
+            });
+            const items = generatedQa.data?.questions_and_answers;
+            if (!generatedQa.success || !Array.isArray(items) || items.length === 0) {
+                return NextResponse.json({ success: false, error: generatedQa.message || "Failed to generate questions from the document content" }, { status: 422 });
+            }
+            return NextResponse.json({ success: true, questions: items });
+        }
+
+        const prompt = `Answer this question using only the PDF: ${question.trim()}
 Give a complete, factual answer. Respond ONLY with the answer text; do not include the question, a preamble, or markdown.`;
         const generated = await Fetch_to(`${apiUrl}generate_md_summary`, {
             token,
@@ -72,11 +81,6 @@ Give a complete, factual answer. Respond ONLY with the answer text; do not inclu
             return NextResponse.json({ success: false, error: generated.message || "Generation failed" }, { status: 502 });
         }
 
-        if (action === "questions") {
-            const questions = parseQuestions(generated.data.markdown);
-            if (!questions) return NextResponse.json({ success: false, error: "Failed to parse generated questions" }, { status: 502 });
-            return NextResponse.json({ success: true, questions });
-        }
         return NextResponse.json({ success: true, answer: generated.data.markdown.trim() });
     } catch (error) {
         console.error("generate_chatbot_qa POST Error:", error);

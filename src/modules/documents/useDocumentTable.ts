@@ -21,7 +21,7 @@ interface NotifyHandlers {
     onSuccess?: (message: string) => void;
     onError?: (message: string) => void;
     onUploadStart?: (files: File[]) => void;
-    onUploadSuccess?: () => void;
+    onUploadSuccess?: (message?: string) => void;
     onUploadError?: (message: string) => void;
 }
 
@@ -87,7 +87,7 @@ export function useDocumentTable(
         const response = await Fetch_toFile(endpoints.upload, files, { email });
 
         if (response.success) {
-            notify?.onUploadSuccess?.();
+            notify?.onUploadSuccess?.(response.data?.message || "Upload complete.");
             const uploaded = response.data?.uploaded;
             if (Array.isArray(uploaded)) {
                 const firstSuccessful = uploaded.find((item: unknown) => {

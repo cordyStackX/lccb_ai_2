@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import api_links from "@/config/conf/json_config/Api_links.json";
 import { supabaseServer } from "@/lib/supabase-server";
+import { isBusinessPlanExpired } from "@/lib/business_plan_usage";
 
 export async function POST(req: NextRequest) {
     try {
@@ -30,7 +31,7 @@ export async function POST(req: NextRequest) {
 
     const { data: planRow, error: planError } = await supabaseServer
         .from("auth_business")
-        .select("current_plan, current_limit")
+        .select("current_plan, current_limit, created_at, plan_expires_at")
         .eq("email", cleanEmail)
         .maybeSingle();
 
@@ -39,31 +40,17 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, error: "Failed to fetch account plan" }, { status: 500 });
     }
 
-    const { current_plan, current_limit } = planRow;
+    const { current_plan, current_limit, created_at } = planRow;
 
-    if (["Free Trial", "Pro", "Enterprise"].includes(current_plan)) {
-        const now = new Date();
-        let usagePeriodStart: string;
+    if (isBusinessPlanExpired(current_plan, created_at, planRow.plan_expires_at)) {
+        return NextResponse.json({ success: false, error: "Your plan has expired. Please renew or upgrade to continue." }, { status: 403 });
+    }
 
-        if (current_plan === "Pro") {
-            // Pro API allowance resets at the start of each calendar month.
-            usagePeriodStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
-        } else if (current_plan === "Enterprise") {
-            // Enterprise API allowance resets at the start of each calendar year.
-            usagePeriodStart = new Date(Date.UTC(now.getUTCFullYear(), 0, 1)).toISOString();
-        } else {
-            // The Free Trial allowance starts when the business account was created.
-            const { data: trial, error: trialError } = await supabaseServer
-                .from("auth_business")
-                .select("created_at")
-                .eq("email", cleanEmail)
-                .maybeSingle();
-
-            if (trialError || !trial?.created_at) {
-                return NextResponse.json({ success: false, error: "Failed to fetch account plan" }, { status: 500 });
-            }
-            usagePeriodStart = new Date(trial.created_at).toISOString();
-        }
+    if (current_plan === "Free Trial" && current_limit !== null) {
+        const trialExpiry = new Date(created_at);
+        trialExpiry.setMonth(trialExpiry.getMonth() + 1);
+        if (new Date() >= trialExpiry) return NextResponse.json({ success: false, error: "Your free trial has ended. Please upgrade your plan." }, { status: 403 });
+        const usagePeriodStart = new Date(created_at).toISOString();
 
         const { data: logRows, error: logError } = await supabaseServer
             .from("system_logs")

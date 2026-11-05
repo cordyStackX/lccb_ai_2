@@ -1,6 +1,6 @@
 "use client";
 import styles from "./css/styles.module.css";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import { Fetch_to, Popup_info, SweetAlert2 } from "@/utilities";
 import Markdown from "react-markdown";
@@ -80,7 +80,7 @@ interface DocumentTableSectionProps {
 }
 
 type JourneyStep = { label: string; detail: string; state: "waiting" | "active" | "complete" | "error" };
-type Journey = { title: string; source: string; steps: JourneyStep[]; isFinished: boolean };
+type Journey = { title: string; source: string; steps: JourneyStep[]; isFinished: boolean; startedAt: string; sensitive?: boolean; result?: string };
 
 function ProcessingJourney({ journey, onDismiss }: { journey: Journey; onDismiss: () => void }) {
     const activeStep = journey.steps.find((step) => step.state === "active" || step.state === "error");
@@ -93,7 +93,7 @@ function ProcessingJourney({ journey, onDismiss }: { journey: Journey; onDismiss
                 </div>
                 {journey.isFinished && <button className={styles.journeyClose} onClick={onDismiss} aria-label="Dismiss progress notification">&times;</button>}
             </div>
-            <p className={styles.journeyStatus}>{activeStep ? activeStep.detail : "Everything is ready."}</p>
+            <p className={`${styles.journeyStatus} ${journey.result?.includes("Skipped ") ? styles.journeyResultWarning : ""}`}>{activeStep ? activeStep.detail : journey.result || "Everything is ready."}</p>
             <ol className={styles.journeySteps}>
                 {journey.steps.map((step, index) => (
                     <li key={step.label} className={styles[`journey${step.state[0].toUpperCase()}${step.state.slice(1)}`]}>
@@ -106,7 +106,148 @@ function ProcessingJourney({ journey, onDismiss }: { journey: Journey; onDismiss
     );
 }
 
-type QuestionAnswer = { question: string; answer: string };
+type QuestionAnswer = { question: string; answer: string; page?: number };
+
+type StudentShelfEntry = {
+    email: string;
+    school_id: string | null;
+    name: string;
+    record_count: number;
+    document_count: number;
+    latest_at: string;
+};
+
+type StudentRecordSource = {
+    id: number;
+    created_at: string;
+    source_file_name: string;
+    page_numbers: number[];
+    record_count: number;
+    records: Array<{ page: number; student_name: string | null; data: Record<string, unknown> }>;
+};
+
+function formatRecordLabel(label: string) {
+    return label.replaceAll("_", " ").replace(/\b\w/g, (character) => character.toUpperCase());
+}
+
+function RecordValue({ value }: { value: unknown }) {
+    if (value === null || value === undefined || value === "") return <span>—</span>;
+    if (Array.isArray(value)) {
+        if (value.every((item) => item === null || ["string", "number", "boolean"].includes(typeof item))) {
+            return <ul className={styles.recordValueList}>{value.map((item, index) => <li key={index}>{item === null ? "—" : String(item)}</li>)}</ul>;
+        }
+        return (
+            <div className={styles.recordValueCards}>
+                {value.map((item, index) => (
+                    <div className={styles.recordValueCard} key={index}>
+                        {item && typeof item === "object" && !Array.isArray(item) ? (
+                            <dl className={styles.recordValueDetails}>
+                                {Object.entries(item as Record<string, unknown>).map(([label, nestedValue]) => (
+                                    <div key={label}><dt>{formatRecordLabel(label)}</dt><dd><RecordValue value={nestedValue} /></dd></div>
+                                ))}
+                            </dl>
+                        ) : <RecordValue value={item} />}
+                    </div>
+                ))}
+            </div>
+        );
+    }
+    if (typeof value === "object") {
+        return (
+            <dl className={styles.recordValueDetails}>
+                {Object.entries(value as Record<string, unknown>).map(([label, nestedValue]) => (
+                    <div key={label}><dt>{formatRecordLabel(label)}</dt><dd><RecordValue value={nestedValue} /></dd></div>
+                ))}
+            </dl>
+        );
+    }
+    return <span>{String(value)}</span>;
+}
+
+function StudentRecordsBookshelf({ email }: { email: string }) {
+    const [students, setStudents] = useState<StudentShelfEntry[]>([]);
+    const [search, setSearch] = useState("");
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState("");
+    const [selectedStudent, setSelectedStudent] = useState<StudentShelfEntry | null>(null);
+    const [studentRecords, setStudentRecords] = useState<StudentRecordSource[]>([]);
+    const [isLoadingRecords, setIsLoadingRecords] = useState(false);
+
+    const refreshStudents = useCallback(async () => {
+        setIsLoading(true);
+        setError("");
+        const response = await Fetch_to(api_link.storage.student_records, { email });
+        if (response.success && Array.isArray(response.data?.students)) setStudents(response.data.students);
+        else setError(response.message || "Could not load the student records shelf.");
+        setIsLoading(false);
+    }, [email]);
+
+    useEffect(() => { void refreshStudents(); }, [refreshStudents]);
+    useEffect(() => {
+        const handleRecordsUpdated = () => { void refreshStudents(); };
+        window.addEventListener("student-records-updated", handleRecordsUpdated);
+        return () => window.removeEventListener("student-records-updated", handleRecordsUpdated);
+    }, [refreshStudents]);
+
+    const openStudent = async (student: StudentShelfEntry) => {
+        setSelectedStudent(student);
+        setIsLoadingRecords(true);
+        setError("");
+        const response = await Fetch_to(api_link.storage.student_records, { email, student_email: student.email });
+        if (response.success && Array.isArray(response.data?.records)) setStudentRecords(response.data.records);
+        else setError(response.message || "Could not load this student's records.");
+        setIsLoadingRecords(false);
+    };
+
+    const filteredStudents = students.filter((student) => `${student.name} ${student.school_id ?? ""} ${student.email}`.toLowerCase().includes(search.trim().toLowerCase()));
+
+    return (
+        <section className={styles.studentShelf}>
+            <div className={styles.shelfHeader}>
+                <div><span className={styles.shelfEyebrow}>SENSITIVE RECORDS</span><h2>Student bookshelf</h2><p>Academic records are grouped by verified student ID.</p></div>
+                <button className={styles.shelfRefresh} onClick={() => void refreshStudents()} disabled={isLoading}>Refresh</button>
+            </div>
+            <input className={styles.shelfSearch} value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by student name, ID, or email" />
+            {error && <p className={styles.shelfError} role="alert">{error}</p>}
+            {isLoading ? <p className={styles.shelfEmpty}>Loading student records…</p> : filteredStudents.length ? (
+                <div className={styles.studentBooks}>
+                    {filteredStudents.map((student) => (
+                        <button className={styles.studentBook} key={student.email} onClick={() => void openStudent(student)}>
+                            <span className={styles.bookIcon} aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 0 4 22V5.5Z" stroke="currentColor" strokeWidth="1.8"/><path d="M4 6h13M8 9h8M8 12h8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg></span>
+                            <strong>{student.name}</strong>
+                            <span className={styles.studentBookId}>{student.school_id || "Student ID unavailable"}</span>
+                            <span className={styles.studentBookMeta}>{student.record_count} record{student.record_count === 1 ? "" : "s"} · {student.document_count} document{student.document_count === 1 ? "" : "s"}</span>
+                        </button>
+                    ))}
+                </div>
+            ) : <p className={styles.shelfEmpty}>No matched student records yet. Records without a registered Student ID are skipped.</p>}
+
+            {selectedStudent && (
+                <div className={styles.modalOverlay} onClick={() => { setSelectedStudent(null); setStudentRecords([]); }}>
+                    <section className={styles.studentRecordModal} role="dialog" aria-modal="true" aria-labelledby="student-record-title" onClick={(event) => event.stopPropagation()}>
+                        <header className={styles.studentRecordHeader}>
+                            <div><span className={styles.shelfEyebrow}>STUDENT RECORDS</span><h2 id="student-record-title">{selectedStudent.name}</h2><p>{selectedStudent.school_id || selectedStudent.email}</p></div>
+                            <button className={styles.modalClose} onClick={() => { setSelectedStudent(null); setStudentRecords([]); }} aria-label="Close student records">&times;</button>
+                        </header>
+                        <div className={styles.studentRecordBody}>
+                            {isLoadingRecords ? <p className={styles.shelfEmpty}>Decrypting records…</p> : studentRecords.length ? studentRecords.map((source) => (
+                                <article className={styles.recordSource} key={source.id}>
+                                    <div className={styles.recordSourceHeader}><div><strong>{source.source_file_name}</strong><span>Pages {source.page_numbers.join(", ") || "—"} · {source.record_count} entries</span></div><time>{new Date(source.created_at).toLocaleDateString()}</time></div>
+                                    {source.records.map((record, index) => (
+                                        <div className={styles.extractedRecord} key={`${source.id}-${index}`}>
+                                            <span className={styles.recordPage}>Page {record.page}{record.student_name ? ` · ${record.student_name}` : ""}</span>
+                                            <dl className={styles.extractedRecordDetails}>{Object.entries(record.data).map(([label, value]) => <div key={label}><dt>{formatRecordLabel(label)}</dt><dd><RecordValue value={value} /></dd></div>)}</dl>
+                                        </div>
+                                    ))}
+                                </article>
+                            )) : <p className={styles.shelfEmpty}>No stored records for this student.</p>}
+                        </div>
+                    </section>
+                </div>
+            )}
+        </section>
+    );
+}
 
 function parseQuestionAnswers(summary?: string): QuestionAnswer[] {
     if (!summary) return [];
@@ -115,7 +256,7 @@ function parseQuestionAnswers(summary?: string): QuestionAnswer[] {
         if (!Array.isArray(parsed)) return [];
         return parsed
             .filter((item): item is QuestionAnswer => Boolean(item) && typeof item.question === "string" && typeof item.answer === "string")
-            .map(({ question, answer }) => ({ question, answer }));
+            .map(({ question, answer, page }) => ({ question, answer, ...(Number.isInteger(page) ? { page } : {}) }));
     } catch {
         return [];
     }
@@ -126,7 +267,7 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
         fileRef, data, search, setSearch, page, setPage, totalPages,
         isLoading, refresh, setRefresh, triggerUpload, handleFile, handleFiles,
         downloadFile, deleteFile, deleteSelected,
-        selectedIds, toggleSelect, toggleSelectAll, lastUploadedDoc,
+        selectedIds, toggleSelect, toggleSelectAll,
     } = table;
 
     const [viewingDoc, setViewingDoc] = useState<DocFile | null>(null);
@@ -140,15 +281,38 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
     const [isDragging, setIsDragging] = useState(false);
     const [webLink, setWebLink] = useState("");
     const [isUploadingLink, setIsUploadingLink] = useState(false);
+    const [isRechecking, setIsRechecking] = useState(false);
+
+    const recheckSensitivePdfs = async () => {
+        if (!sensitive || isRechecking) return;
+        setIsRechecking(true);
+        try {
+            const response = await Fetch_to(api_link.storage.recheck_sensitive_records, { email });
+            if (!response.success) {
+                await SweetAlert2("Could not recheck PDFs", response.message || "Please try again.", "error", true, "OK", false, "");
+                return;
+            }
+            setRefresh(true);
+            window.dispatchEvent(new Event("student-records-updated"));
+            const failed = Array.isArray(response.data?.outcomes)
+                ? response.data.outcomes.filter((item: { success?: boolean }) => !item.success).length
+                : 0;
+            const details = Array.isArray(response.data?.outcomes)
+                ? response.data.outcomes.filter((item: { message?: string }) => item.message).map((item: { file_name?: string; message?: string }) => `${item.file_name || "PDF"}: ${item.message}`).join(" ")
+                : "";
+            const message = `${response.data?.message || response.message || "PDFs rechecked."}${failed ? ` ${failed} PDF(s) could not be rechecked.` : ""}${details ? ` ${details}` : ""}`;
+            await SweetAlert2("PDF recheck complete", message, failed ? "warning" : "success", true, "OK", false, "");
+        } catch {
+            await SweetAlert2("Could not recheck PDFs", "Please try again.", "error", true, "OK", false, "");
+        } finally {
+            setIsRechecking(false);
+        }
+    };
 
     const openReview = (doc: DocFile) => {
         setViewingDoc(doc);
         setQuestionsAndAnswers(parseQuestionAnswers(doc.summary));
     };
-
-    useEffect(() => {
-        if (lastUploadedDoc) openReview(lastUploadedDoc);
-    }, [lastUploadedDoc]);
 
     const closeReview = () => {
         if (isSaving) return;
@@ -190,10 +354,16 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
             await SweetAlert2("Unable to generate questions", response.message || "Please try again.", "error", true, "OK", false, "");
             return;
         }
-        setQuestionsAndAnswers(response.data.questions.map((question: unknown) => ({
-            question: typeof question === "string" ? question : "",
-            answer: "",
-        })));
+        setQuestionsAndAnswers(response.data.questions.map((item: unknown) => {
+            if (typeof item === "string") return { question: item, answer: "" };
+            if (!item || typeof item !== "object") return { question: "", answer: "" };
+            const generated = item as { question?: unknown; answer?: unknown; page?: unknown };
+            return {
+                question: typeof generated.question === "string" ? generated.question : "",
+                answer: typeof generated.answer === "string" ? generated.answer : "",
+                ...(Number.isInteger(generated.page) ? { page: generated.page as number } : {}),
+            };
+        }));
     };
 
     const generateAnswer = async (index: number) => {
@@ -229,7 +399,6 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
         setWebLink("");
         setIsLinkDialogOpen(false);
         setRefresh(true);
-        openReview(response.data.link as DocFile);
     };
 
     const visibleIds = data.map((doc) => doc.id).filter((id): id is number => id !== undefined);
@@ -275,6 +444,9 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
                             <DeleteIcon /> Delete {selectedCount} selected
                         </button>
                     )}
+                    {sensitive && <button className={styles.button_upload} onClick={recheckSensitivePdfs} disabled={isRechecking}>
+                        {isRechecking ? "Checking PDFs…" : "Check all PDFs"}
+                    </button>}
                     <button className={`${styles.button_upload} ${styles.addDocumentButton}`} onClick={() => setIsAddDialogOpen(true)}>
                         <span aria-hidden="true">＋</span> Add document
                     </button>
@@ -345,9 +517,9 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
                                     </td>
                                     <td className={styles.file_name}>{doc.file_name}</td>
                                     <td>
-                                        <button className={styles.button_view} title="Review questions and answers" onClick={() => openReview(doc)}>
+                                        {!sensitive && <button className={styles.button_view} title="Review questions and answers" onClick={() => openReview(doc)}>
                                             <ViewIcon />
-                                        </button>
+                                        </button>}
                                         <button className={styles.button_delete} title="Delete PDF" onClick={() => handleDeleteFile(doc)}>
                                             <DeleteIcon />
                                         </button>
@@ -387,7 +559,13 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
                 <div className={`${styles.modalOverlay} ${questionsAndAnswers.length > 0 ? styles.reviewOverlay : ""}`} onClick={closeReview}>
                     <div className={`${styles.modalCard} ${questionsAndAnswers.length > 0 ? styles.reviewCard : ""}`} onClick={(e) => e.stopPropagation()}>
                         <div className={styles.modalHeader}>
-                            <h3>{viewingDoc.file_name}</h3>
+                            <div className={styles.reviewHeading}>
+                                <span className={styles.reviewFileBadge}>PDF</span>
+                                <span className={styles.reviewTitleText}>
+                                    <span className={styles.reviewEyebrow}>DOCUMENT REVIEW</span>
+                                    <h3>{viewingDoc.file_name}</h3>
+                                </span>
+                            </div>
                             <button className={styles.modalClose} onClick={closeReview}>
                                 &times;
                             </button>
@@ -398,7 +576,7 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
                                     <p className={styles.qaHelp}>Review the generated content before making it available to your chatbot.</p>
                                     {questionsAndAnswers.map((item, index) => (
                                         <div className={styles.qaRow} key={index}>
-                                            <label>Question {index + 1}</label>
+                                            <label>Question {index + 1}{item.page ? ` · Page ${item.page}` : ""}</label>
                                             <input value={item.question} onChange={(event) => updateQuestionAnswer(index, "question", event.target.value)} />
                                             <span className={styles.answerLabel}><label>Answer</label><button className={styles.magicButton} title="Generate answer" aria-label={`Generate answer for question ${index + 1}`} onClick={() => generateAnswer(index)} disabled={isSaving || isGeneratingQuestions || generatingAnswerIndex !== null || !item.question.trim()}>{generatingAnswerIndex === index ? "..." : <MagicIcon />}</button></span>
                                             <textarea value={item.answer} onChange={(event) => updateQuestionAnswer(index, "answer", event.target.value)} rows={5} />
@@ -406,7 +584,7 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
                                         </div>
                                     ))}
                                     <div className={styles.qaActions}>
-                                        <button className={styles.addQuestion} onClick={() => setQuestionsAndAnswers((current) => [...current, { question: "", answer: "" }])} disabled={isSaving || isGeneratingQuestions || questionsAndAnswers.length >= 8}>Add question</button>
+                                        <button className={styles.addQuestion} onClick={() => setQuestionsAndAnswers((current) => [...current, { question: "", answer: "" }])} disabled={isSaving || isGeneratingQuestions}>Add question</button>
                                         <button className={styles.generateQuestions} onClick={generateQuestions} disabled={isSaving || isGeneratingQuestions || generatingAnswerIndex !== null}>{isGeneratingQuestions ? "Generating questions..." : "Generate questions"}</button>
                                     </div>
                                 </div>
@@ -488,29 +666,27 @@ type Chat_botProps = {
 }
 
 export default function Chat_bot({ email } : Chat_botProps) {
-
-    // NOTE: api_link.storage.retrieve_sensitive / uploadpdf_sensitive /
-    // downloadpdf_sensitive / deletepdf_sensitive are placeholder keys —
-    // add matching routes to fetch_url.json and a separate backend
-    // route/bucket with restricted RLS before wiring real grade data here.
     const [isLoadState, setIsLoadState] = useState(false);
     const [isLoadStateDone, setIsLoadStateDone] = useState(false);
     const [isLoadError, setIsLoadError] = useState(false);
     const [isLoadStatus, setIsLoadStatus] = useState("");
     const [journey, setJourney] = useState<Journey | null>(null);
 
-    const beginJourney = (source: string, title: string, steps: Omit<JourneyStep, "state">[]) => {
+    const beginJourney = (source: string, title: string, steps: Omit<JourneyStep, "state">[], sensitive = false) => {
         setJourney({
             source,
             title,
             isFinished: false,
+            startedAt: new Date().toISOString(),
+            sensitive,
             steps: steps.map((step, index) => ({ ...step, state: index === 0 ? "active" : "waiting" })),
         });
     };
 
-    const completeJourney = () => setJourney((current) => current && {
+    const completeJourney = (result?: string) => setJourney((current) => current && {
         ...current,
         isFinished: true,
+        result,
         steps: current.steps.map((step) => ({ ...step, state: "complete" })),
     });
 
@@ -524,16 +700,14 @@ export default function Chat_bot({ email } : Chat_botProps) {
         };
     });
 
-    // The upload endpoint runs these server-side operations in order but returns one
-    // response at the end. Advance the visible checkpoint while it is working, and
-    // reserve the final "ready" step for the confirmed response.
+    // Advance the initial upload/read stages; Python reports the page-processing stage below.
     useEffect(() => {
         if (!journey || journey.isFinished) return;
         const timer = window.setInterval(() => {
             setJourney((current) => {
                 if (!current || current.isFinished) return current;
                 const activeIndex = current.steps.findIndex((step) => step.state === "active");
-                if (activeIndex < 0 || activeIndex >= current.steps.length - 2) return current;
+                if (activeIndex < 0 || activeIndex >= 2) return current;
                 return {
                     ...current,
                     steps: current.steps.map((step, index) => (
@@ -546,15 +720,71 @@ export default function Chat_bot({ email } : Chat_botProps) {
         return () => window.clearInterval(timer);
     }, [journey?.isFinished, journey?.source, journey?.title]);
 
+    useEffect(() => {
+        if (!journey || journey.isFinished) return;
+        const pollProgress = async () => {
+            try {
+                const response = await fetch(api_link.storage.processing_status, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, started_at: journey.startedAt, sensitive: journey.sensitive }),
+                });
+                const result = await response.json();
+                const progress = result?.progress?.[0]?.processing_progress;
+                if (!response.ok || !progress) return;
+                if (progress.status === "failed") {
+                    failJourney(progress.message || "PDF processing failed.");
+                    return;
+                }
+
+                const total = Number(progress.total_pages || 0);
+                const currentPage = Number(progress.current_page || 0);
+                const activeIndex = journey.sensitive ? 2 : progress.phase === "generating_qa" ? 3 : 2;
+                const detail = journey.sensitive
+                    ? progress.message || `Matching records on page ${currentPage} of ${total}${progress.file_name ? ` · ${progress.file_name}` : ""}`
+                    : progress.phase === "generating_qa"
+                    ? `Generating questions and answers through page ${currentPage} of ${total}${progress.file_name ? ` · ${progress.file_name}` : ""}`
+                    : progress.message || `Summarizing PDF page ${currentPage} of ${total}${progress.file_name ? ` · ${progress.file_name}` : ""}`;
+                setJourney((current) => current && !current.isFinished ? {
+                    ...current,
+                    steps: current.steps.map((step, index) => ({
+                        ...step,
+                        state: index < activeIndex ? "complete" : index === activeIndex ? "active" : "waiting",
+                        ...(index === activeIndex ? { detail } : {}),
+                    })),
+                } : current);
+            } catch {
+                // The final upload response still reports failures if live progress is unavailable.
+            }
+        };
+        void pollProgress();
+        const timer = window.setInterval(pollProgress, 3000);
+        return () => window.clearInterval(timer);
+    }, [journey?.isFinished, journey?.startedAt, journey?.sensitive, email]);
+
     const startPdfJourney = (files: File[]) => beginJourney(
         "PDF upload",
         files.length === 1 ? files[0].name : `${files.length} PDF files`,
         [
             { label: "Uploading your PDF", detail: "Sending your document securely…" },
             { label: "Reading the document", detail: "Extracting text from your PDF…" },
-            { label: "Creating its AI summary", detail: "Preparing the document for chatbot Q&A…" },
+            { label: "Summarizing every PDF page", detail: "Python is extracting and summarizing each page…" },
+            { label: "Generating questions and answers", detail: "Choosing useful questions based on the information in each page…" },
             { label: "Ready to review", detail: "Your document is ready." },
         ],
+    );
+
+    const startSensitivePdfJourney = (files: File[]) => beginJourney(
+        "Sensitive PDF",
+        files.length === 1 ? files[0].name : `${files.length} PDF files`,
+        [
+            { label: "Uploading the private PDF", detail: "Storing your document securely…" },
+            { label: "Reading the document", detail: "Extracting records page by page…" },
+            { label: "Matching student IDs", detail: "Checking records against registered student IDs…" },
+            { label: "Saving matched records", detail: "Encrypting records into each student’s bookshelf…" },
+            { label: "Ready", detail: "Sensitive document processing is complete." },
+        ],
+        true,
     );
 
     const startLinkJourney = (url: string) => beginJourney(
@@ -563,7 +793,8 @@ export default function Chat_bot({ email } : Chat_botProps) {
         [
             { label: "Opening the web page", detail: "Connecting to the page and finding readable content…" },
             { label: "Turning it into a PDF", detail: "Converting the page into a document…" },
-            { label: "Creating its AI summary", detail: "Preparing the page for chatbot Q&A…" },
+            { label: "Summarizing every PDF page", detail: "Python is extracting and summarizing each page…" },
+            { label: "Generating questions and answers", detail: "Choosing useful questions based on the information in each page…" },
             { label: "Ready to review", detail: "Your web page is ready." },
         ],
     );
@@ -597,7 +828,7 @@ export default function Chat_bot({ email } : Chat_botProps) {
         onSuccess: showSuccess,
         onError: showError,
         onUploadStart: startPdfJourney,
-        onUploadSuccess: completeJourney,
+        onUploadSuccess: (message?: string) => completeJourney(message),
         onUploadError: failJourney,
     };
 
@@ -612,6 +843,14 @@ export default function Chat_bot({ email } : Chat_botProps) {
         notifyHandlers
     );
 
+    const sensitiveNotifyHandlers = {
+        ...notifyHandlers,
+        onUploadStart: startSensitivePdfJourney,
+        onUploadSuccess: (message?: string) => {
+            completeJourney(message);
+            window.dispatchEvent(new Event("student-records-updated"));
+        },
+    };
     const sensitiveDocs = useDocumentTable(
         {
             retrieve: api_link.storage.retrieve_sensitive,
@@ -620,7 +859,7 @@ export default function Chat_bot({ email } : Chat_botProps) {
             delete: api_link.storage.deletepdf_sensitive,
         },
         email,
-        notifyHandlers
+        sensitiveNotifyHandlers
     );
 
     return (
@@ -671,6 +910,7 @@ export default function Chat_bot({ email } : Chat_botProps) {
                     onLinkJourneyError={failJourney}
                 />
             </div>
+            <StudentRecordsBookshelf email={email} />
         </section>
     );
 }

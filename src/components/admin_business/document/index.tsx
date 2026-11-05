@@ -82,7 +82,7 @@ interface DocumentTableSectionProps {
 }
 
 type JourneyStep = { label: string; detail: string; state: "waiting" | "active" | "complete" | "error" };
-type Journey = { title: string; source: string; steps: JourneyStep[]; isFinished: boolean };
+type Journey = { title: string; source: string; steps: JourneyStep[]; isFinished: boolean; startedAt: string };
 
 function ProcessingJourney({ journey, onDismiss }: { journey: Journey; onDismiss: () => void }) {
     const activeStep = journey.steps.find((step) => step.state === "active" || step.state === "error");
@@ -108,7 +108,7 @@ function ProcessingJourney({ journey, onDismiss }: { journey: Journey; onDismiss
     );
 }
 
-type QuestionAnswer = { question: string; answer: string };
+type QuestionAnswer = { question: string; answer: string; page?: number };
 
 function parseQuestionAnswers(summary?: string): QuestionAnswer[] {
     if (!summary) return [];
@@ -116,7 +116,7 @@ function parseQuestionAnswers(summary?: string): QuestionAnswer[] {
         const parsed: unknown = JSON.parse(summary.trim().replace(/^```json\s*/i, "").replace(/```$/i, ""));
         if (!Array.isArray(parsed)) return [];
         return parsed.filter((item): item is QuestionAnswer => Boolean(item) && typeof item.question === "string" && typeof item.answer === "string")
-            .map(({ question, answer }) => ({ question, answer }));
+            .map(({ question, answer, page }) => ({ question, answer, ...(Number.isInteger(page) ? { page } : {}) }));
     } catch {
         return [];
     }
@@ -125,9 +125,9 @@ function parseQuestionAnswers(summary?: string): QuestionAnswer[] {
 function DocumentTableSection({ title, description, sensitive, email, table, onLinkJourneyStart, onLinkJourneySuccess, onLinkJourneyError }: DocumentTableSectionProps) {
     const {
         fileRef, data, search, setSearch, page, setPage, totalPages,
-        isLoading, refresh, setRefresh, triggerUpload, handleFile,
+        isLoading, refresh, setRefresh, triggerUpload, handleFile, handleFiles,
         downloadFile, deleteFile, deleteSelected,
-        selectedIds, toggleSelect, toggleSelectAll, lastUploadedDoc,
+        selectedIds, toggleSelect, toggleSelectAll,
     } = table;
 
     const [viewingDoc, setViewingDoc] = useState<DocFile | null>(null);
@@ -135,6 +135,9 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
     const [isSaving, setIsSaving] = useState(false);
     const [isGeneratingQuestions, setIsGeneratingQuestions] = useState(false);
     const [generatingAnswerIndex, setGeneratingAnswerIndex] = useState<number | null>(null);
+    const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+    const [isPdfDialogOpen, setIsPdfDialogOpen] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
     const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
     const [webLink, setWebLink] = useState("");
     const [isUploadingLink, setIsUploadingLink] = useState(false);
@@ -143,10 +146,6 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
         setViewingDoc(doc);
         setQuestionsAndAnswers(parseQuestionAnswers(doc.summary));
     };
-
-    useEffect(() => {
-        if (lastUploadedDoc) openReview(lastUploadedDoc);
-    }, [lastUploadedDoc]);
 
     const closeReview = () => {
         if (isSaving) return;
@@ -180,7 +179,16 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
             await SweetAlert2("Unable to generate questions", response.message || "Please try again.", "error", true, "OK", false, "");
             return;
         }
-        setQuestionsAndAnswers(response.data.questions.map((question: unknown) => ({ question: typeof question === "string" ? question : "", answer: "" })));
+        setQuestionsAndAnswers(response.data.questions.map((item: unknown) => {
+            if (typeof item === "string") return { question: item, answer: "" };
+            if (!item || typeof item !== "object") return { question: "", answer: "" };
+            const generated = item as { question?: unknown; answer?: unknown; page?: unknown };
+            return {
+                question: typeof generated.question === "string" ? generated.question : "",
+                answer: typeof generated.answer === "string" ? generated.answer : "",
+                ...(Number.isInteger(generated.page) ? { page: generated.page as number } : {}),
+            };
+        }));
     };
 
     const generateAnswer = async (index: number) => {
@@ -211,7 +219,6 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
         setWebLink("");
         setIsLinkDialogOpen(false);
         setRefresh(true);
-        openReview(response.data.link as DocFile);
     };
 
     const visibleIds = data.map((doc) => doc.id).filter((id): id is number => id !== undefined);
@@ -257,10 +264,9 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
                             <DeleteIcon /> Delete {selectedCount} selected
                         </button>
                     )}
-                    <button className={styles.button_upload} onClick={triggerUpload}>
-                        Upload PDF File
+                    <button className={`${styles.button_upload} ${styles.addDocumentButton}`} onClick={() => setIsAddDialogOpen(true)}>
+                        <span aria-hidden="true">＋</span> Add document
                     </button>
-                    {!sensitive && <button className={styles.button_upload} onClick={() => setIsLinkDialogOpen(true)}>Add web link</button>}
                 </span>
             </span>
             {description && <p className={styles.sectionDescription}>{description}</p>}
@@ -290,7 +296,7 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
                 accept="application/pdf"
                 multiple
                 style={{ display: "none" }}
-                onChange={handleFile}
+                onChange={(event) => { handleFile(event); setIsPdfDialogOpen(false); setIsDragging(false); }}
             />
 
             <div className={styles.tableScroll}>
@@ -380,7 +386,7 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
                                     <p className={styles.qaHelp}>Review the generated content before making it available to your chatbot.</p>
                                     {questionsAndAnswers.map((item, index) => (
                                         <div className={styles.qaRow} key={index}>
-                                            <label>Question {index + 1}</label>
+                                            <label>Question {index + 1}{item.page ? ` · Page ${item.page}` : ""}</label>
                                             <input value={item.question} onChange={(event) => updateQuestionAnswer(index, "question", event.target.value)} />
                                             <span className={styles.answerLabel}><label>Answer</label><button className={styles.magicButton} title="Generate answer" aria-label={`Generate answer for question ${index + 1}`} onClick={() => generateAnswer(index)} disabled={isSaving || isGeneratingQuestions || generatingAnswerIndex !== null || !item.question.trim()}>{generatingAnswerIndex === index ? "..." : <MagicIcon />}</button></span>
                                             <textarea value={item.answer} onChange={(event) => updateQuestionAnswer(index, "answer", event.target.value)} rows={5} />
@@ -388,7 +394,7 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
                                         </div>
                                     ))}
                                     <div className={styles.qaActions}>
-                                        <button className={styles.addQuestion} onClick={() => setQuestionsAndAnswers((current) => [...current, { question: "", answer: "" }])} disabled={isSaving || isGeneratingQuestions || questionsAndAnswers.length >= 8}>Add question</button>
+                                        <button className={styles.addQuestion} onClick={() => setQuestionsAndAnswers((current) => [...current, { question: "", answer: "" }])} disabled={isSaving || isGeneratingQuestions}>Add question</button>
                                         <button className={styles.generateQuestions} onClick={generateQuestions} disabled={isSaving || isGeneratingQuestions || generatingAnswerIndex !== null}>{isGeneratingQuestions ? "Generating questions..." : "Generate questions"}</button>
                                     </div>
                                 </div>
@@ -402,6 +408,42 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
                             >
                                 <DownloadIcon /> Download
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isAddDialogOpen && (
+                <div className={styles.modalOverlay} onClick={() => setIsAddDialogOpen(false)}>
+                    <div className={styles.addDialog} role="dialog" aria-modal="true" aria-labelledby="add-document-title" onClick={(event) => event.stopPropagation()}>
+                        <div className={styles.modalHeader}>
+                            <div><span className={styles.dialogEyebrow}>ADD TO YOUR LIBRARY</span><h3 id="add-document-title">Add document</h3></div>
+                            <button className={styles.modalClose} onClick={() => setIsAddDialogOpen(false)} aria-label="Close">&times;</button>
+                        </div>
+                        <p className={styles.addDialogIntro}>Choose how you’d like to add content to {sensitive ? "your sensitive documents" : "your library"}.</p>
+                        <div className={styles.addChoices}>
+                            <button className={styles.addChoice} onClick={() => { setIsAddDialogOpen(false); setIsPdfDialogOpen(true); }}>
+                                <span className={styles.choiceIcon}>PDF</span><span><strong>Upload a PDF</strong><small>Choose a file from your device</small></span><span className={styles.choiceArrow}>›</span>
+                            </button>
+                            {!sensitive && <button className={styles.addChoice} onClick={() => { setIsAddDialogOpen(false); setIsLinkDialogOpen(true); }}>
+                                <span className={`${styles.choiceIcon} ${styles.linkChoiceIcon}`} aria-hidden="true">↗</span><span><strong>Add a web link</strong><small>Turn a public webpage into a document</small></span><span className={styles.choiceArrow}>›</span>
+                            </button>}
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isPdfDialogOpen && (
+                <div className={styles.modalOverlay} onClick={() => { setIsPdfDialogOpen(false); setIsDragging(false); }}>
+                    <div className={styles.pdfDialog} role="dialog" aria-modal="true" aria-labelledby="upload-pdf-title" onClick={(event) => event.stopPropagation()}>
+                        <div className={styles.modalHeader}>
+                            <div><span className={styles.dialogEyebrow}>UPLOAD DOCUMENT</span><h3 id="upload-pdf-title">Upload a PDF</h3></div>
+                            <button className={styles.modalClose} onClick={() => { setIsPdfDialogOpen(false); setIsDragging(false); }} aria-label="Close">&times;</button>
+                        </div>
+                        <div className={`${styles.dropZone} ${isDragging ? styles.dropZoneActive : ""}`} onDragOver={(event) => { event.preventDefault(); setIsDragging(true); }} onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setIsDragging(false); }} onDrop={(event) => { event.preventDefault(); setIsDragging(false); void handleFiles(Array.from(event.dataTransfer.files)); setIsPdfDialogOpen(false); }}>
+                            <span className={styles.uploadIcon} aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M24 32V8m0 0-9 9m9-9 9 9M10 28v10a3 3 0 0 0 3 3h22a3 3 0 0 0 3-3V28" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg></span>
+                            <strong>Drag and drop your PDF here</strong>
+                            <span className={styles.dropHint}>or choose a file from your device</span>
+                            <button className={styles.browseButton} onClick={triggerUpload}>Browse files</button>
+                            <small>PDF files only</small>
                         </div>
                     </div>
                 </div>
@@ -439,7 +481,7 @@ export default function Chat_bot({ email } : Chat_botProps) {
     const [journey, setJourney] = useState<Journey | null>(null);
 
     const beginJourney = (source: string, title: string, steps: Omit<JourneyStep, "state">[]) => {
-        setJourney({ source, title, isFinished: false, steps: steps.map((step, index) => ({ ...step, state: index === 0 ? "active" : "waiting" })) });
+        setJourney({ source, title, isFinished: false, startedAt: new Date().toISOString(), steps: steps.map((step, index) => ({ ...step, state: index === 0 ? "active" : "waiting" })) });
     };
     const completeJourney = () => setJourney((current) => current && ({ ...current, isFinished: true, steps: current.steps.map((step) => ({ ...step, state: "complete" })) }));
     const failJourney = (message: string) => setJourney((current) => {
@@ -454,23 +496,65 @@ export default function Chat_bot({ email } : Chat_botProps) {
             setJourney((current) => {
                 if (!current || current.isFinished) return current;
                 const activeIndex = current.steps.findIndex((step) => step.state === "active");
-                if (activeIndex < 0 || activeIndex >= current.steps.length - 2) return current;
+                if (activeIndex < 0 || activeIndex >= 2) return current;
                 return { ...current, steps: current.steps.map((step, index) => index === activeIndex ? { ...step, state: "complete" } : index === activeIndex + 1 ? { ...step, state: "active" } : step) };
             });
         }, 2800);
         return () => window.clearInterval(timer);
     }, [journey?.isFinished, journey?.source, journey?.title]);
 
+    useEffect(() => {
+        if (!journey || journey.isFinished) return;
+        const pollProgress = async () => {
+            try {
+                const response = await fetch(api_link.storage.processing_status, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, started_at: journey.startedAt }),
+                });
+                const result = await response.json();
+                const progress = result?.progress?.[0]?.processing_progress;
+                if (!response.ok || !progress) return;
+                if (progress.status === "failed") {
+                    failJourney(progress.message || "PDF processing failed.");
+                    return;
+                }
+
+                const total = Number(progress.total_pages || 0);
+                const currentPage = Number(progress.current_page || 0);
+                const activeIndex = progress.phase === "generating_qa" ? 3 : 2;
+                const detail = progress.phase === "generating_qa"
+                    ? `Generating questions and answers through page ${currentPage} of ${total}${progress.file_name ? ` · ${progress.file_name}` : ""}`
+                    : progress.message || `Summarizing PDF page ${currentPage} of ${total}${progress.file_name ? ` · ${progress.file_name}` : ""}`;
+                setJourney((current) => current && !current.isFinished ? {
+                    ...current,
+                    steps: current.steps.map((step, index) => ({
+                        ...step,
+                        state: index < activeIndex ? "complete" : index === activeIndex ? "active" : "waiting",
+                        ...(index === activeIndex ? { detail } : {}),
+                    })),
+                } : current);
+            } catch {
+                // The final upload response still reports failures if live progress is unavailable.
+            }
+        };
+        void pollProgress();
+        const timer = window.setInterval(pollProgress, 3000);
+        return () => window.clearInterval(timer);
+    }, [journey?.isFinished, journey?.startedAt, email]);
+
     const startPdfJourney = (files: File[]) => beginJourney("PDF upload", files.length === 1 ? files[0].name : `${files.length} PDF files`, [
         { label: "Uploading your PDF", detail: "Sending your document securely…" },
         { label: "Reading the document", detail: "Extracting text from your PDF…" },
-        { label: "Creating its AI summary", detail: "Preparing the document for chatbot Q&A…" },
+        { label: "Summarizing every PDF page", detail: "Python is extracting and summarizing each page…" },
+        { label: "Generating questions and answers", detail: "Choosing useful questions based on the information in each page…" },
         { label: "Ready to review", detail: "Your document is ready." },
     ]);
     const startLinkJourney = (url: string) => beginJourney("Web link", url, [
         { label: "Opening the web page", detail: "Connecting to the page and finding readable content…" },
         { label: "Turning it into a PDF", detail: "Converting the page into a document…" },
-        { label: "Creating its AI summary", detail: "Preparing the page for chatbot Q&A…" },
+        { label: "Summarizing every PDF page", detail: "Python is extracting and summarizing each page…" },
+        { label: "Generating questions and answers", detail: "Choosing useful questions based on the information in each page…" },
         { label: "Ready to review", detail: "Your web page is ready." },
     ]);
 

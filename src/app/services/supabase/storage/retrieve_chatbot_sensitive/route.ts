@@ -1,17 +1,19 @@
 import { NextResponse, NextRequest } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
-// import { Security } from "@/lib/security";
+import { Security } from "@/firewall/security";
 import { decryptText } from "@/firewall/encryptions";
 
 export async function POST(req: NextRequest) {
 
-    // const auth = await Security(req);
-    // if(auth?.error) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    const auth = await Security(req);
+    if (auth?.error) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    if (auth.role?.toLowerCase() !== "admin") return NextResponse.json({ success: false, error: "Only administrators can view sensitive documents" }, { status: 403 });
 
     const { email, page = 1, limit = 30, search = "" } = await req
       .json()
       .catch(() => ({ email: "", page: 1, limit: 30, search: "" }));
     const cleanEmail = String(email || "").trim().toLowerCase();
+    if (auth.email?.trim().toLowerCase() !== cleanEmail) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 403 });
     const currentPage = Math.max(1, Number(page) || 1);
     const pageSize = Math.min(100, Math.max(1, Number(limit) || 30));
     const rangeFrom = (currentPage - 1) * pageSize;

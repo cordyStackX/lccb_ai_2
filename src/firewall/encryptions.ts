@@ -33,3 +33,27 @@ export const decryptText = (payload: string, password: string): string => {
     const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
     return decrypted.toString("utf8");
 };
+
+const SCHOOL_ID_PATTERN = /^[A-Z0-9]{2}-[A-Z0-9]{4}-[A-Z0-9]{3}$/;
+
+const normalizeSchoolId = (value: string) => {
+    const normalized = value.trim().toUpperCase();
+    if (SCHOOL_ID_PATTERN.test(normalized)) return normalized;
+    const compact = normalized.replace(/-/g, "");
+    return /^[A-Z0-9]{9}$/.test(compact)
+        ? `${compact.slice(0, 2)}-${compact.slice(2, 6)}-${compact.slice(6)}`
+        : null;
+};
+
+export const decryptStudentId = (value: string | null | undefined, password: string): string | null => {
+    if (!value) return null;
+    const storedValue = value.trim();
+    const plainValue = normalizeSchoolId(storedValue);
+    if (plainValue) return plainValue;
+
+    try {
+        return normalizeSchoolId(decryptText(storedValue, password));
+    } catch {
+        return null;
+    }
+};

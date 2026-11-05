@@ -1,5 +1,6 @@
 import os
 import sys
+import urllib.parse
 from flask import request, jsonify
 from .context import EXPECTED_API_KEY, supabase
 from .helpers import delete_file_after_delay
@@ -12,6 +13,7 @@ def download_file():
         file_id = data.get("pdf_id")  # get file id dynamically from request
         file_path_input = data.get("filePath")
         file_path_input2 = data.get("filePath2")
+        force_refresh = data.get("force_refresh") is True
 
         # Security
         if received_token != EXPECTED_API_KEY:
@@ -53,13 +55,20 @@ def download_file():
         email = row.data["email"]
 
         # Extract path inside bucket
-        if "/pdfs/" in file_url:
-            file_path = file_url.split("/pdfs/")[1]  # results in uploads/xxx.pdf
+        if "/chatbot_pdfs/" in file_url:
+            file_path = file_url.split("/chatbot_pdfs/", 1)[1]
+        elif "/pdfs/" in file_url:
+            file_path = file_url.split("/pdfs/")[1]
+        elif "/storage/v1/object/" in file_url:
+            file_path = file_url.split("/storage/v1/object/")[-1].split("/", 1)[-1]
         else:
             file_path = file_url  # assume already relative path
+        file_path = urllib.parse.unquote(file_path)
 
         # ---- Check if file already exists in tmp ----
         tmp_path = f"/tmp/{email}_{file_name}"
+        if force_refresh and os.path.exists(tmp_path):
+            os.remove(tmp_path)
         if os.path.exists(tmp_path):
             return jsonify({
                 "success": True,

@@ -5,7 +5,6 @@ import api_link from "@/config/conf/json_config/fetch_url.json";
 import bcrypt from "bcrypt";
 import nodemailer from "nodemailer";
 import { rateLimit } from "@/firewall/rate_limit";
-import { encryptText } from "@/firewall/encryptions";
 
 export async function POST(req: NextRequest) {
 
@@ -27,6 +26,7 @@ export async function POST(req: NextRequest) {
         if (password.length < 8) return NextResponse.json({ success: false, error: "Must be more than 8 characters" }, { status: 409 });
 
         if (!email || !password) return NextResponse.json({ success: false, error: "You Rejected Invalid Info" }, { status: 404 });
+        if (role === "Student" && (typeof id !== "string" || !id.trim())) return NextResponse.json({ success: false, error: "Student ID is required" }, { status: 400 });
         
         const cleanEmail = email.trim().toLowerCase();
 
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
 
         const hashed = await bcrypt.hash(password, 10);
 
-        const hashed_id = encryptText(id, process.env.API_KEY || "");
+        const studentId = typeof id === "string" ? id.trim() : "";
 
         const status = "under_review";
 
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
         if (data) {
             const { error } = await supabaseServer
             .from("auth_student")
-            .insert([{ year: year, department: department, school_id: String(hashed_id), email: cleanEmail }]);
+            .insert([{ year: year, department: department, school_id: studentId, email: cleanEmail }]);
 
             if (error) {
                 console.error("Supabase Query Error: ", error);

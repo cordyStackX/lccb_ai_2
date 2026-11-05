@@ -7,12 +7,19 @@ export async function POST(req: NextRequest) {
     if (auth?.error) {
         return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
+    if (auth.role?.toLowerCase() !== "admin") return NextResponse.json({ success: false, error: "Only administrators can download sensitive documents" }, { status: 403 });
 
     const { filePath } = await req.json().catch(() => ({ filePath: "" }));
     const cleanFilePath = String(filePath || "").trim();
 
     if (!cleanFilePath) {
         return NextResponse.json({ success: false, error: "File not found" }, { status: 404 });
+    }
+
+    const { data: document, error: documentError } = await supabaseServer.from("chatbot_pdf_file_private")
+        .select("file, email").eq("file", cleanFilePath).maybeSingle();
+    if (documentError || !document || document.email?.toLowerCase() !== auth.email?.toLowerCase()) {
+        return NextResponse.json({ success: false, error: "Sensitive document not found" }, { status: 404 });
     }
 
     const bucketName = "chatbot_pdfs";

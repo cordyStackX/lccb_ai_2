@@ -15,7 +15,7 @@ export default function Terms() {
             <div className={styles.content}>
                 <Link href="/" style={{ color: "blue" }} > {"<<"} Go Back</Link>
                 <h1>Terms and Conditions</h1>
-                <p className={styles.updated}>Last Updated: September 17, 2026</p>
+                <p className={styles.updated}>Last Updated: November 5, 2026</p>
 
                 <div className={styles.notice}>
                     <h2>⚠️ Important Notice</h2>
@@ -85,6 +85,7 @@ export default function Terms() {
                     <p><strong>Administrators additionally can:</strong></p>
                     <ul>
                         <li>Review and approve student/teacher account registrations</li>
+                        <li>Upload, recheck, and delete restricted academic PDFs and review the resulting student bookshelf records</li>
                         <li>Manage user accounts (create, update; cannot reset user passwords)</li>
                         <li>Process account deletion requests received via admin email</li>
                         <li>Review, approve, decline, or refund business payments</li>
@@ -94,9 +95,21 @@ export default function Terms() {
                     <p><strong>Business accounts can:</strong></p>
                     <ul>
                         <li>Sign up and use the platform immediately without admin approval</li>
-                        <li>Free Trial: 2 PDF uploads, 10,000 API requests, 10MB per upload, 1 month free</li>
-                        <li>Pro (₱799/month): 250 PDF uploads/month, 1,000,000 API requests/month, 100MB per upload</li>
-                        <li>Enterprise (₱1,999/year): 10,000 PDF uploads/year, 5,000,000 API requests/year, 500MB per upload</li>
+                        <li>Free Trial: up to 50 PDF pages and 10,000 API requests during the 1 month trial</li>
+                        <li>Pro (₱249/month): up to 5,000 PDF pages per account and unlimited API requests</li>
+                        <li>Enterprise (₱1,499/year): up to 10,000 PDF pages per account and unlimited API requests</li>
+                    </ul>
+                </section>
+
+                <section className={styles.section}>
+                    <h2>4.2 Sensitive Student Records</h2>
+                    <ul>
+                        <li>Only authorized administrators may upload and manage sensitive academic PDFs.</li>
+                        <li>Administrators must have authority to submit the PDFs and must use them only for legitimate academic purposes.</li>
+                        <li>The Service extracts student IDs and academic information from each PDF page and matches records to registered student accounts. A record is filed only when its ID matches one unique registered student account.</li>
+                        <li>Records without a valid registered match are skipped. Administrators may use <strong>Check all PDFs</strong> after a student registers to reprocess stored PDFs and file newly matched records; uploading the same PDF again is not required.</li>
+                        <li>Students may use academic chat only for records matched to their own registered student ID. They must not attempt to obtain another student&apos;s information.</li>
+                        <li>AI-generated academic answers may be incomplete or incorrect and should be checked against official school records.</li>
                     </ul>
                 </section>
 
@@ -157,7 +170,7 @@ export default function Terms() {
                         <li>JWT tokens may expire, requiring re-authentication</li>
                         <li>Search functionality limited to file names only</li>
                         <li>Chat history persists indefinitely unless manually cleared</li>
-                        <li>Free Trial business accounts are limited to 2 PDF uploads (10MB each); Pro is limited to 250 PDF uploads and 1,000,000 API requests per month (100MB each); Enterprise is limited to 10,000 PDF uploads and 5,000,000 API requests per year (500MB each)</li>
+                        <li>Free Trial business accounts are limited to 50 PDF pages and 10,000 API requests for one month; Pro is limited to 5,000 PDF pages per account with unlimited API requests; Enterprise is limited to 10,000 PDF pages per account with unlimited API requests</li>
                     </ul>
                 </section>
 
@@ -177,30 +190,32 @@ export default function Terms() {
                     <p>This Service integrates with:</p>
                     <ul>
                         <li><strong>Supabase:</strong> PostgreSQL database, user authentication, and file storage</li>
-                        <li><strong>OpenAI (gpt-4o-mini):</strong> AI-powered chat responses and document analysis</li>
+                        <li><strong>OpenAI:</strong> AI processing for document extraction and question answering</li>
                         <li><strong>Render:</strong> Python API backend hosting</li>
                         <li><strong>Vercel/GitHub Pages:</strong> Next.js frontend deployment</li>
                     </ul>
-                    <p>These services have their own terms and privacy policies. We are not responsible for their practices, availability, outages, data breaches, or data handling. OpenAI processes your PDF content and prompts according to their terms of service.</p>
+                    <p>These services have their own terms and privacy policies. Sensitive PDF pages are sent to OpenAI for record extraction. Student academic chat sends the student&apos;s question and only records matched to that student&apos;s registered ID. OpenAI processes this information under its own terms and privacy practices.</p>
                 </section>
 
                 <section className={styles.section}>
                     <h2>11. Data and Privacy</h2>
                     <ul>
                         <li>Your data is handled according to our Privacy Policy</li>
-                        <li>Sensitive data and document summaries are encrypted</li>
+                        <li>Sensitive PDF files and extracted bookshelf record contents are encrypted at rest. Student IDs in account records are stored as plaintext identifiers and are used for server-side matching.</li>
+                        <li>Student chat requests are checked against the authenticated student account, and only bookshelf records matching that student&apos;s registered ID are supplied to the AI.</li>
+                        <li>Administrator-uploaded sensitive PDF pages are sent to OpenAI for record extraction. OpenAI also receives the student&apos;s question and only the matched records needed to answer it.</li>
                         <li>Payment account numbers are encrypted at rest, including when payment details are resubmitted or a refund is requested</li>
                         <li>PDF files are stored in Supabase storage buckets until you manually delete them</li>
+                        <li>Sensitive PDF files and their bookshelf records remain until an administrator deletes the PDF or the related account is deleted; deleting a sensitive PDF also removes its associated bookshelf records</li>
                         <li>Profile pictures stored until replaced or account deleted</li>
                         <li>Chat conversations stored indefinitely in your account</li>
                         <li>We log API requests, timestamps, and errors for research and debugging</li>
                         <li>Admins can access user management features and API logs, review payments, but cannot reset user passwords or delete accounts without a request via admin email</li>
-                        <li>Teachers can monitor content for LCCB students under their supervision</li>
                         <li>Rate limiting tracks IP addresses temporarily for spam prevention</li>
                         <li>JWT authentication tokens stored in HTTP-only cookies</li>
                         <li>We cannot guarantee the security or confidentiality of your data</li>
                         <li><strong>Do not upload sensitive or confidential information into Public Documents</strong></li>
-                        <li><strong>Your PDF content is sent to OpenAI for processing</strong></li>
+                        <li>Do not upload sensitive student records unless you are an authorized administrator and the upload is for an approved academic purpose.</li>
                     </ul>
                 </section>
 

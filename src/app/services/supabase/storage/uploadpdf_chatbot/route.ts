@@ -3,6 +3,7 @@ import { supabaseServer } from "@/lib/supabase-server";
 import { Security } from "@/firewall/security";
 import { Fetch_to } from "@/utilities";
 import api_links from "@/config/conf/json_config/Api_links.json";
+import { countPdfPages, getUsedPdfPages, isApiLimitReached, isBusinessPlanExpired, planPageLimit, usagePeriodStart } from "@/lib/business_plan_usage";
 
 export async function POST(req: NextRequest) {
 
@@ -13,6 +14,7 @@ export async function POST(req: NextRequest) {
     const entries = form.getAll("file");
     const email = (form.get("email") as string) || "";
     const cleanEmail = email.trim().toLowerCase();
+    if (auth.email?.trim().toLowerCase() !== cleanEmail) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 403 });
 
     if (!entries || entries.length === 0) return NextResponse.json({ success: false, error: "No PDF files detected" }, { status: 400 });
     if (!cleanEmail) return NextResponse.json({ success: false, error: "Email not found" }, { status: 404 });
@@ -25,92 +27,55 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, error: `Invalid PDF file: ${invalidFiles.map((file) => file.name).join(", ")}` }, { status: 400 });
     }
 
-    const { data: planRow, error: planError } = await supabaseServer
-        .from("auth_business")
-        .select("current_plan, current_limit, current_pdf_limit, current_pdf_limit_per_mb, created_at")
-        .eq("email", cleanEmail)
-        .maybeSingle();
+    const isPlatformAdmin = auth.role?.toLowerCase() === "admin";
+    let current_plan = "";
+    let current_limit: number | null = null;
+    let periodStart: string | null = null;
+    if (!isPlatformAdmin) {
+        const { data: planRow, error: planError } = await supabaseServer
+            .from("auth_business")
+            .select("current_plan, current_limit, created_at, plan_expires_at")
+            .eq("email", cleanEmail)
+            .maybeSingle();
 
-    if (planError || !planRow) {
-        console.error("Supabase Query Error: ", planError);
-        return NextResponse.json({ success: false, error: "Failed to fetch account plan" }, { status: 500 });
+        if (planError || !planRow) {
+            console.error("Supabase Query Error: ", planError);
+            return NextResponse.json({ success: false, error: "Failed to fetch account plan" }, { status: 500 });
+        }
+
+        ({ current_plan, current_limit } = planRow);
+        if (isBusinessPlanExpired(current_plan, planRow.created_at, planRow.plan_expires_at)) {
+            return NextResponse.json({ success: false, error: "Your plan has expired. Please renew or upgrade to continue." }, { status: 403 });
+        }
+        periodStart = usagePeriodStart(current_plan, planRow.created_at);
+        if (!periodStart) return NextResponse.json({ success: false, error: "Your plan period has ended. Please upgrade your plan." }, { status: 403 });
     }
 
-    const { current_plan, current_limit, current_pdf_limit, current_pdf_limit_per_mb, created_at } = planRow;
+    const apiUrl = process.env.RENDER_API || api_links.python_links;
+    const apikey = process.env.API_KEY;
+    if (!apikey) return NextResponse.json({ success: false, error: "API is not Valid" }, { status: 401 });
 
-    if (["Free Trial", "Pro", "Enterprise"].includes(current_plan)) {
-        const now = new Date();
-        let usagePeriodStart: string;
-
-        if (current_plan === "Free Trial") {
-            const trialStart = new Date(created_at);
-            const oneMonthLater = new Date(trialStart);
-            oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
-
-            if (new Date() >= oneMonthLater) {
-                return NextResponse.json(
-                    { success: false, error: "1 month free trial already reached, please upgrade plan now" },
-                    { status: 403 }
-                );
+    let incomingPageCount = 0;
+    const pageCounts = new Map<File, number>();
+    try {
+        for (const file of files) {
+            const pageCount = await countPdfPages(Buffer.from(await file.arrayBuffer()).toString("base64"), apiUrl, apikey);
+            pageCounts.set(file, pageCount);
+            incomingPageCount += pageCount;
+        }
+        if (!isPlatformAdmin) {
+            const usedPages = await getUsedPdfPages(cleanEmail);
+            const pageLimit = planPageLimit(current_plan);
+            if (usedPages + incomingPageCount > pageLimit) {
+                return NextResponse.json({ success: false, error: `This upload exceeds your plan's ${pageLimit.toLocaleString()} page limit. You have ${Math.max(0, pageLimit - usedPages).toLocaleString()} pages remaining.` }, { status: 403 });
             }
-            usagePeriodStart = trialStart.toISOString();
-        } else if (current_plan === "Pro") {
-            // Pro allowances reset at the beginning of each calendar month.
-            usagePeriodStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
-        } else {
-            // Enterprise allowances reset at the beginning of each calendar year.
-            usagePeriodStart = new Date(Date.UTC(now.getUTCFullYear(), 0, 1)).toISOString();
+            if (current_plan === "Free Trial" && await isApiLimitReached(cleanEmail, periodStart!, current_limit)) {
+                return NextResponse.json({ success: false, error: "Your free plan API request limit has been reached. Please upgrade your plan." }, { status: 403 });
+            }
         }
-
-        const { data: limitPdf, error: limitPdfError } = await supabaseServer
-            .from("chatbot_pdf_file")
-            .select("id")
-            .eq("email", cleanEmail)
-            .gte("created_at", usagePeriodStart);
-
-        if (limitPdfError) {
-            console.error("Supabase Query Error: ", limitPdfError);
-            return NextResponse.json({ success: false, error: "Failed to fetch document usage" }, { status: 500 });
-        }
-
-        const { data: logRows, error: logError } = await supabaseServer
-            .from("system_logs")
-            .select("api_request, uploaded_pdf")
-            .eq("request", cleanEmail)
-            .gte("created_at", usagePeriodStart);
-
-        if (logError) {
-            console.error("Supabase Query Error: ", logError);
-            return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
-        }
-
-        const totalApiRequest = (logRows ?? []).reduce((sum, row) => sum + (row.api_request ?? 0), 0);
-
-
-        if ((limitPdf?.length ?? 0) + files.length > Number(current_pdf_limit)) {
-            return NextResponse.json(
-                { success: false, error: "Current plan already reach limit, upgrade plan now" },
-                { status: 403 }
-            );
-        }
-
-        if (totalApiRequest >= Number(current_limit)) {
-            return NextResponse.json(
-                { success: false, error: "Current plan already reach limit, upgrade plan now" },
-                { status: 403 }
-            );
-        }
-
-        const maxMb = Number(current_pdf_limit_per_mb);
-        const oversizedFiles = files.filter((file) => file.size / (1024 * 1024) > maxMb);
-
-        if (oversizedFiles.length > 0) {
-            return NextResponse.json(
-                { success: false, error: `Current plan already reach limit, upgrade plan to upload >${maxMb}MB` },
-                { status: 403 }
-            );
-        }
-
+    } catch (error) {
+        console.error("PDF page quota check failed:", error);
+        return NextResponse.json({ success: false, error: "Unable to verify PDF page usage. Please try again." }, { status: 500 });
     }
 
     const incomingNames = files.map((file) => file.name);
@@ -151,11 +116,7 @@ export async function POST(req: NextRequest) {
     }
 
     const bucketName = "chatbot_pdfs";
-    const apiUrl = process.env.RENDER_API || api_links.python_links;
-    const apikey = process.env.API_KEY;
-    const uploadedResults: Array<{ id?: number; originalName: string; filePath?: string; suggest?: string; summary?: string; success: boolean; message?: string }> = [];
-
-    if (!apikey) return NextResponse.json({ success: false, error: "API is not Valid" }, { status: 401 });
+    const uploadedResults: Array<{ id?: number; originalName: string; filePath?: string; suggest?: string; summary?: string; pageCount?: number; success: boolean; message?: string }> = [];
 
     for (const file of files) {
         const filePath = `uploads/${Date.now()}_${file.name}`;
@@ -175,7 +136,7 @@ export async function POST(req: NextRequest) {
 
         const { error: insertError } = await supabaseServer
             .from("chatbot_pdf_file")
-            .insert([{ file: filePath, email: cleanEmail, file_name: file.name }]);
+            .insert([{ file: filePath, email: cleanEmail, file_name: file.name, page_count: pageCounts.get(file) }]);
 
         if (insertError) {
             console.error("Supabase Insert Error: ", insertError);
@@ -200,102 +161,27 @@ export async function POST(req: NextRequest) {
             continue;
         }
         
-        const response_suggest = await Fetch_to(`${apiUrl}generate_md_summary`, {
-            prompt: `Read this PDF and generate questions a user might realistically ask about it.
-
-        Rules:
-        - Generate ONE question per distinct topic or section covered in the PDF.
-        - If the PDF is short or covers only one topic, generate just ONE question. Do not pad the list with filler or repetitive questions.
-        - If the PDF covers multiple distinct topics, generate one question per topic, up to a maximum of 8 questions.
-        - Each question must be a single, natural sentence a real user would type, ending in a question mark.
-        - Do not include answers, numbering, or duplicate/near-duplicate questions.
-
-        Respond with ONLY a raw JSON array of strings. No markdown fences, no explanation, no extra text before or after.
-
-        CORRECT example output (multi-topic PDF):
-        ["What are the requirements for enrollment?", "What courses are offered under the SBIT program?", "How do I apply for a scholarship?"]
-
-        CORRECT example output (single-topic PDF):
-        ["What are the requirements for enrollment?"]
-
-        WRONG (do NOT do this — extra text or preamble):
-        Here is a question: ["What are the requirements?"]
-
-        WRONG (do NOT do this — objects instead of plain strings):
-        [{"question": "What are the requirements?"}]
-
-        Your output must be a JSON array of plain strings matching the CORRECT examples exactly — nothing else.`,
+        const qaResponse = await Fetch_to(`${apiUrl}generate-pdf-qa`, {
             token: apikey,
             email: cleanEmail,
-            filePath: filePath,
-            table: "chatbot_pdf_file"
+            filePath,
+            table: "chatbot_pdf_file",
         });
-
-        if (!response_suggest.success) {
-            uploadedResults.push({ originalName: file.name, filePath, success: false, message: "Failed to create summary" });
+        const rawQuestionAnswers = qaResponse.data?.questions_and_answers;
+        if (!qaResponse.success || !Array.isArray(rawQuestionAnswers) || rawQuestionAnswers.length === 0) {
+            uploadedResults.push({ originalName: file.name, filePath, success: false, message: qaResponse.message || "Failed to generate questions and answers from the document content" });
             continue;
         }
 
-        let questions: string[];
-        
-        try {
-            const raw = response_suggest.data.markdown.trim()
-                .replace(/^```json\s*/i, '')
-                .replace(/```$/i, '');
-            questions = JSON.parse(raw);
-            console.log(questions);
-        } catch {
-            uploadedResults.push({ originalName: file.name, filePath, success: false, message: "Failed to parse questions" });
-            continue;
-        }
-
-        const numberedQuestions = questions.map((q, i) => `${i + 1}. ${q}`).join('\n');
-
-        const response = await Fetch_to(`${apiUrl}generate_md_summary`, {
-            prompt: `You must answer EVERY SINGLE question below — there are exactly ${questions.length} questions. Do not skip, merge, or summarize any of them.
-
-        Questions:
-        ${numberedQuestions}
-
-        For each question, search the ENTIRE document carefully. Many answers are not stated in one single sentence — they are spread across multiple sections, bullet points, or sub-headings. You MUST synthesize and combine relevant scattered information into a single coherent answer.
-
-        Example: if asked "how do I apply for a scholarship?" and the document lists several different scholarship types each with their own application requirements, combine them into one summarized answer covering the general process (e.g. "Requirements vary by scholarship type: for X, submit Y; for Z, apply at W..."), rather than saying the process isn't specified.
-
-        Only write "Not specified in document" if you have checked the full document and genuinely found NO related information anywhere, even partial or indirect.
-
-        Return a JSON array with exactly ${questions.length} objects, one per question, in the same order listed above. Each object MUST use exactly these keys: "question" and "answer".
-
-        Respond with ONLY the raw JSON array. No markdown fences, no preamble, no explanation.
-
-        Correct format:
-        [{"question":"What are the requirements for enrollment?","answer":"The document requires ..."}]`,
-            token: apikey,
-            email: cleanEmail,
-            filePath: filePath,
-            table: "chatbot_pdf_file"
-        });
-
-        if (!response.success) {
-            uploadedResults.push({ originalName: file.name, filePath, success: false, message: "Failed to create summary" });
-            continue;
-        }
-
-        let questionsAndAnswers: Array<{ question: string; answer: string }>;
-        try {
-            const raw = response.data.markdown.trim()
-                .replace(/^```json\s*/i, '')
-                .replace(/```$/i, '');
-            const parsed: unknown = JSON.parse(raw);
-            if (!Array.isArray(parsed) || parsed.length !== questions.length || !parsed.every((item) => {
-                if (!item || typeof item !== "object") return false;
-                const pair = item as { question?: unknown; answer?: unknown };
-                return typeof pair.question === "string" && typeof pair.answer === "string";
-            })) {
-                throw new Error("Invalid question and answer array");
-            }
-            questionsAndAnswers = parsed as Array<{ question: string; answer: string }>;
-        } catch {
-            uploadedResults.push({ originalName: file.name, filePath, success: false, message: "Failed to parse questions and answers" });
+        const questionsAndAnswers = rawQuestionAnswers.filter((item: unknown) => {
+            if (!item || typeof item !== "object") return false;
+            const pair = item as { question?: unknown; answer?: unknown; page?: unknown };
+            return typeof pair.question === "string" && pair.question.trim().endsWith("?")
+                && typeof pair.answer === "string" && pair.answer.trim().length > 0
+                && Number.isInteger(pair.page);
+        }) as Array<{ question: string; answer: string; page: number }>;
+        if (questionsAndAnswers.length !== rawQuestionAnswers.length) {
+            uploadedResults.push({ originalName: file.name, filePath, success: false, message: "Failed to validate generated questions and answers" });
             continue;
         }
 
@@ -303,7 +189,7 @@ export async function POST(req: NextRequest) {
 
         const { error: updateError } = await supabaseServer
             .from("chatbot_pdf_file")
-            .update({ summary, suggest: response_suggest.data.markdown })
+            .update({ summary, suggest: JSON.stringify(questionsAndAnswers.map(({ question }) => question)) })
             .eq("file", filePath);
 
         if (updateError) {
@@ -322,13 +208,15 @@ export async function POST(req: NextRequest) {
             id: savedDocument?.id,
             originalName: file.name,
             filePath,
-            suggest: response_suggest.data.markdown,
+            suggest: JSON.stringify(questionsAndAnswers.map(({ question }) => question)),
             summary,
+            pageCount: pageCounts.get(file),
             success: true,
         });
     }
 
     const successCount = uploadedResults.filter((result) => result.success).length;
+    const successPageCount = uploadedResults.reduce((total, result) => total + (result.success ? result.pageCount ?? 0 : 0), 0);
 
     if (successCount > 0) {
         const { data: record, error: record_err } = await supabaseServer
@@ -342,7 +230,7 @@ export async function POST(req: NextRequest) {
         if (record_err) {
             console.error("Supabase Query Error: ", record_err);
         } else if (record) {
-            const record_add = (record.uploaded_pdf ?? 0) + successCount;
+            const record_add = (record.uploaded_pdf ?? 0) + successPageCount;
             await supabaseServer
                 .from("system_logs")
                 .update({ uploaded_pdf: record_add })
@@ -352,7 +240,7 @@ export async function POST(req: NextRequest) {
                 .from("system_logs")
                 .insert([{
                     request: cleanEmail,
-                    uploaded_pdf: successCount,
+                    uploaded_pdf: successPageCount,
                 }]);
         }
     }

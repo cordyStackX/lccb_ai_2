@@ -1,0 +1,76 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+6 0 obj
+<< /Length 873 >>
+stream
+BT
+72 750 Td
+/F2 20 Tf
+(SAMPLE ACADEMIC RECORD - FICTIONAL TEST DATA) Tj
+0 -30 Td
+/F2 13 Tf
+(STUDENT INFORMATION) Tj
+0 -24 Td
+/F2 14 Tf
+(Student ID: 23-0764-388) Tj
+0 -24 Td
+/F1 11 Tf
+(Student Name: Sample Student) Tj
+0 -24 Td
+/F1 11 Tf
+(School: La Consolacion College Bacolod) Tj
+0 -24 Td
+/F1 11 Tf
+(Academic Term: First Semester, AY 2025-2026) Tj
+0 -30 Td
+/F2 13 Tf
+(COURSE RECORDS) Tj
+0 -24 Td
+/F2 10 Tf
+(Course Code | Course Title | Units | Grade | Remarks) Tj
+0 -24 Td
+/F1 10 Tf
+(GE 101 | Understanding the Self | 3 | 1.50 | Passed) Tj
+0 -24 Td
+/F1 10 Tf
+(GE 102 | Readings in Philippine History | 3 | 1.75 | Passed) Tj
+0 -24 Td
+/F1 10 Tf
+(CS 201 | Data Structures and Algorithms | 3 | 1.25 | Passed) Tj
+0 -24 Td
+/F1 10 Tf
+(MATH 110 | Discrete Mathematics | 3 | 2.00 | Passed) Tj
+0 -24 Td
+/F1 9 Tf
+(This document contains fictional sample data for testing only.) Tj
+ET
+endstream
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000251 00000 n 
+0000000321 00000 n 
+0000000396 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+1320
+%%EOF

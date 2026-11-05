@@ -3,18 +3,7 @@ import { supabaseServer } from "@/lib/supabase-server";
 import { Security } from "@/firewall/security";
 import { Fetch_to } from "@/utilities";
 import apiLinks from "@/config/conf/json_config/Api_links.json";
-
-function parseQuestions(markdown: unknown): string[] | null {
-    if (typeof markdown !== "string") return null;
-    try {
-        const parsed: unknown = JSON.parse(markdown.trim().replace(/^```json\s*/i, "").replace(/```$/i, ""));
-        if (!Array.isArray(parsed) || parsed.length === 0 || parsed.length > 8) return null;
-        const questions = parsed.map((value) => typeof value === "string" ? value.trim() : "");
-        return questions.every((question) => question.endsWith("?") && question.length <= 300) ? questions : null;
-    } catch {
-        return null;
-    }
-}
+import { countPdfPages, getUsedPdfPages, isApiLimitReached, isBusinessPlanExpired, planPageLimit, usagePeriodStart } from "@/lib/business_plan_usage";
 
 function parseQuestionAnswers(markdown: unknown, count: number) {
     if (typeof markdown !== "string") return null;
@@ -23,9 +12,10 @@ function parseQuestionAnswers(markdown: unknown, count: number) {
         if (!Array.isArray(parsed) || parsed.length !== count) return null;
         return parsed.every((item) => {
             if (!item || typeof item !== "object") return false;
-            const pair = item as { question?: unknown; answer?: unknown };
-            return typeof pair.question === "string" && typeof pair.answer === "string";
-        }) ? parsed as Array<{ question: string; answer: string }> : null;
+            const pair = item as { question?: unknown; answer?: unknown; page?: unknown };
+            return typeof pair.question === "string" && typeof pair.answer === "string"
+                && (pair.page === undefined || Number.isInteger(pair.page));
+        }) ? parsed as Array<{ question: string; answer: string; page?: number }> : null;
     } catch {
         return null;
     }
@@ -40,6 +30,7 @@ export async function POST(req: NextRequest) {
         const cleanUrl = typeof url === "string" ? url.trim() : "";
         const cleanEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
         if (!cleanUrl || !cleanEmail) return NextResponse.json({ success: false, error: "URL and email are required" }, { status: 400 });
+        if (auth.email?.trim().toLowerCase() !== cleanEmail) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 403 });
         try {
             const parsed = new URL(cleanUrl);
             if (parsed.protocol !== "http:" && parsed.protocol !== "https:") throw new Error();
@@ -47,27 +38,32 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ success: false, error: "URL must use http or https" }, { status: 400 });
         }
 
-        const { data: documents, error: documentError } = await supabaseServer.from("chatbot_pdf_file").select("id").eq("email", cleanEmail);
-        const { data: plan, error: planError } = await supabaseServer
-            .from("auth_business")
-            .select("current_plan, current_limit, current_pdf_limit, created_at")
-            .eq("email", cleanEmail)
-            .maybeSingle();
-        if (documentError || planError || !plan) return NextResponse.json({ success: false, error: "Failed to fetch account plan" }, { status: 500 });
-
-        if (plan.current_plan === "Free Trial" || plan.current_plan === "Pro") {
-            const trialExpiry = new Date(plan.created_at);
-            trialExpiry.setMonth(trialExpiry.getMonth() + 1);
-            if (plan.current_plan === "Free Trial" && new Date() >= trialExpiry) {
-                return NextResponse.json({ success: false, error: "1 month free trial already reached, please upgrade plan now" }, { status: 403 });
-            }
-            if ((documents?.length ?? 0) + 1 > Number(plan.current_pdf_limit)) {
-                return NextResponse.json({ success: false, error: "Current plan already reach limit, upgrade plan now" }, { status: 403 });
-            }
-            const { data: logs, error: logError } = await supabaseServer.from("system_logs").select("api_request").eq("request", cleanEmail);
-            if (logError) return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
-            if ((logs ?? []).reduce((total, row) => total + (row.api_request ?? 0), 0) >= Number(plan.current_limit)) {
-                return NextResponse.json({ success: false, error: "Current plan already reach limit, upgrade plan now" }, { status: 403 });
+        const isPlatformAdmin = auth.role?.toLowerCase() === "admin";
+        let currentPlan = "";
+        let periodStart: string | null = null;
+        let usedPages = 0;
+        if (!isPlatformAdmin) {
+            const { data: plan, error: planError } = await supabaseServer
+                .from("auth_business")
+                .select("current_plan, current_limit, created_at, plan_expires_at")
+                .eq("email", cleanEmail)
+                .maybeSingle();
+            if (planError || !plan) return NextResponse.json({ success: false, error: "Failed to fetch account plan" }, { status: 500 });
+            currentPlan = plan.current_plan;
+            periodStart = usagePeriodStart(currentPlan, plan.created_at);
+            if (isBusinessPlanExpired(currentPlan, plan.created_at, plan.plan_expires_at)) return NextResponse.json({ success: false, error: "Your plan has expired. Please renew or upgrade to continue." }, { status: 403 });
+            if (!periodStart) return NextResponse.json({ success: false, error: "Your plan period has ended. Please upgrade your plan." }, { status: 403 });
+            if (!["Free Trial", "Pro", "Enterprise"].includes(currentPlan)) return NextResponse.json({ success: false, error: "Your account plan does not allow document imports." }, { status: 403 });
+            try {
+                usedPages = await getUsedPdfPages(cleanEmail);
+                const pageLimit = planPageLimit(currentPlan);
+                if (usedPages >= pageLimit) return NextResponse.json({ success: false, error: `Your plan's ${pageLimit.toLocaleString()} page limit has been reached.` }, { status: 403 });
+                if (currentPlan === "Free Trial" && await isApiLimitReached(cleanEmail, periodStart, plan.current_limit)) {
+                    return NextResponse.json({ success: false, error: "Your free plan API request limit has been reached. Please upgrade your plan." }, { status: 403 });
+                }
+            } catch (error) {
+                console.error("PDF page quota check failed:", error);
+                return NextResponse.json({ success: false, error: "Unable to verify PDF page usage. Please try again." }, { status: 500 });
             }
         }
 
@@ -80,14 +76,27 @@ export async function POST(req: NextRequest) {
         }
 
         const fileName = converted.data.file_name;
-        const filePath = `uploads/${Date.now()}_${fileName}`;
         const pdfBytes = Buffer.from(converted.data.pdf_base64, "base64");
+        let pageCount: number;
+        try {
+            pageCount = await countPdfPages(converted.data.pdf_base64, apiUrl, token);
+            if (!isPlatformAdmin) {
+                const pageLimit = planPageLimit(currentPlan);
+                if (usedPages + pageCount > pageLimit) {
+                    return NextResponse.json({ success: false, error: `This document exceeds your plan's ${pageLimit.toLocaleString()} page limit. You have ${Math.max(0, pageLimit - usedPages).toLocaleString()} pages remaining.` }, { status: 403 });
+                }
+            }
+        } catch (error) {
+            console.error("PDF page quota check failed:", error);
+            return NextResponse.json({ success: false, error: "Unable to verify PDF page usage. Please try again." }, { status: 500 });
+        }
+        const filePath = `uploads/${Date.now()}_${fileName}`;
         const { error: uploadError } = await supabaseServer.storage.from("chatbot_pdfs").upload(filePath, pdfBytes, { contentType: "application/pdf", upsert: false });
         if (uploadError) return NextResponse.json({ success: false, error: "Failed to upload converted PDF" }, { status: 500 });
 
         const { data: savedDocument, error: insertError } = await supabaseServer
             .from("chatbot_pdf_file")
-            .insert([{ file: filePath, email: cleanEmail, file_name: fileName }])
+            .insert([{ file: filePath, email: cleanEmail, file_name: fileName, page_count: pageCount }])
             .select("id, file, file_name")
             .single();
         if (insertError || !savedDocument) {
@@ -106,26 +115,34 @@ export async function POST(req: NextRequest) {
         const cache = await Fetch_to(`${apiUrl}generate-pdf-cache`, { token, email: cleanEmail, filePath, table: "chatbot_pdf_file" });
         if (!cache.success) return fail(cache.message || "Failed to summarize converted PDF pages");
 
-        const suggested = await Fetch_to(`${apiUrl}generate_md_summary`, {
-            token, email: cleanEmail, filePath, table: "chatbot_pdf_file",
-            prompt: "Read this document and generate up to 8 distinct, natural user questions. Return ONLY a raw JSON array of question strings. Every question must end with a question mark.",
-        });
-        const questions = suggested.success ? parseQuestions(suggested.data?.markdown) : null;
-        if (!questions) return fail(suggested.message || "Failed to create suggested questions");
-
-        const answers = await Fetch_to(`${apiUrl}generate_md_summary`, {
-            token, email: cleanEmail, filePath, table: "chatbot_pdf_file",
-            prompt: `Answer every question below using only the document. Return ONLY a raw JSON array with exactly ${questions.length} objects in the same order. Every object must have exactly "question" and "answer" string keys.\n\n${questions.map((question, index) => `${index + 1}. ${question}`).join("\n")}`,
-        });
-        const generatedQuestionAnswers = answers.success ? parseQuestionAnswers(answers.data?.markdown, questions.length) : null;
-        const questionsAndAnswers = generatedQuestionAnswers ?? questions.map((question) => ({ question, answer: "" }));
+        const qaResponse = await Fetch_to(`${apiUrl}generate-pdf-qa`, { token, email: cleanEmail, filePath, table: "chatbot_pdf_file" });
+        const rawQuestionAnswers = qaResponse.data?.questions_and_answers;
+        if (!qaResponse.success || !Array.isArray(rawQuestionAnswers) || rawQuestionAnswers.length === 0) {
+            return fail(qaResponse.message || "Failed to generate questions and answers from the document content");
+        }
+        const questionsAndAnswers = parseQuestionAnswers(JSON.stringify(rawQuestionAnswers), rawQuestionAnswers.length);
+        if (!questionsAndAnswers) return fail("The generated page-by-page questions and answers were invalid");
+        const suggestedQuestions = questionsAndAnswers.map(({ question }) => question);
 
         const summary = JSON.stringify(questionsAndAnswers);
         const { error: updateError } = await supabaseServer.from("chatbot_pdf_file")
-            .update({ summary, suggest: JSON.stringify(questions) }).eq("id", savedDocument.id);
+            .update({ summary, suggest: JSON.stringify(suggestedQuestions) }).eq("id", savedDocument.id);
         if (updateError) return fail("Failed to save questions and answers", 500);
 
-        return NextResponse.json({ success: true, message: "Web page converted and saved as a PDF", link: { ...savedDocument, summary, suggest: JSON.stringify(questions) } });
+        const todayStart = new Date().toISOString().split("T")[0];
+        const tomorrowStart = new Date(Date.now() + 86400000).toISOString().split("T")[0];
+        const { data: dailyUsage, error: usageError } = await supabaseServer.from("system_logs")
+            .select("uploaded_pdf").eq("request", cleanEmail).gte("created_at", todayStart).lt("created_at", tomorrowStart).maybeSingle();
+        if (!usageError) {
+            if (dailyUsage) {
+                await supabaseServer.from("system_logs").update({ uploaded_pdf: Number(dailyUsage.uploaded_pdf ?? 0) + pageCount })
+                    .eq("request", cleanEmail).gte("created_at", todayStart).lt("created_at", tomorrowStart);
+            } else {
+                await supabaseServer.from("system_logs").insert({ request: cleanEmail, uploaded_pdf: pageCount });
+            }
+        }
+
+        return NextResponse.json({ success: true, message: "Web page converted and saved as a PDF", link: { ...savedDocument, summary, suggest: JSON.stringify(suggestedQuestions) } });
     } catch (error) {
         console.error("generate_link_chatbot POST Error:", error);
         return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });

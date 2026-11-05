@@ -220,3 +220,48 @@
         width: 85vw;
     }
 }
+
+/* Admin-matched full-height navigation surface */
+.container { --sidebar-collapsed-width: max(4rem, min(6vw, 5rem)); box-sizing: border-box; width: var(--sidebar-collapsed-width); height: 100vh; min-height: 100vh; top: 0; margin-left: 0; align-items: flex-start; border: 0; border-radius: 0; background: transparent; box-shadow: none; isolation: isolate; z-index: 2; }
+.container::before { content: ""; position: absolute; z-index: 0; inset: 0 auto 0 0; width: 100%; border-right: 1px solid #cbd1db; background: #dfe3e9; box-shadow: 4px 0 18px rgba(20,35,65,.04); transition: width 260ms cubic-bezier(.2,.75,.25,1); pointer-events: none; }
+.container > * { position: relative; z-index: 1; }
+.admin { box-sizing: border-box; min-height: 58px; justify-content: center; padding: 0 0.8rem 1rem; transition: width 240ms ease, padding 240ms ease; }
+.avatar { width: 44px; height: 44px; }
+.admin span { display: none; }
+.options, .options_2 { box-sizing: border-box; padding-left: 0.45rem; padding-right: 0.45rem; transition: width 240ms ease, padding 240ms ease; }
+.navButton { box-sizing: border-box; justify-content: center; padding: 0.75rem 0.5rem; border-radius: 8px; font-size: 0; transition: width 240ms ease, padding 240ms ease, background-color 200ms ease, color 200ms ease; }
+.navButton svg, .logoutButton svg { margin: 0; transition: margin 220ms ease; }
+.logoutButton { box-sizing: border-box; justify-content: center; padding: 0.75rem 0.5rem; font-size: 0; transition: width 240ms ease, padding 240ms ease, background-color 200ms ease, color 200ms ease; }
+.navButton:not(:disabled):hover { background: color-mix(in srgb, var(--primary) 8%, #dfe3e9); color: var(--primary); }
+.navButtonActive { background: var(--primary); color: var(--default-color-white); }
+.logoutButton:hover { background: color-mix(in srgb, var(--default-color-red) 12%, #dfe3e9); color: var(--default-color-red); }
+.container:hover::before { width: min(240px, 86vw); }
+.container:hover .admin, .container:hover .options, .container:hover .options_2 { width: min(240px, 86vw); }
+.container:hover .admin { justify-content: flex-start; padding-left: 1.4rem; padding-right: 1.4rem; }
+.container:hover .admin span { display: block; }
+.container:hover .options, .container:hover .options_2 { padding-left: 0.85rem; padding-right: 0.85rem; }
+.container:hover .navButton { justify-content: flex-start; padding: 0.75rem 0.9rem 0.75rem 1.1rem; font-size: 0.88rem; }
+.container:hover .navButton svg, .container:hover .logoutButton svg { margin-right: 0.7rem; }
+.container:hover .logoutButton { justify-content: flex-start; padding: 0.75rem 0.9rem; font-size: 0.88rem; }
+.burger { background: #e9ebef; border-color: #cbd1db; }
+@media (max-width: 900px) {
+    .container { width: 270px; height: 100dvh; min-height: 100dvh; align-items: center; background: #dfe3e9; border-radius: 0; }
+    .container::before { width: 100%; border-right: 0; }
+    .container .admin { width: 100%; min-height: 0; justify-content: flex-start; padding: 0 1.4rem 1.5rem; }
+    .container .admin span { display: block; }
+    .container .options, .container .options_2 { width: 100%; padding-left: 0.85rem; padding-right: 0.85rem; }
+    .container .navButton { justify-content: flex-start; padding: 0.75rem 0.9rem 0.75rem 1.1rem; font-size: 0.88rem; }
+    .container .navButton svg, .container .logoutButton svg { margin-right: 0.7rem; }
+    .container .logoutButton { justify-content: flex-start; padding: 0.75rem 0.9rem; font-size: 0.88rem; }
+    .container:hover::before { width: 100%; }
+    .container:hover .admin, .container:hover .options, .container:hover .options_2 { width: 100%; }
+    .container:hover .options, .container:hover .options_2 { padding-left: 0.85rem; padding-right: 0.85rem; }
+    .container:hover .navButton { justify-content: flex-start; padding: 0.75rem 0.9rem 0.75rem 1.1rem; font-size: 0.88rem; }
+    .container:hover .logoutButton { justify-content: flex-start; padding: 0.75rem 0.9rem; font-size: 0.88rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .container::before, .admin, .options, .navButton, .navButton svg, .options_2, .logoutButton {
+        transition-duration: 0.01ms;
+    }
+}

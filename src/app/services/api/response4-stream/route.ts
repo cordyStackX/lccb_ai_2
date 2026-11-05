@@ -9,8 +9,12 @@ export async function POST(req: NextRequest) {
     if (auth?.error) {
         return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
+    if (auth.role?.toLowerCase() !== "student") {
+        return NextResponse.json({ success: false, error: "Sensitive academic chat is available only to students" }, { status: 403 });
+    }
 
-    const { prompt, email, last_user_response, last_ai_response, f_name } = await req.json();
+    const { prompt, email } = await req.json();
+    const cleanEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
 
     const apikey = process.env.API_KEY;
 
@@ -18,9 +22,13 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, error: "API is not Valid" }, { status: 401 });
     }
 
-    if (!email) {
-        return NextResponse.json({ success: false, error: "Email not exist invalid user" }, { status: 404 });
+    if (!cleanEmail || auth.email?.trim().toLowerCase() !== cleanEmail) {
+        return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 403 });
     }
+
+    const { data: profile, error: profileError } = await supabaseServer.from("auth").select("f_name")
+        .eq("email", cleanEmail).maybeSingle();
+    if (profileError || !profile) return NextResponse.json({ success: false, error: "User profile not found" }, { status: 404 });
 
     const apiUrl = process.env.RENDER_API || api_links.python_links;
 
@@ -34,10 +42,8 @@ export async function POST(req: NextRequest) {
         body: JSON.stringify({
             prompt: prompt,
             token: apikey,
-            email: email,
-            f_name: f_name,
-            last_user_response: last_user_response,
-            last_ai_response: last_ai_response,
+            email: cleanEmail,
+            f_name: profile.f_name,
             method: "text_sensitive"
         }),
     });
@@ -53,7 +59,7 @@ export async function POST(req: NextRequest) {
     const { data: record, error: record_err } = await supabaseServer
         .from("system_logs")
         .select("api_request, created_at")
-        .eq("request", email)
+        .eq("request", cleanEmail)
         .gte("created_at", new Date().toISOString().split("T")[0])
         .lt("created_at", new Date(Date.now() + 86400000).toISOString().split("T")[0])
         .maybeSingle();
@@ -68,7 +74,7 @@ export async function POST(req: NextRequest) {
         await supabaseServer
             .from("system_logs")
             .update({ api_request: record_add })
-            .eq("request", email);
+            .eq("request", cleanEmail);
     }
 
     if (!record) {
@@ -76,7 +82,7 @@ export async function POST(req: NextRequest) {
             .from("system_logs")
             .insert([
                 {
-                    request: email,
+                    request: cleanEmail,
                     api_request: 1,
                 },
             ]);

@@ -9,15 +9,13 @@ type PaymentEmailStatus = (typeof VALID_STATUSES)[number];
 const BUSINESS_PLAN_LIMITS = {
   pro: {
     current_plan: "Pro",
-    current_pdf_limit: "250",
-    current_limit: "1000000",
-    current_pdf_limit_per_mb: "100",
+    current_page_limit: 5000,
+    current_limit: null,
   },
   enterprise: {
     current_plan: "Enterprise",
-    current_pdf_limit: "10000",
-    current_limit: "5000000",
-    current_pdf_limit_per_mb: "500",
+    current_page_limit: 10000,
+    current_limit: null,
   },
 } as const;
 
@@ -151,9 +149,46 @@ export async function POST(params: NextRequest) {
 
     const planLimits = BUSINESS_PLAN_LIMITS[payment.plan_type?.trim().toLowerCase() as keyof typeof BUSINESS_PLAN_LIMITS];
     if (status === "success" && planLimits) {
+      const { data: currentBusiness, error: currentBusinessError } = await supabaseServer
+        .from("auth_business")
+        .select("current_plan, plan_started_at, plan_expires_at")
+        .eq("email", payment.email)
+        .maybeSingle();
+
+      if (currentBusinessError || !currentBusiness) {
+        console.error("Business subscription lookup error:", currentBusinessError);
+        await supabaseServer.from("payments").update({ status: "pending" }).eq("id", payment.id).eq("status", "success");
+        return NextResponse.json({ success: false, error: "The business plan could not be loaded" }, { status: 500 });
+      }
+
+      const now = new Date();
+      const currentExpiry = currentBusiness.plan_expires_at ? new Date(currentBusiness.plan_expires_at) : null;
+      const sameActivePlan = currentBusiness.current_plan === planLimits.current_plan
+        && currentExpiry !== null
+        && currentExpiry > now;
+      const planStartedAt = sameActivePlan && currentBusiness.plan_started_at
+        ? currentBusiness.plan_started_at
+        : now.toISOString();
+      const termBase = sameActivePlan && currentExpiry ? new Date(currentExpiry) : now;
+      const originalDay = termBase.getUTCDate();
+      if (planLimits.current_plan === "Pro") {
+        termBase.setUTCDate(1);
+        termBase.setUTCMonth(termBase.getUTCMonth() + 1);
+        const lastDayOfMonth = new Date(Date.UTC(termBase.getUTCFullYear(), termBase.getUTCMonth() + 1, 0)).getUTCDate();
+        termBase.setUTCDate(Math.min(originalDay, lastDayOfMonth));
+      } else {
+        const targetYear = termBase.getUTCFullYear() + 1;
+        const originalMonth = termBase.getUTCMonth();
+        termBase.setUTCDate(1);
+        termBase.setUTCFullYear(targetYear);
+        termBase.setUTCMonth(originalMonth);
+        const lastDayOfMonth = new Date(Date.UTC(targetYear, originalMonth + 1, 0)).getUTCDate();
+        termBase.setUTCDate(Math.min(originalDay, lastDayOfMonth));
+      }
+
       const { data: business, error: businessError } = await supabaseServer
         .from("auth_business")
-        .update(planLimits)
+        .update({ ...planLimits, plan_started_at: planStartedAt, plan_expires_at: termBase.toISOString() })
         .eq("email", payment.email)
         .select("email")
         .maybeSingle();

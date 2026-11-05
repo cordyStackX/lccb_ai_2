@@ -9,7 +9,7 @@ export default function DashboardPage() {
     const router = useRouter();
     const [nav, setNav] = useState("");
     const [data, setData] = useState({
-        email: "", name: "", current_limit: 0, current_pdf_limit: 0, current_pdf_limit_per_mb: 0, current_plan: ""
+        email: "", name: "", account_created_at: "", plan_expires_at: null as string | null, current_limit: 10000 as number | null, current_page_limit: 50, current_plan: ""
     });
 
     useEffect(() => {
@@ -21,9 +21,10 @@ export default function DashboardPage() {
             setData(prev => ({ ...prev, 
                 email: result.email,
                 name: result.f_name,
+                account_created_at: result.created_at,
+                plan_expires_at: result.plan_expires_at,
                 current_limit: result.current_limit,
-                current_pdf_limit: result.current_pdf_limit,
-                current_pdf_limit_per_mb: result.current_pdf_limit_per_mb,
+                current_page_limit: result.current_page_limit,
                 current_plan: result.current_plan
              }));
             return;
@@ -38,7 +39,7 @@ export default function DashboardPage() {
     return (
         <main className="admin">
             <Sidebar nav={nav} email={data.email} f_name={data.name} />
-            <Dashboard email={data.email} current_limit={data.current_limit} current_pdf_limit={data.current_pdf_limit} current_pdf_limit_per_mb={data.current_pdf_limit_per_mb} current_plan={data.current_plan} />
+            <Dashboard email={data.email} account_created_at={data.account_created_at} plan_expires_at={data.plan_expires_at} current_limit={data.current_limit} current_page_limit={data.current_page_limit} current_plan={data.current_plan} />
         </main>
     );
 }

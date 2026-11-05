@@ -5,6 +5,7 @@ from .context import EXPECTED_API_KEY, client, supabase, PDF_ENCRYPT_PASSWORD
 from .prompt_loader import load_prompt_template, load_system_prompt
 import hashlib
 import base64
+import re
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 def decrypt_text(payload: str, password: str) -> str:
@@ -31,11 +32,20 @@ def decrypt_text(payload: str, password: str) -> str:
 
     return decrypted.decode("utf-8")
 
+def normalize_student_id(value) -> str | None:
+    if not isinstance(value, str):
+        return None
+    normalized = value.strip().upper()
+    if re.fullmatch(r"[A-Z0-9]{2}-[A-Z0-9]{4}-[A-Z0-9]{3}", normalized):
+        return normalized
+    compact = normalized.replace("-", "")
+    if re.fullmatch(r"[A-Z0-9]{9}", compact):
+        return f"{compact[:2]}-{compact[2:6]}-{compact[6:]}"
+    return None
+
 def _build_prompt_context(data):
     received_token = data.get("token")
     prompt = data.get("prompt", "")
-    last_user_response = str(data.get("last_user_response", "")).strip()
-    last_ai_response = str(data.get("last_ai_response", "")).strip()
     email = data.get("email")
     f_name = data.get("f_name")
     method = data.get("method")
@@ -49,41 +59,53 @@ def _build_prompt_context(data):
     if not f_name:
         return None, (jsonify({"success": False, "error": "Name not found"}), 400)
 
-    rows = supabase.table("chatbot_pdf_file_private").select("id, file_name, summary").eq("email", "admin@admin.com").execute()
-    if not rows.data:
-        return None, (jsonify({"success": False, "error": "No summaries found"}), 404)
-
     user = supabase.table("auth_student").select("school_id").eq("email", email).single().execute()
-    if not user.data["school_id"]:
+    if not user.data or not user.data.get("school_id"):
         return None, (jsonify({"success": False, "error": "User not found"}), 404)
 
-    raw_school_id = user.data["school_id"]
-    try:
-        user_id = decrypt_text(raw_school_id, EXPECTED_API_KEY) if raw_school_id else None
-    except Exception as e:
-        print(f"🔥 Failed to decrypt school_id: {e}", file=sys.stderr)
-        user_id = None
+    # auth_student.school_id is stored as plaintext; only private PDF records
+    # remain encrypted at rest.
+    user_id = normalize_student_id(user.data["school_id"])
+    if not user_id:
+        return None, (jsonify({"success": False, "error": "Could not verify your registered student ID"}), 403)
 
-    # NOTE: 'role' was undefined here before — this print was crashing with
-    # a NameError on every call. If you need role, either select it from
-    # auth_student in the query above (add it to .select(...)) or drop it.
-    print(user_id)
+    record_rows = []
+    offset = 0
+    while True:
+        rows = supabase.table("chatbot_student_records").select("records_ciphertext, source_file_name, page_numbers").eq("student_email", email).range(offset, offset + 999).execute()
+        if not rows.data:
+            break
+        record_rows.extend(rows.data)
+        if len(rows.data) < 1000:
+            break
+        offset += 1000
+    if not record_rows:
+        return None, (jsonify({"success": False, "error": "No released student records found"}), 404)
 
-    summaries = []
-    for item in rows.data:
-        raw_summary = (item.get("summary") or "").strip()
-        if not raw_summary:
+    record_context = []
+    for item in record_rows:
+        encrypted_records = (item.get("records_ciphertext") or "").strip()
+        if not encrypted_records:
             continue
         try:
-            summary_text = decrypt_text(raw_summary, PDF_ENCRYPT_PASSWORD or "")
+            records = json.loads(decrypt_text(encrypted_records, PDF_ENCRYPT_PASSWORD or ""))
         except Exception as e:
-            print(f"🔥 Failed to decrypt summary for {item.get('file_name')}: {e}", file=sys.stderr)
+            print(f"Failed to decrypt a student's private records: {e}", file=sys.stderr)
             continue
-        label = item.get("file_name") or f"PDF {item.get('id')}"
-        summaries.append(f"[{label}]\n{summary_text}")
+        if isinstance(records, list):
+            for record in records:
+                if not isinstance(record, dict):
+                    continue
+                # Enforce row ownership before any record reaches OpenAI.
+                if normalize_student_id(record.get("student_id")) != user_id:
+                    continue
+                record_context.append(json.dumps({
+                    "source": item.get("source_file_name"),
+                    "record": record,
+                }, ensure_ascii=False))
 
-    if not summaries:
-        return None, (jsonify({"success": False, "error": "PDF summaries not found"}), 404)
+    if not record_context:
+        return None, (jsonify({"success": False, "error": "No released records match your registered student ID"}), 404)
 
     template = load_prompt_template()
     system_role = load_system_prompt()
@@ -95,11 +117,11 @@ def _build_prompt_context(data):
         return None, (jsonify({"success": False, "message": "template not found"}), 404)
 
     chunk_size = 8
-    combined_text = "\n\n".join(summaries)
-    if len(summaries) > chunk_size:
+    combined_text = "\n\n".join(record_context)
+    if len(record_context) > chunk_size:
         chunk_summaries = []
-        for i in range(0, len(summaries), chunk_size):
-            chunk_text = "\n\n".join(summaries[i : i + chunk_size])
+        for i in range(0, len(record_context), chunk_size):
+            chunk_text = "\n\n".join(record_context[i : i + chunk_size])
             chunk_prompt = template.format(
                 documents=chunk_text,
                 question=prompt,
@@ -126,23 +148,11 @@ def _build_prompt_context(data):
         question=prompt,
     )
 
-    if last_user_response:
-        final_prompt += (
-            "\n\nConversation context (latest previous user message):\n"
-            f"{last_user_response}"
-        )
-
-    if last_ai_response:
-        final_prompt += (
-            "\n\nConversation context (latest previous AI response):\n"
-            f"{last_ai_response}"
-        )
-
     systemRole = system_role.format(
         role="student",
         name=f_name,
         method=method,
-        user_id=raw_school_id,
+        user_id=user_id or "",
         chat_bot_name=""
     )
 

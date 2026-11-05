@@ -8,6 +8,9 @@ from .generate_tts import generate_tts
 from .generate_voice_to_md import generate_voice_md, generate_voice_md_stream, generate_voice_md_stream_pdf
 from .link_convertions import convert_link_chatbot, convert_link_to_pdf_chatbot, generate_link_chatbot
 from .generate_pdf_cache import generate_pdf_cache
+from .generate_pdf_qa import generate_pdf_qa
+from .extract_sensitive_records import extract_sensitive_records
+from .count_pdf_pages import count_pdf_pages
 from .dashboard_analysis import dashboard_analysis
 
 __all__ = [
@@ -28,5 +31,8 @@ __all__ = [
 	"convert_link_to_pdf_chatbot",
 	"generate_link_chatbot",
 	"generate_pdf_cache",
+	"generate_pdf_qa",
+	"extract_sensitive_records",
+	"count_pdf_pages",
 	"dashboard_analysis",
 ]
