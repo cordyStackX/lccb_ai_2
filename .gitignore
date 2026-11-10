@@ -1,5 +1,7 @@
 volumes/db/data
 volumes/storage
 .env
+.env.bak
+.env.old
 test.http
 docker-compose.override.yml
