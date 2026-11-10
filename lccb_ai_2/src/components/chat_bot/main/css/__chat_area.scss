@@ -1,0 +1,59 @@
+.chat {
+    width: 100%;
+    height: 75vh;
+    overflow-y: auto;
+    align-items: flex-start;
+    flex: 1;
+    gap: 1rem;
+    margin: 40px 0 0 0;
+    overflow-x: hidden;
+    scrollbar-width: none;
+}
+.chat div {
+    padding: 0 0 1rem 0;
+}
+.response {
+    width: min(800px, 100dvw);
+    height: auto;
+    margin: 1rem auto;
+}
+.user_respones {
+    width: 100%;
+    height: auto;
+    justify-content: right;
+    margin: 2rem 0;
+    display: flex;
+    align-items: center;
+}
+.user_respones div {
+    width: min(500px, 70%);
+    padding: 1rem;
+    margin: 0 1rem;
+    background: var(--primary);
+    border-radius: 12px 12px 2px 12px;
+    color: var(--default-color-white);
+    box-shadow: 0 4px 14px rgba(33, 59, 148, 0.25);
+}
+.ai_response {
+    display: block;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 0 0 2rem 0;
+    line-height: 2.2rem;
+    width: 100%;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    opacity: 0;
+    transform: translateY(6px);
+}
+.fadeIn {
+    animation: riseIn 350ms ease forwards;
+}
+@keyframes riseIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

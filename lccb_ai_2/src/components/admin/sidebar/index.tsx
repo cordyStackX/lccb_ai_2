@@ -1,0 +1,238 @@
+"use client";
+import styles from "./css/styles.module.css";
+import Image from "next/image";
+import image_src from "@/config/images_links/assets.json";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { SweetAlert2, Fetch_to, Progress } from "@/utilities";
+import api_link from "@/config/conf/json_config/fetch_url.json";
+import Swal from "sweetalert2";
+
+interface SidebarProps {
+    nav: string;
+}
+
+const NAV_ITEMS = [
+    {
+        key: "dashboard",
+        group: "Workspace",
+        label: "Dashboard",
+        path: "/admin/dashboard",
+        icon: (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2" />
+                <rect x="14" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2" />
+                <rect x="3" y="14" width="7" height="7" stroke="currentColor" strokeWidth="2" />
+                <rect x="14" y="14" width="7" height="7" stroke="currentColor" strokeWidth="2" />
+            </svg>
+        ),
+    },
+    {
+        key: "manage_user",
+        group: "User management",
+        label: "Manage users",
+        path: "/admin/manageuser",
+        icon: (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="10" cy="8" r="4" stroke="currentColor" strokeWidth="2" />
+                <path d="M2 20c0-4 4-6 8-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path d="M14 14l6-6 2 2-6 6-3 1 1-3z" stroke="currentColor" strokeWidth="2" />
+            </svg>
+        ),
+    },
+    {
+        key: "pending_user",
+        group: "User management",
+        label: "Pending users",
+        path: "/admin/pending_user",
+        icon: (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <circle cx="9" cy="8" r="3" stroke="currentColor" strokeWidth="2"/>
+                <path d="M4 19c.7-3 2.3-4.5 5-4.5s4.3 1.5 5 4.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <circle cx="17" cy="16" r="4" stroke="currentColor" strokeWidth="2"/>
+                <path d="M17 14v2l1.5 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+        ),
+    },
+    {
+        key: "document",
+        group: "Knowledge base",
+        label: "Documents",
+        path: "/admin/document",
+        icon: (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                <path d="M14 2v6h6" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                <path d="M8 13h8M8 17h8M8 9h2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+        ),
+    },
+    {
+        key: "embeded_code",
+        group: "Knowledge base",
+        label: "Embed code",
+        path: "/admin/embeded_code",
+        icon: (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 6L2 12L8 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M16 6L22 12L16 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M13.5 4L10.5 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+        ),
+    },
+    {
+        key: "pending_payment",
+        group: "Billing",
+        label: "Payment Status",
+        path: "/admin/pending_payment",
+        icon: (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="5" width="14" height="14" rx="2" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+              <path d="M2 9.5H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M5 14.5H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              <circle cx="18" cy="16" r="5" fill="white" stroke="currentColor" strokeWidth="2" />
+              <path d="M18 13.5V16L19.5 17.2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+        ),
+    },
+    {
+        key: "setting",
+        group: "System",
+        label: "Settings",
+        path: "/admin/setting",
+        icon: (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="2" />
+                <circle cx="9" cy="6" r="2" fill="currentColor" />
+                <circle cx="15" cy="12" r="2" fill="currentColor" />
+                <circle cx="11" cy="18" r="2" fill="currentColor" />
+            </svg>
+        ),
+    },
+];
+
+export default function Sidebar({ nav }: SidebarProps) {
+    const router = useRouter();
+    const [nav_status, setNav_status] = useState("");
+    const [is_open, setIs_open] = useState(false);
+    const [is_expanded, setIs_expanded] = useState(false);
+    const collapseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const expandSidebar = () => {
+        if (collapseTimer.current) clearTimeout(collapseTimer.current);
+        setIs_expanded(true);
+    };
+
+    const scheduleSidebarCollapse = () => {
+        if (collapseTimer.current) clearTimeout(collapseTimer.current);
+        collapseTimer.current = setTimeout(() => setIs_expanded(false), 180);
+    };
+
+    useEffect(() => () => {
+        if (collapseTimer.current) clearTimeout(collapseTimer.current);
+    }, []);
+
+    useEffect(() => {
+        setNav_status(nav);
+    }, [nav]);
+
+    // close the mobile drawer whenever the route/nav changes
+    useEffect(() => {
+        setIs_open(false);
+    }, [nav]);
+
+    const handle_logout = async () => {
+        const alert2 = await SweetAlert2("Signning Out", "Are you sure want to sign out?", "warning", true, "Yes", true, "No");
+
+        if (alert2.isConfirmed) {
+            SweetAlert2("Signning Out", "", "info", false, "", false, "", true);
+            const response = await Fetch_to(api_link.jwt.deauth);
+            Swal.close();
+            if (response.success) {
+                const alert2 = await SweetAlert2("Sign Out", "Complete", "success", true, "Go to Signin Page", false, "");
+                if (alert2.isConfirmed) { router.push("/auth/signin"); }
+            } else {
+                SweetAlert2("Error", "Something went wrong", "error", true, "Ok", false, "");
+            }
+        }
+    };
+
+    return (
+        <>
+            {/* Burger button — only visible on mobile via CSS */}
+            <button
+                type="button"
+                className={is_open ? styles.hide_burger : styles.burger}
+                aria-label={is_open ? "Close menu" : "Open menu"}
+                aria-expanded={is_open}
+                onClick={() => setIs_open((prev) => !prev)}
+            >
+                <span className={`${styles.burgerBar} ${is_open ? styles.burgerBarOpenTop : ""}`} />
+                <span className={`${styles.burgerBar} ${is_open ? styles.burgerBarOpenMid : ""}`} />
+                <span className={`${styles.burgerBar} ${is_open ? styles.burgerBarOpenBot : ""}`} />
+            </button>
+
+            {/* Backdrop — only rendered/visible on mobile when open */}
+            {is_open && (
+                <div className={styles.backdrop} onClick={() => setIs_open(false)} />
+            )}
+
+            <aside
+                className={`${styles.container} ${is_open ? styles.containerOpen : ""} ${is_expanded ? styles.containerExpanded : ""}`}
+                onMouseEnter={expandSidebar}
+                onMouseLeave={scheduleSidebarCollapse}
+                onFocusCapture={expandSidebar}
+                onBlurCapture={(event) => {
+                    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) scheduleSidebarCollapse();
+                }}
+            >
+                <figure className={styles.admin}>
+                    <Image
+                        src={image_src.admin}
+                        alt="admin"
+                        title="admin"
+                        width={56}
+                        height={56}
+                        className={styles.avatar}
+                    />
+                    <span>
+                        <figcaption>Admin</figcaption>
+                        <p>{process.env.NEXT_PUBLIC_GMAIL_USERNAME}</p>
+                    </span>
+                </figure>
+
+                <section className={styles.options}>
+                    {NAV_ITEMS.map((item, index) => (
+                        <div className={styles.navGroup} key={item.key}>
+                            {(index === 0 || NAV_ITEMS[index - 1].group !== item.group) && (
+                                <span className={styles.navGroupLabel}>{item.group}</span>
+                            )}
+                            <button
+                                disabled={nav_status === item.key}
+                                aria-label={item.label}
+                                title={is_expanded ? undefined : item.label}
+                                className={`${styles.navButton} ${nav_status === item.key ? styles.navButtonActive : ""}`}
+                                onClick={() => {router.push(item.path); Progress(true);}}
+                            >
+                                <span className={styles.navIndicator} />
+                                {item.icon}
+                                <span className={styles.navLabel}>{item.label}</span>
+                            </button>
+                        </div>
+                    ))}
+                </section>
+
+                <section className={styles.options_2}>
+                    <button className={styles.logoutButton} onClick={handle_logout}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M10 17V7a2 2 0 0 1 2-2h7v14h-7a2 2 0 0 1-2-2z" />
+                            <path d="M15 12H3m0 0l3-3m-3 3l3 3" />
+                        </svg>
+                        <span className={styles.logoutLabel}>Sign Out</span>
+                    </button>
+                </section>
+            </aside>
+        </>
+    );
+}

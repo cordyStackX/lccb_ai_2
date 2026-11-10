@@ -1,0 +1,139 @@
+"use client";
+import styles from "./css/styles.module.css";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import image_src from "@/config/images_links/assets.json";
+import { useState, useEffect } from "react";
+import api_link from "@/config/conf/json_config/fetch_url.json";
+import {
+    Fetch_to,
+    usePreventExit,
+    React_Spinners,
+    useConfirmExit
+} from "@/utilities";
+
+export default function Update_Password() {
+    const router = useRouter();
+
+    const [form, setForm] = useState({
+        email: "", password: "", c_password: ""
+    });
+    const [status, setStatus] = useState(false);
+    const [message, setMessage] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [isDirty, setIsDirty] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showPassword2, setShowPassword2] = useState(false);
+
+    usePreventExit(isDirty);
+
+    const confirmExit = useConfirmExit({
+        onConfirm: () => {router.push("/auth/signin");}
+    });
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+        setIsDirty(true); 
+    };
+
+    useEffect(() => {
+        const checkCode = async () => {
+            const saveEmail = localStorage.getItem("email");
+            setForm(prev => ({ ...prev, email: saveEmail || ""}));
+        };
+        checkCode();
+    }, []);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        const responds = await Fetch_to(api_link.fotgot_password.updateAccount, form);
+        if (responds.success) {
+            localStorage.clear();
+            await Fetch_to(api_link.jwt.deauth);
+            await Fetch_to(api_link.checkcode, { email: form.email, key: "confirm_code" });
+            router.push("/auth/signin");
+        } else {
+            setStatus(true);
+            setLoading(false);
+            setMessage(responds.message || "Somethings Went Wrong");
+        }
+    };
+
+    return(
+        <section className={`${styles.container} `}>
+            <div className={`${styles.wrapper} `}>
+                {loading ? (
+                    <div className={`${styles.form_styles} `}>
+                        <React_Spinners status="Updating Your Account..." />
+                    </div>
+                ) : (
+                    <form className={styles.form_styles} onSubmit={handleSubmit}>
+                        <section className={`${styles.info} `}>
+                            <figure className={`${styles.logo} `}>
+                                <Image 
+                                src={image_src.lccb}
+                                alt="Logo"
+                                width={65}
+                                height={65}
+                                priority
+                                />
+                                <figcaption>LACO AI</figcaption>
+                            </figure>
+                            <h1>Create your new password</h1>
+                        </section>
+                        <div className={styles.password_field}>
+                            <input 
+                            type={showPassword ? "text" : "password"}
+                            name="password" 
+                            id="password" 
+                            autoComplete="password"
+                            value={form.password}
+                            onChange={handleChange}
+                            placeholder="Create your New password"
+                            style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
+                            required
+                            />
+                            <button
+                                type="button"
+                                className={styles.password_toggle}
+                                aria-pressed={showPassword}
+                                onClick={() => setShowPassword((prev) => !prev)}
+                            >
+                                {showPassword ? "Hide" : "Show"}
+                            </button>
+                        </div>
+                        <div className={styles.password_field}>
+                            <input 
+                            type={showPassword2 ? "text" : "password"}
+                            name="c_password" 
+                            id="c_password" 
+                            autoComplete="password"
+                            value={form.c_password}
+                            onChange={handleChange}
+                            placeholder="Confirm Your New Password"
+                            style={status ? {border: "2px solid var(--default-color-red)", color: "var(--default-color-red)"} : {}}
+                            required
+                            />
+                            <button
+                                type="button"
+                                className={styles.password_toggle}
+                                aria-pressed={showPassword2}
+                                onClick={() => setShowPassword2((prev) => !prev)}
+                            >
+                                {showPassword2 ? "Hide" : "Show"}
+                            </button>
+                        </div>
+                        {message && (
+                            <p className={status ?  "error" : "success"}>{message}</p>
+                        )}
+                        <section className={`${styles.buttons} `}>
+                            <button type="button" onClick={() => { if(confirmExit()) return router.push("/auth/signin"); }} style={{backgroundColor: "var(--secondary)"}}>Back</button>
+                            <button>Update</button>
+                        </section>
+                    </form>
+                )}
+            </div>
+        </section>
+    );
+}

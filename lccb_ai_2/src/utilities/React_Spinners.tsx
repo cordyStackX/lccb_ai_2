@@ -1,0 +1,23 @@
+"use client";
+import { Puff } from "react-loader-spinner";
+
+type StatusType = {
+    status: string
+}
+
+export default function React_Spinners({status} : StatusType) {
+    return(
+        <div style={{ height: "100%", flexFlow: "column", padding: "3rem", display: "flex", justifyContent: "center", alignItems: "center" }}>
+            <Puff
+            visible={true}
+            height="80"
+            width="80"
+            color="#123a9b"
+            ariaLabel="puff-loading"
+            wrapperStyle={{}}
+            wrapperClass=""
+            />
+            <h3 style={{ textAlign: "center" }} className="gradientTextAnimation" >{status}</h3>
+        </div>
+    );
+}

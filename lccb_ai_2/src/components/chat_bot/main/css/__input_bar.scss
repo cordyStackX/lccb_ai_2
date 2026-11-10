@@ -1,0 +1,66 @@
+/* ---------- Input bar ---------- */
+.ask {
+    width: min(900px, 90dvw);
+    height: auto;
+    overflow: visible;
+    border-radius: 14px;
+    padding: 0.5rem 0.75rem;
+    margin: 1.3rem 1rem;
+    background: var(--default-color-white);
+    box-shadow: 0 2px 10px var(--fx-color-bg);
+    border: 1px solid var(--default-color-white-2);
+    bottom: 0;
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+    position: relative;
+    transition: box-shadow 220ms ease, border-color 220ms ease;
+}
+.ask:focus-within {
+    border-color: var(--secondary);
+    box-shadow: 0 0 0 3px var(--fx-color-bg);
+}
+.expandableInput {
+    flex: 1;
+    min-height: 44px;
+    max-height: 150px;
+    padding: 0.7rem 3rem 0.7rem 0.75rem; /* room on the right for the button */
+    border: none;
+    outline: none;
+    background: transparent;
+    resize: none;
+    font-family: inherit;
+    font-size: 15px;
+    line-height: 1.5;
+    font-weight: 400;
+    color: var(--foreground);
+    overflow-y: hidden;
+    &::placeholder {
+        color: #848484; // darker gray, adjust to taste
+        opacity: 1; // Firefox dims placeholder opacity by default, this overrides it
+    }
+}
+.sendButton {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: none;
+    color: var(--default-color-white);
+    background: var(--primary);
+    cursor: pointer;
+    position: absolute;
+    right: 12px;
+    bottom: 10px;
+    transition: all 200ms ease;
+}
+.sendButton:hover:not(:disabled) {
+    background: var(--secondary);
+    box-shadow: 0 0 8px 1px var(--fx-color);
+}
+.sendButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

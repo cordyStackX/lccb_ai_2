@@ -1,0 +1,80 @@
+.blinkTwice {
+  animation: blinkTwice 5s ease infinite;
+}
+
+@keyframes blinkTwice {
+  0%   { opacity: 1; }
+  15%  { opacity: 0.5; }
+  30%  { opacity: 1; }
+  45%  { opacity: 0.5; }
+  60%  { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+
+/* Gradient text animation */
+.gradientTextAnimation {
+  background: linear-gradient(
+    90deg,
+    #808080 0%,
+    #c0c0c0 25%,
+    #232323 50%,
+    #c0c0c0 75%,
+    #808080 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientShift 1s forwards infinite;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% center;
+  }
+  50% {
+    background-position: 50% center;
+  }
+  100% {
+    background-position: 100% center;
+  }
+}
+
+/* Gradient load div animation */
+.gradientDivAnimation {
+  background: linear-gradient(
+    90deg,
+    var(--default-color-white) 0%,
+    #c0c0c0 25%,
+    transparent 50%,
+    #c0c0c0 75%,
+    var(--default-color-white) 100%
+  );
+  background-size: 200% 100%;
+  animation: gradientShiftDiv 1s forwards infinite;
+}
+
+@keyframes gradientShiftDiv {
+  0% {
+    background-position: 0% center;
+  }
+  50% {
+    background-position: 50% center;
+  }
+  100% {
+    background-position: 100% center;
+  }
+}
+
+/* Glow effect */
+#nprogress .bar {
+  background: #1A54B8;
+  height: 3px;
+
+  box-shadow:
+    0 0 5px #1A54B8,
+    0 0 10px #1A54B8,
+    0 0 20px #1A54B8;
+
+  transition: all 0.3s ease;
+}

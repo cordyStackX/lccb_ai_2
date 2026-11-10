@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <meta name="theme-color" content="#0f4e82" />
+        <title>Offline</title>
+        <style>
+            :root {
+                color-scheme: light;
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            html,
+            body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+            }
+
+            body {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background: #0f4e82;
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                color: #ffffff;
+                text-align: center;
+                padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right))
+                    max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+            }
+
+            .offline-wrap {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .offline-image {
+                width: min(220px, 52vw);
+                height: auto;
+                image-rendering: crisp-edges;
+            }
+
+            .offline-title {
+                margin: 0;
+                font-size: clamp(1rem, 1vw + 1.3rem, 2rem);
+                line-height: 1.2;
+            }
+        </style>
+    </head>
+    <body>
+        <main class="offline-wrap" role="main" aria-live="polite">
+            <img class="offline-image" src="/offline.png" alt="Offline" width="200" height="220" />
+            <h1 class="offline-title">No Internet Connection</h1>
+        </main>
+    </body>
+</html>

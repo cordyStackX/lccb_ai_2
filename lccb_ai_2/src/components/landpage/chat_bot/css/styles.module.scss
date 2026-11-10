@@ -1,0 +1,69 @@
+.container {
+    position: fixed;
+    width: 60px;
+    height: 60px;
+    background: var(--default-color-black);
+    z-index: 999;
+    right: 2rem;
+    bottom: 2rem;
+    border-radius: 50px;
+    transition: all 0.8s ease;
+    cursor: pointer;
+    overflow: hidden;
+    justify-content: flex-start;
+    display: flex;
+    align-items: center;
+    animation: spand_in 3000ms 2s ease-in-out;
+}
+@keyframes spand_in {
+    0% {
+        width: 60px;
+    }
+    20% {
+        width: 190px;
+    }
+    70% {
+        width: 190px;
+    }
+    100% {
+        width: 60px;
+    }
+}
+.container p {
+    opacity: 0;
+    margin-left: 10px; 
+    color: white;
+    white-space: nowrap;
+    margin: 0 20px;
+    transition: opacity 0.8s ease;
+    animation: fade_in 3000ms 2s ease-in-out; 
+}
+@keyframes fade_in {
+    0% {
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    70% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+.container:hover {
+    width: 190px;
+}
+
+.container:hover p {
+    opacity: 1;
+}
+.container:active {
+    transform: scale(0.6);
+}
+.plushie {
+    position: absolute;
+    right: 12px;
+}

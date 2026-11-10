@@ -1,0 +1,77 @@
+{
+	"signin" : "/services/supabase/auth/signin",
+	"check_status" : "/services/supabase/auth/check_status",
+	"checkcode" : "/services/supabase/auth/check_code",
+	"signup" : {
+	    "checkEmail" : "/services/supabase/auth/register/check_email",
+		"createAccount" : "/services/supabase/auth/register/create_account"
+	},
+	"fotgot_password" : {
+		"checkEmail" : "/services/supabase/auth/forgot_password/check_email",
+		"updateAccount" : "/services/supabase/auth/forgot_password/update_account"
+	},
+	"business" : {
+		"signup" : {
+			"checkEmail" : "/services/supabase/auth_business/register/check_email",
+			"createAccount" : "/services/supabase/auth_business/register/create_account"
+		},
+		"update" : "/services/supabase/auth_business/update"
+	},
+	"update" : "/services/supabase/auth/update",
+	"jwt" : {
+		"deauth" : "/services/jwt/deauth",
+		"verify" : "/services/jwt/verify"
+	},
+	"responses_stream" : "/services/api/response-stream",
+	"responses2_stream" : "/services/api/response2-stream",
+	"voice_stream" : "/services/api/response3-stream",
+	"response4-stream" : "/services/api/response4-stream",
+	"tts" : "/services/api/tts",
+	"save_responses" : "/services/api/save_responses",
+	"retrieve_responses" : "/services/api/retrieve_responses",
+	"delete_responses" : "/services/api/delete_responses",
+	"chatbot_public" : "/services/api/chatbot_public",
+	"storage" : {
+		"uploadPdf" : "/services/supabase/storage/uploadpdf",
+		"retrieve" : "/services/supabase/storage/retrieve",
+		"deletepdf" : "/services/supabase/storage/deletepdf",
+		"uploadimg" : "/services/supabase/storage/uploadimg",
+		"uploadpdf_chatbot" : "/services/supabase/storage/uploadpdf_chatbot",
+		"retrieve_chatbot" : "/services/supabase/storage/retrieve_chatbot",
+		"page_usage" : "/services/supabase/storage/page_usage",
+		"processing_status" : "/services/supabase/storage/processing_status",
+		"downloadpdf_chatbot" : "/services/supabase/storage/downloadpdf_chatbot",
+		"deletepdf_chatbot" : "/services/supabase/storage/deletepdf_chatbot",
+		"fetchimg" : "/services/supabase/storage/fetchimg",
+		"lbc_image_retieve" : "/services/supabase/storage/lbc_image_retieve",
+		"uploadpdf_sensitive" : "/services/supabase/storage/uploadpdf_chatbot_sensitive",
+		"retrieve_sensitive" : "/services/supabase/storage/retrieve_chatbot_sensitive",
+		"student_records" : "/services/supabase/storage/student_records",
+		"recheck_sensitive_records" : "/services/supabase/storage/recheck_sensitive_records",
+		"deletepdf_sensitive" : "/services/supabase/storage/deletepdf_chatbot_sensitive",
+		"downloadpdf_sensitive" : "/services/supabase/storage/downloadpdf_chatbot_sensitive",
+		"retrieve_chatbot_suggest" : "/services/supabase/storage/retrieve_chatbot_suggest",
+		"update_chatbot_questions" : "/services/supabase/storage/update_chatbot_questions",
+		"generate_chatbot_qa" : "/services/supabase/storage/generate_chatbot_qa",
+    "generate_link_chatbot" : "/services/supabase/storage/generate_link_chatbot"
+	},
+	"admin" : {
+		"retrieve_user" : "/services/supabase/admin/retrieve_user",
+		"delete_user" : "/services/supabase/admin/delete_user",
+		"update_user_status" : "/services/supabase/admin/update_user_status",
+		"retrieve_pdf_record" : "/services/supabase/admin/retrieve_pdf_record",
+		"system_logs" : "/services/supabase/admin/system_logs",
+		"dashboard" : "/services/supabase/admin/dashboard",
+		"get_suspension_state" : "/services/supabase/admin/get-suspension-state",
+		"set_suspension_state" : "/services/supabase/admin/suspension-state",
+		"update_chatbot" : "/services/supabase/admin/update_chatbot",
+    "pending_payment" : "/services/supabase/admin/pending_payment",
+    "update_payment" : "/services/supabase/admin/update_payment"
+	},
+  "payment" : {
+    "retrieve" : "/services/supabase/payments/retrieve",
+    "paying" : "/services/supabase/payments/paying",
+    "refund" : "/services/supabase/payments/refund",
+    "resubmit" : "/services/supabase/payments/resubmit"
+  }
+}

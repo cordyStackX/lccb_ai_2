@@ -5,3 +5,11 @@ volumes/storage
 .env.old
 test.http
 docker-compose.override.yml
+
+**/node_modules/
+**/.next/
+**/.venv/
+**/venv/
+**/__pycache__/
+**/*.pyc
+**/tsconfig.tsbuildinfo

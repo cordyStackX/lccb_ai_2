@@ -1,0 +1,349 @@
+.container {
+    width: 0;
+    height: calc(100svh - 72px);
+    background-color: #e9edef;
+    z-index: 2;
+    transition: all 800ms ease;
+    overflow: hidden;
+    opacity: 0;
+    border-right: 1px solid rgba(33, 59, 148, 0.14);
+    color: var(--foreground);
+    padding: 0 0.5rem;
+}
+.open {
+    width: min(340px, 88vw);
+    opacity: 1;
+}
+.wrapper {
+    width: 100%;
+    height: auto;
+    margin: 0 auto;
+    display: flex;
+    flex-flow: column;
+}
+.options {
+    width: 100%;
+    height: auto;
+    padding: 0.5rem 0.7rem;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.options button {
+    width: 100%;
+    height: 50px;
+    cursor: pointer;
+    background: var(--primary);
+    border: transparent;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 0.9rem;
+    margin: 0.5rem 0;
+    position: relative;
+    color: var(--default-color-white);
+}
+.options button:active {
+    opacity: 0.5;
+}
+
+.search_pdf {
+    width: 100%;
+    height: 50px;
+    padding: 1rem;
+    background: transparent;
+    border: 1px solid rgba(24, 24, 24, 0.2);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    border-radius: 8px;
+    text-align: left;
+    font-size: 0.9rem;
+    margin: 1rem 0;
+    color: var(--foreground);
+}
+.viewTabs {
+    width: 100%;
+    display: flex;
+    gap: 0.5rem;
+    margin: 0.5rem 0 1rem 0;
+}
+.viewTabs button {
+    flex: 1;
+    height: 42px;
+    border-radius: 8px;
+    border: 1px solid rgba(24, 24, 24, 0.16);
+    background: transparent;
+    color: var(--foreground);
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+.tabActive {
+    background: var(--primary) !important;
+    color: var(--default-color-white) !important;
+    border-color: var(--primary) !important;
+}
+.chat_history {
+    width: 100%;
+    height: auto;
+    display: flex;
+    flex-flow: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+.history_base {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+.history_base h3 {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+.history_container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: auto;
+    max-height: calc(100svh - 250px);
+}
+.history_item {
+    width: 100%;
+    min-height: 72px;
+    padding: 0.6rem;
+    border-radius: 10px;
+    margin: 0;
+    border: 1px solid rgba(24, 24, 24, 0.08);
+    background: transparent;
+    color: var(--foreground);
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    overflow: visible;
+}
+.history_item:hover {
+    background: rgba(255, 255, 255, 0.72);
+}
+.history_icon {
+    margin: 0 0.5rem;
+    flex: 0 0 auto;
+}
+.history_title {
+    flex: 1;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+.history_preview {
+    flex: 1;
+    font-size: 0.8rem;
+    color: var(--default-color-gray);
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+.no_history {
+    margin: 20px 0;
+    color: var(--default-color-gray);
+    text-align: center;
+}
+.chat_history select {
+    background: transparent;
+    border: transparent;
+    outline: none;
+    cursor: pointer;
+    margin: 1rem 0;
+    color: var(--adaptive-color-text);
+    font-weight: 900;
+}
+.pdf_base {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+.pdf_base h3 {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+.pdf_container {
+    width: 100%;
+    overflow: auto;
+    max-height: calc(100svh - 250px);
+}
+.fx_load {
+    width: 100%;
+    height: 80px;
+    padding: 0.3rem;
+    border-radius: 8px;
+    margin: 10px 0;
+}
+.pdf_container span {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.3rem;
+    border-radius: 8px;
+    margin: 5px 0;
+}
+.pdf_icon {
+    margin: 0 0.5rem;
+}
+.pdf_container button {
+    width: 100%;
+    height: 50px;
+    cursor: pointer;
+    background: transparent;
+    border: transparent;
+    text-align: left;
+    margin: 0.5rem;
+    font-size: 0.9rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    color: var(--foreground);
+}
+.pdf_options {
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+    pointer-events: auto;
+    flex: 0 0 auto;
+}
+.image_base {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+.image_base h3 {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+.image_container {
+    width: 100%;
+    overflow: auto;
+    max-height: calc(100svh - 250px);
+}
+.image_container span {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.3rem;
+    border-radius: 8px;
+    margin: 5px 0;
+}
+.image_icon {
+    margin: 0 0.5rem;
+}
+.image_container button {
+    width: 100%;
+    height: 50px;
+    cursor: pointer;
+    background: transparent;
+    border: transparent;
+    text-align: left;
+    margin: 0.5rem;
+    font-size: 0.9rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    color: var(--foreground);
+}
+
+.history_container,
+.pdf_container,
+.image_container {
+    max-height: calc(100svh - 250px);
+}
+
+.history_header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.25rem 0.3rem 0.75rem;
+}
+
+.history_header h3 {
+    margin: 0;
+}
+
+.delete_selected {
+    padding: 0.4rem 0.65rem;
+    border: 1px solid var(--default-color-red);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--default-color-red);
+    cursor: pointer;
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+
+.delete_selected:hover:not(:disabled) {
+    background: var(--default-color-red);
+    color: var(--default-color-white);
+}
+
+.delete_selected:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+.history_item input[type="checkbox"] {
+    flex: 0 0 auto;
+    width: 16px;
+    height: 16px;
+    margin: 0 0.25rem 0 0;
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+
+.pdf_header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.25rem 0.3rem 0.75rem;
+}
+
+.select_all {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    font-weight: 700;
+}
+
+.select_all input,
+.pdf_container input[type="checkbox"] {
+    flex: 0 0 auto;
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+
+.select_all input:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+

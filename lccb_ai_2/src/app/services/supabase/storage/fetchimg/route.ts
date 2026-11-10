@@ -1,0 +1,39 @@
+import { NextRequest, NextResponse } from "next/server";
+import { supabaseServer } from "@/lib/supabase-server";
+// import { Security } from "@/lib/security";
+import { rateLimit } from "@/firewall/rate_limit";
+
+export async function POST(req: NextRequest) {
+    
+    const rate = rateLimit(req, { windowMs: 1000, max: 5, keyPrefix: "fetchimg" });
+    if (!rate.allowed) {
+        const retryAfterSeconds = Math.ceil((rate.resetAt - Date.now()) / 1000);
+        return NextResponse.json(
+            { success: false, error: "Too many requests. Please try again later." },
+            { status: 429, headers: { "Retry-After": String(retryAfterSeconds) } }
+        );
+    }
+
+    // const auth = await Security(req);
+    // if(auth?.error) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+
+    const { email } = await req.json();
+
+    if (!email) return NextResponse.json({ success: false, error: "Email not found" }, { status: 404 });
+
+    const { data, error } = await supabaseServer
+    .from("profile_pic")
+    .select("file_link")
+    .eq("email", email);
+
+    if (error) {
+        console.error("Supabase Query Error: ", error);
+        return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
+    }
+
+
+    if (data && data.length <= 0) return NextResponse.json({ success: false, error: "No Image found" }, { status: 405 });
+
+    return NextResponse.json({ success: true, message: data }, { status: 200 });
+
+}
