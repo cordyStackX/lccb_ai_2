@@ -18,7 +18,7 @@ services:
       - ./lccb_ai_2:/app
     command: sh -c "pip install -r python/python_txt_file/requirements.txt && python python/main.py"
     ports:
-      - "127.0.0.1:5000:5000"
+      - "127.0.0.1:5100:5100"
 
 volumes:
   laco_web_modules:
