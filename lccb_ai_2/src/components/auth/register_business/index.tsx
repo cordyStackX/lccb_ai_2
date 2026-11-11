@@ -12,12 +12,12 @@ import {
     React_Spinners,
     Progress
 } from "@/utilities";
-import { Turnstile } from "@marsidev/react-turnstile";
+// import { Turnstile } from "@marsidev/react-turnstile";
 
 
 export default function SignUpBusiness() {
     const router = useRouter();
-    const [turnstileToken, setTurnstileToken] = useState("");
+    // const [turnstileToken, setTurnstileToken] = useState("");
     const [form, setForm] = useState({
         email: "", name: "", year: "", business_name: "", role: "Business", assign_by: "", institutions: "", specify_institutions: ""
     });
@@ -48,7 +48,7 @@ export default function SignUpBusiness() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        const responds = await Fetch_to(api_link.business.signup.checkEmail, { email: form.email, assign_by: form.assign_by, role: form.role, year: form.year, turnstileToken });
+        const responds = await Fetch_to(api_link.business.signup.checkEmail, { email: form.email, assign_by: form.assign_by, role: form.role, year: form.year });
         if (responds.success) {
             localStorage.setItem("email", form.email);
             localStorage.setItem("name", form.name);
@@ -228,11 +228,7 @@ export default function SignUpBusiness() {
                         </div>
                         ) : null}
 
-                        <Turnstile
-                            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-                            onSuccess={(token) => setTurnstileToken(token)}
-                            options={{ theme: "light" }}
-                        />
+                       
                         {message && (
                             <p className={status ?  "error" : "success"}>{message}</p>
                         )}
