@@ -1,0 +1,24 @@
+services:
+  laco-web:
+    image: node:20-alpine
+    working_dir: /app
+    restart: unless-stopped
+    volumes:
+      - ./lccb_ai_2:/app
+      - laco_web_modules:/app/node_modules
+    command: sh -c "corepack enable && pnpm install && pnpm build && pnpm run start"
+    ports:
+      - "127.0.0.1:3000:3000"
+
+  laco-py:
+    image: python:3.12-slim
+    working_dir: /app
+    restart: unless-stopped
+    volumes:
+      - ./lccb_ai_2:/app
+    command: sh -c "pip install -r python/python_txt_file/requirements.txt && python python/main.py"
+    ports:
+      - "127.0.0.1:5000:5000"
+
+volumes:
+  laco_web_modules:

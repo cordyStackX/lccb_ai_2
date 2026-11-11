@@ -4,7 +4,6 @@ volumes/storage
 .env.bak
 .env.old
 test.http
-docker-compose.override.yml
 
 **/node_modules/
 **/.next/
