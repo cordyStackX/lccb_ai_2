@@ -1,5 +1,5 @@
 {
-	"python_links" : "http://laco-py:5000/",
-	"share_ip_link" : "",
+	"python_links" : "http://laco-py:5100/",
+	"share_ip_link" : "http://laco-py:5100/",
 	"iframe_localhost" : "http://localhost:3000/chat_bot?email=admin@admin.com"
 }
