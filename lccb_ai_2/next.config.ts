@@ -7,7 +7,7 @@ const buildCsp = (frameAncestors: string) =>
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com",
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: http://localhost:8000 http://kong:8000 https://*.supabase.co",
+    "img-src 'self' data: blob: http://localhost:8000 http://kong.local:8000 https://*.supabase.co",
     "font-src 'self' data:",
     "connect-src 'self' http://localhost:8000 https://challenges.cloudflare.com https://*.supabase.co",
     "frame-src 'self' https://challenges.cloudflare.com",
