@@ -88,7 +88,7 @@ def download_file():
             f.write(file_bytes)
 
         # Schedule deletion after 5 minutes
-        delete_file_after_delay(tmp_path, delay=100)
+        delete_file_after_delay(tmp_path, delay=30000)
 
         return jsonify({
             "success": True,
