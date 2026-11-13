@@ -65,7 +65,8 @@ function isAllowedRequestOrigin(req: NextRequest): boolean {
         "http://localhost:3000",
         "https://localhost:3000",
         "http://laco-py:5000/",
-        api_link.share_ip_link
+        api_link.share_ip_link,
+        "http://app.laco.local/"
     ];
 
     const allowedOrigins = new Set(

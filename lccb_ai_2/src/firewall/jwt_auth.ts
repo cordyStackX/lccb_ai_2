@@ -1,8 +1,17 @@
 "use server";
 import jwt from "jsonwebtoken";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { supabaseServer } from "@/lib/supabase-server";
 import { decryptStudentId } from "@/firewall/encryptions";
+
+function getProtocol(value: string | null | undefined) {
+    if (!value) return "";
+    try {
+        return new URL(value).protocol.replace(":", "");
+    } catch {
+        return "";
+    }
+}
 
 export async function auth_jwt(email: string) {
     const { data, error } = await supabaseServer
@@ -67,12 +76,21 @@ export async function auth_jwt(email: string) {
 
     const token = jwt.sign({ final_data }, process.env.JWT_SECRET || "", { expiresIn: "7d" });
 
+    const requestHeaders = await headers();
+    const forwardedProto = requestHeaders.get("x-forwarded-proto")?.split(",")[0].trim().toLowerCase();
+    const requestOrigin = requestHeaders.get("origin") || requestHeaders.get("referer");
+    const configuredAppUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "";
+    const requestProtocol = forwardedProto
+        || getProtocol(requestOrigin)
+        || getProtocol(configuredAppUrl)
+        || (process.env.NODE_ENV === "production" ? "https" : "http");
+
     const cookieStore = await cookies();
     cookieStore.set({
         name: "token",
         value: token,
         httpOnly: true,
-        secure: true,
+        secure: requestProtocol === "https",
         sameSite: "strict",
         path: "/",
         maxAge: 60 * 60 * 24 * 7,
