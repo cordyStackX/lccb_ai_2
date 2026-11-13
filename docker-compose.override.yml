@@ -9,6 +9,8 @@ services:
     command: sh -c "corepack enable && pnpm install && pnpm build && pnpm run start"
     ports:
       - "127.0.0.1:3000:3000"
+    extra_hosts:
+      - "kong.local:host-gateway"
 
   laco-py:
     image: python:3.12-slim
