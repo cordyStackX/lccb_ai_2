@@ -1,6 +1,6 @@
 
-Documents:
+Prepared questions and answers and other provided source data:
 {documents}
 
-Question:
+Visitor's question:
 {question}

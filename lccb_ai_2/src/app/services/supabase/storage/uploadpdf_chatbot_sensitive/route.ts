@@ -41,6 +41,27 @@ export async function POST(req: NextRequest) {
     const pdfPassword = process.env.PDF_ENCRYPT_PASSWORD;
     if (!token || !pdfPassword) return NextResponse.json({ success: false, error: "Sensitive document processing is not configured" }, { status: 500 });
     const apiUrl = process.env.RENDER_API || apiLinks.python_links;
+    if (form.get("privacyConfirmed") !== "true") {
+        const warnings: Array<{ fileName: string; findings: Array<{ category: string; pages: number[] }> }> = [];
+        for (const file of files) {
+            const scan = await Fetch_to(`${apiUrl}scan-pdf-privacy`, {
+                token,
+                file_name: file.name,
+                pdf_base64: Buffer.from(await file.arrayBuffer()).toString("base64"),
+            });
+            if (!scan.success) {
+                console.error("Sensitive PDF privacy scan failed:", scan.message);
+                return NextResponse.json({ success: false, error: "Could not complete the privacy scan. Please try again." }, { status: 503 });
+            }
+            if (scan.data?.contains_sensitive_info && Array.isArray(scan.data.findings)) {
+                warnings.push({ fileName: file.name, findings: scan.data.findings });
+            }
+        }
+        if (warnings.length > 0) {
+            // This is a successful preflight scan awaiting confirmation, not an upload error.
+            return NextResponse.json({ success: true, requiresPrivacyConfirmation: true, warnings });
+        }
+    }
     const studentsById = new Map<string, string | null>();
     for (let offset = 0; ; offset += 1000) {
         const { data: studentRows, error: studentsError } = await supabaseServer.from("auth_student")

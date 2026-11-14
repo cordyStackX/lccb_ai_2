@@ -3,22 +3,14 @@ import styles from "./css/styles.module.css";
 import { useEffect, useState } from "react";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import { Fetch_to, Popup_info, SweetAlert2 } from "@/utilities";
-import Markdown from "react-markdown";
 import { DocFile, useDocumentTable } from "@/modules/documents/useDocumentTable";
-import remarkGfm from "remark-gfm";
+import PdfViewer from "@/modules/documents/PdfViewer";
+import UploadDisclaimer from "@/modules/documents/UploadDisclaimer";
 
 const ViewIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" />
         <circle cx="12" cy="12" r="3" />
-    </svg>
-);
-
-const DownloadIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-        <polyline points="7 10 12 15 17 10" />
-        <line x1="12" y1="15" x2="12" y2="3" />
     </svg>
 );
 
@@ -38,12 +30,6 @@ const LockIcon = () => (
     </svg>
 );
 
-const MagicIcon = () => (
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-        <path d="m15 4 5 5M4 20l7.5-7.5M13 3l1.5 3L18 7.5l-3.5 1.5L13 12l-1.5-3L8 7.5 11.5 6 13 3Z" />
-        <path d="m5 13 1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2Z" />
-    </svg>
-);
 
 const SKELETON_ROWS = 6;
 
@@ -108,99 +94,30 @@ function ProcessingJourney({ journey, onDismiss }: { journey: Journey; onDismiss
     );
 }
 
-type QuestionAnswer = { question: string; answer: string; page?: number };
-
-function parseQuestionAnswers(summary?: string): QuestionAnswer[] {
-    if (!summary) return [];
-    try {
-        const parsed: unknown = JSON.parse(summary.trim().replace(/^```json\s*/i, "").replace(/```$/i, ""));
-        if (!Array.isArray(parsed)) return [];
-        return parsed.filter((item): item is QuestionAnswer => Boolean(item) && typeof item.question === "string" && typeof item.answer === "string")
-            .map(({ question, answer, page }) => ({ question, answer, ...(Number.isInteger(page) ? { page } : {}) }));
-    } catch {
-        return [];
-    }
-}
-
 function DocumentTableSection({ title, description, sensitive, email, table, onLinkJourneyStart, onLinkJourneySuccess, onLinkJourneyError }: DocumentTableSectionProps) {
     const {
         fileRef, data, search, setSearch, page, setPage, totalPages,
         isLoading, refresh, setRefresh, triggerUpload, handleFile, handleFiles,
-        downloadFile, deleteFile, deleteSelected,
+        deleteFile, deleteSelected,
         selectedIds, toggleSelect, toggleSelectAll,
     } = table;
 
-    const [viewingDoc, setViewingDoc] = useState<DocFile | null>(null);
-    const [questionsAndAnswers, setQuestionsAndAnswers] = useState<QuestionAnswer[]>([]);
-    const [isSaving, setIsSaving] = useState(false);
-    const [isGeneratingQuestions, setIsGeneratingQuestions] = useState(false);
-    const [generatingAnswerIndex, setGeneratingAnswerIndex] = useState<number | null>(null);
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [isPdfDialogOpen, setIsPdfDialogOpen] = useState(false);
+    const [hasAcceptedUploadDisclaimer, setHasAcceptedUploadDisclaimer] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
     const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
     const [webLink, setWebLink] = useState("");
     const [isUploadingLink, setIsUploadingLink] = useState(false);
+    const [preview, setPreview] = useState<{ filePath: string; name: string } | null>(null);
 
-    const openReview = (doc: DocFile) => {
-        setViewingDoc(doc);
-        setQuestionsAndAnswers(parseQuestionAnswers(doc.summary));
+    const openPdfPreview = (doc: DocFile) => {
+        if (!doc.file) return;
+        setPreview({ filePath: doc.file, name: doc.file_name || "PDF preview" });
     };
 
-    const closeReview = () => {
-        if (isSaving) return;
-        setViewingDoc(null);
-        setQuestionsAndAnswers([]);
-    };
-
-    const updateQuestionAnswer = (index: number, field: keyof QuestionAnswer, value: string) => {
-        setQuestionsAndAnswers((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, [field]: value } : item));
-    };
-
-    const saveQuestionAnswers = async () => {
-        if (!viewingDoc?.id || questionsAndAnswers.length === 0) return;
-        setIsSaving(true);
-        const response = await Fetch_to(api_link.storage.update_chatbot_questions, { id: viewingDoc.id, email, questionsAndAnswers });
-        setIsSaving(false);
-        if (!response.success) {
-            await SweetAlert2("Unable to save", response.message || "Please try again.", "error", true, "OK", false, "");
-            return;
-        }
-        setRefresh(true);
-        closeReview();
-    };
-
-    const generateQuestions = async () => {
-        if (!viewingDoc?.id) return;
-        setIsGeneratingQuestions(true);
-        const response = await Fetch_to(api_link.storage.generate_chatbot_qa, { id: viewingDoc.id, email, action: "questions" });
-        setIsGeneratingQuestions(false);
-        if (!response.success || !Array.isArray(response.data?.questions)) {
-            await SweetAlert2("Unable to generate questions", response.message || "Please try again.", "error", true, "OK", false, "");
-            return;
-        }
-        setQuestionsAndAnswers(response.data.questions.map((item: unknown) => {
-            if (typeof item === "string") return { question: item, answer: "" };
-            if (!item || typeof item !== "object") return { question: "", answer: "" };
-            const generated = item as { question?: unknown; answer?: unknown; page?: unknown };
-            return {
-                question: typeof generated.question === "string" ? generated.question : "",
-                answer: typeof generated.answer === "string" ? generated.answer : "",
-                ...(Number.isInteger(generated.page) ? { page: generated.page as number } : {}),
-            };
-        }));
-    };
-
-    const generateAnswer = async (index: number) => {
-        if (!viewingDoc?.id || !questionsAndAnswers[index]?.question.trim()) return;
-        setGeneratingAnswerIndex(index);
-        const response = await Fetch_to(api_link.storage.generate_chatbot_qa, { id: viewingDoc.id, email, action: "answer", question: questionsAndAnswers[index].question });
-        setGeneratingAnswerIndex(null);
-        if (!response.success || typeof response.data?.answer !== "string") {
-            await SweetAlert2("Unable to generate answer", response.message || "Please try again.", "error", true, "OK", false, "");
-            return;
-        }
-        updateQuestionAnswer(index, "answer", response.data.answer);
+    const closePdfPreview = () => {
+        setPreview(null);
     };
 
     const uploadWebLink = async () => {
@@ -296,7 +213,16 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
                 accept="application/pdf"
                 multiple
                 style={{ display: "none" }}
-                onChange={(event) => { handleFile(event); setIsPdfDialogOpen(false); setIsDragging(false); }}
+                onChange={(event) => {
+                    if (!hasAcceptedUploadDisclaimer) {
+                        event.target.value = "";
+                        return;
+                    }
+                    handleFile(event);
+                    setIsPdfDialogOpen(false);
+                    setIsDragging(false);
+                    setHasAcceptedUploadDisclaimer(false);
+                }}
             />
 
             <div className={styles.tableScroll}>
@@ -333,7 +259,7 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
                                     <td className={styles.file_name}>{doc.file_name}</td>
                                     <td className={styles.file_name}> {doc.suggest} </td>
                                     <td>
-                                        <button className={styles.button_view} title="Review questions and answers" onClick={() => openReview(doc)}>
+                                        <button className={styles.button_view} title="View PDF" aria-label={`View ${doc.file_name || "PDF"}`} onClick={() => openPdfPreview(doc)}>
                                             <ViewIcon />
                                         </button>
                                         <button className={styles.button_delete} onClick={() => handleDeleteFile(doc)}>
@@ -371,47 +297,7 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
                 </button>
             </div>
 
-            {viewingDoc && (
-                <div className={`${styles.modalOverlay} ${questionsAndAnswers.length > 0 ? styles.reviewOverlay : ""}`} onClick={closeReview}>
-                    <div className={`${styles.modalCard} ${questionsAndAnswers.length > 0 ? styles.reviewCard : ""}`} onClick={(e) => e.stopPropagation()}>
-                        <div className={styles.modalHeader}>
-                            <h3>{viewingDoc.file_name}</h3>
-                            <button className={styles.modalClose} onClick={closeReview}>
-                                &times;
-                            </button>
-                        </div>
-                        <div className={styles.modalBody}>
-                            {questionsAndAnswers.length > 0 ? (
-                                <div className={styles.qaEditor}>
-                                    <p className={styles.qaHelp}>Review the generated content before making it available to your chatbot.</p>
-                                    {questionsAndAnswers.map((item, index) => (
-                                        <div className={styles.qaRow} key={index}>
-                                            <label>Question {index + 1}{item.page ? ` · Page ${item.page}` : ""}</label>
-                                            <input value={item.question} onChange={(event) => updateQuestionAnswer(index, "question", event.target.value)} />
-                                            <span className={styles.answerLabel}><label>Answer</label><button className={styles.magicButton} title="Generate answer" aria-label={`Generate answer for question ${index + 1}`} onClick={() => generateAnswer(index)} disabled={isSaving || isGeneratingQuestions || generatingAnswerIndex !== null || !item.question.trim()}>{generatingAnswerIndex === index ? "..." : <MagicIcon />}</button></span>
-                                            <textarea value={item.answer} onChange={(event) => updateQuestionAnswer(index, "answer", event.target.value)} rows={5} />
-                                            <button className={styles.removeQuestion} onClick={() => setQuestionsAndAnswers((current) => current.filter((_, itemIndex) => itemIndex !== index))} disabled={questionsAndAnswers.length === 1 || isSaving}>Remove</button>
-                                        </div>
-                                    ))}
-                                    <div className={styles.qaActions}>
-                                        <button className={styles.addQuestion} onClick={() => setQuestionsAndAnswers((current) => [...current, { question: "", answer: "" }])} disabled={isSaving || isGeneratingQuestions}>Add question</button>
-                                        <button className={styles.generateQuestions} onClick={generateQuestions} disabled={isSaving || isGeneratingQuestions || generatingAnswerIndex !== null}>{isGeneratingQuestions ? "Generating questions..." : "Generate questions"}</button>
-                                    </div>
-                                </div>
-                            ) : <Markdown remarkPlugins={[remarkGfm]}>{viewingDoc.summary || "No summary available."}</Markdown>}
-                        </div>
-                        <div className={styles.modalFooter}>
-                            {questionsAndAnswers.length > 0 && <button className={styles.button_upload} onClick={saveQuestionAnswers} disabled={isSaving}>{isSaving ? "Saving..." : "Save questions and answers"}</button>}
-                            <button
-                                className={styles.button_upload}
-                                onClick={() => downloadFile(viewingDoc)}
-                            >
-                                <DownloadIcon /> Download
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {preview && <PdfViewer filePath={preview.filePath} fileName={preview.name} onClose={closePdfPreview} />}
             {isAddDialogOpen && (
                 <div className={styles.modalOverlay} onClick={() => setIsAddDialogOpen(false)}>
                     <div className={styles.addDialog} role="dialog" aria-modal="true" aria-labelledby="add-document-title" onClick={(event) => event.stopPropagation()}>
@@ -421,7 +307,7 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
                         </div>
                         <p className={styles.addDialogIntro}>Choose how you’d like to add content to {sensitive ? "your sensitive documents" : "your library"}.</p>
                         <div className={styles.addChoices}>
-                            <button className={styles.addChoice} onClick={() => { setIsAddDialogOpen(false); setIsPdfDialogOpen(true); }}>
+                            <button className={styles.addChoice} onClick={() => { setIsAddDialogOpen(false); setHasAcceptedUploadDisclaimer(false); setIsPdfDialogOpen(true); }}>
                                 <span className={styles.choiceIcon}>PDF</span><span><strong>Upload a PDF</strong><small>Choose a file from your device</small></span><span className={styles.choiceArrow}>›</span>
                             </button>
                             {!sensitive && <button className={styles.addChoice} onClick={() => { setIsAddDialogOpen(false); setIsLinkDialogOpen(true); }}>
@@ -432,17 +318,18 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
                 </div>
             )}
             {isPdfDialogOpen && (
-                <div className={styles.modalOverlay} onClick={() => { setIsPdfDialogOpen(false); setIsDragging(false); }}>
+                <div className={styles.modalOverlay} onClick={() => { setIsPdfDialogOpen(false); setIsDragging(false); setHasAcceptedUploadDisclaimer(false); }}>
                     <div className={styles.pdfDialog} role="dialog" aria-modal="true" aria-labelledby="upload-pdf-title" onClick={(event) => event.stopPropagation()}>
                         <div className={styles.modalHeader}>
                             <div><span className={styles.dialogEyebrow}>UPLOAD DOCUMENT</span><h3 id="upload-pdf-title">Upload a PDF</h3></div>
-                            <button className={styles.modalClose} onClick={() => { setIsPdfDialogOpen(false); setIsDragging(false); }} aria-label="Close">&times;</button>
+                            <button className={styles.modalClose} onClick={() => { setIsPdfDialogOpen(false); setIsDragging(false); setHasAcceptedUploadDisclaimer(false); }} aria-label="Close">&times;</button>
                         </div>
-                        <div className={`${styles.dropZone} ${isDragging ? styles.dropZoneActive : ""}`} onDragOver={(event) => { event.preventDefault(); setIsDragging(true); }} onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setIsDragging(false); }} onDrop={(event) => { event.preventDefault(); setIsDragging(false); void handleFiles(Array.from(event.dataTransfer.files)); setIsPdfDialogOpen(false); }}>
+                        <UploadDisclaimer sensitive={false} accepted={hasAcceptedUploadDisclaimer} onAcceptedChange={setHasAcceptedUploadDisclaimer} />
+                        <div className={`${styles.dropZone} ${isDragging ? styles.dropZoneActive : ""} ${!hasAcceptedUploadDisclaimer ? styles.dropZoneDisabled : ""}`} aria-disabled={!hasAcceptedUploadDisclaimer} onDragOver={(event) => { event.preventDefault(); if (hasAcceptedUploadDisclaimer) setIsDragging(true); }} onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setIsDragging(false); }} onDrop={(event) => { event.preventDefault(); setIsDragging(false); if (!hasAcceptedUploadDisclaimer) return; void handleFiles(Array.from(event.dataTransfer.files)); setIsPdfDialogOpen(false); setHasAcceptedUploadDisclaimer(false); }}>
                             <span className={styles.uploadIcon} aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M24 32V8m0 0-9 9m9-9 9 9M10 28v10a3 3 0 0 0 3 3h22a3 3 0 0 0 3-3V28" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg></span>
-                            <strong>Drag and drop your PDF here</strong>
-                            <span className={styles.dropHint}>or choose a file from your device</span>
-                            <button className={styles.browseButton} onClick={triggerUpload}>Browse files</button>
+                            <strong>{hasAcceptedUploadDisclaimer ? "Drag and drop your PDF here" : "Accept the disclaimer above to continue"}</strong>
+                            <span className={styles.dropHint}>{hasAcceptedUploadDisclaimer ? "or choose a file from your device" : "Your file will not be uploaded until you accept."}</span>
+                            <button type="button" className={styles.browseButton} onClick={triggerUpload} disabled={!hasAcceptedUploadDisclaimer}>Browse files</button>
                             <small>PDF files only</small>
                         </div>
                     </div>

@@ -11,6 +11,7 @@ from .generate_pdf_cache import generate_pdf_cache
 from .generate_pdf_qa import generate_pdf_qa
 from .extract_sensitive_records import extract_sensitive_records
 from .count_pdf_pages import count_pdf_pages
+from .scan_pdf_privacy import scan_pdf_privacy
 from .dashboard_analysis import dashboard_analysis
 
 __all__ = [
@@ -34,5 +35,6 @@ __all__ = [
 	"generate_pdf_qa",
 	"extract_sensitive_records",
 	"count_pdf_pages",
+	"scan_pdf_privacy",
 	"dashboard_analysis",
 ]

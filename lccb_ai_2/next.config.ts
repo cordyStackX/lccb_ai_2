@@ -10,7 +10,7 @@ const buildCsp = (frameAncestors: string) =>
     "img-src 'self' data: blob: http://localhost:8000 http://kong.local:8000 https://*.supabase.co",
     "font-src 'self' data:",
     "connect-src 'self' http://localhost:8000 https://challenges.cloudflare.com https://*.supabase.co",
-    "frame-src 'self' https://challenges.cloudflare.com",
+    "frame-src 'self' blob: https://challenges.cloudflare.com",
     `frame-ancestors ${frameAncestors}`,
   ].join("; ");
 
@@ -20,6 +20,7 @@ const commonHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ["app.laco.local"],
   poweredByHeader: false, // removes the "X-Powered-By" header
   images: {
     remotePatterns: [

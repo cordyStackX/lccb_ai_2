@@ -115,6 +115,32 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, error: `PDF name already exists: ${names}` }, { status: 409 });
     }
 
+    if (form.get("privacyConfirmed") !== "true") {
+        const warnings: Array<{ fileName: string; findings: Array<{ category: string; pages: number[] }> }> = [];
+        for (const file of files) {
+            const scan = await Fetch_to(`${apiUrl}scan-pdf-privacy`, {
+                token: apikey,
+                file_name: file.name,
+                pdf_base64: Buffer.from(await file.arrayBuffer()).toString("base64"),
+            });
+            if (!scan.success) {
+                console.error("PDF privacy scan failed:", scan.message);
+                return NextResponse.json({ success: false, error: "Could not complete the privacy scan. Please try again." }, { status: 503 });
+            }
+            if (scan.data?.contains_sensitive_info && Array.isArray(scan.data.findings)) {
+                warnings.push({ fileName: file.name, findings: scan.data.findings });
+            }
+        }
+        if (warnings.length > 0) {
+            return NextResponse.json({
+                // The scan completed successfully; the client still needs the user's decision.
+                success: true,
+                requiresPrivacyConfirmation: true,
+                warnings,
+            });
+        }
+    }
+
     const bucketName = "chatbot_pdfs";
     const uploadedResults: Array<{ id?: number; originalName: string; filePath?: string; suggest?: string; summary?: string; pageCount?: number; success: boolean; message?: string }> = [];
 
@@ -158,6 +184,34 @@ export async function POST(req: NextRequest) {
         });
         if (!cacheResponse.success) {
             uploadedResults.push({ originalName: file.name, filePath, success: false, message: cacheResponse.message || "Failed to summarize every PDF page" });
+            continue;
+        }
+
+        // Store page-level data here as well so the database write does not depend on
+        // the Python worker and web app being redeployed at the same time. Mark this
+        // fallback explicitly; a current Python worker will replace it with extracted text.
+        const cachedPages = cacheResponse.data?.cache?.pages;
+        if (!Array.isArray(cachedPages) || cachedPages.length === 0) {
+            uploadedResults.push({ originalName: file.name, filePath, success: false, message: "PDF page summaries were not returned" });
+            continue;
+        }
+        const summaryPageContent = cachedPages.map((item: unknown, index: number) => {
+            const page = item && typeof item === "object" ? item as { page?: unknown; summary?: unknown } : {};
+            return {
+                page: Number.isInteger(page.page) ? page.page : index + 1,
+                text: typeof page.summary === "string" ? page.summary : "",
+                source: "cache_summary",
+            };
+        });
+        const { error: pageContentError } = await supabaseServer
+            .from("chatbot_pdf_file")
+            .update({ page_content: summaryPageContent })
+            .eq("file", filePath)
+            .eq("email", cleanEmail)
+            .is("page_content", null);
+        if (pageContentError) {
+            console.error("Supabase page content fallback update error:", pageContentError);
+            uploadedResults.push({ originalName: file.name, filePath, success: false, message: "Failed to save page-level PDF content" });
             continue;
         }
         

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Fetch_to, Fetch_toFile } from "@/utilities";
+import { Fetch_to, Fetch_toFile, SweetAlert2 } from "@/utilities";
 
 export interface DocFile {
     id?: number;
@@ -84,7 +84,42 @@ export function useDocumentTable(
 
         notify?.onUploadStart?.(files);
 
-        const response = await Fetch_toFile(endpoints.upload, files, { email });
+        let response = await Fetch_toFile(endpoints.upload, files, { email });
+        if (response.data?.requiresPrivacyConfirmation === true) {
+            const warnings = Array.isArray(response.data.warnings) ? response.data.warnings : [];
+            const warningDetails = warnings.map((warning: { fileName?: unknown; findings?: Array<{ category?: unknown; pages?: unknown }> }) => {
+                const findings = Array.isArray(warning?.findings) ? warning.findings.map((finding) => {
+                    const category = typeof finding.category === "string" ? finding.category.replaceAll("_", " ") : "sensitive information";
+                    const pages = Array.isArray(finding.pages) ? finding.pages.join(", ") : "unknown";
+                    return `${category} (page${pages.includes(",") ? "s" : ""} ${pages})`;
+                }) : [];
+                return `${typeof warning.fileName === "string" ? warning.fileName : "PDF"}: ${findings.join("; ")}`;
+            });
+            const publicDocument = endpoints.upload.includes("uploadpdf_chatbot") && !endpoints.upload.includes("uploadpdf_chatbot_sensitive");
+            const details = [
+                `Possible information detected:\n${warningDetails.join("\n") || "Personal or sensitive information."}`,
+                publicDocument
+                    ? "Public Documents may be used by the chatbot to answer visitor questions."
+                    : "Sensitive document content is processed to extract student records.",
+                "Only continue if you are authorized to upload and process this information. This is an automated warning, not a legal determination.",
+            ].join("\n\n");
+            const confirmation = await SweetAlert2(
+                "Possible sensitive information detected",
+                details,
+                "warning",
+                true,
+                "Continue upload",
+                true,
+                "Cancel"
+            );
+            if (confirmation.isConfirmed) {
+                response = await Fetch_toFile(endpoints.upload, files, { email, privacyConfirmed: "true" });
+            } else {
+                notify?.onUploadError?.("Upload cancelled after the privacy warning.");
+                if (fileRef.current) fileRef.current.value = "";
+                return;
+            }
+        }
 
         if (response.success) {
             notify?.onUploadSuccess?.(response.data?.message || "Upload complete.");

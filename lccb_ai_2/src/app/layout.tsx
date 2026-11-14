@@ -2,8 +2,6 @@ import { Inter } from "next/font/google";
 import type { Viewport } from "next";
 import PWARegister from "@/components/pwa_register";
 import { MetadataUtils, Gtag, Json_LD } from "@/utilities";
-import { SpeedInsights } from "@vercel/speed-insights/next";
-import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const interSans = Inter({
@@ -42,8 +40,6 @@ export default function RootLayout({
       </head>
       <body className={`${interSans.variable} ${interMono.variable} ${interSans.className}`}>
         <PWARegister />
-        <SpeedInsights />
-        <Analytics />
         {children}
       </body>
     </html>

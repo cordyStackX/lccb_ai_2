@@ -1,0 +1,1 @@
+ALTER TABLE chatbot_pdf_file DROP COLUMN suggest;

@@ -8,11 +8,11 @@ export default async function Fetch_toFile(
 ) {
   if (!dir || dir === "") {
     if (typeof window !== "undefined") alert("Invalid API Directory not found");
-    return { success: false, message: "Invalid API Directory" };
+    return { success: false, message: "Invalid API Directory", data: null };
   }
 
   if (!file || (Array.isArray(file) && file.length === 0)) {
-    return { success: false, message: "No file provided" };
+    return { success: false, message: "No file provided", data: null };
   }
 
   // Build multipart form
@@ -49,6 +49,7 @@ export default async function Fetch_toFile(
         return {
           success: false,
           message: data?.error || `Request failed: ${response.status}`,
+          data,
         };
       }
     } catch (err: unknown) {
@@ -60,5 +61,5 @@ export default async function Fetch_toFile(
     if (attempt < retries) await new Promise(res => setTimeout(res, delay));
   }
 
-  return { success: false, message: `All ${retries} attempts failed for ${dir}` };
+  return { success: false, message: `All ${retries} attempts failed for ${dir}`, data: null };
 }

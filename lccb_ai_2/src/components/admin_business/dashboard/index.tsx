@@ -3,6 +3,7 @@ import styles from "./css/styles.module.css";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Fetch_to, Progress } from "@/utilities";
 import apiLink from "@/config/conf/json_config/fetch_url.json";
 import { useRouter } from "next/navigation";
@@ -24,7 +25,7 @@ const number = new Intl.NumberFormat("en-PH");
 
 function UsageCard({ title, used, limit, detail, icon, expired = false }: { title: string; used: number; limit: number | null; detail: string; icon: "pdf" | "ai"; expired?: boolean }) {
     if (expired) return <article className={styles.usageCard}><div className={styles.usageCardHeader}><span className={styles.usageIcon}>{icon === "pdf" ? "PDF" : "AI"}</span><span className={styles.usagePercent}>Plan expired</span></div><h2>{title}</h2><p className={styles.usageNumbers}><strong>Access paused</strong></p><p className={styles.usageDetail}>Renew your plan to continue.</p></article>;
-    if (limit === null) return <article className={styles.usageCard}><div className={styles.usageCardHeader}><span className={styles.usageIcon}>{icon === "pdf" ? "PDF" : "AI"}</span><span className={styles.usagePercent}>No limit</span></div><h2>{title}</h2><p className={styles.usageNumbers}><strong>{number.format(used)}</strong><span> requests</span></p><p className={styles.usageDetail}>{detail}</p></article>;
+    if (limit === null) return <article className={styles.usageCard}><div className={styles.usageCardHeader}><span className={styles.usageIcon}>{icon === "pdf" ? "PDF" : "AI"}</span><span className={styles.usagePercent}>No limit</span></div><h2>{title}</h2><p className={styles.usageNumbers}><strong>{number.format(used)}</strong><span> responses</span></p><p className={styles.usageDetail}>{detail}</p></article>;
     const usedPercent = percentage(used, limit);
     const state = usedPercent >= 90 ? styles.usageDanger : usedPercent >= 70 ? styles.usageWarning : "";
     return <article className={styles.usageCard}>
@@ -93,6 +94,7 @@ export default function Dashboard({ email, current_plan, account_created_at, pla
     const [showPayment, setShowPayment] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState<PaidPlanId>("pro");
     const [payment, setPayment] = useState({ method: "", otherBank: "", accountNumber: "" });
+    const [hasAcceptedPaymentPrivacy, setHasAcceptedPaymentPrivacy] = useState(false);
     const [paymentError, setPaymentError] = useState("");
     const [submitting, setSubmitting] = useState(false);
 
@@ -152,6 +154,10 @@ export default function Dashboard({ email, current_plan, account_created_at, pla
             setPaymentError("Please select a payment method, specify the other bank if needed, and enter your account number.");
             return;
         }
+        if (!hasAcceptedPaymentPrivacy) {
+            setPaymentError("Please review and acknowledge the payment privacy notice.");
+            return;
+        }
         setSubmitting(true); setPaymentError("");
         const planType = selectedPlan === "enterprise" ? "Enterprise" : "Pro";
         const response = await Fetch_to(apiLink.payment.paying, { email, account_number: payment.accountNumber.trim(), method: paymentMethod, plan_type: planType });
@@ -164,12 +170,12 @@ export default function Dashboard({ email, current_plan, account_created_at, pla
 
     return <section className={styles.container}>
         <header className={styles.header_cons}><span><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2"/><rect x="14" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2"/><rect x="3" y="14" width="7" height="7" stroke="currentColor" strokeWidth="2"/><rect x="14" y="14" width="7" height="7" stroke="currentColor" strokeWidth="2"/></svg><h1>Dashboard</h1></span><button className={styles.upgradeBtn} onClick={() => setShowUpgrade(true)}>{current_plan === "Pro" || current_plan === "Enterprise" ? "Renew plan" : "Upgrade plan"}</button></header>
-        <section className={styles.workspaceHero}><span className={styles.workspaceEyebrow}>Your workspace</span><h2>Usage at a glance</h2><p>Keep track of your PDF page allowance and AI requests.</p>{lastUpdated && <small>Updated automatically at {lastUpdated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</small>}</section>
+        <section className={styles.workspaceHero}><span className={styles.workspaceEyebrow}>Your workspace</span><h2>Usage at a glance</h2><p>Keep track of your PDF page allowance and AI responses.</p>{lastUpdated && <small>Updated automatically at {lastUpdated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</small>}</section>
         {(current_plan === "Free Trial" || current_plan === "Pro" || current_plan === "Enterprise") && <div className={`${styles.planStatus} ${planExpired ? styles.planStatusExpired : ""}`}>
             <span>{planExpired
                 ? `Your ${current_plan} plan has ended. Renew or upgrade to continue uploading PDFs and using the chatbot.`
                 : current_plan === "Free Trial"
-                    ? "Free Trial · 50 PDF pages per account and 10,000 AI requests during your one-month trial."
+                    ? "Free Trial · 50 PDF pages per account and 10,000 AI responses during your one-month trial."
                     : plan_expires_at
                         ? `${current_plan} plan active until ${new Date(plan_expires_at).toLocaleDateString()}. PDF page allowance is per account.`
                         : `${current_plan} plan active. Its renewal date will be set after the next payment is confirmed.`}</span>
@@ -178,14 +184,64 @@ export default function Dashboard({ email, current_plan, account_created_at, pla
         {error && <p className={styles.usageError}>{error}</p>}
         <section className={styles.userUsageGrid}>
             <UsageCard title="PDF pages" used={pdfCount} limit={current_page_limit} detail="Total PDF pages used across this account." icon="pdf" />
-            <UsageCard title="AI requests" used={apiCount} limit={current_limit} detail={current_limit === null ? "Unlimited requests on your paid plan." : "Your usage updates automatically every 5 seconds."} icon="ai" expired={planExpired} />
+            <UsageCard title="AI responses" used={apiCount} limit={current_limit} detail={current_limit === null ? "Unlimited responses on your paid plan." : "Your usage updates automatically every 5 seconds."} icon="ai" expired={planExpired} />
         </section>
         <p className={styles.usageNote}>Your limits are based on your current plan. Contact support if you need more capacity.</p>
         <section className={styles.businessAnalytics}>
             <div className={styles.businessAnalyticsHeader}><h3>Usage &amp; activity</h3><div className={styles.chartFilters}><select value={range} onChange={(event) => setRange(event.target.value as Range)}><option value="week">Last 7 days</option><option value="year">Last 12 months</option></select></div></div>
-            <div className={styles.businessCharts}><UsageTrend title="PDF pages processed" data={pdfHistory} color="#2563eb"/><UsageTrend title="AI requests" data={apiHistory} color="#7c3aed"/></div>
+            <div className={styles.businessCharts}><UsageTrend title="PDF pages processed" data={pdfHistory} color="#2563eb"/><UsageTrend title="AI responses" data={apiHistory} color="#7c3aed"/></div>
         </section>
-        {showUpgrade && <div className={styles.modalOverlay} onClick={() => setShowUpgrade(false)}><div className={styles.modalCard} onClick={(event) => event.stopPropagation()}><div className={styles.modalHeader}><h2>{planExpired ? `Your ${current_plan} plan has ended` : "Choose your plan"}</h2><button className={styles.closeBtn} onClick={() => setShowUpgrade(false)} aria-label="Close">✕</button></div><div className={styles.tiersGrid}>{PRICING_TIERS.map((tier) => <article key={tier.id} className={`${styles.tierCard} ${tier.highlight ? styles.tierHighlight : ""}`}>{tier.highlight && <span className={styles.popularBadge}>Most popular</span>}<h3>{tier.name}</h3><p className={styles.tierPrice}>{tier.price}<span>{tier.period}</span></p><p className={styles.tierTagline}>{tier.tagline}</p><ul className={styles.tierFeatures}>{tier.features.map((feature) => <li key={feature}>{feature}</li>)}</ul><button className={tier.highlight ? styles.tierCtaPrimary : styles.tierCtaSecondary} disabled={tier.id === "free" && current_plan === "Free Trial"} onClick={() => { if (tier.id === "pro" || tier.id === "enterprise") { setSelectedPlan(tier.id); setShowUpgrade(false); setShowPayment(true); } }}>{tier.id === "free" && planExpired ? "Trial ended" : (tier.id === "pro" || tier.id === "enterprise") && current_plan === tier.name ? `Renew ${tier.name}` : current_plan === tier.name ? "Current Plan" : tier.cta}</button></article>)}</div></div></div>}
-        {showPayment && <div className={styles.paymentOverlay} onClick={() => setShowPayment(false)}><div className={styles.paymentCard} onClick={(event) => event.stopPropagation()}><div className={styles.modalHeader}><div><p className={styles.paymentEyebrow}>{selectedPlan === "enterprise" ? "Enterprise plan · ₱1,499/year" : "Pro plan · ₱249/month"}</p><h2>Payment details</h2></div><button className={styles.closeBtn} onClick={() => setShowPayment(false)} aria-label="Close">✕</button></div><p className={styles.paymentIntro}>Scan the QR code to pay, then enter the details from the payment account you used.</p><div className={styles.qrPayment}><Image src="/QR_Gcash.png" alt="InstaPay payment QR code" width={120} height={120}/><div><h3>Scan to pay</h3><p>Use your preferred banking or e-wallet app to scan this InstaPay QR code.</p></div></div><div className={styles.paymentForm}><label htmlFor="payment-method">Payment method</label><select id="payment-method" value={payment.method} onChange={(event) => setPayment((current) => ({ ...current, method: event.target.value, otherBank: event.target.value === "Other" ? current.otherBank : "" }))}><option value="">Select a payment method</option><option value="Gcash">GCash</option><option value="Paymaya">PayMaya</option><option value="Maribank">MariBank</option><option value="Gotyme">GoTyme</option><option value="Other">Other bank</option></select>{payment.method === "Other" && <><label htmlFor="other-bank">Bank name</label><input id="other-bank" value={payment.otherBank} onChange={(event) => setPayment((current) => ({ ...current, otherBank: event.target.value }))} placeholder="Specify your bank"/></>}<label htmlFor="account-number">Account number</label><input id="account-number" value={payment.accountNumber} inputMode="numeric" onChange={(event) => setPayment((current) => ({ ...current, accountNumber: event.target.value }))} placeholder="Enter your account number"/>{paymentError && <p className={styles.refundError}>{paymentError}</p>}<div className={styles.paymentActions}><button className={styles.cancelPaymentBtn} onClick={() => setShowPayment(false)}>Cancel</button><button className={styles.submitPaymentBtn} disabled={submitting} onClick={submitUpgrade}>{submitting ? "Submitting…" : "Submit payment details"}</button></div></div></div></div>}
+        {showUpgrade && <div className={styles.modalOverlay} onClick={() => setShowUpgrade(false)}><div className={styles.modalCard} onClick={(event) => event.stopPropagation()}><div className={styles.modalHeader}><h2>{planExpired ? `Your ${current_plan} plan has ended` : "Choose your plan"}</h2><button className={styles.closeBtn} onClick={() => setShowUpgrade(false)} aria-label="Close">✕</button></div><div className={styles.tiersGrid}>{PRICING_TIERS.map((tier) => <article key={tier.id} className={`${styles.tierCard} ${tier.highlight ? styles.tierHighlight : ""}`}>{tier.highlight && <span className={styles.popularBadge}>Most popular</span>}<h3>{tier.name}</h3><p className={styles.tierPrice}>{tier.price}<span>{tier.period}</span></p><p className={styles.tierTagline}>{tier.tagline}</p><ul className={styles.tierFeatures}>{tier.features.map((feature) => <li key={feature}>{feature}</li>)}</ul><button className={tier.highlight ? styles.tierCtaPrimary : styles.tierCtaSecondary} disabled={tier.id === "free" && current_plan === "Free Trial"} onClick={() => { if (tier.id === "pro" || tier.id === "enterprise") { setSelectedPlan(tier.id); setHasAcceptedPaymentPrivacy(false); setPaymentError(""); setShowUpgrade(false); setShowPayment(true); } }}>{tier.id === "free" && planExpired ? "Trial ended" : (tier.id === "pro" || tier.id === "enterprise") && current_plan === tier.name ? `Renew ${tier.name}` : current_plan === tier.name ? "Current Plan" : tier.cta}</button></article>)}</div></div></div>}
+        {showPayment && (
+            <div className={styles.paymentOverlay} onClick={() => setShowPayment(false)}>
+                <div className={styles.paymentCard} onClick={(event) => event.stopPropagation()}>
+                    <div className={styles.modalHeader}>
+                        <div>
+                            <p className={styles.paymentEyebrow}>{selectedPlan === "enterprise" ? "Enterprise plan · ₱1,499/year" : "Pro plan · ₱249/month"}</p>
+                            <h2>Payment details</h2>
+                        </div>
+                        <button className={styles.closeBtn} onClick={() => setShowPayment(false)} aria-label="Close">✕</button>
+                    </div>
+                    <p className={styles.paymentIntro}>Scan the QR code to pay, then enter the details from the payment account you used.</p>
+                    <div className={styles.qrPayment}>
+                        <Image src="/QR_Gcash.png" alt="InstaPay payment QR code" width={120} height={120}/>
+                        <div><h3>Scan to pay</h3><p>Use your preferred banking or e-wallet app to scan this InstaPay QR code.</p></div>
+                    </div>
+                    <div className={styles.paymentForm}>
+                        <label htmlFor="payment-method">Payment method</label>
+                        <select id="payment-method" value={payment.method} onChange={(event) => setPayment((current) => ({ ...current, method: event.target.value, otherBank: event.target.value === "Other" ? current.otherBank : "" }))}>
+                            <option value="">Select a payment method</option>
+                            <option value="Gcash">GCash</option>
+                            <option value="Paymaya">PayMaya</option>
+                            <option value="Maribank">MariBank</option>
+                            <option value="Gotyme">GoTyme</option>
+                            <option value="Other">Other bank</option>
+                        </select>
+                        {payment.method === "Other" && <>
+                            <label htmlFor="other-bank">Bank name</label>
+                            <input id="other-bank" value={payment.otherBank} onChange={(event) => setPayment((current) => ({ ...current, otherBank: event.target.value }))} placeholder="Specify your bank"/>
+                        </>}
+                        <aside className={styles.paymentPrivacyNotice}>
+                            <strong>Payment information privacy</strong>
+                            <p>Your account number is collected to verify this payment and activate your selected plan. It is encrypted before storage and may be reviewed by authorized LACO AI administrators. Do not enter your PIN, password, OTP, or card security code.</p>
+                            <p className={styles.paymentPolicyLinks}>
+                                Review the <Link href="/privacy" target="_blank" rel="noreferrer">Privacy Policy</Link> and <Link href="/terms" target="_blank" rel="noreferrer">Terms and Conditions</Link>.
+                            </p>
+                            <label>
+                                <input type="checkbox" checked={hasAcceptedPaymentPrivacy} onChange={(event) => { setHasAcceptedPaymentPrivacy(event.target.checked); if (event.target.checked) setPaymentError(""); }}/>
+                                I have read this payment privacy notice.
+                            </label>
+                        </aside>
+                        <label htmlFor="account-number">Account number</label>
+                        <input id="account-number" value={payment.accountNumber} inputMode="numeric" onChange={(event) => setPayment((current) => ({ ...current, accountNumber: event.target.value }))} placeholder="Enter your account number"/>
+                        {paymentError && <p className={styles.refundError}>{paymentError}</p>}
+                        <div className={styles.paymentActions}>
+                            <button className={styles.cancelPaymentBtn} onClick={() => setShowPayment(false)}>Cancel</button>
+                            <button className={styles.submitPaymentBtn} disabled={submitting || !hasAcceptedPaymentPrivacy} onClick={submitUpgrade}>{submitting ? "Submitting…" : "Submit payment details"}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )}
     </section>;
 }

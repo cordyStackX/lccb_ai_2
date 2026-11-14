@@ -105,7 +105,7 @@ def dashboard_analysis():
         insights.append(f"{len(pending_payments)} payment request{'s' if len(pending_payments) != 1 else ''} awaiting review, worth ₱{pending_revenue:,.2f}.")
     if total_api_usage:
         top_email, top_usage = max(usage_by_email.items(), key=lambda item: item[1])
-        insights.append(f"Most active user: {top_email} with {top_usage:,} AI requests.")
+        insights.append(f"Most active user: {top_email} with {top_usage:,} AI responses.")
     if not insights:
         insights.append("Data will appear here as accounts, payments, and documents are created.")
 
@@ -129,7 +129,18 @@ def dashboard_analysis():
                 "roles": [{"name": name, "value": value} for name, value in role_counts.items()],
                 "paymentStatus": [{"name": "Collected", "value": len(completed_payments)}, {"name": "Pending", "value": len(pending_payments)}],
             },
-            "topUsers": [{"email": email, "usage": usage} for email, usage in sorted(usage_by_email.items(), key=lambda item: item[1], reverse=True)[:20]],
+            "topUsers": [
+                {"email": email, "usage": usage}
+                for email, usage in sorted(
+                    (
+                        (email, usage)
+                        for email, usage in usage_by_email.items()
+                        if email.strip().lower().endswith("@lccbonline.edu.ph")
+                    ),
+                    key=lambda item: item[1],
+                    reverse=True,
+                )[:10]
+            ],
             "insights": insights,
         },
     }), 200

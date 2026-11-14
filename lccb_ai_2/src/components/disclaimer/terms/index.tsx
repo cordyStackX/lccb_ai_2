@@ -15,7 +15,7 @@ export default function Terms() {
             <div className={styles.content}>
                 <Link href="/" style={{ color: "blue" }} > {"<<"} Go Back</Link>
                 <h1>Terms and Conditions</h1>
-                <p className={styles.updated}>Last Updated: November 5, 2026</p>
+                <p className={styles.updated}>Last Updated: November 15, 2026</p>
 
                 <div className={styles.notice}>
                     <h2>⚠️ Important Notice</h2>
@@ -106,8 +106,8 @@ export default function Terms() {
                     <ul>
                         <li>Only authorized administrators may upload and manage sensitive academic PDFs.</li>
                         <li>Administrators must have authority to submit the PDFs and must use them only for legitimate academic purposes.</li>
-                        <li>The Service extracts student IDs and academic information from each PDF page and matches records to registered student accounts. A record is filed only when its ID matches one unique registered student account.</li>
-                        <li>Records without a valid registered match are skipped. Administrators may use <strong>Check all PDFs</strong> after a student registers to reprocess stored PDFs and file newly matched records; uploading the same PDF again is not required.</li>
+                        <li>Python sends restricted PDF pages to OpenAI to extract student IDs and academic information, then the Service matches records to registered LACO AI student accounts. A record is filed only when its ID matches exactly one registered account; the Service does not create an account for a student found in a PDF.</li>
+                        <li>If a student has not registered, or the extracted ID is missing, invalid, or unmatched/ambiguous, that extracted record is skipped and is not placed in a student bookshelf or included in student chat. The restricted PDF remains stored for authorized administrative processing until deleted. After a student registers, an administrator may use <strong>Check all PDFs</strong> to reprocess stored PDFs and file newly matched records; uploading the PDF again is not required.</li>
                         <li>Students may use academic chat only for records matched to their own registered student ID. They must not attempt to obtain another student&apos;s information.</li>
                         <li>AI-generated academic answers may be incomplete or incorrect and should be checked against official school records.</li>
                     </ul>
@@ -287,7 +287,7 @@ export default function Terms() {
 
                 <section className={styles.section}>
                     <h2>18. Governing Law</h2>
-                    <p>These Terms are governed by applicable laws. Any disputes shall be resolved in accordance with the laws of the jurisdiction where the project owner resides.</p>
+                    <p>These Terms are governed by and construed in accordance with the laws of the Republic of the Philippines.</p>
                 </section>
 
                 <section className={styles.section}>

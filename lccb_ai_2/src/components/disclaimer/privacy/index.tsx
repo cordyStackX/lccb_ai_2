@@ -16,7 +16,7 @@ export default function Privacy() {
             <div className={styles.content}>
                 <Link href="/" style={{ color: "blue" }} > {"<<"} Go Back</Link>
                 <h1>Privacy Policy</h1>
-                <p className={styles.updated}>Last Updated: November 5, 2026</p>
+                <p className={styles.updated}>Last Updated: November 15, 2026</p>
                 
                 <div className={styles.notice}>
                     <h2>⚠️ Important Notice</h2>
@@ -26,7 +26,13 @@ export default function Privacy() {
                 <section className={styles.section}>
                     <h2>1. Introduction</h2>
                     <p>Welcome to LACO AI (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our AI-powered platform for school, business, and academic-record information services.</p>
-                    <p>This project is developed under the Apache License 2.0. We are committed to protecting your privacy and handling your data responsibly.</p>
+                    <p>LACO AI was developed by <strong>Marc Giestin Louis Cordova</strong> and <strong>Ian Dave Moreno</strong>. We recognize the support of our parents, classmates, teachers, and schools. The project and its original contributions are protected by applicable copyright notices and are distributed under the Apache License 2.0; use and redistribution must follow that license.</p>
+                    <p>We are committed to protecting your privacy and handling your data responsibly.</p>
+                    <h3>1.1 Philippine Data Privacy Act</h3>
+                    <p>LACO AI processes personal information in the Philippines and recognizes the requirements of Republic Act No. 10173, the <strong>Data Privacy Act of 2012</strong>, and its implementing rules. The Act requires personal information to be processed fairly and lawfully, for specified and legitimate purposes, in a way that is proportionate to those purposes, and kept only as long as necessary, subject to applicable law.</p>
+                    <p>Personal information may identify a person directly or when combined with other information. Sensitive personal information under the Act includes, among other things, information about a person&apos;s education or health and identifiers issued by government agencies. LACO AI&apos;s student academic records and uploaded PDFs may contain these kinds of information.</p>
+                    <p>Personal information may be processed only when a lawful criterion under the Act applies. The automated PDF warning and a user&apos;s decision to continue an upload are not, by themselves, a legal determination that the processing is authorized. Uploaders must have authority to submit the information and should not place sensitive or confidential information in Public Documents.</p>
+                    <p>The Act provides data subjects rights that include being informed, reasonable access, correction, objection, and erasure or blocking in circumstances provided by law, as well as the right to file a complaint with the National Privacy Commission. You may submit requests to the LACO AI administrator using the contact details in Section 16. Requests are handled subject to the Act and other applicable legal requirements. Read the <a href="https://privacy.gov.ph/DATA-PRIVACY-ACT/" target="_blank" rel="noopener noreferrer">official Data Privacy Act</a>.</p>
                 </section>
 
                 <section className={styles.section}>
@@ -89,7 +95,7 @@ export default function Privacy() {
                         <li>API usage logs accessible by admins</li>
                     </ul>
                     <h4>How sensitive academic records are collected</h4>
-                    <p>An authorized administrator uploads a restricted PDF. The system reads its pages and uses AI to extract student IDs and associated academic information. It matches each extracted ID against registered student accounts. Records are filed in that student&apos;s private bookshelf only when the ID matches one unique registered account. Records with missing, invalid, unregistered, or ambiguous IDs are skipped. If an account is registered later, an administrator can recheck the already uploaded PDFs to match and file its records without uploading those PDFs again.</p>
+                    <p>An authorized administrator uploads a restricted PDF. Python sends its pages to OpenAI to extract student IDs and associated academic information, then the system matches each extracted ID against registered LACO AI student accounts. If a student has not registered, or the ID is missing, invalid, or does not match exactly one account, that extracted record is skipped: it is not filed in a student bookshelf or provided in student chat, and the system does not create an account for the student. The restricted PDF itself remains stored for authorized administrative processing until it is deleted. If the student registers later, an administrator can recheck the stored PDF and file newly matched records without uploading the PDF again.</p>
 
                     <h3>3.5 Business Accounts</h3>
                     <ul>
@@ -140,6 +146,8 @@ export default function Privacy() {
                         <li>We implement reasonable security measures but cannot guarantee absolute security</li>
                         <li>HTTPS encryption for all data transmission</li>
                     </ul>
+                    <h3>Personal Data Breach Notification</h3>
+                    <p>If we become aware of, or reasonably believe, that a personal data breach requiring notification has occurred, we will notify the National Privacy Commission and affected data subjects within seventy-two (72) hours, as required by applicable law. The notice may be based on information available at the time and supplemented as the investigation progresses, subject to lawful exceptions or directions from the Commission.</p>
                 </section>
 
                 <section className={styles.section}>
@@ -203,6 +211,7 @@ export default function Privacy() {
 
                 <section className={styles.section}>
                     <h2>11. Your Rights</h2>
+                    <p>These privacy protections and applicable data subject rights extend to people whose information LACO AI processes in connection with LCCB, including teachers, student beneficiaries, and other school personnel. A person does not need to be a LACO AI account holder for information about them in an uploaded document to be treated as personal information.</p>
                     <p>You have the right to:</p>
                     <ul>
                         <li>Access your personal data through your profile settings</li>
@@ -211,8 +220,10 @@ export default function Privacy() {
                         <li>View your uploaded PDFs and chat history</li>
                         <li>Delete individual PDFs via right-click context menu</li>
                         <li>Request correction of inaccurate account data</li>
+                        <li>Object to processing, or request erasure or blocking of personal information, where provided by applicable law</li>
                         <li>Request full account and data deletion by contacting the admin email</li>
                         <li>Be informed of data breaches affecting your information</li>
+                        <li>File a complaint with the National Privacy Commission or seek damages as allowed by law</li>
                     </ul>
                 </section>
 
@@ -281,7 +292,8 @@ export default function Privacy() {
 
                 <section className={styles.section}>
                     <h2>16. Contact Information</h2>
-                    <p>For questions about this Privacy Policy, account deletion requests, or negotiating full-system access for other schools, please contact the admin.</p>
+                    <p><strong>Privacy Contact:</strong> Marc Giestin Louis Cordova, LACO AI developer. Direct privacy questions and data subject requests to Marc through the LACO AI administrator contact channel. Parents or legal guardians may submit requests on behalf of a minor as permitted by law.</p>
+                    <p>For account deletion requests or questions about this Privacy Policy, use this privacy contact. For negotiating full-system access for other schools, contact the LACO AI administrator.</p>
                     <p><strong>Project Owner:</strong> cordyStackX</p>
                     <p><strong>License:</strong> Apache License 2.0</p>
                     <p><strong>GitHub:</strong> <a href="https://github.com/cordyStackX/lccb_ai_2" target="_blank" rel="noopener noreferrer">github.com/cordyStackX/lccb_ai_2</a></p>

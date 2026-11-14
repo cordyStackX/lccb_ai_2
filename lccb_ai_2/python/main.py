@@ -9,6 +9,7 @@ from utils import (
     convert_link_chatbot, convert_link_to_pdf_chatbot, generate_link_chatbot,
     generate_pdf_cache,
     count_pdf_pages,
+    scan_pdf_privacy,
     generate_pdf_qa,
     extract_sensitive_records,
     dashboard_analysis,
@@ -110,6 +111,11 @@ def extract_sensitive_records_route():
 @app.route("/count-pdf-pages", methods=["POST"])
 def count_pdf_pages_route():
     return count_pdf_pages()
+
+
+@app.route("/scan-pdf-privacy", methods=["POST"])
+def scan_pdf_privacy_route():
+    return scan_pdf_privacy()
 
 
 @app.route("/dashboard-analysis", methods=["POST"])

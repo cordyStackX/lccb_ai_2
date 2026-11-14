@@ -65,7 +65,30 @@ export async function POST(req: NextRequest) {
             if (!generatedQa.success || !Array.isArray(items) || items.length === 0) {
                 return NextResponse.json({ success: false, error: generatedQa.message || "Failed to generate questions from the document content" }, { status: 422 });
             }
-            return NextResponse.json({ success: true, questions: items });
+            const questionsAndAnswers = items.filter((item: unknown) => {
+                if (!item || typeof item !== "object") return false;
+                const pair = item as { question?: unknown; answer?: unknown; page?: unknown };
+                return typeof pair.question === "string" && pair.question.trim().endsWith("?")
+                    && typeof pair.answer === "string" && pair.answer.trim().length > 0
+                    && Number.isInteger(pair.page);
+            }) as Array<{ question: string; answer: string; page: number }>;
+            if (questionsAndAnswers.length !== items.length) {
+                return NextResponse.json({ success: false, error: "Generated PDF questions and answers were invalid" }, { status: 422 });
+            }
+
+            const { error: updateError } = await supabaseServer
+                .from("chatbot_pdf_file")
+                .update({
+                    summary: JSON.stringify(questionsAndAnswers),
+                    suggest: JSON.stringify(questionsAndAnswers.map(({ question }) => question)),
+                })
+                .eq("id", documentId)
+                .eq("email", cleanEmail);
+            if (updateError) {
+                console.error("Failed to save refreshed PDF questions:", updateError);
+                return NextResponse.json({ success: false, error: "Could not save the refreshed PDF guide" }, { status: 500 });
+            }
+            return NextResponse.json({ success: true, questions: questionsAndAnswers });
         }
 
         const prompt = `Answer this question using only the PDF: ${question.trim()}

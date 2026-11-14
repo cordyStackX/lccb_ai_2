@@ -42,6 +42,7 @@ create table public.chatbot_pdf_file (
   id bigint generated always as identity primary key,
   suggest text,
   cache jsonb,
+  page_content jsonb,
   file_name text,
   file text,
   summary text,

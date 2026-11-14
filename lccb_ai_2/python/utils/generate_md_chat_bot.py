@@ -1,8 +1,59 @@
 import sys
 import json
+import re
 from flask import request, jsonify, Response, stream_with_context
 from .context import EXPECTED_API_KEY, client, supabase
 from .prompt_loader import load_business_prompt, load_prompt_template
+
+
+_STOP_WORDS = {"about", "after", "again", "also", "and", "are", "can", "could", "does", "for", "from", "have", "how", "into", "its", "more", "please", "that", "the", "their", "them", "there", "this", "what", "when", "where", "which", "who", "with", "would", "you", "your"}
+
+
+def _tokens(text):
+    return {word for word in re.findall(r"[a-z0-9]{2,}", str(text or "").lower()) if word not in _STOP_WORDS}
+
+
+def _relevant_page_context(rows, question, limit=6):
+    query_terms = _tokens(question)
+    if not query_terms:
+        return ""
+
+    matches = []
+    for document in rows:
+        page_content = document.get("page_content")
+        pages = page_content if isinstance(page_content, list) else []
+        if not pages:
+            cache = document.get("cache")
+            pages = cache.get("pages", []) if isinstance(cache, dict) else []
+        for item in pages:
+            if not isinstance(item, dict):
+                continue
+            text = str(item.get("text", item.get("summary", ""))).strip()
+            if not text:
+                continue
+            terms = _tokens(text)
+            overlap = query_terms & terms
+            if not overlap:
+                continue
+            score = len(overlap)
+            # Select short passages around the user's terms to keep the model context bounded.
+            windows = []
+            for start in range(0, len(text), 1200):
+                excerpt = text[start:start + 1200]
+                excerpt_terms = _tokens(excerpt)
+                excerpt_score = len(query_terms & excerpt_terms)
+                if excerpt_score:
+                    windows.append((excerpt_score, start, excerpt))
+            windows.sort(key=lambda window: window[0], reverse=True)
+            selected = sorted(windows[:3], key=lambda window: window[1])
+            excerpt = "\n[…]\n".join(window[2] for window in selected)[:3600]
+            matches.append((len(overlap), document.get("file_name") or f"PDF {document.get('id')}", item.get("page", "?"), excerpt))
+
+    matches.sort(key=lambda match: match[0], reverse=True)
+    return "\n\n".join(
+        f"[{file_name}, page {page}]\n{excerpt}"
+        for _, file_name, page, excerpt in matches[:limit]
+    )
 
 
 def _build_chatbot_context(data):
@@ -20,7 +71,7 @@ def _build_chatbot_context(data):
     if not email:
         return None, (jsonify({"success": False, "error": "Email not found"}), 404)
 
-    rows = supabase.table("chatbot_pdf_file").select("id, file_name, summary").eq("email", email).execute()
+    rows = supabase.table("chatbot_pdf_file").select("id, file_name, summary, cache, page_content").eq("email", email).execute()
 
     chatbot_name = supabase.table("chatbot_public").select("name").eq("email", email).execute()
     
@@ -85,6 +136,14 @@ def _build_chatbot_context(data):
         question=prompt,
     )
 
+    page_context = _relevant_page_context(rows.data, prompt)
+    if page_context:
+        final_prompt += (
+            "\n\nAdditional source text retrieved from the most relevant public PDF pages. "
+            "Use it to provide specific details while keeping every claim grounded in the cited document and page:\n"
+            f"{page_context}"
+        )
+
     if last_user_response:
         final_prompt += (
             "\n\nConversation context (latest previous user message):\n"
@@ -121,7 +180,7 @@ def generate_md_chatbot():
                 {"role": "system", "content": context["system_role"]},
                 {"role": "user", "content": context["final_prompt"]},
             ],
-            temperature=0.7,
+            temperature=0.2,
             max_tokens=1000,
         )
 
@@ -149,7 +208,7 @@ def generate_md_chatbot_stream():
                         {"role": "system", "content": context["system_role"]},
                         {"role": "user", "content": context["final_prompt"]},
                     ],
-                    temperature=0.7,
+                    temperature=0.2,
                     max_tokens=1000,
                     stream=True,
                 )
