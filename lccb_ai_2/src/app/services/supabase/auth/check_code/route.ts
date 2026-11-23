@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomBytes } from "crypto";
 import nodemailer from "nodemailer";
-import { attemptMap, cooldownMap, CodeStore } from "@/lib/code_store";
+import { attemptMap, cooldownMap, CodeStore, consumeVerification, grantVerification, revokeVerification } from "@/lib/code_store";
 import { rateLimit } from "@/firewall/rate_limit";
 import { auth_jwt } from "@/firewall/jwt_auth";
 
@@ -27,8 +28,7 @@ export async function POST(req: NextRequest) {
     const cleanEmail = email.trim().toLowerCase();
 
     if (key === "confirm_code") {
-        const stored = CodeStore.get(cleanEmail);
-        if (!stored?.confirm_code) return NextResponse.json({ success: false, error: "Request Terminated" }, { status: 429 });
+        if (!consumeVerification(cleanEmail, "signin", req.cookies.get("otp_verification")?.value)) return NextResponse.json({ success: false, error: "Verification required" }, { status: 403 });
         CodeStore.delete(cleanEmail);
         attemptMap.delete(cleanEmail);
         cooldownMap.delete(cleanEmail);
@@ -144,17 +144,28 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        await auth_jwt(cleanEmail);
+        if (stored.purpose === "signin") await auth_jwt(cleanEmail);
 
         CodeStore.set(cleanEmail, {
             code: code,
-            expiresAt,
-            confirm_code: code
+            expiresAt: stored.expiresAt,
+            confirm_code: code,
+            purpose: stored.purpose
         });
+        const verificationToken = randomBytes(32).toString("hex");
+        grantVerification(cleanEmail, stored.purpose, stored.expiresAt, verificationToken);
 
         
         // Code correct
-        return NextResponse.json({ success: true }, { status: 200 });
+        const response = NextResponse.json({ success: true }, { status: 200 });
+        response.cookies.set("otp_verification", verificationToken, {
+            httpOnly: true,
+            secure: req.nextUrl.protocol === "https:",
+            sameSite: "strict",
+            path: "/",
+            maxAge: Math.max(0, Math.floor((stored.expiresAt - Date.now()) / 1000)),
+        });
+        return response;
     }
 
     // === Cooldown check ===
@@ -177,11 +188,14 @@ export async function POST(req: NextRequest) {
     cooldownMap.set(cleanEmail, now);
 
     const confirmationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const purpose = key === "register" ? "register" : key === "forgot_password" ? "forgot_password" : "signin";
 
+    revokeVerification(cleanEmail);
     CodeStore.set(cleanEmail, {
         code: confirmationCode,
         expiresAt,
-        confirm_code: ""
+        confirm_code: "",
+        purpose
     });
 
     try {

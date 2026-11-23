@@ -26,7 +26,7 @@ export default function UploadDisclaimer({ sensitive, accepted, onAcceptedChange
             </label>
             <p style={{ margin: ".55rem 0 .45rem 28px", color: "#5f6b7b", fontSize: ".8rem", lineHeight: 1.5 }}>
                 {sensitive
-                    ? "I confirm I am authorized to upload these student records. OpenAI scans PDF pages for possible personal or credential information before restricted record extraction; these files are not used for general chatbot answers."
+                    ? "I confirm I am authorized to upload these student records. PDFs are processed to match records with registered student IDs and are not used for general chatbot answers."
                     : "I confirm I have permission to upload this PDF. OpenAI scans pages for possible personal or credential information before upload. Public Documents may be used by the chatbot to answer questions, so do not upload sensitive, confidential, or password-protected information here."}
             </p>
             <p style={{ margin: "0 0 0 28px", color: "#5f6b7b", fontSize: ".78rem" }}>

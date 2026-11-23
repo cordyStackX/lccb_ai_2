@@ -115,6 +115,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, error: `PDF name already exists: ${names}` }, { status: 409 });
     }
 
+    const scanResults: Array<{ fileName: string; containsSensitiveInfo: boolean; findings: Array<{ category: string; pages: number[] }> }> = [];
     if (form.get("privacyConfirmed") !== "true") {
         const warnings: Array<{ fileName: string; findings: Array<{ category: string; pages: number[] }> }> = [];
         for (const file of files) {
@@ -127,8 +128,11 @@ export async function POST(req: NextRequest) {
                 console.error("PDF privacy scan failed:", scan.message);
                 return NextResponse.json({ success: false, error: "Could not complete the privacy scan. Please try again." }, { status: 503 });
             }
-            if (scan.data?.contains_sensitive_info && Array.isArray(scan.data.findings)) {
-                warnings.push({ fileName: file.name, findings: scan.data.findings });
+            const findings = Array.isArray(scan.data?.findings) ? scan.data.findings : [];
+            const containsSensitiveInfo = scan.data?.contains_sensitive_info === true;
+            scanResults.push({ fileName: file.name, containsSensitiveInfo, findings });
+            if (containsSensitiveInfo) {
+                warnings.push({ fileName: file.name, findings });
             }
         }
         if (warnings.length > 0) {
@@ -137,6 +141,7 @@ export async function POST(req: NextRequest) {
                 success: true,
                 requiresPrivacyConfirmation: true,
                 warnings,
+                scanResults,
             });
         }
     }
@@ -305,6 +310,7 @@ export async function POST(req: NextRequest) {
             success: successCount > 0,
             message: hasFailure ? "Some PDFs failed to upload" : "Files uploaded successfully",
             uploaded: uploadedResults,
+            scanResults,
         },
         { status: successCount > 0 ? 200 : 409 }
     );

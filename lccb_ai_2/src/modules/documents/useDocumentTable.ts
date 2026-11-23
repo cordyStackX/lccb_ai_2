@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Fetch_to, Fetch_toFile, SweetAlert2 } from "@/utilities";
+import { Fetch_to, Fetch_toFile } from "@/utilities";
 
 export interface DocFile {
     id?: number;
@@ -7,6 +7,11 @@ export interface DocFile {
     file?: string;
     summary?: string;
     suggest?: string;
+}
+
+export interface PrivacyWarning {
+    fileName?: string;
+    findings?: Array<{ category?: string; pages?: number[] }>;
 }
 
 interface DocumentTableEndpoints {
@@ -21,8 +26,9 @@ interface NotifyHandlers {
     onSuccess?: (message: string) => void;
     onError?: (message: string) => void;
     onUploadStart?: (files: File[]) => void;
-    onUploadSuccess?: (message?: string) => void;
-    onUploadError?: (message: string) => void;
+    onUploadSuccess?: (message?: string, details?: { uploaded?: Array<Record<string, unknown>>; privacyScan?: Array<Record<string, unknown>> }) => void;
+    onUploadError?: (message: string, details?: { uploaded?: Array<Record<string, unknown>>; privacyScan?: Array<Record<string, unknown>> }) => void;
+    onPrivacyReview?: (warnings: PrivacyWarning[]) => Promise<boolean>;
 }
 
 const PAGE_SIZE = 30;
@@ -33,6 +39,7 @@ export function useDocumentTable(
     notify?: NotifyHandlers
 ) {
     const fileRef = useRef<HTMLInputElement>(null);
+    const uploadController = useRef<AbortController | null>(null);
     const [data, setData] = useState<DocFile[]>([]);
     const [refresh, setRefresh] = useState(false);
     const [search, setSearch] = useState("");
@@ -84,46 +91,48 @@ export function useDocumentTable(
 
         notify?.onUploadStart?.(files);
 
-        let response = await Fetch_toFile(endpoints.upload, files, { email });
+        const controller = new AbortController();
+        uploadController.current = controller;
+        let response = await Fetch_toFile(endpoints.upload, files, { email }, {}, 3, 1000, { signal: controller.signal });
+        if (controller.signal.aborted) {
+            notify?.onUploadError?.("Upload cancellation requested. The server may finish processing files it already received.");
+            setRefresh(true);
+            uploadController.current = null;
+            if (fileRef.current) fileRef.current.value = "";
+            return;
+        }
+        let privacyScan: Array<Record<string, unknown>> = Array.isArray(response.data?.scanResults) ? response.data.scanResults : [];
         if (response.data?.requiresPrivacyConfirmation === true) {
-            const warnings = Array.isArray(response.data.warnings) ? response.data.warnings : [];
-            const warningDetails = warnings.map((warning: { fileName?: unknown; findings?: Array<{ category?: unknown; pages?: unknown }> }) => {
-                const findings = Array.isArray(warning?.findings) ? warning.findings.map((finding) => {
-                    const category = typeof finding.category === "string" ? finding.category.replaceAll("_", " ") : "sensitive information";
-                    const pages = Array.isArray(finding.pages) ? finding.pages.join(", ") : "unknown";
-                    return `${category} (page${pages.includes(",") ? "s" : ""} ${pages})`;
-                }) : [];
-                return `${typeof warning.fileName === "string" ? warning.fileName : "PDF"}: ${findings.join("; ")}`;
-            });
-            const publicDocument = endpoints.upload.includes("uploadpdf_chatbot") && !endpoints.upload.includes("uploadpdf_chatbot_sensitive");
-            const details = [
-                `Possible information detected:\n${warningDetails.join("\n") || "Personal or sensitive information."}`,
-                publicDocument
-                    ? "Public Documents may be used by the chatbot to answer visitor questions."
-                    : "Sensitive document content is processed to extract student records.",
-                "Only continue if you are authorized to upload and process this information. This is an automated warning, not a legal determination.",
-            ].join("\n\n");
-            const confirmation = await SweetAlert2(
-                "Possible sensitive information detected",
-                details,
-                "warning",
-                true,
-                "Continue upload",
-                true,
-                "Cancel"
-            );
-            if (confirmation.isConfirmed) {
-                response = await Fetch_toFile(endpoints.upload, files, { email, privacyConfirmed: "true" });
+            const warnings: PrivacyWarning[] = Array.isArray(response.data.warnings) ? response.data.warnings : [];
+            privacyScan = Array.isArray(response.data.scanResults) ? response.data.scanResults : warnings.map((warning) => ({
+                fileName: warning.fileName,
+                findings: warning.findings,
+                containsSensitiveInfo: true,
+            }));
+            const shouldContinue = await notify?.onPrivacyReview?.(warnings) ?? false;
+            if (shouldContinue) {
+                response = await Fetch_toFile(endpoints.upload, files, { email, privacyConfirmed: "true" }, {}, 3, 1000, { signal: controller.signal });
+                if (controller.signal.aborted) {
+                    notify?.onUploadError?.("Upload cancellation requested. The server may finish processing files it already received.");
+                    setRefresh(true);
+                    uploadController.current = null;
+                    if (fileRef.current) fileRef.current.value = "";
+                    return;
+                }
             } else {
                 notify?.onUploadError?.("Upload cancelled after the privacy warning.");
+                uploadController.current = null;
                 if (fileRef.current) fileRef.current.value = "";
                 return;
             }
         }
 
         if (response.success) {
-            notify?.onUploadSuccess?.(response.data?.message || "Upload complete.");
             const uploaded = response.data?.uploaded;
+            notify?.onUploadSuccess?.(response.data?.message || "Upload complete.", {
+                uploaded: Array.isArray(uploaded) ? uploaded : [],
+                privacyScan: Array.isArray(response.data?.scanResults) && response.data.scanResults.length ? response.data.scanResults : privacyScan,
+            });
             if (Array.isArray(uploaded)) {
                 const firstSuccessful = uploaded.find((item: unknown) => {
                     const document = item as { success?: unknown; id?: unknown };
@@ -141,11 +150,17 @@ export function useDocumentTable(
             }
             setRefresh(true);
         } else {
-            notify?.onUploadError?.(response.message || "Upload failed");
+            notify?.onUploadError?.(response.message || "Upload failed", {
+                uploaded: Array.isArray(response.data?.uploaded) ? response.data.uploaded : [],
+                privacyScan: Array.isArray(response.data?.scanResults) && response.data.scanResults.length ? response.data.scanResults : privacyScan,
+            });
         }
 
         if (fileRef.current) fileRef.current.value = "";
+        uploadController.current = null;
     };
+
+    const cancelUpload = () => uploadController.current?.abort();
 
     const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
         await handleFiles(e.target.files ? Array.from(e.target.files) : []);
@@ -179,8 +194,7 @@ export function useDocumentTable(
         notify?.onError?.(response.message || "Download failed");
     };
 
-    // Deletes immediately — no undo window. Confirmation is expected to happen
-    // upstream (e.g. a SweetAlert2 confirm) before this is called.
+    // Deletes immediately — no undo window. Confirmation is expected upstream.
     const deleteFiles = async (docs: DocFile[]) => {
         const validDocs = docs.filter((d): d is DocFile & { id: number } => d.id !== undefined);
         if (validDocs.length === 0) return;
@@ -239,6 +253,7 @@ export function useDocumentTable(
 
     return {
         fileRef,
+        cancelUpload,
         data,
         search,
         setSearch,

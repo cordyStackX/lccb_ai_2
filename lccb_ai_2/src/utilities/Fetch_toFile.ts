@@ -4,7 +4,8 @@ export default async function Fetch_toFile(
   fields: Record<string, string | number> = {},
   headers: Record<string, string> = {},
   retries: number = 3,
-  delay: number = 1000
+  delay: number = 1000,
+  options: { signal?: AbortSignal } = {}
 ) {
   if (!dir || dir === "") {
     if (typeof window !== "undefined") alert("Invalid API Directory not found");
@@ -36,6 +37,7 @@ export default async function Fetch_toFile(
         headers: {
           ...headers
         },
+        signal: options.signal,
         body: formData,
       });
 
@@ -53,6 +55,9 @@ export default async function Fetch_toFile(
         };
       }
     } catch (err: unknown) {
+      if (options.signal?.aborted || (err instanceof DOMException && err.name === "AbortError")) {
+        return { success: false, message: "Upload request cancelled", data: null };
+      }
       let message = "Unknown fetch error";
       if (err instanceof Error) message = err.message;
       console.error(`Attempt ${attempt} fetch error:`, message);

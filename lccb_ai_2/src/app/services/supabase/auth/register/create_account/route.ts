@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
-import { Fetch_to } from "@/utilities";
-import api_link from "@/config/conf/json_config/fetch_url.json";
+import { consumeVerification } from "@/lib/code_store";
 import bcrypt from "bcrypt";
 import nodemailer from "nodemailer";
 import { rateLimit } from "@/firewall/rate_limit";
@@ -32,9 +31,7 @@ export async function POST(req: NextRequest) {
 
         const cleanAssign_by = "admin";
 
-        const checkCodeUrl = new URL(api_link.checkcode, req.nextUrl.origin).toString();
-        const response_code = await Fetch_to(checkCodeUrl, { email: email, key: "confirm_code" });
-        if (!response_code.success) return NextResponse.json({ success: false, error: response_code.message }, { status: 405 });
+        if (!consumeVerification(cleanEmail, "register", req.cookies.get("otp_verification")?.value)) return NextResponse.json({ success: false, error: "Email verification required" }, { status: 403 });
 
         if (cleanEmail === cleanAssign_by) return NextResponse.json({ success: false, error: "Email you provided is in conflict"}, { status: 409 });
 

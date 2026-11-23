@@ -3,6 +3,7 @@ import { supabaseServer } from "@/lib/supabase-server";
 import bcrypt from "bcrypt";
 import nodemailer from "nodemailer";
 import { rateLimit } from "@/firewall/rate_limit";
+import { consumeVerification } from "@/lib/code_store";
 
 export async function POST(req: NextRequest) {
 
@@ -26,6 +27,8 @@ export async function POST(req: NextRequest) {
         if (password.length < 8) return NextResponse.json({ success: false, error: "Must be more than 8 characters" }, { status: 409 });
 
         const cleanEmail = email.trim().toLowerCase();
+
+        if (!consumeVerification(cleanEmail, "forgot_password", req.cookies.get("otp_verification")?.value)) return NextResponse.json({ success: false, error: "Email verification required" }, { status: 403 });
 
         const resolveEmail = (email: string) => {
             if (email === process.env.ADMIN_ALIAS) {

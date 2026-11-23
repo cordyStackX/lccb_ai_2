@@ -9,20 +9,28 @@
     padding: 0 1rem;
 }
 
-/* Live document-processing journey, fixed at the right edge of the workspace. */
-.processingJourney {
+/* Centered live document-processing map and per-PDF results. */
+.journeyOverlay {
     position: fixed;
-    z-index: 60;
-    top: 1.25rem;
-    right: 1.25rem;
-    width: min(370px, calc(100vw - 2rem));
-    padding: 1.15rem;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: rgba(12, 22, 37, 0.58);
+    backdrop-filter: blur(3px);
+}
+.processingJourney {
+    width: min(620px, calc(100vw - 2rem));
+    max-height: min(88vh, 850px);
+    overflow-y: auto;
+    padding: clamp(1.1rem, 3vw, 1.8rem);
     color: var(--foreground);
     background: var(--default-color-white);
     border: 1px solid var(--default-color-white-2);
-    border-radius: 14px;
-    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.22);
-    animation: journeyEnter 260ms ease-out;
+    border-radius: 20px;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.32);
+    animation: journeyEnter 220ms ease-out;
 }
 .journeyHeader {
     display: flex;
@@ -30,20 +38,55 @@
     justify-content: space-between;
     gap: 1rem;
 }
-.journeyHeader h3 { margin: 0.2rem 0 0; font-size: 0.95rem; overflow-wrap: anywhere; }
+.journeyHeader h3 { margin: 0.2rem 0 0; font-size: clamp(1.1rem, 2.5vw, 1.45rem); overflow-wrap: anywhere; }
 .journeyEyebrow { color: var(--primary); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
 .journeyClose { border: 0; background: transparent; color: var(--default-color-gray); font-size: 1.5rem; line-height: 1; cursor: pointer; }
-.journeyStatus { min-height: 2.7rem; margin: 1rem 0 0.65rem; color: var(--default-color-gray); font-size: 0.88rem; line-height: 1.45; }
+.journeyCancel { flex: 0 0 auto; padding: 0.5rem 0.75rem; border: 1px solid rgba(233, 75, 60, 0.45); border-radius: 8px; background: rgba(233, 75, 60, 0.06); color: var(--default-color-red); font: inherit; font-size: 0.82rem; font-weight: 650; cursor: pointer; }
+.journeyCancel:hover { background: rgba(233, 75, 60, 0.12); }
+.journeyStatus { min-height: 2.7rem; margin: 1rem 0 1.1rem; color: var(--default-color-gray); font-size: 0.92rem; line-height: 1.5; }
 .journeyResultWarning { color: #9a5b00; font-weight: 650; }
-.journeySteps { display: grid; gap: 0.7rem; margin: 0; padding: 0; list-style: none; }
-.journeySteps li { display: flex; align-items: center; gap: 0.65rem; color: var(--default-color-gray); font-size: 0.86rem; transition: color 180ms ease; }
-.journeyMarker { display: inline-grid; place-items: center; flex: 0 0 1.45rem; width: 1.45rem; height: 1.45rem; border: 1px solid var(--default-color-gray); border-radius: 50%; font-size: 0.72rem; font-weight: 700; }
+.journeySteps { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.journeyStep { position: relative; display: flex; align-items: flex-start; gap: 0.8rem; min-height: 3.3rem; color: var(--default-color-gray); font-size: 0.9rem; transition: color 180ms ease; }
+.journeyStep:not(:last-child)::before { content: ""; position: absolute; left: 0.76rem; top: 1.65rem; bottom: -0.15rem; width: 2px; background: var(--default-color-white-2); }
+.journeyMarker { position: relative; z-index: 1; display: inline-grid; place-items: center; flex: 0 0 1.55rem; width: 1.55rem; height: 1.55rem; border: 1px solid var(--default-color-gray); border-radius: 50%; background: var(--default-color-white); font-size: 0.72rem; font-weight: 700; }
+.journeyStepText { display: grid; gap: 0.2rem; padding: 0.12rem 0 0.75rem; }
+.journeyStepText small { color: var(--default-color-gray); font-size: 0.8rem; font-weight: 400; line-height: 1.4; }
 .journeyActive { color: var(--foreground) !important; font-weight: 700; }
 .journeyActive .journeyMarker { color: var(--default-color-white); background: var(--primary); border-color: var(--primary); animation: journeyPulse 1.2s ease-in-out infinite; }
 .journeyComplete { color: var(--foreground) !important; }
 .journeyComplete .journeyMarker { color: var(--default-color-white); background: var(--default-color-green); border-color: var(--default-color-green); }
 .journeyError { color: var(--default-color-red) !important; font-weight: 700; }
 .journeyError .journeyMarker { color: var(--default-color-white); background: var(--default-color-red); border-color: var(--default-color-red); }
+.journeyFiles { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--default-color-white-2); }
+.journeyFiles h4 { margin: 0 0 0.7rem; font-size: 0.95rem; }
+.journeyFiles ul { display: grid; gap: 0.55rem; max-height: 260px; overflow-y: auto; margin: 0; padding: 0; list-style: none; }
+.journeyFiles li { display: flex; align-items: flex-start; gap: 0.65rem; padding: 0.7rem; border: 1px solid var(--default-color-white-2); border-radius: 10px; background: rgba(1, 125, 147, 0.035); overflow-wrap: anywhere; }
+.journeyFiles li.journeyFileSensitive { border-color: rgba(233, 75, 60, 0.35); background: rgba(233, 75, 60, 0.045); }
+.journeyFiles li > span:last-child { display: grid; gap: 0.18rem; min-width: 0; }
+.journeyFiles small { color: var(--default-color-gray); font-size: 0.78rem; line-height: 1.4; }
+.journeyFileIcon { display: grid; place-items: center; flex: 0 0 1.35rem; width: 1.35rem; height: 1.35rem; color: white; border-radius: 50%; background: var(--default-color-green); font-size: 0.75rem; font-weight: 800; }
+.journeyFileSensitive .journeyFileIcon { background: var(--default-color-red); }
+.modalOverlay.privacyReviewOverlay { z-index: 120; background: rgba(12, 22, 37, 0.68); }
+.privacyReviewDialog { display: flex; flex-direction: column; width: min(680px, 100%); max-height: min(88vh, 900px); overflow: hidden; border: 1px solid var(--default-color-white-2); border-radius: 18px; background: var(--default-color-white); color: var(--foreground); box-shadow: 0 24px 80px rgba(0, 0, 0, 0.34); }
+.privacyReviewHeader { padding: 1.35rem 1.5rem 1rem; border-bottom: 1px solid var(--default-color-white-2); }
+.privacyReviewEyebrow { color: var(--primary); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.07em; }
+.privacyReviewHeader h2 { margin: 0.45rem 0; font-size: clamp(1.15rem, 3vw, 1.45rem); }
+.privacyReviewHeader p { margin: 0; color: var(--default-color-gray); font-size: 0.9rem; }
+.privacyReviewBody { overflow-y: auto; padding: 1.2rem 1.5rem; }
+.privacyReviewNotice { padding: 0.9rem 1rem; border: 1px solid rgba(233, 75, 60, 0.3); border-radius: 10px; background: rgba(233, 75, 60, 0.06); color: var(--foreground); font-size: 0.88rem; line-height: 1.5; }
+.privacyReviewBody h3 { margin: 1.15rem 0 0.65rem; font-size: 0.98rem; }
+.privacyWarningList, .privacyWarningList ul { display: grid; gap: 0.6rem; margin: 0; padding: 0; list-style: none; }
+.privacyWarningList > li { padding: 0.85rem; border: 1px solid rgba(233, 75, 60, 0.28); border-radius: 10px; background: rgba(233, 75, 60, 0.035); overflow-wrap: anywhere; }
+.privacyWarningList > li > strong { display: block; margin-bottom: 0.55rem; }
+.privacyWarningList > li > ul { gap: 0.45rem; }
+.privacyWarningList > li > ul > li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.3rem 0.8rem; padding-top: 0.45rem; border-top: 1px solid rgba(0, 0, 0, 0.08); font-size: 0.86rem; text-transform: capitalize; }
+.privacyWarningList small { color: var(--default-color-gray); text-transform: none; }
+.privacyWarningList p, .privacyReviewFootnote { margin: 0.55rem 0 0; color: var(--default-color-gray); font-size: 0.82rem; line-height: 1.45; }
+.privacyReviewFooter { display: flex; justify-content: flex-end; gap: 0.65rem; padding: 0.9rem 1.5rem; border-top: 1px solid var(--default-color-white-2); }
+.privacyReviewFooter button { min-height: 42px; padding: 0.6rem 0.95rem; border-radius: 8px; font: inherit; font-size: 0.86rem; font-weight: 700; cursor: pointer; }
+.privacyReviewCancel { border: 1px solid var(--default-color-white-2); background: transparent; color: var(--foreground); }
+.privacyReviewContinue { border: 1px solid var(--default-color-red); background: var(--default-color-red); color: var(--default-color-white); }
+.privacyReviewContinue:hover { filter: brightness(0.92); }
 @keyframes journeyEnter { from { opacity: 0; transform: translateX(1rem); } to { opacity: 1; transform: translateX(0); } }
 @keyframes journeyPulse { 50% { transform: scale(1.12); box-shadow: 0 0 0 5px color-mix(in srgb, var(--primary) 20%, transparent); } }
 
