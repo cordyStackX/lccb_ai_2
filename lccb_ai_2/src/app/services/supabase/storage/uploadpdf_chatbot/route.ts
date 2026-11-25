@@ -294,10 +294,12 @@ export async function POST(req: NextRequest) {
     if (successCount > 0) {
         const { data: record, error: record_err } = await supabaseServer
             .from("system_logs")
-            .select("uploaded_pdf, created_at")
+            .select("id, uploaded_pdf, created_at")
             .eq("request", cleanEmail)
             .gte("created_at", new Date().toISOString().split("T")[0])
             .lt("created_at", new Date(Date.now() + 86400000).toISOString().split("T")[0])
+            .order("created_at", { ascending: false })
+            .limit(1)
             .maybeSingle();
 
         if (record_err) {
@@ -307,7 +309,7 @@ export async function POST(req: NextRequest) {
             await supabaseServer
                 .from("system_logs")
                 .update({ uploaded_pdf: record_add })
-                .eq("request", cleanEmail);
+                .eq("id", record.id);
         } else {
             await supabaseServer
                 .from("system_logs")

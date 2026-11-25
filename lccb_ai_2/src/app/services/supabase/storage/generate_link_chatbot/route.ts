@@ -132,11 +132,12 @@ export async function POST(req: NextRequest) {
         const todayStart = new Date().toISOString().split("T")[0];
         const tomorrowStart = new Date(Date.now() + 86400000).toISOString().split("T")[0];
         const { data: dailyUsage, error: usageError } = await supabaseServer.from("system_logs")
-            .select("uploaded_pdf").eq("request", cleanEmail).gte("created_at", todayStart).lt("created_at", tomorrowStart).maybeSingle();
+            .select("id, uploaded_pdf").eq("request", cleanEmail).gte("created_at", todayStart).lt("created_at", tomorrowStart)
+            .order("created_at", { ascending: false }).limit(1).maybeSingle();
         if (!usageError) {
             if (dailyUsage) {
                 await supabaseServer.from("system_logs").update({ uploaded_pdf: Number(dailyUsage.uploaded_pdf ?? 0) + pageCount })
-                    .eq("request", cleanEmail).gte("created_at", todayStart).lt("created_at", tomorrowStart);
+                    .eq("id", dailyUsage.id);
             } else {
                 await supabaseServer.from("system_logs").insert({ request: cleanEmail, uploaded_pdf: pageCount });
             }
