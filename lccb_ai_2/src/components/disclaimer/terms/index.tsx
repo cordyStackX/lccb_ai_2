@@ -15,11 +15,11 @@ export default function Terms() {
             <div className={styles.content}>
                 <Link href="/" style={{ color: "blue" }} > {"<<"} Go Back</Link>
                 <h1>Terms and Conditions</h1>
-                <p className={styles.updated}>Last Updated: November 15, 2026</p>
+                <p className={styles.updated}>Last Updated: November 25, 2026</p>
 
                 <div className={styles.notice}>
                     <h2>⚠️ Important Notice</h2>
-                    <p>LACO AI is an AI-powered platform providing information about schools, businesses, and student academic records. Full sensitive-data access, including student grades, is currently exclusive to <strong>La Consolacion College Bacolod (LCCB)</strong>. Other schools seeking full system access must contact us to negotiate a separate agreement. Businesses may use general document analysis features under Free Trial, Pro, or Enterprise tiers.</p>
+                    <p>LACO AI is an AI-powered platform providing information about schools, businesses, and academic records. Sensitive student and teacher records, including grades where applicable, are available only within <strong>La Consolacion College Bacolod (LCCB)</strong>. Other schools seeking full system access must contact us to negotiate a separate agreement. Businesses may use general document analysis features under Free Trial, Pro, or Enterprise tiers.</p>
                 </div>
 
                 <section className={styles.section}>
@@ -32,7 +32,7 @@ export default function Terms() {
                     <h2>2. Platform Scope and Purpose</h2>
                     <ul>
                         <li>LACO AI provides AI-powered information services covering schools, businesses, and academic records</li>
-                        <li>Full sensitive academic data access (including student grades) is available exclusively to <strong>La Consolacion College Bacolod (LCCB)</strong></li>
+                        <li>Sensitive student and teacher records (including grades where applicable) are available only within <strong>La Consolacion College Bacolod (LCCB)</strong></li>
                         <li>Other schools or institutions seeking full system access must contact us to negotiate access</li>
                         <li>Businesses may sign up for general PDF document analysis under a Free Trial, Pro, or Enterprise tier</li>
                         <li>The Service is subject to bugs, errors, downtime, and ongoing development</li>
@@ -74,18 +74,18 @@ export default function Terms() {
                     </ul>
 
                     <h3>Platform Features by Role</h3>
-                    <p><strong>LCCB Students and Teacher can:</strong></p>
+                    <p><strong>LCCB students and teachers can:</strong></p>
                     <ul>
                         <li>Upload PDF documents (stored until manual deletion via right-click menu)</li>
                         <li>Search and filter PDFs by name</li>
-                        <li>Chat with AI about selected PDFs and their own academic records</li>
+                        <li>Students can chat with AI about selected PDFs and academic records matched to their own registered school ID. Teachers can chat about their own PDFs; student academic chat does not expose teacher records.</li>
                         <li>Update profile name and upload profile picture</li>
                         <li>Recover password via OTP</li>
                     </ul>
                     <p><strong>Administrators additionally can:</strong></p>
                     <ul>
                         <li>Review and approve student/teacher account registrations</li>
-                        <li>Upload, recheck, and delete restricted academic PDFs and review the resulting student bookshelf records</li>
+                        <li>Upload, recheck, and delete restricted academic PDFs and review resulting matched student and teacher records</li>
                         <li>Manage user accounts (create, update; cannot reset user passwords)</li>
                         <li>Process account deletion requests received via admin email</li>
                         <li>Review, approve, decline, or refund business payments</li>
@@ -102,13 +102,13 @@ export default function Terms() {
                 </section>
 
                 <section className={styles.section}>
-                    <h2>4.2 Sensitive Student Records</h2>
+                    <h2>4.2 Sensitive Student and Teacher Records</h2>
                     <ul>
                         <li>Only authorized administrators may upload and manage sensitive academic PDFs.</li>
                         <li>Administrators must have authority to submit the PDFs and must use them only for legitimate academic purposes.</li>
-                        <li>Python sends restricted PDF pages to OpenAI to extract student IDs and academic information, then the Service matches records to registered LACO AI student accounts. A record is filed only when its ID matches exactly one registered account; the Service does not create an account for a student found in a PDF.</li>
-                        <li>If a student has not registered, or the extracted ID is missing, invalid, or unmatched/ambiguous, that extracted record is skipped and is not placed in a student bookshelf or included in student chat. The restricted PDF remains stored for authorized administrative processing until deleted. After a student registers, an administrator may use <strong>Check all PDFs</strong> to reprocess stored PDFs and file newly matched records; uploading the PDF again is not required.</li>
-                        <li>Students may use academic chat only for records matched to their own registered student ID. They must not attempt to obtain another student&apos;s information.</li>
+                        <li>Python sends restricted PDF pages to OpenAI to extract student or teacher records and school IDs. The Service matches each ID to registered LCCB accounts using the same ID field for students and teachers. A record is filed only when its ID matches exactly one registered account; the Service does not create an account for a person found in a PDF.</li>
+                        <li>If the person has not registered, or the extracted ID is missing, invalid, or unmatched/ambiguous, that extracted record is skipped. The restricted PDF remains stored for authorized administrative processing until deleted. An administrator may use <strong>Check all PDFs</strong> to reprocess stored PDFs and file newly matched records; uploading the PDF again is not required.</li>
+                        <li>Students may use academic chat only for records matched to their own registered school ID. Student chat does not provide access to teacher records. Users must not attempt to obtain another person&apos;s information.</li>
                         <li>AI-generated academic answers may be incomplete or incorrect and should be checked against official school records.</li>
                     </ul>
                 </section>
@@ -194,19 +194,19 @@ export default function Terms() {
                         <li><strong>Render:</strong> Python API backend hosting</li>
                         <li><strong>Vercel/GitHub Pages:</strong> Next.js frontend deployment</li>
                     </ul>
-                    <p>These services have their own terms and privacy policies. Sensitive PDF pages are sent to OpenAI for record extraction. Student academic chat sends the student&apos;s question and only records matched to that student&apos;s registered ID. OpenAI processes this information under its own terms and privacy practices.</p>
+                    <p>These services have their own terms and privacy policies. Sensitive PDF pages are sent to OpenAI to extract student and teacher records. Student academic chat sends the student&apos;s question and only records matched to that student&apos;s registered school ID. OpenAI processes this information under its own terms and privacy practices.</p>
                 </section>
 
                 <section className={styles.section}>
                     <h2>11. Data and Privacy</h2>
                     <ul>
                         <li>Your data is handled according to our Privacy Policy</li>
-                        <li>Sensitive PDF files and extracted bookshelf record contents are encrypted at rest. Student IDs in account records are stored as plaintext identifiers and are used for server-side matching.</li>
+                        <li>Sensitive PDF files and extracted record contents are encrypted at rest. School IDs in account records are stored as plaintext identifiers and are used for server-side matching.</li>
                         <li>Student chat requests are checked against the authenticated student account, and only bookshelf records matching that student&apos;s registered ID are supplied to the AI.</li>
-                        <li>Administrator-uploaded sensitive PDF pages are sent to OpenAI for record extraction. OpenAI also receives the student&apos;s question and only the matched records needed to answer it.</li>
+                        <li>Administrator-uploaded sensitive PDF pages are sent to OpenAI for student/teacher record extraction. For student academic chat, OpenAI receives the student&apos;s question and only records matched to that student.</li>
                         <li>Payment account numbers are encrypted at rest, including when payment details are resubmitted or a refund is requested</li>
                         <li>PDF files are stored in Supabase storage buckets until you manually delete them</li>
-                        <li>Sensitive PDF files and their bookshelf records remain until an administrator deletes the PDF or the related account is deleted; deleting a sensitive PDF also removes its associated bookshelf records</li>
+                        <li>Sensitive PDF files and their matched student/teacher records remain until an administrator deletes the PDF or the related account is deleted; deleting a sensitive PDF also removes its associated records</li>
                         <li>Profile pictures stored until replaced or account deleted</li>
                         <li>Chat conversations stored indefinitely in your account</li>
                         <li>We log API requests, timestamps, and errors for research and debugging</li>
@@ -215,7 +215,7 @@ export default function Terms() {
                         <li>JWT authentication tokens stored in HTTP-only cookies</li>
                         <li>We cannot guarantee the security or confidentiality of your data</li>
                         <li><strong>Do not upload sensitive or confidential information into Public Documents</strong></li>
-                        <li>Do not upload sensitive student records unless you are an authorized administrator and the upload is for an approved academic purpose.</li>
+                        <li>Do not upload sensitive student or teacher records unless you are an authorized administrator and the upload is for an approved academic purpose.</li>
                     </ul>
                 </section>
 

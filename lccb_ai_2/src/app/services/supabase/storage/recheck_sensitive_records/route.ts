@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
         for (let offset = 0; ; offset += 1000) {
             const { data: students, error: studentError } = await supabaseServer.from("auth_student")
                 .select("email, school_id").range(offset, offset + 999);
-            if (studentError) return NextResponse.json({ success: false, error: "Could not load registered student IDs" }, { status: 500 });
+            if (studentError) return NextResponse.json({ success: false, error: "Could not load registered school IDs" }, { status: 500 });
             for (const student of students ?? []) {
                 const id = normalizeStudentId(student.school_id);
                 const studentEmail = typeof student.email === "string" ? student.email.trim().toLowerCase() : "";
@@ -104,8 +104,8 @@ export async function POST(req: NextRequest) {
                     success: true,
                     newly_matched_students: newlyMatched,
                     message: rows.length
-                        ? `${newlyMatched} new student bookshelf entr${newlyMatched === 1 ? "y" : "ies"} created; ${rows.length - newlyMatched} existing entr${rows.length - newlyMatched === 1 ? "y" : "ies"} refreshed${skipped ? `; skipped ${skipped} unmatched or invalid record(s)` : ""}.`
-                        : `No verified student records were extracted${skipped ? ` (${skipped} unmatched or invalid record(s))` : ""}. Existing bookshelf entries were left untouched; check the PDF ID and encryption settings.`,
+                        ? `${newlyMatched} new bookshelf entr${newlyMatched === 1 ? "y" : "ies"} created; ${rows.length - newlyMatched} existing entr${rows.length - newlyMatched === 1 ? "y" : "ies"} refreshed${skipped ? `; skipped ${skipped} unmatched or invalid record(s)` : ""}.`
+                        : `No verified school records were extracted${skipped ? ` (${skipped} unmatched or invalid record(s))` : ""}. Existing bookshelf entries were left untouched; check the PDF ID and encryption settings.`,
                 });
             } catch (error) {
                 outcomes.push({ file_name: document.file_name, success: false, newly_matched_students: 0, message: error instanceof Error ? error.message : "PDF recheck failed" });
@@ -116,8 +116,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({
             success: successful > 0,
             message: totalSavedGroups
-                ? `Rechecked ${successful} of ${documents.length} PDF(s); created ${newlyMatchedStudents} new student bookshelf entr${newlyMatchedStudents === 1 ? "y" : "ies"} and refreshed ${totalSavedGroups - newlyMatchedStudents} existing entr${totalSavedGroups - newlyMatchedStudents === 1 ? "y" : "ies"}.`
-                : `Rechecked ${successful} of ${documents.length} PDF(s), but found no verified student record groups. Existing bookshelf entries were left untouched.`,
+                ? `Rechecked ${successful} of ${documents.length} PDF(s); created ${newlyMatchedStudents} new bookshelf entr${newlyMatchedStudents === 1 ? "y" : "ies"} and refreshed ${totalSavedGroups - newlyMatchedStudents} existing entr${totalSavedGroups - newlyMatchedStudents === 1 ? "y" : "ies"}.`
+                : `Rechecked ${successful} of ${documents.length} PDF(s), but found no verified school record groups. Existing bookshelf entries were left untouched.`,
             outcomes,
             newlyMatchedStudents,
         }, { status: successful > 0 ? 200 : 500 });

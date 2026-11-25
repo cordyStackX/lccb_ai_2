@@ -3,6 +3,7 @@ import json
 from flask import request, jsonify, Response, stream_with_context
 from .context import EXPECTED_API_KEY, client, supabase, PDF_ENCRYPT_PASSWORD
 from .prompt_loader import load_prompt_template, load_system_prompt
+from .chat_history import normalize_history
 import hashlib
 import base64
 import re
@@ -49,6 +50,7 @@ def _build_prompt_context(data):
     email = data.get("email")
     f_name = data.get("f_name")
     method = data.get("method")
+    history = normalize_history(data)
 
     if received_token != EXPECTED_API_KEY:
         return None, (jsonify({"success": False, "error": "Unauthorized"}), 401)
@@ -156,7 +158,7 @@ def _build_prompt_context(data):
         chat_bot_name=""
     )
 
-    return {"final_prompt": final_prompt, "system_role": systemRole}, None
+    return {"final_prompt": final_prompt, "system_role": systemRole, "history": history}, None
 
 
 def generate_md_sensitive_data():
@@ -169,10 +171,7 @@ def generate_md_sensitive_data():
 
         response = client.chat.completions.create(
             model="gpt-4.1-mini",
-            messages=[
-                {"role": "system", "content": context["system_role"]},
-                {"role": "user", "content": context["final_prompt"]},
-            ],
+            messages=[{"role": "system", "content": context["system_role"]}, *context["history"], {"role": "user", "content": context["final_prompt"]}],
             temperature=0.7,
             max_tokens=1000,
         )
@@ -197,10 +196,7 @@ def generate_md_sensitive_data_stream():
             try:
                 stream = client.chat.completions.create(
                     model="gpt-4.1-mini",
-                    messages=[
-                        {"role": "system", "content": context["system_role"]},
-                        {"role": "user", "content": context["final_prompt"]},
-                    ],
+                    messages=[{"role": "system", "content": context["system_role"]}, *context["history"], {"role": "user", "content": context["final_prompt"]}],
                     temperature=0.7,
                     max_tokens=1000,
                     stream=True,

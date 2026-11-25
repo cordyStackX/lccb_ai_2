@@ -2,11 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import api_links from "@/config/conf/json_config/Api_links.json";
 import { supabaseServer } from "@/lib/supabase-server";
 import { isBusinessPlanExpired } from "@/lib/business_plan_usage";
+import { acquireChatStream, releaseChatStream, releaseWhenStreamEnds } from "@/lib/chat-stream-lock";
 
 export async function POST(req: NextRequest) {
+    let streamLockEmail = "";
     try {
 
-    const { prompt, last_user_response, last_ai_response, email } = await req.json();
+    const { prompt, history, last_user_response, last_ai_response, email } = await req.json();
 
     const { data: stateRows, error: stateError } = await supabaseServer
         .from("setting")
@@ -84,6 +86,11 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, error: "Prompt is required" }, { status: 401 });
     }
 
+    if (!acquireChatStream(cleanEmail)) {
+        return NextResponse.json({ success: false, error: "Wait for the current AI response to finish." }, { status: 429 });
+    }
+    streamLockEmail = cleanEmail;
+
     const upstream = await fetch(`${apiUrl}generate-md-chatbot-stream`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -91,12 +98,15 @@ export async function POST(req: NextRequest) {
             prompt: prompt,
             token: apikey,
             email: email,
+            history: history,
             last_user_response: last_user_response,
             last_ai_response: last_ai_response,
         }),
     });
 
     if (!upstream.ok || !upstream.body) {
+        releaseChatStream(streamLockEmail);
+        streamLockEmail = "";
         const errorData = await upstream.json().catch(() => null);
         return NextResponse.json(
             { success: false, error: errorData?.error || "Upstream stream error" },
@@ -113,6 +123,8 @@ export async function POST(req: NextRequest) {
         .maybeSingle();
 
     if (record_err) {
+        releaseChatStream(streamLockEmail);
+        streamLockEmail = "";
         console.error("Supabase Query Error: ", record_err);
         return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
     }
@@ -136,7 +148,8 @@ export async function POST(req: NextRequest) {
             ]);
     }
 
-    return new NextResponse(upstream.body, {
+    streamLockEmail = "";
+    return new NextResponse(releaseWhenStreamEnds(upstream.body, cleanEmail), {
         status: 200,
         headers: {
             "Content-Type": "text/event-stream; charset=utf-8",
@@ -145,6 +158,7 @@ export async function POST(req: NextRequest) {
         },
     });
     } catch (error) {
+        if (streamLockEmail) releaseChatStream(streamLockEmail);
         console.error("response2-stream POST Error:", error);
         return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
     }

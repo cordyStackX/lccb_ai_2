@@ -16,11 +16,11 @@ export default function Privacy() {
             <div className={styles.content}>
                 <Link href="/" style={{ color: "blue" }} > {"<<"} Go Back</Link>
                 <h1>Privacy Policy</h1>
-                <p className={styles.updated}>Last Updated: November 15, 2026</p>
+                <p className={styles.updated}>Last Updated: November 25, 2026</p>
                 
                 <div className={styles.notice}>
                     <h2>⚠️ Important Notice</h2>
-                    <p>LACO AI provides AI-powered information services covering schools, businesses, and student academic records. Full sensitive-data features (including student grades) are currently available exclusively to <strong>La Consolacion College Bacolod (LCCB)</strong>. Businesses may sign up for general document analysis under a separate tier described below. This platform is provided &quot;as-is&quot; and is under active development.</p>
+                    <p>LACO AI provides AI-powered information services covering schools, businesses, and academic records. Full sensitive-data features (including student grades and teacher records) are currently available exclusively to <strong>La Consolacion College Bacolod (LCCB)</strong>. Businesses may sign up for general document analysis under a separate tier described below. This platform is provided &quot;as-is&quot; and is under active development.</p>
                 </div>
 
                 <section className={styles.section}>
@@ -30,7 +30,7 @@ export default function Privacy() {
                     <p>We are committed to protecting your privacy and handling your data responsibly.</p>
                     <h3>1.1 Philippine Data Privacy Act</h3>
                     <p>LACO AI processes personal information in the Philippines and recognizes the requirements of Republic Act No. 10173, the <strong>Data Privacy Act of 2012</strong>, and its implementing rules. The Act requires personal information to be processed fairly and lawfully, for specified and legitimate purposes, in a way that is proportionate to those purposes, and kept only as long as necessary, subject to applicable law.</p>
-                    <p>Personal information may identify a person directly or when combined with other information. Sensitive personal information under the Act includes, among other things, information about a person&apos;s education or health and identifiers issued by government agencies. LACO AI&apos;s student academic records and uploaded PDFs may contain these kinds of information.</p>
+                    <p>Personal information may identify a person directly or when combined with other information. Sensitive personal information under the Act includes, among other things, information about a person&apos;s education or health and identifiers issued by government agencies. LACO AI&apos;s student and teacher records and uploaded PDFs may contain these kinds of information.</p>
                     <p>Personal information may be processed only when a lawful criterion under the Act applies. The automated PDF warning and a user&apos;s decision to continue an upload are not, by themselves, a legal determination that the processing is authorized. Uploaders must have authority to submit the information and should not place sensitive or confidential information in Public Documents.</p>
                     <p>The Act provides data subjects rights that include being informed, reasonable access, correction, objection, and erasure or blocking in circumstances provided by law, as well as the right to file a complaint with the National Privacy Commission. You may submit requests to the LACO AI administrator using the contact details in Section 16. Requests are handled subject to the Act and other applicable legal requirements. Read the <a href="https://privacy.gov.ph/DATA-PRIVACY-ACT/" target="_blank" rel="noopener noreferrer">official Data Privacy Act</a>.</p>
                 </section>
@@ -39,7 +39,7 @@ export default function Privacy() {
                     <h2>2. Platform Scope</h2>
                     <p>LACO AI operates under two distinct scopes:</p>
                     <ul>
-                        <li><strong>Academic (La Consolacion College Bacolod only):</strong> Full access to sensitive student data, including grades, is available exclusively to LCCB. Other schools or institutions seeking full system access must contact us directly to negotiate a separate agreement.</li>
+                        <li><strong>Academic (La Consolacion College Bacolod only):</strong> Sensitive student and teacher records, including grades where applicable, are available only within the LCCB academic scope. Other schools or institutions seeking full system access must contact us directly to negotiate a separate agreement.</li>
                         <li><strong>Business:</strong> Businesses may sign up for general PDF document analysis under the Free Trial, Pro, or Enterprise tier (see Section 3.5). This tier is not intended for sensitive or confidential data.</li>
                     </ul>
                     <h3>2.1 Account Approval Process</h3>
@@ -86,16 +86,16 @@ export default function Privacy() {
                         <li>Request headers and origin validation</li>
                     </ul>
 
-                    <h3>3.4 Academic Data (LCCB Only)</h3>
+                    <h3>3.4 Student and Teacher Records (LCCB Only)</h3>
                     <ul>
-                        <li>Student ID, student name, school email, year level, and department used to register and match academic records</li>
-                        <li>Student grades and other academic information extracted from sensitive PDFs uploaded by an administrator</li>
+                        <li>School ID, name, school email, role, and (for students) year level, used to register accounts and match records</li>
+                        <li>Student academic information and teacher school-related records extracted from sensitive PDFs uploaded by an administrator</li>
                         <li>Admin users have access to user management features</li>
                         <li>Admin activity logs (user creation, status updates, deletions)</li>
                         <li>API usage logs accessible by admins</li>
                     </ul>
-                    <h4>How sensitive academic records are collected</h4>
-                    <p>An authorized administrator uploads a restricted PDF. Python sends its pages to OpenAI to extract student IDs and associated academic information, then the system matches each extracted ID against registered LACO AI student accounts. If a student has not registered, or the ID is missing, invalid, or does not match exactly one account, that extracted record is skipped: it is not filed in a student bookshelf or provided in student chat, and the system does not create an account for the student. The restricted PDF itself remains stored for authorized administrative processing until it is deleted. If the student registers later, an administrator can recheck the stored PDF and file newly matched records without uploading the PDF again.</p>
+                    <h4>How sensitive school records are collected</h4>
+                    <p>An authorized administrator uploads a restricted PDF. Python sends its pages to OpenAI to extract student or teacher records and their school IDs. The system matches each extracted school ID against registered LCCB accounts using the same ID field for students and teachers. A record is filed only when its ID matches exactly one account. If the person has not registered, or the ID is missing, invalid, or does not match exactly one account, that extracted record is skipped; the system does not create an account. Matched records are available for authorized administrative review. Student chat can use only records matched to that student&apos;s own registered ID; teacher records are not made available through student chat. The restricted PDF remains stored for authorized administrative processing until deleted. An administrator can recheck stored PDFs to match records after an account is registered, without uploading the PDF again.</p>
 
                     <h3>3.5 Business Accounts</h3>
                     <ul>
@@ -113,8 +113,8 @@ export default function Privacy() {
                         <li>User authentication via JWT tokens and email verification</li>
                         <li>Role-based access control (Admin, Teacher, Student)</li>
                         <li>Processing public PDFs for document analysis and question answering</li>
-                        <li>Processing administrator-uploaded sensitive PDFs with AI to extract academic records and match them to registered student IDs</li>
-                        <li>Answering a student&apos;s academic questions using only bookshelf records whose student ID matches that student&apos;s registered ID</li>
+                        <li>Processing administrator-uploaded sensitive PDFs with AI to extract student and teacher records and match them to registered LCCB school IDs</li>
+                        <li>Answering a student&apos;s academic questions using only records whose school ID matches that student&apos;s registered ID</li>
                         <li>Storing and managing profile pictures</li>
                         <li>Enabling search and filtering of uploaded PDFs</li>
                         <li>Admin features: user management, API logs, and system monitoring</li>
@@ -131,7 +131,7 @@ export default function Privacy() {
                     <ul>
                         <li>User data stored in Supabase PostgreSQL database with row-level security</li>
                         <li>Sensitive PDF files are password-encrypted before being stored, and extracted bookshelf record contents are encrypted before database storage</li>
-                        <li>Student IDs in student account records are stored as plaintext identifiers; they are used by the server to match PDF records and are not treated as encrypted values</li>
+                        <li>School IDs in account records are stored as plaintext identifiers; they are used by the server to match PDF records and are not treated as encrypted values</li>
                         <li>Sensitive PDF and bookshelf access is handled through server-side routes with role and account checks; student chat is limited to records matched to the authenticated student&apos;s registered ID</li>
                         <li>Raw PDF pages and extracted record contents are decrypted in the backend when needed for extraction or authorized record display</li>
                         <li>Profile pictures stored in Supabase public storage buckets</li>
@@ -162,12 +162,12 @@ export default function Privacy() {
                     <p>We use the following third-party services:</p>
                     <ul>
                         <li><strong>Supabase:</strong> PostgreSQL database, authentication, and file storage services</li>
-                        <li><strong>OpenAI:</strong> AI processing of public documents, sensitive PDF pages for record extraction, and student questions with only the matched student records supplied as chat context</li>
+                        <li><strong>OpenAI:</strong> AI processing of public documents and sensitive PDF pages for student/teacher record extraction; student academic questions include only records matched to that student</li>
                         <li><strong>Render:</strong> Python API hosting for backend services</li>
                         <li><strong>Vercel/GitHub Pages:</strong> Next.js application deployment</li>
                         <li><strong>Next.js:</strong> React framework for the web application</li>
                     </ul>
-                    <p>When an administrator submits a sensitive PDF, its pages and content are sent to OpenAI for extraction. When a student asks about academic records, only records matched to that student&apos;s registered ID are included in the AI request. These providers process information under their own terms and privacy practices.</p>
+                    <p>When an administrator submits a sensitive PDF, its pages and content are sent to OpenAI to extract student and teacher records. When a student asks about academic records, only records matched to that student&apos;s registered school ID are included in the AI request. These providers process information under their own terms and privacy practices.</p>
                 </section>
 
                 <section className={styles.section}>
@@ -189,7 +189,7 @@ export default function Privacy() {
                         <li><strong>Account data:</strong> Retained until you request deletion by contacting the admin (see Section 10)</li>
                         <li><strong>Profile pictures:</strong> Stored until replaced or account deleted</li>
                         <li><strong>PDF files:</strong> Stored in database and storage bucket until manually deleted via context menu</li>
-                        <li><strong>Sensitive academic PDFs and bookshelf records:</strong> Retained until an administrator deletes the PDF or the related account is deleted; deleting a sensitive PDF also removes its associated bookshelf entries</li>
+                        <li><strong>Sensitive academic PDFs and matched student/teacher records:</strong> Retained until an administrator deletes the PDF or the related account is deleted; deleting a sensitive PDF also removes its associated records</li>
                         <li><strong>Chat history:</strong> Stored indefinitely in your account until manually cleared</li>
                         <li><strong>Payment records:</strong> Retained for accounting and dispute-resolution purposes, with account numbers encrypted</li>
                         <li><strong>API logs:</strong> Retained for debugging, research, and admin monitoring purposes</li>
@@ -233,7 +233,7 @@ export default function Privacy() {
                     <ul>
                         <li>Accounts require admin review and approval before activation</li>
                         <li>Can upload and manage their own public PDF documents</li>
-                        <li>Can chat with AI about their own PDFs and academic records matched to their registered student ID</li>
+                        <li>Students can chat with AI about their own PDFs and academic records matched to their registered school ID. Teachers can chat about their own PDFs; student academic chat does not expose teacher records.</li>
                         <li>Can search and filter their PDF library</li>
                         <li>Can update their profile and recover their password via OTP</li>
                         <li>Students under 13 require Guardian or Parent supervision</li>
@@ -243,7 +243,7 @@ export default function Privacy() {
                     <ul>
                         <li>Full access to user management features</li>
                         <li>Review and approve student/teacher account registrations</li>
-                        <li>Upload, recheck, and delete sensitive academic PDFs and review the resulting student bookshelf records</li>
+                        <li>Upload, recheck, and delete sensitive academic PDFs and review resulting matched student and teacher records</li>
                         <li>Can create, update, and manage user accounts (cannot reset user passwords — recovery is OTP-only)</li>
                         <li>Handle account deletion requests received via admin email</li>
                         <li>Review, approve, decline, or refund business payments</li>

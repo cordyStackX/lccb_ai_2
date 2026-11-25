@@ -56,11 +56,33 @@ def _relevant_page_context(rows, question, limit=6):
     )
 
 
+def _validated_history(data):
+    raw_history = data.get("history")
+    history = []
+    if isinstance(raw_history, list):
+        for item in raw_history[-12:]:
+            if not isinstance(item, dict) or item.get("role") not in {"user", "assistant"}:
+                continue
+            content = item.get("content")
+            if not isinstance(content, str) or not content.strip():
+                continue
+            history.append({"role": item["role"], "content": content.strip()[-4000:]})
+
+    # Keep older clients working until they send structured conversation turns.
+    if not history:
+        last_user = str(data.get("last_user_response", "")).strip()
+        last_assistant = str(data.get("last_ai_response", "")).strip()
+        if last_user:
+            history.append({"role": "user", "content": last_user[-4000:]})
+        if last_assistant:
+            history.append({"role": "assistant", "content": last_assistant[-4000:]})
+    return history
+
+
 def _build_chatbot_context(data):
     received_token = data.get("token")
     prompt = data.get("prompt", "")
-    last_user_response = str(data.get("last_user_response", "")).strip()
-    last_ai_response = str(data.get("last_ai_response", "")).strip()
+    history = _validated_history(data)
     email = data.get("email")
     f_name = data.get("f_name")
 
@@ -136,24 +158,13 @@ def _build_chatbot_context(data):
         question=prompt,
     )
 
-    page_context = _relevant_page_context(rows.data, prompt)
+    prior_user_questions = " ".join(item["content"] for item in history if item["role"] == "user")
+    page_context = _relevant_page_context(rows.data, f"{prior_user_questions} {prompt}")
     if page_context:
         final_prompt += (
             "\n\nAdditional source text retrieved from the most relevant public PDF pages. "
             "Use it to provide specific details while keeping every claim grounded in the cited document and page:\n"
             f"{page_context}"
-        )
-
-    if last_user_response:
-        final_prompt += (
-            "\n\nConversation context (latest previous user message):\n"
-            f"{last_user_response}"
-        )
-
-    if last_ai_response:
-        final_prompt += (
-            "\n\nConversation context (latest previous AI response):\n"
-            f"{last_ai_response}"
         )
 
     systemRole = system_role.format(
@@ -164,7 +175,7 @@ def _build_chatbot_context(data):
         chat_bot_name=chatbot_name
     )
 
-    return {"final_prompt": final_prompt, "system_role": systemRole}, None
+    return {"final_prompt": final_prompt, "system_role": systemRole, "history": history}, None
 
 
 def generate_md_chatbot():
@@ -176,10 +187,7 @@ def generate_md_chatbot():
 
         response = client.chat.completions.create(
             model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": context["system_role"]},
-                {"role": "user", "content": context["final_prompt"]},
-            ],
+            messages=[{"role": "system", "content": context["system_role"]}, *context["history"], {"role": "user", "content": context["final_prompt"]}],
             temperature=0.2,
             max_tokens=1000,
         )
@@ -204,10 +212,7 @@ def generate_md_chatbot_stream():
             try:
                 stream = client.chat.completions.create(
                     model="gpt-4o-mini",
-                    messages=[
-                        {"role": "system", "content": context["system_role"]},
-                        {"role": "user", "content": context["final_prompt"]},
-                    ],
+                    messages=[{"role": "system", "content": context["system_role"]}, *context["history"], {"role": "user", "content": context["final_prompt"]}],
                     temperature=0.2,
                     max_tokens=1000,
                     stream=True,

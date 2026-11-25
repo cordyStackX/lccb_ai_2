@@ -3,15 +3,17 @@ import api_links from "@/config/conf/json_config/Api_links.json";
 import { Fetch_to } from "@/utilities";
 import { supabaseServer } from "@/lib/supabase-server";
 import { Security } from "@/firewall/security";
+import { acquireChatStream, releaseChatStream, releaseWhenStreamEnds } from "@/lib/chat-stream-lock";
 
 export async function POST(req: NextRequest) {
+    let streamLockEmail = "";
     try {
     const auth = await Security(req);
     if (auth?.error) {
         return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
-    const { prompt, email, pdf_id, last_user_response, last_ai_response, f_name } = await req.json();
+    const { prompt, email, pdf_id, history, last_user_response, last_ai_response, f_name } = await req.json();
 
     const apikey = process.env.API_KEY;
 
@@ -33,9 +35,17 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, error: "Prompt is required" }, { status: 401 });
     }
 
+    const cleanEmail = String(email).trim().toLowerCase();
+    if (!acquireChatStream(cleanEmail)) {
+        return NextResponse.json({ success: false, error: "Wait for the current AI response to finish." }, { status: 429 });
+    }
+    streamLockEmail = cleanEmail;
+
     const download = await Fetch_to(`${apiUrl}download-file`, { token: apikey, pdf_id: pdf_id });
 
     if (!download.success) {
+        releaseChatStream(streamLockEmail);
+        streamLockEmail = "";
         return NextResponse.json({ success: false, error: "3rd party failed to read the data" }, { status: 409 });
     }
 
@@ -48,6 +58,7 @@ export async function POST(req: NextRequest) {
             email: email,
             f_name: f_name,
             pdf_id: pdf_id,
+            history: history,
             last_user_response: last_user_response,
             last_ai_response: last_ai_response,
             method: "text"
@@ -55,6 +66,8 @@ export async function POST(req: NextRequest) {
     });
 
     if (!upstream.ok || !upstream.body) {
+        releaseChatStream(streamLockEmail);
+        streamLockEmail = "";
         const errorData = await upstream.json().catch(() => null);
         return NextResponse.json(
             { success: false, error: errorData?.error || "Upstream stream error" },
@@ -71,6 +84,8 @@ export async function POST(req: NextRequest) {
         .maybeSingle();
 
     if (record_err) {
+        releaseChatStream(streamLockEmail);
+        streamLockEmail = "";
         console.error("Supabase Query Error: ", record_err);
         return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
     }
@@ -94,7 +109,8 @@ export async function POST(req: NextRequest) {
             ]);
     }
 
-    return new NextResponse(upstream.body, {
+    streamLockEmail = "";
+    return new NextResponse(releaseWhenStreamEnds(upstream.body, cleanEmail), {
         status: 200,
         headers: {
             "Content-Type": "text/event-stream; charset=utf-8",
@@ -103,6 +119,7 @@ export async function POST(req: NextRequest) {
         },
     });
     } catch (error) {
+        if (streamLockEmail) releaseChatStream(streamLockEmail);
         console.error("response-stream POST Error:", error);
         return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
     }

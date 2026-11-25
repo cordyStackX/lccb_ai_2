@@ -1,4 +1,5 @@
 import type React from "react";
+import { acquireChatRequest, releaseChatRequest } from "./request_lock";
 
 type Message = { ask: string; respond: string };
 
@@ -38,7 +39,9 @@ export default async function handleChatSubmit({
 	messages,
 }: HandleSubmitArgs) {
 	event?.preventDefault();
-	if (!chatInput.trim()) return;
+	if (!chatInput.trim()) return false;
+	const requestKey = acquireChatRequest(payloadBase.email);
+	if (!requestKey) return false;
 
 	setStatus(true);
 	setLoading(true);
@@ -52,9 +55,10 @@ export default async function handleChatSubmit({
 		textareaRef.current.style.height = "auto";
 	}
 
-	const lastMessage = messages[messages.length - 1];
-	const lastUserResponse = lastMessage?.ask || "";
-	const lastAIResponse = lastMessage?.respond || "";
+	const history = messages.slice(-8).flatMap((message) => [
+		...(message.ask.trim() ? [{ role: "user", content: message.ask.trim() }] : []),
+		...(message.respond.trim() ? [{ role: "assistant", content: message.respond.trim() }] : []),
+	]);
 
 	try {
 		const response = await fetch(apiUrl, {
@@ -65,8 +69,7 @@ export default async function handleChatSubmit({
 				email: payloadBase.email,
 				pdf_id: payloadBase.pdf_id,
 				f_name: payloadBase.f_name,
-				last_user_response: lastUserResponse,
-				last_ai_response: lastAIResponse,
+				history,
 			}),
 		});
 
@@ -145,5 +148,7 @@ export default async function handleChatSubmit({
 	} finally {
 		setLoading(false);
 		lastChunkAtRef.current = null;
+		releaseChatRequest(requestKey);
 	}
+	return true;
 }

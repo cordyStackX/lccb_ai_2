@@ -86,7 +86,7 @@ def generate_pdf_cache():
             return jsonify({"success": True, "cache": existing_cache, "cached": True})
 
         file_name = row.data["file_name"]
-        set_progress({"status": "processing", "phase": "summarizing_pages", "current_page": 0, "total_pages": page_count, "file_name": file_name, "message": f"Preparing to read text and images from {page_count} PDF pages."})
+        set_progress({"status": "processing", "phase": "reading_document", "current_page": 0, "total_pages": page_count, "file_name": file_name, "message": f"Reading text from {page_count} PDF pages."})
         pages = existing_cache["pages"] if cache_is_valid else []
         page_content = []
         cached_summaries = {
@@ -94,8 +94,10 @@ def generate_pdf_cache():
             for index, item in enumerate(pages)
             if isinstance(item, dict)
         }
-        for page_number, page in enumerate(reader.pages, start=1):
-            page_text = (page.extract_text() or "").strip()
+        page_texts = [(page.extract_text() or "").strip() for page in reader.pages]
+        set_progress({"status": "processing", "phase": "reading_document", "current_page": page_count, "total_pages": page_count, "file_name": file_name, "message": f"Finished reading text from {page_count} PDF pages."})
+        set_progress({"status": "processing", "phase": "summarizing_pages", "current_page": 0, "total_pages": page_count, "file_name": file_name, "message": f"Summarizing visual content across {page_count} PDF pages."})
+        for page_number, (page, page_text) in enumerate(zip(reader.pages, page_texts), start=1):
             if cache_is_valid:
                 summary = cached_summaries.get(page_number, "")
                 page_content.append({
@@ -126,7 +128,7 @@ def generate_pdf_cache():
                 "text": _page_text_with_visual_summary(page_text, summary),
                 "source": "text_and_vision",
             })
-            set_progress({"status": "processing", "phase": "summarizing_pages", "current_page": page_number, "total_pages": page_count, "file_name": file_name, "message": f"Read text and visual content on page {page_number} of {page_count}."})
+            set_progress({"status": "processing", "phase": "summarizing_pages", "current_page": page_number, "total_pages": page_count, "file_name": file_name, "message": f"Summarized page {page_number} of {page_count}."})
 
         cache = existing_cache if cache_is_valid else {
             "version": CACHE_VERSION,

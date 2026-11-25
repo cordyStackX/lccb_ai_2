@@ -7,6 +7,7 @@ import Image from "next/image";
 import image_src from "@/config/images_links/assets.json";
 import { Fetch_to } from "@/utilities";
 import remarkGfm from "remark-gfm";
+import { acquireChatRequest, releaseChatRequest } from "@/modules/chat/request_lock";
 
 function useTypewriterPlaceholder(items: string[], options?: { typeSpeed?: number; deleteSpeed?: number; pauseMs?: number }) {
     const { typeSpeed = 45, deleteSpeed = 25, pauseMs = 1400 } = options ?? {};
@@ -134,6 +135,7 @@ export default function Chat_bot({ email } : Chat_botProps) {
     });
     const [status, setStatus] = useState(false);
     const [loading, setLoading] = useState(false);
+    const requestInFlightRef = useRef(false);
     const chatEndRef = useRef<HTMLDivElement>(null);
     const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
     const [chatbot, setChatbot] = useState({
@@ -204,7 +206,10 @@ export default function Chat_bot({ email } : Chat_botProps) {
     };
 
     const submitPrompt = async (rawPrompt: string) => {
-        if (!rawPrompt.trim()) return;
+        if (requestInFlightRef.current || !rawPrompt.trim()) return;
+        const requestKey = acquireChatRequest(email);
+        if (!requestKey) return;
+        requestInFlightRef.current = true;
 
         setStatus(true);
         setLoading(true);
@@ -215,12 +220,10 @@ export default function Chat_bot({ email } : Chat_botProps) {
         const prompt = rawPrompt;
         setChatres({ ask: "", respond2: "" });
 
-        const lastUserResponse = messages.length > 0
-            ? messages[messages.length - 1].ask
-            : "";
-        const lastAIResponse = messages.length > 0
-            ? messages[messages.length - 1].respond
-            : "";
+        const history = messages.slice(-8).flatMap((message) => [
+            ...(message.ask.trim() ? [{ role: "user", content: message.ask.trim() }] : []),
+            ...(message.respond.trim() ? [{ role: "assistant", content: message.respond.trim() }] : []),
+        ]);
 
         try {
             const response = await fetch(api_link.responses2_stream, {
@@ -228,8 +231,7 @@ export default function Chat_bot({ email } : Chat_botProps) {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     prompt,
-                    last_user_response: lastUserResponse,
-                    last_ai_response: lastAIResponse,
+                    history,
                     email: email
                 }),
             });
@@ -304,7 +306,9 @@ export default function Chat_bot({ email } : Chat_botProps) {
                 return updated;
             });
         } finally {
+            requestInFlightRef.current = false;
             setLoading(false);
+            releaseChatRequest(requestKey);
         }
     };
 
@@ -314,6 +318,7 @@ export default function Chat_bot({ email } : Chat_botProps) {
     };
 
     const handleTypeaheadSelect = (text: string) => {
+        if (requestInFlightRef.current) return;
         setChatres({ ...chatres, ask: text });
         setShowTypeahead(false);
         submitPrompt(text);
@@ -400,13 +405,14 @@ export default function Chat_bot({ email } : Chat_botProps) {
             )}
 
             <form className={styles.ask} onSubmit={handleSubmit}>
-                {showTypeahead && typeaheadMatches.length > 0 && (
+                {showTypeahead && !loading && !requestInFlightRef.current && typeaheadMatches.length > 0 && (
                     <div className={styles.typeahead}>
                         {typeaheadMatches.map((match, i) => (
                             <button
                                 key={i}
                                 type="button"
                                 className={styles.typeaheadItem}
+                                disabled={loading}
                                 onMouseDown={(e) => e.preventDefault()}
                                 onClick={() => handleTypeaheadSelect(match)}
                             >
@@ -418,6 +424,7 @@ export default function Chat_bot({ email } : Chat_botProps) {
                 <textarea
                     id="chat"
                     name="ask"
+                    disabled={loading}
                     placeholder={animatedPlaceholder}
                     value={chatres.ask}
                     onChange={(e) => {

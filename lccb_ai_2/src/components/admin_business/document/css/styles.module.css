@@ -14,6 +14,8 @@
 .journeyHeader h3 { margin: 0.2rem 0 0; font-size: 0.95rem; overflow-wrap: anywhere; }
 .journeyEyebrow { color: var(--primary); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
 .journeyClose { border: 0; background: transparent; color: var(--default-color-gray); font-size: 1.5rem; line-height: 1; cursor: pointer; }
+.journeyCancel { flex: 0 0 auto; padding: 0.45rem 0.65rem; border: 1px solid rgba(233, 75, 60, 0.45); border-radius: 8px; background: rgba(233, 75, 60, 0.06); color: var(--default-color-red); font: inherit; font-size: 0.78rem; font-weight: 650; cursor: pointer; }
+.journeyCancel:hover { background: rgba(233, 75, 60, 0.12); }
 .journeyStatus { min-height: 2.7rem; margin: 1rem 0 0.65rem; color: var(--default-color-gray); font-size: 0.88rem; line-height: 1.45; }
 .journeySteps { display: grid; gap: 0.7rem; margin: 0; padding: 0; list-style: none; }
 .journeySteps li { display: flex; align-items: center; gap: 0.65rem; color: var(--default-color-gray); font-size: 0.86rem; transition: color 180ms ease; }

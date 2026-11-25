@@ -1,6 +1,6 @@
 "use client";
 import styles from "./css/styles.module.css";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import { Fetch_to, Popup_info, SweetAlert2 } from "@/utilities";
 import { type DocFile, type PrivacyWarning, useDocumentTable } from "@/modules/documents/useDocumentTable";
@@ -60,6 +60,7 @@ interface DocumentTableSectionProps {
     sensitive?: boolean;
     email: string;
     table: ReturnType<typeof useDocumentTable>;
+    pdfDialogOpenerRef: { current: (() => void) | null };
     onLinkJourneyStart: (url: string) => void;
     onLinkJourneySuccess: () => void;
     onLinkJourneyError: (message: string) => void;
@@ -67,17 +68,18 @@ interface DocumentTableSectionProps {
 
 type JourneyStep = { label: string; detail: string; state: "waiting" | "active" | "complete" | "error" };
 type JourneyFileResult = { name: string; status: string; detail: string; sensitive?: boolean };
+type SensitiveRecheckOutcome = { file_name?: string; success?: boolean; newly_matched_students?: number; message?: string };
 type UploadResultDetails = { uploaded?: Array<Record<string, unknown>>; privacyScan?: Array<Record<string, unknown>> };
-type Journey = { title: string; source: string; steps: JourneyStep[]; isFinished: boolean; startedAt: string; sensitive?: boolean; result?: string; files?: JourneyFileResult[] };
+type Journey = { title: string; source: string; steps: JourneyStep[]; isFinished: boolean; startedAt: string; sensitive?: boolean; result?: string; files?: JourneyFileResult[]; canRestart?: boolean; restoredFromStorage?: boolean };
 
-function PrivacyReviewDialog({ warnings, onCancel, onContinue }: { warnings: PrivacyWarning[]; onCancel: () => void; onContinue: () => void }) {
+function PrivacyReviewDialog({ warnings, onCancel, onContinue, restored = false }: { warnings: PrivacyWarning[]; onCancel: () => void; onContinue: () => void; restored?: boolean }) {
     return (
         <div className={`${styles.modalOverlay} ${styles.privacyReviewOverlay}`}>
             <section className={styles.privacyReviewDialog} role="dialog" aria-modal="true" aria-labelledby="privacy-review-title">
                 <header className={styles.privacyReviewHeader}>
                     <span className={styles.privacyReviewEyebrow}>PUBLIC DOCUMENTS · PRIVACY REVIEW</span>
                     <h2 id="privacy-review-title">Possible sensitive information detected</h2>
-                    <p>Review the scan results before adding these PDFs to the public library.</p>
+                    <p>{restored ? "This privacy scan finished before the page was reloaded. Select the PDFs again to rescan and continue." : "Review the scan results before adding these PDFs to the public library."}</p>
                 </header>
                 <div className={styles.privacyReviewBody}>
                     <div className={styles.privacyReviewNotice}>
@@ -102,14 +104,14 @@ function PrivacyReviewDialog({ warnings, onCancel, onContinue }: { warnings: Pri
                 </div>
                 <footer className={styles.privacyReviewFooter}>
                     <button type="button" className={styles.privacyReviewCancel} onClick={onCancel}>Cancel upload</button>
-                    <button type="button" className={styles.privacyReviewContinue} onClick={onContinue}>Continue to upload</button>
+                    <button type="button" className={styles.privacyReviewContinue} onClick={onContinue}>{restored ? "Reselect PDFs to continue" : "Continue to upload"}</button>
                 </footer>
             </section>
         </div>
     );
 }
 
-function ProcessingJourney({ journey, onDismiss, onCancel }: { journey: Journey; onDismiss: () => void; onCancel: () => void }) {
+function ProcessingJourney({ journey, onDismiss, onCancel, onRestart }: { journey: Journey; onDismiss: () => void; onCancel: () => void; onRestart: () => void }) {
     const activeStep = journey.steps.find((step) => step.state === "active" || step.state === "error");
     return (
         <div className={styles.journeyOverlay}>
@@ -119,9 +121,11 @@ function ProcessingJourney({ journey, onDismiss, onCancel }: { journey: Journey;
                     <span className={styles.journeyEyebrow}>{journey.source}</span>
                     <h3 id="processing-journey-title">{journey.title}</h3>
                 </div>
-                {journey.isFinished
+                {journey.canRestart
+                    ? <button className={styles.journeyCancel} onClick={onRestart}>Reselect PDFs</button>
+                    : journey.isFinished
                     ? <button className={styles.journeyClose} onClick={onDismiss} aria-label="Dismiss progress notification">&times;</button>
-                    : journey.source !== "Web link" && <button className={styles.journeyCancel} onClick={onCancel}>Cancel upload</button>}
+                    : journey.source !== "Web link" && journey.source !== "Sensitive PDF recheck" && <button className={styles.journeyCancel} onClick={onCancel}>Cancel upload</button>}
             </div>
             <p className={`${styles.journeyStatus} ${journey.result?.includes("Skipped ") ? styles.journeyResultWarning : ""}`}>{activeStep ? activeStep.detail : journey.result || "Everything is ready."}</p>
             <ol className={styles.journeySteps}>
@@ -152,6 +156,7 @@ type StudentShelfEntry = {
     email: string;
     school_id: string | null;
     name: string;
+    role: string;
     record_count: number;
     document_count: number;
     latest_at: string;
@@ -218,7 +223,7 @@ function StudentRecordsBookshelf({ email }: { email: string }) {
         setError("");
         const response = await Fetch_to(api_link.storage.student_records, { email });
         if (response.success && Array.isArray(response.data?.students)) setStudents(response.data.students);
-        else setError(response.message || "Could not load the student records shelf.");
+        else setError(response.message || "Could not load the sensitive records shelf.");
         setIsLoading(false);
     }, [email]);
 
@@ -235,7 +240,7 @@ function StudentRecordsBookshelf({ email }: { email: string }) {
         setError("");
         const response = await Fetch_to(api_link.storage.student_records, { email, student_email: student.email });
         if (response.success && Array.isArray(response.data?.records)) setStudentRecords(response.data.records);
-        else setError(response.message || "Could not load this student's records.");
+        else setError(response.message || "Could not load this person's records.");
         setIsLoadingRecords(false);
     };
 
@@ -244,30 +249,30 @@ function StudentRecordsBookshelf({ email }: { email: string }) {
     return (
         <section className={styles.studentShelf}>
             <div className={styles.shelfHeader}>
-                <div><span className={styles.shelfEyebrow}>SENSITIVE RECORDS</span><h2>Student bookshelf</h2><p>Academic records are grouped by verified student ID.</p></div>
+                <div><span className={styles.shelfEyebrow}>SENSITIVE RECORDS</span><h2>Student and teacher records</h2><p>Private school records are grouped by each person&apos;s verified school ID.</p></div>
                 <button className={styles.shelfRefresh} onClick={() => void refreshStudents()} disabled={isLoading}>Refresh</button>
             </div>
-            <input className={styles.shelfSearch} value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by student name, ID, or email" />
+            <input className={styles.shelfSearch} value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by name, school ID, or email" />
             {error && <p className={styles.shelfError} role="alert">{error}</p>}
-            {isLoading ? <p className={styles.shelfEmpty}>Loading student records…</p> : filteredStudents.length ? (
+            {isLoading ? <p className={styles.shelfEmpty}>Loading sensitive records…</p> : filteredStudents.length ? (
                 <div className={styles.studentBooks}>
                     {filteredStudents.map((student) => (
                         <button className={styles.studentBook} key={student.email} onClick={() => void openStudent(student)}>
                             <span className={styles.bookIcon} aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 0 4 22V5.5Z" stroke="currentColor" strokeWidth="1.8"/><path d="M4 6h13M8 9h8M8 12h8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg></span>
                             <strong>{student.name}</strong>
-                            <span className={styles.studentBookId}>{student.school_id || "Student ID unavailable"}</span>
+                            <span className={styles.studentBookId}>{student.role} · {student.school_id || "School ID unavailable"}</span>
                             <span className={styles.studentBookMeta}>{student.record_count} record{student.record_count === 1 ? "" : "s"} · {student.document_count} document{student.document_count === 1 ? "" : "s"}</span>
                         </button>
                     ))}
                 </div>
-            ) : <p className={styles.shelfEmpty}>No matched student records yet. Records without a registered Student ID are skipped.</p>}
+            ) : <p className={styles.shelfEmpty}>No matched student or teacher records yet. Records without a registered school ID are skipped.</p>}
 
             {selectedStudent && (
                 <div className={styles.modalOverlay} onClick={() => { setSelectedStudent(null); setStudentRecords([]); }}>
                     <section className={styles.studentRecordModal} role="dialog" aria-modal="true" aria-labelledby="student-record-title" onClick={(event) => event.stopPropagation()}>
                         <header className={styles.studentRecordHeader}>
-                            <div><span className={styles.shelfEyebrow}>STUDENT RECORDS</span><h2 id="student-record-title">{selectedStudent.name}</h2><p>{selectedStudent.school_id || selectedStudent.email}</p></div>
-                            <button className={styles.modalClose} onClick={() => { setSelectedStudent(null); setStudentRecords([]); }} aria-label="Close student records">&times;</button>
+                            <div><span className={styles.shelfEyebrow}>{selectedStudent.role.toUpperCase()} RECORDS</span><h2 id="student-record-title">{selectedStudent.name}</h2><p>{selectedStudent.school_id || selectedStudent.email}</p></div>
+                            <button className={styles.modalClose} onClick={() => { setSelectedStudent(null); setStudentRecords([]); }} aria-label="Close sensitive records">&times;</button>
                         </header>
                         <div className={styles.studentRecordBody}>
                             {isLoadingRecords ? <p className={styles.shelfEmpty}>Decrypting records…</p> : studentRecords.length ? studentRecords.map((source) => (
@@ -280,7 +285,7 @@ function StudentRecordsBookshelf({ email }: { email: string }) {
                                         </div>
                                     ))}
                                 </article>
-                            )) : <p className={styles.shelfEmpty}>No stored records for this student.</p>}
+                            )) : <p className={styles.shelfEmpty}>No stored records for this account.</p>}
                         </div>
                     </section>
                 </div>
@@ -289,7 +294,7 @@ function StudentRecordsBookshelf({ email }: { email: string }) {
     );
 }
 
-function DocumentTableSection({ title, description, sensitive, email, table, onLinkJourneyStart, onLinkJourneySuccess, onLinkJourneyError }: DocumentTableSectionProps) {
+function DocumentTableSection({ title, description, sensitive, email, table, pdfDialogOpenerRef, onLinkJourneyStart, onLinkJourneySuccess, onLinkJourneyError }: DocumentTableSectionProps) {
     const {
         fileRef, data, search, setSearch, page, setPage, totalPages,
         isLoading, refresh, setRefresh, triggerUpload, handleFile, handleFiles,
@@ -305,7 +310,18 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
     const [webLink, setWebLink] = useState("");
     const [isUploadingLink, setIsUploadingLink] = useState(false);
     const [isRechecking, setIsRechecking] = useState(false);
+    const [recheckJourney, setRecheckJourney] = useState<Journey | null>(null);
     const [preview, setPreview] = useState<{ filePath: string; name: string } | null>(null);
+
+    useEffect(() => {
+        pdfDialogOpenerRef.current = () => {
+            setIsAddDialogOpen(false);
+            setIsLinkDialogOpen(false);
+            setHasAcceptedUploadDisclaimer(false);
+            setIsPdfDialogOpen(true);
+        };
+        return () => { pdfDialogOpenerRef.current = null; };
+    }, [pdfDialogOpenerRef]);
 
     const openPdfPreview = (doc: DocFile) => {
         if (!doc.file) return;
@@ -319,24 +335,57 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
     const recheckSensitivePdfs = async () => {
         if (!sensitive || isRechecking) return;
         setIsRechecking(true);
+        setRecheckJourney({
+            source: "Sensitive PDF recheck",
+            title: "Rechecking sensitive PDFs",
+            startedAt: new Date().toISOString(),
+            sensitive: true,
+            isFinished: false,
+            steps: [
+                { label: "Rechecking PDFs", detail: "Reading each private PDF and matching verified school IDs…", state: "active" },
+                { label: "Refreshing student bookshelves", detail: "Saving updated records securely…", state: "waiting" },
+                { label: "Ready", detail: "PDF recheck is complete.", state: "waiting" },
+            ],
+        });
         try {
             const response = await Fetch_to(api_link.storage.recheck_sensitive_records, { email });
             if (!response.success) {
-                await SweetAlert2("Could not recheck PDFs", response.message || "Please try again.", "error", true, "OK", false, "");
+                const message = response.message || "Please try again.";
+                setRecheckJourney((current) => current && ({
+                    ...current,
+                    isFinished: true,
+                    result: message,
+                    steps: current.steps.map((step, index) => index === 0 ? { ...step, state: "error", detail: message } : step),
+                }));
                 return;
             }
             setRefresh(true);
             window.dispatchEvent(new Event("student-records-updated"));
             const failed = Array.isArray(response.data?.outcomes)
-                ? response.data.outcomes.filter((item: { success?: boolean }) => !item.success).length
+                ? response.data.outcomes.filter((item: SensitiveRecheckOutcome) => !item.success).length
                 : 0;
-            const details = Array.isArray(response.data?.outcomes)
-                ? response.data.outcomes.filter((item: { message?: string }) => item.message).map((item: { file_name?: string; message?: string }) => `${item.file_name || "PDF"}: ${item.message}`).join(" ")
-                : "";
-            const message = `${response.data?.message || response.message || "PDFs rechecked."}${failed ? ` ${failed} PDF(s) could not be rechecked.` : ""}${details ? ` ${details}` : ""}`;
-            await SweetAlert2("PDF recheck complete", message, failed ? "warning" : "success", true, "OK", false, "");
-        } catch {
-            await SweetAlert2("Could not recheck PDFs", "Please try again.", "error", true, "OK", false, "");
+            const outcomes = Array.isArray(response.data?.outcomes) ? response.data.outcomes as SensitiveRecheckOutcome[] : [];
+            const message = `${response.data?.message || response.message || "PDFs rechecked."}${failed ? ` ${failed} PDF(s) could not be rechecked.` : ""}`;
+            setRecheckJourney((current) => current && ({
+                ...current,
+                isFinished: true,
+                result: message,
+                files: outcomes.map((item) => ({
+                    name: item.file_name || "PDF",
+                    status: item.success ? `${item.newly_matched_students || 0} new bookshelf entr${item.newly_matched_students === 1 ? "y" : "ies"}` : "Could not recheck",
+                    detail: item.message || "",
+                    sensitive: !item.success,
+                })),
+                steps: current.steps.map((step) => ({ ...step, state: "complete" })),
+            }));
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "Please try again.";
+            setRecheckJourney((current) => current && ({
+                ...current,
+                isFinished: true,
+                result: message,
+                steps: current.steps.map((step, index) => index === 0 ? { ...step, state: "error", detail: message } : step),
+            }));
         } finally {
             setIsRechecking(false);
         }
@@ -392,6 +441,12 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
 
     return (
         <section className={`${styles.status} ${sensitive ? styles.statusSensitive : ""}`}>
+            {recheckJourney && <ProcessingJourney
+                journey={recheckJourney}
+                onDismiss={() => setRecheckJourney(null)}
+                onCancel={() => {}}
+                onRestart={() => {}}
+            />}
             <span className={styles.sectionHeader}>
                 <span className={styles.sectionTitleGroup}>
                     {sensitive && <LockIcon />}
@@ -590,7 +645,10 @@ export default function Chat_bot({ email } : Chat_botProps) {
     const [isLoadError, setIsLoadError] = useState(false);
     const [isLoadStatus, setIsLoadStatus] = useState("");
     const [journey, setJourney] = useState<Journey | null>(null);
-    const [privacyReview, setPrivacyReview] = useState<{ warnings: PrivacyWarning[]; resolve: (confirmed: boolean) => void } | null>(null);
+    const [privacyReview, setPrivacyReview] = useState<{ warnings: PrivacyWarning[]; resolve?: (confirmed: boolean) => void; restored?: boolean } | null>(null);
+    const restoredJourneyRef = useRef(false);
+    const publicPdfDialogOpenerRef = useRef<(() => void) | null>(null);
+    const sensitivePdfDialogOpenerRef = useRef<(() => void) | null>(null);
 
     const beginJourney = (source: string, title: string, steps: Omit<JourneyStep, "state">[], sensitive = false) => {
         setJourney({
@@ -602,6 +660,154 @@ export default function Chat_bot({ email } : Chat_botProps) {
             steps: steps.map((step, index) => ({ ...step, state: index === 0 ? "active" : "waiting" })),
         });
     };
+
+    const journeyStorageKey = email ? `laco:document-journey:${email.trim().toLowerCase()}` : "";
+    const privacyReviewStorageKey = email ? `laco:privacy-review:${email.trim().toLowerCase()}` : "";
+
+    useEffect(() => {
+        if (!journeyStorageKey) return;
+        try {
+            const saved = localStorage.getItem(journeyStorageKey);
+            if (!saved) return;
+            const restored = JSON.parse(saved) as Journey;
+            const age = Date.now() - Date.parse(restored.startedAt);
+            if (!restored.isFinished && Number.isFinite(age) && age < 60 * 60 * 1000) {
+                restoredJourneyRef.current = true;
+                setJourney((current) => current || { ...restored, restoredFromStorage: true });
+            } else {
+                localStorage.removeItem(journeyStorageKey);
+            }
+        } catch {
+            localStorage.removeItem(journeyStorageKey);
+        }
+    }, [journeyStorageKey]);
+
+    useEffect(() => {
+        if (!journeyStorageKey || !journey) return;
+        try {
+            if (journey.isFinished) localStorage.removeItem(journeyStorageKey);
+            else localStorage.setItem(journeyStorageKey, JSON.stringify(journey));
+        } catch {
+            // The server-side progress endpoint remains the recovery fallback.
+        }
+    }, [journey, journeyStorageKey]);
+
+    useEffect(() => {
+        if (!privacyReviewStorageKey) return;
+        try {
+            const saved = localStorage.getItem(privacyReviewStorageKey);
+            if (!saved) return;
+            const pending = JSON.parse(saved) as { warnings?: PrivacyWarning[]; savedAt?: number };
+            if (Array.isArray(pending.warnings) && pending.warnings.length && Date.now() - Number(pending.savedAt) < 60 * 60 * 1000) {
+                setPrivacyReview({ warnings: pending.warnings, restored: true });
+            } else {
+                localStorage.removeItem(privacyReviewStorageKey);
+            }
+        } catch {
+            localStorage.removeItem(privacyReviewStorageKey);
+        }
+    }, [privacyReviewStorageKey]);
+
+    useEffect(() => {
+        let cancelled = false;
+        const restoreJourney = async () => {
+            let checkedStatus = false;
+            let savedJourney: Journey | null = null;
+            try {
+                const saved = journeyStorageKey ? localStorage.getItem(journeyStorageKey) : null;
+                if (saved) savedJourney = JSON.parse(saved) as Journey;
+            } catch { /* Ignore corrupt saved journey data and recover from server progress. */ }
+            const statusOrder = savedJourney ? [savedJourney.sensitive === true] : [false, true];
+            for (const sensitive of statusOrder) {
+                try {
+                    const response = await fetch(api_link.storage.processing_status, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            email,
+                            sensitive,
+                            ...(savedJourney?.sensitive === true && sensitive ? { started_at: savedJourney.startedAt, include_completed: true } : {}),
+                        }),
+                    });
+                    const result = await response.json();
+                    if (response.ok && result?.success === true) checkedStatus = true;
+                    const active = (result?.progress ?? []).find((item: { processing_progress?: { status?: string } }) => item.processing_progress?.status === "processing");
+                    const completed = !active && savedJourney?.sensitive === true && sensitive
+                        ? (result?.progress ?? []).find((item: { processing_progress?: { status?: string } }) => item.processing_progress?.status === "complete")
+                        : undefined;
+                    const activeJob = active || completed;
+                    if (!response.ok || !activeJob || cancelled) continue;
+
+                    const progress = activeJob.processing_progress;
+                    const isQa = progress.phase === "generating_qa";
+                    const steps: Omit<JourneyStep, "state">[] = sensitive
+                        ? [
+                            { label: "Uploading the private PDF", detail: "Storing your document securely…" },
+                            { label: "Reading and matching student and teacher records", detail: progress.message || "Checking records against registered school IDs…" },
+                            { label: "Saving matched records", detail: "Encrypting records into each student’s bookshelf…" },
+                            { label: "Ready", detail: "Sensitive document processing is complete." },
+                        ]
+                        : [
+                            { label: "Uploading", detail: "Uploading your PDF…" },
+                            { label: "Checking your PDF", detail: "Checking for sensitive information…" },
+                            { label: "Reading the document", detail: "Extracting text from every PDF page…" },
+                            { label: "Summarizing every PDF page", detail: "Analyzing page text and visuals…" },
+                            { label: "Generating questions and answers", detail: "Choosing useful questions based on the information in each page…" },
+                            { label: "Ready to review", detail: "Your document is ready." },
+                        ];
+                    const activeIndex = progress.phase === "uploading" ? 0 : sensitive ? progress.phase === "saving_matched_records" ? 2 : 1 : isQa ? 4 : progress.phase === "summarizing_pages" ? 3 : progress.phase === "reading_document" ? 2 : 1;
+                    if (progress.status === "complete") {
+                        setJourney((currentJourney) => {
+                            const recovered = currentJourney || {
+                                source: "Sensitive PDF",
+                                title: activeJob.file_name || progress.file_name || "Sensitive PDF processing",
+                                startedAt: savedJourney?.startedAt || activeJob.created_at || new Date().toISOString(),
+                                sensitive: true,
+                                isFinished: false,
+                                steps: steps.map((step, index) => ({ ...step, state: index <= activeIndex ? "complete" as const : "waiting" as const })),
+                            };
+                            return { ...recovered, isFinished: true, result: "Sensitive PDF processing completed.", steps: recovered.steps.map((step) => ({ ...step, state: "complete" })) };
+                        });
+                        return;
+                    }
+                    setJourney((current) => current || {
+                        source: sensitive ? "Sensitive PDF" : "PDF upload",
+                        title: activeJob.file_name || progress.file_name || "PDF processing",
+                        startedAt: savedJourney?.startedAt || activeJob.created_at || new Date().toISOString(),
+                        sensitive,
+                        isFinished: false,
+                        steps: steps.map((step, index) => ({
+                            ...step,
+                            state: index < activeIndex ? "complete" : index === activeIndex ? "active" : "waiting",
+                            ...(index === activeIndex ? { detail: progress.message || step.detail } : {}),
+                        })),
+                    });
+                    return;
+                } catch {
+                    // A failed recovery lookup should not prevent normal document use.
+                }
+            }
+            if (!checkedStatus || cancelled || !restoredJourneyRef.current) return;
+            let hasSavedPrivacyReview = false;
+            try { hasSavedPrivacyReview = Boolean(privacyReviewStorageKey && localStorage.getItem(privacyReviewStorageKey)); } catch { /* Ignore unavailable browser storage. */ }
+            if (hasSavedPrivacyReview) return;
+            setJourney((current) => {
+                if (!current?.restoredFromStorage) return current;
+                const activeIndex = current.steps.findIndex((step) => step.state === "active");
+                const errorIndex = Math.max(0, activeIndex);
+                const message = "This upload was interrupted before PDF processing began. Reselect the PDF to run its privacy check and continue.";
+                return {
+                    ...current,
+                    isFinished: true,
+                    canRestart: true,
+                    result: message,
+                    steps: current.steps.map((step, index) => index === errorIndex ? { ...step, state: "error", detail: message } : step),
+                };
+            });
+        };
+        void restoreJourney();
+        return () => { cancelled = true; };
+    }, [email, privacyReviewStorageKey]);
 
     const completeJourney = (result?: string, details?: { uploaded?: Array<Record<string, unknown>>; privacyScan?: Array<Record<string, unknown>> }) => setJourney((current) => {
         if (!current) return current;
@@ -618,7 +824,7 @@ export default function Chat_bot({ email } : Chat_botProps) {
                 ].filter(Boolean).join(" · ");
                 return {
                     name: String(item.originalName || "PDF"),
-                    status: item.success === true ? `${Number(item.matchedStudents ?? 0)} matched student record group${Number(item.matchedStudents ?? 0) === 1 ? "" : "s"}` : "Processing failed",
+                    status: item.success === true ? `${Number(item.matchedStudents ?? 0)} matched record group${Number(item.matchedStudents ?? 0) === 1 ? "" : "s"}` : "Processing failed",
                     detail: item.success === true ? (skipped || invalid ? `${skipped + invalid} extracted record(s) were not saved${reasons ? `: ${reasons}` : ""}.` : "No records were skipped during matching.") : String(item.message || "The PDF could not be processed."),
                     sensitive: skipped + invalid > 0 || item.success !== true,
                 };
@@ -690,26 +896,6 @@ export default function Chat_bot({ email } : Chat_botProps) {
         };
     });
 
-    // Advance the initial upload/read stages; Python reports the page-processing stage below.
-    useEffect(() => {
-        if (!journey || journey.isFinished) return;
-        const timer = window.setInterval(() => {
-            setJourney((current) => {
-                if (!current || current.isFinished) return current;
-                const activeIndex = current.steps.findIndex((step) => step.state === "active");
-                if (activeIndex < 0 || activeIndex >= 2) return current;
-                return {
-                    ...current,
-                    steps: current.steps.map((step, index) => (
-                        index === activeIndex ? { ...step, state: "complete" } :
-                        index === activeIndex + 1 ? { ...step, state: "active" } : step
-                    )),
-                };
-            });
-        }, 2800);
-        return () => window.clearInterval(timer);
-    }, [journey?.isFinished, journey?.source, journey?.title]);
-
     useEffect(() => {
         if (!journey || journey.isFinished) return;
         const pollProgress = async () => {
@@ -717,24 +903,35 @@ export default function Chat_bot({ email } : Chat_botProps) {
                 const response = await fetch(api_link.storage.processing_status, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email, started_at: journey.startedAt, sensitive: journey.sensitive }),
+                    body: JSON.stringify({ email, started_at: journey.startedAt, sensitive: journey.sensitive, include_completed: journey.sensitive === true }),
                 });
                 const result = await response.json();
-                const progress = result?.progress?.[0]?.processing_progress;
+                const currentProgress = result?.progress?.find((item: { processing_progress?: { status?: string } }) => item.processing_progress?.status === "processing")
+                    || result?.progress?.[0];
+                const progress = currentProgress?.processing_progress;
                 if (!response.ok || !progress) return;
                 if (progress.status === "failed") {
                     failJourney(progress.message || "PDF processing failed.");
                     return;
                 }
+                if (journey.sensitive && progress.status === "complete") {
+                    setJourney((current) => current && !current.isFinished ? {
+                        ...current,
+                        isFinished: true,
+                        result: "Sensitive PDF processing completed.",
+                        steps: current.steps.map((step) => ({ ...step, state: "complete" })),
+                    } : current);
+                    return;
+                }
 
                 const total = Number(progress.total_pages || 0);
                 const currentPage = Number(progress.current_page || 0);
-                const activeIndex = journey.sensitive ? 2 : progress.phase === "generating_qa" ? 3 : 2;
+                const activeIndex = progress.phase === "uploading" ? 0 : journey.sensitive ? progress.phase === "saving_matched_records" ? 2 : 1 : progress.phase === "generating_qa" ? 4 : progress.phase === "summarizing_pages" ? 3 : progress.phase === "reading_document" ? 2 : 1;
                 const detail = journey.sensitive
-                    ? progress.message || `Matching records on page ${currentPage} of ${total}${progress.file_name ? ` · ${progress.file_name}` : ""}`
+                    ? progress.message || (progress.phase === "saving_matched_records" ? "Saving matched records securely…" : `Matching records on page ${currentPage} of ${total}`) + `${progress.file_name ? ` · ${progress.file_name}` : ""}`
                     : progress.phase === "generating_qa"
                     ? `Generating questions and answers through page ${currentPage} of ${total}${progress.file_name ? ` · ${progress.file_name}` : ""}`
-                    : progress.message || `Summarizing PDF page ${currentPage} of ${total}${progress.file_name ? ` · ${progress.file_name}` : ""}`;
+                    : progress.message || (progress.phase === "reading_document" ? `Reading PDF page ${currentPage} of ${total}` : `Summarizing PDF page ${currentPage} of ${total}`) + `${progress.file_name ? ` · ${progress.file_name}` : ""}`;
                 setJourney((current) => current && !current.isFinished ? {
                     ...current,
                     steps: current.steps.map((step, index) => ({
@@ -756,9 +953,10 @@ export default function Chat_bot({ email } : Chat_botProps) {
         "PDF upload",
         files.length === 1 ? files[0].name : `${files.length} PDF files`,
         [
-            { label: "Uploading your PDF", detail: "Sending your document securely…" },
-            { label: "Reading the document", detail: "Extracting text from your PDF…" },
-            { label: "Summarizing every PDF page", detail: "Python is extracting and summarizing each page…" },
+            { label: "Uploading", detail: "Uploading your PDF…" },
+            { label: "Checking your PDF", detail: "Checking for sensitive information…" },
+            { label: "Reading the document", detail: "Extracting text from every PDF page…" },
+            { label: "Summarizing every PDF page", detail: "Analyzing page text and visuals…" },
             { label: "Generating questions and answers", detail: "Choosing useful questions based on the information in each page…" },
             { label: "Ready to review", detail: "Your document is ready." },
         ],
@@ -769,13 +967,21 @@ export default function Chat_bot({ email } : Chat_botProps) {
         files.length === 1 ? files[0].name : `${files.length} PDF files`,
         [
             { label: "Uploading the private PDF", detail: "Storing your document securely…" },
-            { label: "Reading the document", detail: "Extracting records page by page…" },
-            { label: "Matching student IDs", detail: "Checking records against registered student IDs…" },
+            { label: "Reading and matching student and teacher records", detail: "Checking records against registered school IDs…" },
             { label: "Saving matched records", detail: "Encrypting records into each student’s bookshelf…" },
             { label: "Ready", detail: "Sensitive document processing is complete." },
         ],
         true,
     );
+
+    const markUploadTransferred = () => setJourney((current) => current && !current.isFinished ? {
+        ...current,
+        steps: current.steps.map((step, index) => index === 0
+            ? { ...step, state: "complete" }
+            : index === 1
+                ? { ...step, state: "active", detail: `Upload complete. ${step.label}…` }
+                : { ...step, state: "waiting" }),
+    } : current);
 
     const startLinkJourney = (url: string) => beginJourney(
         "Web link",
@@ -818,9 +1024,29 @@ export default function Chat_bot({ email } : Chat_botProps) {
         onSuccess: showSuccess,
         onError: showError,
         onUploadStart: startPdfJourney,
-        onUploadSuccess: (message?: string, details?: UploadResultDetails) => completeJourney(message, details),
-        onUploadError: (message: string, details?: UploadResultDetails) => failJourney(message, details),
-        onPrivacyReview: (warnings: PrivacyWarning[]) => new Promise<boolean>((resolve) => setPrivacyReview({ warnings, resolve })),
+        onUploadTransferred: markUploadTransferred,
+        onUploadSuccess: (message?: string, details?: UploadResultDetails) => {
+            try { if (privacyReviewStorageKey) localStorage.removeItem(privacyReviewStorageKey); } catch { /* Ignore unavailable browser storage. */ }
+            completeJourney(message, details);
+        },
+        onUploadError: (message: string, details?: UploadResultDetails) => {
+            try { if (privacyReviewStorageKey) localStorage.removeItem(privacyReviewStorageKey); } catch { /* Ignore unavailable browser storage. */ }
+            failJourney(message, details);
+        },
+        onPrivacyReview: (warnings: PrivacyWarning[]) => new Promise<boolean>((resolve) => {
+            try {
+                if (privacyReviewStorageKey) localStorage.setItem(privacyReviewStorageKey, JSON.stringify({ warnings, savedAt: Date.now() }));
+            } catch { /* The in-memory review still works if storage is unavailable. */ }
+            setJourney((current) => current && !current.isFinished ? {
+                ...current,
+                steps: current.steps.map((step, index) => index === 0
+                    ? { ...step, state: "complete" }
+                    : index === 1
+                        ? { ...step, state: "active", detail: "Privacy scan finished. Review the flagged information to continue." }
+                        : { ...step, state: "waiting" }),
+            } : current);
+            setPrivacyReview({ warnings, resolve });
+        }),
     };
 
     const publicDocs = useDocumentTable(
@@ -852,6 +1078,7 @@ export default function Chat_bot({ email } : Chat_botProps) {
             upload: api_link.storage.uploadpdf_sensitive,
             download: api_link.storage.downloadpdf_sensitive,
             delete: api_link.storage.deletepdf_sensitive,
+            sensitive: true,
         },
         email,
         sensitiveNotifyHandlers
@@ -861,13 +1088,53 @@ export default function Chat_bot({ email } : Chat_botProps) {
         <section className={styles.container}>
             {privacyReview && <PrivacyReviewDialog
                 warnings={privacyReview.warnings}
-                onCancel={() => { const review = privacyReview; setPrivacyReview(null); review.resolve(false); }}
-                onContinue={() => { const review = privacyReview; setPrivacyReview(null); review.resolve(true); }}
+                restored={privacyReview.restored}
+                onCancel={() => {
+                    const review = privacyReview;
+                    setPrivacyReview(null);
+                    try {
+                        if (privacyReviewStorageKey) localStorage.removeItem(privacyReviewStorageKey);
+                        if (review.restored && journeyStorageKey) localStorage.removeItem(journeyStorageKey);
+                    } catch { /* Ignore unavailable browser storage. */ }
+                    if (review.resolve) review.resolve(false);
+                    if (review.restored) setJourney(null);
+                }}
+                onContinue={() => {
+                    const review = privacyReview;
+                    setPrivacyReview(null);
+                    try { if (privacyReviewStorageKey) localStorage.removeItem(privacyReviewStorageKey); } catch { /* Ignore unavailable browser storage. */ }
+                    if (review.resolve) {
+                        review.resolve(true);
+                    } else {
+                        try { if (journeyStorageKey) localStorage.removeItem(journeyStorageKey); } catch { /* Ignore unavailable browser storage. */ }
+                        setJourney(null);
+                        publicPdfDialogOpenerRef.current?.();
+                    }
+                }}
             />}
             {journey && <ProcessingJourney
                 journey={journey}
                 onDismiss={() => setJourney(null)}
-                onCancel={() => (journey.sensitive ? sensitiveDocs.cancelUpload : publicDocs.cancelUpload)()}
+                onRestart={() => {
+                    try {
+                        if (journeyStorageKey) localStorage.removeItem(journeyStorageKey);
+                        if (privacyReviewStorageKey) localStorage.removeItem(privacyReviewStorageKey);
+                    } catch { /* Ignore unavailable browser storage. */ }
+                    setJourney(null);
+                    (journey.sensitive ? sensitivePdfDialogOpenerRef : publicPdfDialogOpenerRef).current?.();
+                }}
+                onCancel={() => {
+                    const table = journey.sensitive ? sensitiveDocs : publicDocs;
+                    const aborted = table.cancelUpload();
+                    void table.deleteIncompleteUploads(journey.startedAt);
+                    if (!aborted) {
+                        try {
+                            if (journeyStorageKey) localStorage.removeItem(journeyStorageKey);
+                            if (privacyReviewStorageKey) localStorage.removeItem(privacyReviewStorageKey);
+                        } catch { /* Ignore unavailable browser storage. */ }
+                        setJourney(null);
+                    }
+                }}
             />}
             {isLoadState ? (
                 isLoadStateDone ? (
@@ -898,6 +1165,7 @@ export default function Chat_bot({ email } : Chat_botProps) {
                     description="Visible to the chatbot for general Q&A."
                     email={email}
                     table={publicDocs}
+                    pdfDialogOpenerRef={publicPdfDialogOpenerRef}
                     onLinkJourneyStart={startLinkJourney}
                     onLinkJourneySuccess={completeJourney}
                     onLinkJourneyError={failJourney}
@@ -909,6 +1177,7 @@ export default function Chat_bot({ email } : Chat_botProps) {
                     sensitive
                     email={email}
                     table={sensitiveDocs}
+                    pdfDialogOpenerRef={sensitivePdfDialogOpenerRef}
                     onLinkJourneyStart={startLinkJourney}
                     onLinkJourneySuccess={completeJourney}
                     onLinkJourneyError={failJourney}

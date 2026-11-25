@@ -17,7 +17,7 @@ function normalizeStudentId(value: string) {
 export async function POST(req: NextRequest) {
     const auth = await Security(req);
     if (auth?.error) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    if (auth.role?.toLowerCase() !== "admin") return NextResponse.json({ success: false, error: "Only administrators can process sensitive student records" }, { status: 403 });
+    if (auth.role?.toLowerCase() !== "admin") return NextResponse.json({ success: false, error: "Only administrators can process sensitive school records" }, { status: 403 });
 
     const form = await req.formData();
     const entries = form.getAll("file");
@@ -42,18 +42,7 @@ export async function POST(req: NextRequest) {
     if (!token || !pdfPassword) return NextResponse.json({ success: false, error: "Sensitive document processing is not configured" }, { status: 500 });
     const apiUrl = process.env.RENDER_API || apiLinks.python_links;
     const studentsById = new Map<string, string | null>();
-    for (let offset = 0; ; offset += 1000) {
-        const { data: studentRows, error: studentsError } = await supabaseServer.from("auth_student")
-            .select("email, school_id").range(offset, offset + 999);
-        if (studentsError) return NextResponse.json({ success: false, error: "Could not load student ID records" }, { status: 500 });
-        for (const student of studentRows ?? []) {
-            if (!student.email || !student.school_id) continue;
-            const normalizedId = normalizeStudentId(student.school_id);
-            if (!normalizedId) continue;
-            studentsById.set(normalizedId, studentsById.has(normalizedId) ? null : student.email.trim().toLowerCase());
-        }
-        if (!studentRows || studentRows.length < 1000) break;
-    }
+    let studentsLoaded = false;
     const uploaded: Array<{ id?: number; originalName: string; filePath?: string; success: boolean; matchedStudents?: number; skippedRecords?: number; skippedMissingId?: number; skippedUnmatchedId?: number; skippedAmbiguousId?: number; invalidRecords?: number; message?: string }> = [];
     for (const file of files) {
         const filePath = `sensitive/${Date.now()}_${randomUUID()}_${file.name}`;
@@ -63,16 +52,46 @@ export async function POST(req: NextRequest) {
             if (storageError) throw new Error("Failed to upload the private PDF");
 
             const { data: privateDoc, error: insertError } = await supabaseServer.from("chatbot_pdf_file_private")
-                .insert({ file: filePath, email: cleanEmail, file_name: file.name })
+                .insert({
+                    file: filePath,
+                    email: cleanEmail,
+                    file_name: file.name,
+                    processing_progress: {
+                        status: "processing",
+                        phase: "uploading",
+                        current_page: 0,
+                        total_pages: 0,
+                        file_name: file.name,
+                        message: "Uploading and preparing your private PDF…",
+                        updated_at: new Date().toISOString(),
+                    },
+                })
                 .select("id").single();
             if (insertError || !privateDoc) throw new Error("Failed to save the private PDF record");
             privateDocId = privateDoc.id;
+
+            // Save a recoverable processing row before loading the student directory.
+            if (!studentsLoaded) {
+                for (let offset = 0; ; offset += 1000) {
+                    const { data: studentRows, error: studentsError } = await supabaseServer.from("auth_student")
+                        .select("email, school_id").range(offset, offset + 999);
+                    if (studentsError) throw new Error("Could not load registered school IDs");
+                    for (const student of studentRows ?? []) {
+                        if (!student.email || !student.school_id) continue;
+                        const normalizedId = normalizeStudentId(student.school_id);
+                        if (!normalizedId) continue;
+                        studentsById.set(normalizedId, studentsById.has(normalizedId) ? null : student.email.trim().toLowerCase());
+                    }
+                    if (!studentRows || studentRows.length < 1000) break;
+                }
+                studentsLoaded = true;
+            }
 
             const downloaded = await Fetch_to(`${apiUrl}download-file`, { token, filePath2: filePath });
             if (!downloaded.success) throw new Error(downloaded.message || "Python could not read the PDF");
             const extracted = await Fetch_to(`${apiUrl}extract-sensitive-records`, { token, email: cleanEmail, filePath });
             const extractedRecords = extracted.data?.records;
-            if (!extracted.success || !Array.isArray(extractedRecords)) throw new Error(extracted.message || "Could not extract student records from the PDF");
+            if (!extracted.success || !Array.isArray(extractedRecords)) throw new Error(extracted.message || "Could not extract school records from the PDF");
 
             const grouped = new Map<string, { pages: Set<number>; records: Array<{ page: number; student_id: string; student_name: string | null; data: Record<string, unknown> }> }>();
             let skippedMissingId = 0;
@@ -119,11 +138,36 @@ export async function POST(req: NextRequest) {
                 record_count: group.records.length,
                 records_ciphertext: encryptText(JSON.stringify(group.records), pdfPassword),
             }));
+            const { error: progressError } = await supabaseServer.from("chatbot_pdf_file_private").update({
+                processing_progress: {
+                    status: "processing",
+                    phase: "saving_matched_records",
+                    current_page: extracted.data?.page_count ?? 0,
+                    total_pages: extracted.data?.page_count ?? 0,
+                    file_name: file.name,
+                    message: "Saving matched school records securely…",
+                    updated_at: new Date().toISOString(),
+                },
+            }).eq("id", privateDocId).eq("email", cleanEmail);
+            if (progressError) throw new Error("Could not update private PDF processing status");
             if (recordsToSave.length) {
                 const { error: recordsError } = await supabaseServer.from("chatbot_student_records")
                     .upsert(recordsToSave, { onConflict: "student_email,source_pdf_id" });
-                if (recordsError) throw new Error("Failed to save the matched student records");
+                if (recordsError) throw new Error("Failed to save the matched school records");
             }
+
+            const { error: completeError } = await supabaseServer.from("chatbot_pdf_file_private").update({
+                processing_progress: {
+                    status: "complete",
+                    phase: "ready",
+                    current_page: extracted.data?.page_count ?? 0,
+                    total_pages: extracted.data?.page_count ?? 0,
+                    file_name: file.name,
+                    message: "Sensitive PDF processing is complete.",
+                    updated_at: new Date().toISOString(),
+                },
+            }).eq("id", privateDocId).eq("email", cleanEmail);
+            if (completeError) throw new Error("Could not finish private PDF processing status");
 
             uploaded.push({
                 id: privateDocId,
@@ -136,7 +180,7 @@ export async function POST(req: NextRequest) {
                 skippedUnmatchedId,
                 skippedAmbiguousId,
                 invalidRecords,
-                message: `${grouped.size} student record groups saved.${skippedMissingId ? ` Skipped ${skippedMissingId} record(s) because no valid ID was extracted from the PDF.` : ""}${skippedUnmatchedId - skippedAmbiguousId ? ` Skipped ${skippedUnmatchedId - skippedAmbiguousId} record(s) because the ID is not registered to a student account.` : ""}${skippedAmbiguousId ? ` Skipped ${skippedAmbiguousId} record(s) because the ID matches multiple student accounts.` : ""}${!skippedMissingId && !skippedUnmatchedId ? " No records were skipped for missing or unmatched Student IDs." : ""}${invalidRecords ? ` Ignored ${invalidRecords} incomplete extraction result(s).` : ""}`,
+                message: `${grouped.size} school record groups saved.${skippedMissingId ? ` Skipped ${skippedMissingId} record(s) because no valid ID was extracted from the PDF.` : ""}${skippedUnmatchedId - skippedAmbiguousId ? ` Skipped ${skippedUnmatchedId - skippedAmbiguousId} record(s) because the ID is not registered to a school account.` : ""}${skippedAmbiguousId ? ` Skipped ${skippedAmbiguousId} record(s) because the ID matches multiple school accounts.` : ""}${!skippedMissingId && !skippedUnmatchedId ? " No records were skipped for missing or unmatched school IDs." : ""}${invalidRecords ? ` Ignored ${invalidRecords} incomplete extraction result(s).` : ""}`,
             });
         } catch (error) {
             console.error("Sensitive PDF processing failed:", error);
@@ -155,7 +199,7 @@ export async function POST(req: NextRequest) {
     const skippedMissingId = successful.reduce((total, item) => total + (item.skippedMissingId ?? 0), 0);
     const skippedUnmatchedId = successful.reduce((total, item) => total + (item.skippedUnmatchedId ?? 0), 0);
     const skippedAmbiguousId = successful.reduce((total, item) => total + (item.skippedAmbiguousId ?? 0), 0);
-    const message = `Processed ${successful.length} of ${files.length} PDF(s). ${savedGroups} student record groups saved.${skippedMissingId ? ` Skipped ${skippedMissingId} record(s) because no valid ID was extracted from the PDF.` : ""}${skippedUnmatchedId - skippedAmbiguousId ? ` Skipped ${skippedUnmatchedId - skippedAmbiguousId} record(s) because the ID is not registered to a student account.` : ""}${skippedAmbiguousId ? ` Skipped ${skippedAmbiguousId} record(s) because the ID matches multiple student accounts.` : ""}${!skippedMissingId && !skippedUnmatchedId ? " No records were skipped for missing or unmatched Student IDs." : ""}${invalidRecords ? ` Ignored ${invalidRecords} incomplete extraction result(s).` : ""}`;
+    const message = `Processed ${successful.length} of ${files.length} PDF(s). ${savedGroups} school record groups saved.${skippedMissingId ? ` Skipped ${skippedMissingId} record(s) because no valid ID was extracted from the PDF.` : ""}${skippedUnmatchedId - skippedAmbiguousId ? ` Skipped ${skippedUnmatchedId - skippedAmbiguousId} record(s) because the ID is not registered to a school account.` : ""}${skippedAmbiguousId ? ` Skipped ${skippedAmbiguousId} record(s) because the ID matches multiple school accounts.` : ""}${!skippedMissingId && !skippedUnmatchedId ? " No records were skipped for missing or unmatched school IDs." : ""}${invalidRecords ? ` Ignored ${invalidRecords} incomplete extraction result(s).` : ""}`;
     if (successful.length > 0) {
         const todayStart = new Date().toISOString().split("T")[0];
         const tomorrowStart = new Date(Date.now() + 86400000).toISOString().split("T")[0];

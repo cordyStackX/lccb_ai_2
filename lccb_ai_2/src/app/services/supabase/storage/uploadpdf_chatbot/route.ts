@@ -167,7 +167,21 @@ export async function POST(req: NextRequest) {
 
         const { error: insertError } = await supabaseServer
             .from("chatbot_pdf_file")
-            .insert([{ file: filePath, email: cleanEmail, file_name: file.name, page_count: pageCounts.get(file) }]);
+            .insert([{
+                file: filePath,
+                email: cleanEmail,
+                file_name: file.name,
+                page_count: pageCounts.get(file),
+                processing_progress: {
+                    status: "processing",
+                    phase: "uploading",
+                    current_page: 0,
+                    total_pages: pageCounts.get(file) ?? 0,
+                    file_name: file.name,
+                    message: "Uploading and preparing your PDF…",
+                    updated_at: new Date().toISOString(),
+                },
+            }]);
 
         if (insertError) {
             console.error("Supabase Insert Error: ", insertError);

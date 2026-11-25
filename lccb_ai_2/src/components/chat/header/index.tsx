@@ -55,7 +55,17 @@ export default function Header({ isOpen, setOpen, setShowProfile, name, email, p
             
             <Hamburger toggled={isOpen} toggle={setOpen}  />
             
-            <h1>LACO AI</h1>
+            <div className={styles.brand}>
+                <Image
+                    className={styles.brandLogo}
+                    src={image_src.lccb}
+                    alt="LACO AI logo"
+                    width={36}
+                    height={36}
+                    unoptimized
+                />
+                <h1>LACO AI</h1>
+            </div>
             <span className={styles.profile} onClick={() => {
                 setTimeout(() => {
                     setProfile(!profile);

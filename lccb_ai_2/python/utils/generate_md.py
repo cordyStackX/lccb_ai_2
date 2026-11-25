@@ -5,13 +5,13 @@ from flask import request, jsonify, Response, stream_with_context
 from PyPDF2 import PdfReader
 from .context import EXPECTED_API_KEY, client, supabase
 from .prompt_loader import load_prompt_template, load_system_prompt
+from .chat_history import normalize_history
 
 
 def _build_prompt_context(data):
     received_token = data.get("token")
     prompt = data.get("prompt", "")
-    last_user_response = str(data.get("last_user_response", "")).strip()
-    last_ai_response = str(data.get("last_ai_response", "")).strip()
+    history = normalize_history(data)
     email = data.get("email")
     file_id = data.get("pdf_id")
     f_name = data.get("f_name")
@@ -79,7 +79,9 @@ def _build_prompt_context(data):
         for idx, chunk in enumerate(chunks)
     ])
 
-    relevance_prompt = f"""Given this question: \"{prompt}\"
+    prior_user_questions = " ".join(item["content"] for item in history if item["role"] == "user")
+    relevance_prompt = f"""Given this conversation context from the user: \"{prior_user_questions}\"
+Current question: \"{prompt}\"
 Here are summaries of document chunks:
 {chunk_summaries}
 
@@ -117,18 +119,6 @@ Respond with ONLY comma-separated numbers (e.g., \"1,3,4\"). If all chunks seem 
         question=prompt,
     )
 
-    if last_user_response:
-        final_prompt += (
-            "\n\nConversation context (latest previous user message):\n"
-            f"{last_user_response}"
-        )
-
-    if last_ai_response:
-        final_prompt += (
-            "\n\nConversation context (latest previous AI response):\n"
-            f"{last_ai_response}"
-        )
-
     systemRole = system_role.format(
         role=role,
         name=f_name,
@@ -137,7 +127,7 @@ Respond with ONLY comma-separated numbers (e.g., \"1,3,4\"). If all chunks seem 
         chat_bot_name=""
     )
 
-    return {"final_prompt": final_prompt, "system_role": systemRole}, None
+    return {"final_prompt": final_prompt, "system_role": systemRole, "history": history}, None
 
 
 def generate_md():
@@ -149,10 +139,7 @@ def generate_md():
 
         response = client.chat.completions.create(
             model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": context["system_role"]},
-                {"role": "user", "content": context["final_prompt"]},
-            ],
+            messages=[{"role": "system", "content": context["system_role"]}, *context["history"], {"role": "user", "content": context["final_prompt"]}],
             temperature=0.7,
             max_tokens=1000,
         )
@@ -177,10 +164,7 @@ def generate_md_stream():
             try:
                 stream = client.chat.completions.create(
                     model="gpt-4o-mini",
-                    messages=[
-                        {"role": "system", "content": context["system_role"]},
-                        {"role": "user", "content": context["final_prompt"]},
-                    ],
+                    messages=[{"role": "system", "content": context["system_role"]}, *context["history"], {"role": "user", "content": context["final_prompt"]}],
                     temperature=0.7,
                     max_tokens=1000,
                     stream=True,

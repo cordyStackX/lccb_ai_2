@@ -5,7 +5,7 @@ export default async function Fetch_toFile(
   headers: Record<string, string> = {},
   retries: number = 3,
   delay: number = 1000,
-  options: { signal?: AbortSignal } = {}
+  options: { signal?: AbortSignal; onUploadTransferred?: () => void } = {}
 ) {
   if (!dir || dir === "") {
     if (typeof window !== "undefined") alert("Invalid API Directory not found");
@@ -32,25 +32,69 @@ export default async function Fetch_toFile(
 
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
-      const response = await fetch(dir, {
-        method: "POST",
-        headers: {
-          ...headers
-        },
-        signal: options.signal,
-        body: formData,
-      });
+      let responseOk: boolean;
+      let responseStatus: number;
+      let data: Record<string, unknown> | null;
+      if (options.onUploadTransferred) {
+        const result = await new Promise<{ ok: boolean; status: number; body: string }>((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          const abort = () => xhr.abort();
+          xhr.open("POST", dir);
+          Object.entries(headers).forEach(([key, value]) => xhr.setRequestHeader(key, value));
+          const onUploadTransferred = options.onUploadTransferred;
+          if (onUploadTransferred) xhr.upload.addEventListener("load", onUploadTransferred, { once: true });
+          xhr.addEventListener("load", () => {
+            options.signal?.removeEventListener("abort", abort);
+            resolve({ ok: xhr.status >= 200 && xhr.status < 300, status: xhr.status, body: xhr.responseText });
+          }, { once: true });
+          xhr.addEventListener("error", () => {
+            options.signal?.removeEventListener("abort", abort);
+            reject(new Error("Network error while uploading file"));
+          }, { once: true });
+          xhr.addEventListener("abort", () => {
+            options.signal?.removeEventListener("abort", abort);
+            reject(new DOMException("Upload request cancelled", "AbortError"));
+          }, { once: true });
+          if (options.signal?.aborted) {
+            xhr.abort();
+            return;
+          }
+          options.signal?.addEventListener("abort", abort, { once: true });
+          xhr.send(formData);
+        });
+        responseOk = result.ok;
+        responseStatus = result.status;
+        try {
+          const parsed: unknown = JSON.parse(result.body || "null");
+          data = parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)
+            ? parsed as Record<string, unknown>
+            : null;
+        } catch {
+          data = null;
+        }
+      } else {
+        const response = await fetch(dir, {
+          method: "POST",
+          headers: { ...headers },
+          signal: options.signal,
+          body: formData,
+        });
+        responseOk = response.ok;
+        responseStatus = response.status;
+        const parsed: unknown = await response.json().catch(() => null);
+        data = parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)
+          ? parsed as Record<string, unknown>
+          : null;
+      }
 
-      const data = await response.json().catch(() => null);
-
-      if (response.ok) {
+      if (responseOk) {
         console.log("Status for file upload:", data);
         return { success: true, data };
       } else {
         console.log(data?.error);
         return {
           success: false,
-          message: data?.error || `Request failed: ${response.status}`,
+          message: typeof data?.error === "string" ? data.error : `Request failed: ${responseStatus}`,
           data,
         };
       }

@@ -14,11 +14,23 @@
     box-shadow: 0 4px 18px rgba(24, 24, 24, 0.08);
     backdrop-filter: blur(14px);
 }
-.container h1 {
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
     margin: 0 auto 0 1rem;
+}
+.container h1 {
+    margin: 0;
     color: var(--primary);
     font-size: clamp(1rem, 0.5rem + 1vw, 1.35rem);
     letter-spacing: 0.02em;
+}
+.brandLogo {
+    display: block;
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
 }
 .chevron {
     transform: rotate(0deg);

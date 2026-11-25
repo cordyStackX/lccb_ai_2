@@ -197,7 +197,7 @@ export default function Sidebars({ currentMsg, isOpen, emailRes, setCurrentPdf, 
 
         if (response.success) {
             setIsLoadStateDone(false);
-            setIsLoadStatus(response.data.message);
+            setIsLoadStatus(typeof response.data?.message === "string" ? response.data.message : "Upload complete.");
             setTimeout(() => setIsLoadState(false), 3000);
             if (fileRef.current) {
                 fileRef.current.value = "";
@@ -205,7 +205,7 @@ export default function Sidebars({ currentMsg, isOpen, emailRes, setCurrentPdf, 
             setRefresh(!refresh);
         } else {
             setIsLoadStateDone(false);
-            setIsLoadStatus(response.message);
+            setIsLoadStatus(response.message || "Upload failed.");
             setIsLoadError(true);
             setTimeout(() => setIsLoadState(false), 3000);
             if (fileRef.current) {

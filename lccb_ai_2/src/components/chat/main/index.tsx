@@ -85,6 +85,7 @@ export default function Main({ setCurrentMsg, currentMsg, emailRes, currentPdf, 
     });
     const [status, setStatus] = useState(false);
     const [loading, setLoading] = useState(false);
+    const requestInFlightRef = useRef(false);
     const [copy, setCopy] = useState(false);
     const [email, setEmail] = useState("");
     const [pdf_id, setPdf_id] = useState<number | undefined>();
@@ -138,6 +139,7 @@ export default function Main({ setCurrentMsg, currentMsg, emailRes, currentPdf, 
     };
 
     const handleTypeaheadSelect = (text: string) => {
+        if (loading || requestInFlightRef.current) return;
         setChatres((prev) => ({ ...prev, ask: text }));
         setShowTypeahead(false);
     };
@@ -145,8 +147,11 @@ export default function Main({ setCurrentMsg, currentMsg, emailRes, currentPdf, 
     const handleSubmit = async (e?: React.FormEvent<HTMLFormElement>) => {
         e?.preventDefault();
         setShowTypeahead(false);
+        if (requestInFlightRef.current || !chatres.ask.trim()) return;
+        requestInFlightRef.current = true;
+        try {
         if (currentPdf) {
-            await handleChatSubmit({
+            const submitted = await handleChatSubmit({
                 event: e,
                 chatInput: chatres.ask,
                 setChatres,
@@ -165,6 +170,7 @@ export default function Main({ setCurrentMsg, currentMsg, emailRes, currentPdf, 
                 },
                 messages,
             });
+            if (!submitted) return;
             
             
             setTimeout(async() => {
@@ -182,7 +188,7 @@ export default function Main({ setCurrentMsg, currentMsg, emailRes, currentPdf, 
 
 
         } else {
-            await handleChatSubmit({
+            const submitted = await handleChatSubmit({
                 event: e,
                 chatInput: chatres.ask,
                 setChatres,
@@ -201,6 +207,7 @@ export default function Main({ setCurrentMsg, currentMsg, emailRes, currentPdf, 
                 },
                 messages,
             });
+            if (!submitted) return;
 
             setTimeout(async() => {
                 const response = await Fetch_to(api_link.save_responses, {
@@ -215,6 +222,9 @@ export default function Main({ setCurrentMsg, currentMsg, emailRes, currentPdf, 
                 setGlobalRefreshMsg(true);
             }, 100);
         
+        }
+        } finally {
+            requestInFlightRef.current = false;
         }
     };
 
@@ -350,13 +360,14 @@ export default function Main({ setCurrentMsg, currentMsg, emailRes, currentPdf, 
 
             <div className={`${styles.form_contain} ${status ? styles.form_active : styles.form_welcome}`}>
                 <form className={`${styles.ask} `} onSubmit={handleSubmit} >
-                    {showTypeahead && typeaheadMatches.length > 0 && (
+                    {showTypeahead && !loading && !requestInFlightRef.current && typeaheadMatches.length > 0 && (
                         <div className={styles.typeahead}>
                             {typeaheadMatches.map((match, index) => (
                                 <button
                                     key={`${match}-${index}`}
                                     type="button"
                                     className={styles.typeaheadItem}
+                                    disabled={loading}
                                     onMouseDown={(event) => event.preventDefault()}
                                     onClick={() => handleTypeaheadSelect(match)}
                                 >
@@ -369,6 +380,7 @@ export default function Main({ setCurrentMsg, currentMsg, emailRes, currentPdf, 
                         ref={textareaRef}
                         id="chat"
                         name="ask"
+                        disabled={loading}
                         placeholder={animatedPlaceholder}
                         value={chatres.ask}
                         onChange={(e) => {

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import api_link from "@/config/conf/json_config/fetch_url.json";
+import styles from "./PdfViewer.module.css";
 
 type PdfViewerProps = {
     filePath: string;
@@ -47,65 +48,45 @@ export default function PdfViewer({ filePath, fileName, onClose }: PdfViewerProp
         };
     }, [filePath]);
 
+    useEffect(() => {
+        const closeOnEscape = (event: KeyboardEvent) => {
+            if (event.key === "Escape") onClose();
+        };
+        window.addEventListener("keydown", closeOnEscape);
+        return () => window.removeEventListener("keydown", closeOnEscape);
+    }, [onClose]);
+
     return (
         <div
             role="presentation"
             onClick={onClose}
-            style={{ position: "fixed", inset: 0, zIndex: 1000, display: "grid", placeItems: "center", padding: 16, background: "rgba(0,0,0,.6)" }}
+            className={styles.overlay}
         >
             <section
                 role="dialog"
                 aria-modal="true"
                 aria-label={`PDF viewer: ${fileName}`}
                 onClick={(event) => event.stopPropagation()}
-                style={{ display: "flex", flexDirection: "column", width: "min(1100px, 96vw)", height: "90vh", background: "#fff", borderRadius: 8, overflow: "hidden" }}
+                className={styles.dialog}
             >
-                <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px" }}>
-                    <strong>{fileName}</strong>
+                <header className={styles.header}>
+                    <strong className={styles.fileName}>{fileName}</strong>
                     <button
                         type="button"
                         onClick={onClose}
                         aria-label="Close PDF viewer"
                         title="Close preview"
-                        style={{
-                            display: "grid",
-                            placeItems: "center",
-                            width: 36,
-                            height: 36,
-                            flex: "0 0 36px",
-                            padding: 0,
-                            border: "1px solid #e2e5eb",
-                            borderRadius: "50%",
-                            background: "#f5f6f8",
-                            color: "#4b5563",
-                            fontSize: 24,
-                            fontWeight: 400,
-                            lineHeight: 1,
-                            cursor: "pointer",
-                            transition: "background 140ms ease, color 140ms ease, border-color 140ms ease, transform 140ms ease",
-                        }}
-                        onMouseEnter={(event) => {
-                            event.currentTarget.style.background = "#fee2e2";
-                            event.currentTarget.style.color = "#b91c1c";
-                            event.currentTarget.style.borderColor = "#fecaca";
-                            event.currentTarget.style.transform = "rotate(90deg)";
-                        }}
-                        onMouseLeave={(event) => {
-                            event.currentTarget.style.background = "#f5f6f8";
-                            event.currentTarget.style.color = "#4b5563";
-                            event.currentTarget.style.borderColor = "#e2e5eb";
-                            event.currentTarget.style.transform = "rotate(0deg)";
-                        }}
+                        className={styles.closeButton}
                     >
                         ×
                     </button>
                 </header>
                 {error ? (
-                    <p role="alert" style={{ padding: 16 }}>{error}</p>
+                    <p role="alert" className={styles.message}>{error}</p>
                 ) : pdfUrl ? (
-                    <iframe title={`PDF pages: ${fileName}`} src={pdfUrl} style={{ flex: 1, width: "100%", border: 0 }} />
+                    <iframe title={`PDF pages: ${fileName}`} src={pdfUrl} className={styles.frame} />
                 ) : (
-                    <p style={{ padding: 16 }}>Loading PDF…</p>
+                    <p className={styles.message}>Loading PDF…</p>
                 )}
             </section>
         </div>

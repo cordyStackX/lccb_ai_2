@@ -1,6 +1,6 @@
 "use client";
 import styles from "./css/styles.module.css";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import api_link from "@/config/conf/json_config/fetch_url.json";
 import { Fetch_to, Popup_info, SweetAlert2 } from "@/utilities";
 import { DocFile, useDocumentTable } from "@/modules/documents/useDocumentTable";
@@ -62,15 +62,16 @@ interface DocumentTableSectionProps {
     sensitive?: boolean;
     email: string;
     table: ReturnType<typeof useDocumentTable>;
+    pdfDialogOpenerRef: { current: (() => void) | null };
     onLinkJourneyStart: (url: string) => void;
     onLinkJourneySuccess: () => void;
     onLinkJourneyError: (message: string) => void;
 }
 
 type JourneyStep = { label: string; detail: string; state: "waiting" | "active" | "complete" | "error" };
-type Journey = { title: string; source: string; steps: JourneyStep[]; isFinished: boolean; startedAt: string };
+type Journey = { title: string; source: string; steps: JourneyStep[]; isFinished: boolean; startedAt: string; canRestart?: boolean; restoredFromStorage?: boolean };
 
-function ProcessingJourney({ journey, onDismiss }: { journey: Journey; onDismiss: () => void }) {
+function ProcessingJourney({ journey, onDismiss, onCancel, onRestart }: { journey: Journey; onDismiss: () => void; onCancel: () => void; onRestart: () => void }) {
     const activeStep = journey.steps.find((step) => step.state === "active" || step.state === "error");
     return (
         <aside className={styles.processingJourney} role="status" aria-live="polite">
@@ -79,7 +80,11 @@ function ProcessingJourney({ journey, onDismiss }: { journey: Journey; onDismiss
                     <span className={styles.journeyEyebrow}>{journey.source}</span>
                     <h3>{journey.title}</h3>
                 </div>
-                {journey.isFinished && <button className={styles.journeyClose} onClick={onDismiss} aria-label="Dismiss progress notification">&times;</button>}
+                {journey.canRestart
+                    ? <button className={styles.journeyCancel} onClick={onRestart}>Reselect PDF</button>
+                    : journey.isFinished
+                    ? <button className={styles.journeyClose} onClick={onDismiss} aria-label="Dismiss progress notification">&times;</button>
+                    : journey.source !== "Web link" && <button className={styles.journeyCancel} onClick={onCancel}>Cancel upload</button>}
             </div>
             <p className={styles.journeyStatus}>{activeStep ? activeStep.detail : "Everything is ready."}</p>
             <ol className={styles.journeySteps}>
@@ -94,7 +99,7 @@ function ProcessingJourney({ journey, onDismiss }: { journey: Journey; onDismiss
     );
 }
 
-function DocumentTableSection({ title, description, sensitive, email, table, onLinkJourneyStart, onLinkJourneySuccess, onLinkJourneyError }: DocumentTableSectionProps) {
+function DocumentTableSection({ title, description, sensitive, email, table, pdfDialogOpenerRef, onLinkJourneyStart, onLinkJourneySuccess, onLinkJourneyError }: DocumentTableSectionProps) {
     const {
         fileRef, data, search, setSearch, page, setPage, totalPages,
         isLoading, refresh, setRefresh, triggerUpload, handleFile, handleFiles,
@@ -110,6 +115,16 @@ function DocumentTableSection({ title, description, sensitive, email, table, onL
     const [webLink, setWebLink] = useState("");
     const [isUploadingLink, setIsUploadingLink] = useState(false);
     const [preview, setPreview] = useState<{ filePath: string; name: string } | null>(null);
+
+    useEffect(() => {
+        pdfDialogOpenerRef.current = () => {
+            setIsAddDialogOpen(false);
+            setIsLinkDialogOpen(false);
+            setHasAcceptedUploadDisclaimer(false);
+            setIsPdfDialogOpen(true);
+        };
+        return () => { pdfDialogOpenerRef.current = null; };
+    }, [pdfDialogOpenerRef]);
 
     const openPdfPreview = (doc: DocFile) => {
         if (!doc.file) return;
@@ -366,29 +381,109 @@ export default function Chat_bot({ email } : Chat_botProps) {
     const [isLoadError, setIsLoadError] = useState(false);
     const [isLoadStatus, setIsLoadStatus] = useState("");
     const [journey, setJourney] = useState<Journey | null>(null);
+    const restoredJourneyRef = useRef(false);
+    const pdfDialogOpenerRef = useRef<(() => void) | null>(null);
 
     const beginJourney = (source: string, title: string, steps: Omit<JourneyStep, "state">[]) => {
         setJourney({ source, title, isFinished: false, startedAt: new Date().toISOString(), steps: steps.map((step, index) => ({ ...step, state: index === 0 ? "active" : "waiting" })) });
     };
+
+    const journeyStorageKey = email ? `laco:document-journey:${email.trim().toLowerCase()}` : "";
+
+    useEffect(() => {
+        if (!journeyStorageKey) return;
+        try {
+            const saved = localStorage.getItem(journeyStorageKey);
+            if (!saved) return;
+            const restored = JSON.parse(saved) as Journey;
+            const age = Date.now() - Date.parse(restored.startedAt);
+            if (!restored.isFinished && Number.isFinite(age) && age < 60 * 60 * 1000) {
+                restoredJourneyRef.current = true;
+                setJourney((current) => current || { ...restored, restoredFromStorage: true });
+            } else {
+                localStorage.removeItem(journeyStorageKey);
+            }
+        } catch {
+            localStorage.removeItem(journeyStorageKey);
+        }
+    }, [journeyStorageKey]);
+
+    useEffect(() => {
+        if (!journeyStorageKey || !journey) return;
+        try {
+            if (journey.isFinished) localStorage.removeItem(journeyStorageKey);
+            else localStorage.setItem(journeyStorageKey, JSON.stringify(journey));
+        } catch {
+            // The server-side progress endpoint remains the recovery fallback.
+        }
+    }, [journey, journeyStorageKey]);
+
+    useEffect(() => {
+        let cancelled = false;
+        const restoreJourney = async () => {
+            let checkedStatus = false;
+            try {
+                const response = await fetch(api_link.storage.processing_status, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email }),
+                });
+                const result = await response.json();
+                if (response.ok && result?.success === true) checkedStatus = true;
+                const active = (result?.progress ?? []).find((item: { processing_progress?: { status?: string } }) => item.processing_progress?.status === "processing");
+                if (!response.ok || !active || cancelled) {
+                    if (checkedStatus && !cancelled && restoredJourneyRef.current) {
+                        setJourney((current) => {
+                            if (!current?.restoredFromStorage) return current;
+                            const activeIndex = current.steps.findIndex((step) => step.state === "active");
+                            const errorIndex = Math.max(0, activeIndex);
+                            const message = "This upload was interrupted before PDF processing began. Reselect the PDF to run its privacy check and continue.";
+                            return {
+                                ...current,
+                                isFinished: true,
+                                canRestart: true,
+                                steps: current.steps.map((step, index) => index === errorIndex ? { ...step, state: "error", detail: message } : step),
+                            };
+                        });
+                    }
+                    return;
+                }
+
+                const progress = active.processing_progress;
+                const activeIndex = progress.phase === "uploading" ? 0 : progress.phase === "generating_qa" ? 4 : progress.phase === "summarizing_pages" ? 3 : progress.phase === "reading_document" ? 2 : 1;
+                const steps: Omit<JourneyStep, "state">[] = [
+                    { label: "Uploading", detail: "Uploading your PDF…" },
+                    { label: "Checking your PDF", detail: "Checking for sensitive information…" },
+                    { label: "Reading the document", detail: "Extracting text from every PDF page…" },
+                    { label: "Summarizing every PDF page", detail: "Analyzing page text and visuals…" },
+                    { label: "Generating questions and answers", detail: "Choosing useful questions based on the information in each page…" },
+                    { label: "Ready to review", detail: "Your document is ready." },
+                ];
+                setJourney((current) => current || {
+                    source: "PDF upload",
+                    title: active.file_name || progress.file_name || "PDF processing",
+                    startedAt: active.created_at || new Date().toISOString(),
+                    isFinished: false,
+                    steps: steps.map((step, index) => ({
+                        ...step,
+                        state: index < activeIndex ? "complete" : index === activeIndex ? "active" : "waiting",
+                        ...(index === activeIndex ? { detail: progress.message || step.detail } : {}),
+                    })),
+                });
+            } catch {
+                // A failed recovery lookup should not prevent normal document use.
+            }
+        };
+        void restoreJourney();
+        return () => { cancelled = true; };
+    }, [email]);
+
     const completeJourney = () => setJourney((current) => current && ({ ...current, isFinished: true, steps: current.steps.map((step) => ({ ...step, state: "complete" })) }));
     const failJourney = (message: string) => setJourney((current) => {
         if (!current) return current;
         const activeIndex = current.steps.findIndex((step) => step.state === "active");
         return { ...current, isFinished: true, steps: current.steps.map((step, index) => index === activeIndex ? { ...step, state: "error", detail: message } : step) };
     });
-
-    useEffect(() => {
-        if (!journey || journey.isFinished) return;
-        const timer = window.setInterval(() => {
-            setJourney((current) => {
-                if (!current || current.isFinished) return current;
-                const activeIndex = current.steps.findIndex((step) => step.state === "active");
-                if (activeIndex < 0 || activeIndex >= 2) return current;
-                return { ...current, steps: current.steps.map((step, index) => index === activeIndex ? { ...step, state: "complete" } : index === activeIndex + 1 ? { ...step, state: "active" } : step) };
-            });
-        }, 2800);
-        return () => window.clearInterval(timer);
-    }, [journey?.isFinished, journey?.source, journey?.title]);
 
     useEffect(() => {
         if (!journey || journey.isFinished) return;
@@ -409,10 +504,10 @@ export default function Chat_bot({ email } : Chat_botProps) {
 
                 const total = Number(progress.total_pages || 0);
                 const currentPage = Number(progress.current_page || 0);
-                const activeIndex = progress.phase === "generating_qa" ? 3 : 2;
+                const activeIndex = progress.phase === "generating_qa" ? 4 : progress.phase === "summarizing_pages" ? 3 : progress.phase === "reading_document" ? 2 : 1;
                 const detail = progress.phase === "generating_qa"
                     ? `Generating questions and answers through page ${currentPage} of ${total}${progress.file_name ? ` · ${progress.file_name}` : ""}`
-                    : progress.message || `Summarizing PDF page ${currentPage} of ${total}${progress.file_name ? ` · ${progress.file_name}` : ""}`;
+                    : progress.message || (progress.phase === "reading_document" ? `Reading PDF page ${currentPage} of ${total}` : `Summarizing PDF page ${currentPage} of ${total}`) + `${progress.file_name ? ` · ${progress.file_name}` : ""}`;
                 setJourney((current) => current && !current.isFinished ? {
                     ...current,
                     steps: current.steps.map((step, index) => ({
@@ -431,9 +526,10 @@ export default function Chat_bot({ email } : Chat_botProps) {
     }, [journey?.isFinished, journey?.startedAt, email]);
 
     const startPdfJourney = (files: File[]) => beginJourney("PDF upload", files.length === 1 ? files[0].name : `${files.length} PDF files`, [
-        { label: "Uploading your PDF", detail: "Sending your document securely…" },
-        { label: "Reading the document", detail: "Extracting text from your PDF…" },
-        { label: "Summarizing every PDF page", detail: "Python is extracting and summarizing each page…" },
+        { label: "Uploading", detail: "Uploading your PDF…" },
+        { label: "Checking your PDF", detail: "Checking for sensitive information…" },
+        { label: "Reading the document", detail: "Extracting text from every PDF page…" },
+        { label: "Summarizing every PDF page", detail: "Analyzing page text and visuals…" },
         { label: "Generating questions and answers", detail: "Choosing useful questions based on the information in each page…" },
         { label: "Ready to review", detail: "Your document is ready." },
     ]);
@@ -469,7 +565,16 @@ export default function Chat_bot({ email } : Chat_botProps) {
         setTimeout(() => setIsLoadState(false), 2500);
     };
 
-    const notifyHandlers = { onStart: showLoading, onSuccess: showSuccess, onError: showError, onUploadStart: startPdfJourney, onUploadSuccess: completeJourney, onUploadError: failJourney };
+    const markUploadTransferred = () => setJourney((current) => current && !current.isFinished ? {
+        ...current,
+        steps: current.steps.map((step, index) => index === 0
+            ? { ...step, state: "complete" }
+            : index === 1
+                ? { ...step, state: "active", detail: `Upload complete. ${step.label}…` }
+                : { ...step, state: "waiting" }),
+    } : current);
+
+    const notifyHandlers = { onStart: showLoading, onSuccess: showSuccess, onError: showError, onUploadStart: startPdfJourney, onUploadTransferred: markUploadTransferred, onUploadSuccess: completeJourney, onUploadError: failJourney };
 
     const publicDocs = useDocumentTable(
         {
@@ -484,7 +589,23 @@ export default function Chat_bot({ email } : Chat_botProps) {
 
     return (
         <section className={styles.container}>
-            {journey && <ProcessingJourney journey={journey} onDismiss={() => setJourney(null)} />}
+            {journey && <ProcessingJourney
+                journey={journey}
+                onDismiss={() => setJourney(null)}
+                onRestart={() => {
+                    try { if (journeyStorageKey) localStorage.removeItem(journeyStorageKey); } catch { /* Ignore unavailable browser storage. */ }
+                    setJourney(null);
+                    pdfDialogOpenerRef.current?.();
+                }}
+                onCancel={() => {
+                    const aborted = publicDocs.cancelUpload();
+                    void publicDocs.deleteIncompleteUploads(journey.startedAt);
+                    if (!aborted) {
+                        try { if (journeyStorageKey) localStorage.removeItem(journeyStorageKey); } catch { /* Ignore unavailable browser storage. */ }
+                        setJourney(null);
+                    }
+                }}
+            />}
             {isLoadState ? (
                 isLoadStateDone ? (
                     <Popup_info status={isLoadStatus} bg_color="var(--primary)" states={true} load={true} error={false} />
@@ -514,6 +635,7 @@ export default function Chat_bot({ email } : Chat_botProps) {
                     description="Visible to the chatbot for general Q&A."
                     email={email}
                     table={publicDocs}
+                    pdfDialogOpenerRef={pdfDialogOpenerRef}
                     onLinkJourneyStart={startLinkJourney}
                     onLinkJourneySuccess={completeJourney}
                     onLinkJourneyError={failJourney}

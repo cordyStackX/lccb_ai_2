@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Fetch_to, Fetch_toFile } from "@/utilities";
+import api_link from "@/config/conf/json_config/fetch_url.json";
 
 export interface DocFile {
     id?: number;
@@ -19,6 +20,7 @@ interface DocumentTableEndpoints {
     upload: string;
     download: string;
     delete: string;
+    sensitive?: boolean;
 }
 
 interface NotifyHandlers {
@@ -26,6 +28,7 @@ interface NotifyHandlers {
     onSuccess?: (message: string) => void;
     onError?: (message: string) => void;
     onUploadStart?: (files: File[]) => void;
+    onUploadTransferred?: () => void;
     onUploadSuccess?: (message?: string, details?: { uploaded?: Array<Record<string, unknown>>; privacyScan?: Array<Record<string, unknown>> }) => void;
     onUploadError?: (message: string, details?: { uploaded?: Array<Record<string, unknown>>; privacyScan?: Array<Record<string, unknown>> }) => void;
     onPrivacyReview?: (warnings: PrivacyWarning[]) => Promise<boolean>;
@@ -93,7 +96,10 @@ export function useDocumentTable(
 
         const controller = new AbortController();
         uploadController.current = controller;
-        let response = await Fetch_toFile(endpoints.upload, files, { email }, {}, 3, 1000, { signal: controller.signal });
+        let response = await Fetch_toFile(endpoints.upload, files, { email }, {}, 3, 1000, {
+            signal: controller.signal,
+            onUploadTransferred: notify?.onUploadTransferred,
+        });
         if (controller.signal.aborted) {
             notify?.onUploadError?.("Upload cancellation requested. The server may finish processing files it already received.");
             setRefresh(true);
@@ -111,7 +117,10 @@ export function useDocumentTable(
             }));
             const shouldContinue = await notify?.onPrivacyReview?.(warnings) ?? false;
             if (shouldContinue) {
-                response = await Fetch_toFile(endpoints.upload, files, { email, privacyConfirmed: "true" }, {}, 3, 1000, { signal: controller.signal });
+                response = await Fetch_toFile(endpoints.upload, files, { email, privacyConfirmed: "true" }, {}, 3, 1000, {
+                    signal: controller.signal,
+                    onUploadTransferred: notify?.onUploadTransferred,
+                });
                 if (controller.signal.aborted) {
                     notify?.onUploadError?.("Upload cancellation requested. The server may finish processing files it already received.");
                     setRefresh(true);
@@ -129,7 +138,7 @@ export function useDocumentTable(
 
         if (response.success) {
             const uploaded = response.data?.uploaded;
-            notify?.onUploadSuccess?.(response.data?.message || "Upload complete.", {
+            notify?.onUploadSuccess?.(typeof response.data?.message === "string" ? response.data.message : "Upload complete.", {
                 uploaded: Array.isArray(uploaded) ? uploaded : [],
                 privacyScan: Array.isArray(response.data?.scanResults) && response.data.scanResults.length ? response.data.scanResults : privacyScan,
             });
@@ -160,7 +169,35 @@ export function useDocumentTable(
         uploadController.current = null;
     };
 
-    const cancelUpload = () => uploadController.current?.abort();
+    const cancelUpload = () => {
+        if (!uploadController.current) return false;
+        uploadController.current.abort();
+        return true;
+    };
+
+    const deleteIncompleteUploads = async (startedAt: string) => {
+        for (let attempt = 0; attempt < 5; attempt += 1) {
+            try {
+                const response = await fetch(api_link.storage.processing_status, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, started_at: startedAt, sensitive: endpoints.sensitive === true, include_completed: true }),
+                });
+                const result = await response.json();
+                const pending = (result?.progress ?? []).filter((item: { id?: number; file?: string }) => Number.isInteger(item.id) && typeof item.file === "string");
+                if (response.ok && pending.length) {
+                    const deleted = await Promise.all(pending.map((item: { id: number; file: string }) =>
+                        Fetch_to(endpoints.delete, { id: item.id, filePath: item.file })
+                    ));
+                    if (deleted.some((item) => item.success)) setRefresh(true);
+                    if (deleted.every((item) => item.success)) return;
+                }
+            } catch {
+                // Keep trying briefly while the canceled request finishes its current step.
+            }
+            await new Promise((resolve) => window.setTimeout(resolve, 500));
+        }
+    };
 
     const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
         await handleFiles(e.target.files ? Array.from(e.target.files) : []);
@@ -254,6 +291,7 @@ export function useDocumentTable(
     return {
         fileRef,
         cancelUpload,
+        deleteIncompleteUploads,
         data,
         search,
         setSearch,

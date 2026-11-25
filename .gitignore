@@ -4,6 +4,7 @@ volumes/storage
 .env.bak
 .env.old
 test.http
+*.dump
 
 **/node_modules/
 **/.next/
