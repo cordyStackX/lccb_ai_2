@@ -5,11 +5,11 @@ import type { NextConfig } from "next";
 const buildCsp = (frameAncestors: string) =>
   [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://www.googletagmanager.com https://vercel.live",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: http://localhost:8000 http://kong.local:8000 https://*.supabase.co",
     "font-src 'self' data:",
-    "connect-src 'self' http://localhost:8000 https://challenges.cloudflare.com https://*.supabase.co",
+    "connect-src 'self' http://localhost:8000 https://challenges.cloudflare.com https://*.supabase.co https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://vercel.live",
     "frame-src 'self' blob: https://challenges.cloudflare.com",
     `frame-ancestors ${frameAncestors}`,
   ].join("; ");
