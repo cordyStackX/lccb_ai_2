@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomUUID } from "node:crypto";
 import { supabaseServer } from "@/lib/supabase-server";
 import { Security } from "@/firewall/security";
 import { Fetch_to } from "@/utilities";
@@ -90,7 +91,7 @@ export async function POST(req: NextRequest) {
             console.error("PDF page quota check failed:", error);
             return NextResponse.json({ success: false, error: "Unable to verify PDF page usage. Please try again." }, { status: 500 });
         }
-        const filePath = `uploads/${Date.now()}_${fileName}`;
+        const filePath = `uploads/${Date.now()}_${randomUUID()}.pdf`;
         const { error: uploadError } = await supabaseServer.storage.from("chatbot_pdfs").upload(filePath, pdfBytes, { contentType: "application/pdf", upsert: false });
         if (uploadError) return NextResponse.json({ success: false, error: "Failed to upload converted PDF" }, { status: 500 });
 

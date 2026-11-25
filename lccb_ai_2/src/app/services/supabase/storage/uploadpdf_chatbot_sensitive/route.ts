@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     let studentsLoaded = false;
     const uploaded: Array<{ id?: number; originalName: string; filePath?: string; success: boolean; matchedStudents?: number; skippedRecords?: number; skippedMissingId?: number; skippedUnmatchedId?: number; skippedAmbiguousId?: number; invalidRecords?: number; message?: string }> = [];
     for (const file of files) {
-        const filePath = `sensitive/${Date.now()}_${randomUUID()}_${file.name}`;
+        const filePath = `sensitive/${Date.now()}_${randomUUID()}.pdf`;
         let privateDocId: number | undefined;
         try {
             const { error: storageError } = await supabaseServer.storage.from("chatbot_pdfs").upload(filePath, file, { contentType: "application/pdf", upsert: false });
@@ -200,19 +200,5 @@ export async function POST(req: NextRequest) {
     const skippedUnmatchedId = successful.reduce((total, item) => total + (item.skippedUnmatchedId ?? 0), 0);
     const skippedAmbiguousId = successful.reduce((total, item) => total + (item.skippedAmbiguousId ?? 0), 0);
     const message = `Processed ${successful.length} of ${files.length} PDF(s). ${savedGroups} school record groups saved.${skippedMissingId ? ` Skipped ${skippedMissingId} record(s) because no valid ID was extracted from the PDF.` : ""}${skippedUnmatchedId - skippedAmbiguousId ? ` Skipped ${skippedUnmatchedId - skippedAmbiguousId} record(s) because the ID is not registered to a school account.` : ""}${skippedAmbiguousId ? ` Skipped ${skippedAmbiguousId} record(s) because the ID matches multiple school accounts.` : ""}${!skippedMissingId && !skippedUnmatchedId ? " No records were skipped for missing or unmatched school IDs." : ""}${invalidRecords ? ` Ignored ${invalidRecords} incomplete extraction result(s).` : ""}`;
-    if (successful.length > 0) {
-        const todayStart = new Date().toISOString().split("T")[0];
-        const tomorrowStart = new Date(Date.now() + 86400000).toISOString().split("T")[0];
-        const { data: log, error: logError } = await supabaseServer.from("system_logs")
-            .select("id, uploaded_pdf").eq("request", cleanEmail).gte("created_at", todayStart).lt("created_at", tomorrowStart)
-            .order("created_at", { ascending: false }).limit(1).maybeSingle();
-        if (logError) console.error("Sensitive PDF usage log lookup failed:", logError);
-        else if (log) {
-            await supabaseServer.from("system_logs").update({ uploaded_pdf: Number(log.uploaded_pdf ?? 0) + successful.length })
-                .eq("id", log.id);
-        } else {
-            await supabaseServer.from("system_logs").insert({ request: cleanEmail, uploaded_pdf: successful.length });
-        }
-    }
     return NextResponse.json({ success: successful.length > 0, message, uploaded }, { status: successful.length > 0 ? 200 : 422 });
 }

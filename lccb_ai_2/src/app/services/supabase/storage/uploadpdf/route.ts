@@ -1,4 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
+import { randomUUID } from "node:crypto";
 import { supabaseServer } from "@/lib/supabase-server";
 import { Security } from "@/firewall/security";
 
@@ -83,7 +84,7 @@ export async function POST(req: NextRequest) {
         const candidate = origName;
 
         // storage path — include timestamp to avoid key collisions
-        const storagePath = `uploads/${Date.now()}_${candidate}`;
+        const storagePath = `uploads/${Date.now()}_${randomUUID()}.pdf`;
 
         const { error: uploadErr } = await supabaseServer.storage
             .from(bucketName)
@@ -112,12 +113,10 @@ export async function POST(req: NextRequest) {
         // update daily upload counter
         const { data: record, error: record_err } = await supabaseServer
             .from("system_logs")
-            .select("id, uploaded_pdf, created_at")
+            .select("uploaded_pdf, created_at")
             .eq("request", cleanEmail)
             .gte("created_at", new Date().toISOString().split("T")[0])
             .lt("created_at", new Date(Date.now() + 86400000).toISOString().split("T")[0])
-            .order("created_at", { ascending: false })
-            .limit(1)
             .maybeSingle();
 
         if (record_err) {
@@ -127,7 +126,7 @@ export async function POST(req: NextRequest) {
             await supabaseServer
                 .from("system_logs")
                 .update({ uploaded_pdf: record_add })
-                .eq("id", record.id);
+                .eq("request", cleanEmail);
         } else {
             await supabaseServer
                 .from("system_logs")

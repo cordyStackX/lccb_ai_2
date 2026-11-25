@@ -77,12 +77,10 @@ export async function POST(req: NextRequest) {
 
     const { data: record, error: record_err } = await supabaseServer
         .from("system_logs")
-        .select("id, api_request, created_at")
+        .select("api_request, created_at")
         .eq("request", email)
         .gte("created_at", new Date().toISOString().split("T")[0])
         .lt("created_at", new Date(Date.now() + 86400000).toISOString().split("T")[0])
-        .order("created_at", { ascending: false })
-        .limit(1)
         .maybeSingle();
 
     if (record_err) {
@@ -97,7 +95,7 @@ export async function POST(req: NextRequest) {
         await supabaseServer
             .from("system_logs")
             .update({ api_request: record_add })
-            .eq("id", record.id);
+            .eq("request", email);
     }
 
     if (!record) {

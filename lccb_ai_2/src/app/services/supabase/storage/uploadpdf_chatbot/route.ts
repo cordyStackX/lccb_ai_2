@@ -1,4 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
+import { randomUUID } from "node:crypto";
 import { supabaseServer } from "@/lib/supabase-server";
 import { Security } from "@/firewall/security";
 import { Fetch_to } from "@/utilities";
@@ -150,7 +151,7 @@ export async function POST(req: NextRequest) {
     const uploadedResults: Array<{ id?: number; originalName: string; filePath?: string; suggest?: string; summary?: string; pageCount?: number; success: boolean; message?: string }> = [];
 
     for (const file of files) {
-        const filePath = `uploads/${Date.now()}_${file.name}`;
+        const filePath = `uploads/${Date.now()}_${randomUUID()}.pdf`;
 
         const { error: uploadError } = await supabaseServer.storage
             .from(bucketName)
