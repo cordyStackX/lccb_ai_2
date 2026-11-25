@@ -10,7 +10,7 @@ const buildCsp = (frameAncestors: string) =>
     "img-src 'self' data: blob: http://localhost:8000 http://kong.local:8000 https://*.supabase.co",
     "font-src 'self' data:",
     "connect-src 'self' http://localhost:8000 https://challenges.cloudflare.com https://*.supabase.co https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://vercel.live",
-    "frame-src 'self' blob: https://challenges.cloudflare.com",
+    "frame-src 'self' blob: https://challenges.cloudflare.com https://vercel.live",
     `frame-ancestors ${frameAncestors}`,
   ].join("; ");
 
